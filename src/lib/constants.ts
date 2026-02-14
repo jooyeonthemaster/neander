@@ -18,6 +18,7 @@ export const NAV_ITEMS: NavItem[] = [
   { path: '/about', labelKey: 'nav.about' },
   { path: '/services', labelKey: 'nav.services' },
   { path: '/portfolio', labelKey: 'nav.portfolio' },
+  { path: '/press', labelKey: 'nav.press' },
   { path: '/quote', labelKey: 'nav.quote' },
   { path: '/contact', labelKey: 'nav.contact' },
 ];
@@ -38,10 +39,11 @@ export const SOCIAL_LINKS = {
    ───────────────────────────────────────────────────────── */
 
 export const CONTACT = {
-  email: 'hello@neanderco.com',
-  phone: '+82-2-0000-0000',
+  email: 'ok@neander.co.kr',
+  phone: '02-336-3368',
+  phoneInternational: '+82-2-336-3368',
   address: {
-    ko: '서울특별시 강남구',
-    en: 'Gangnam-gu, Seoul, South Korea',
+    ko: '서울특별시 마포구 와우산로 29라길 22',
+    en: '22, Wausan-ro 29ra-gil, Mapo-gu, Seoul, South Korea',
   },
 } as const;

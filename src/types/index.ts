@@ -57,6 +57,16 @@ export interface EventDetails {
   description: string;
 }
 
+/** Press/media coverage article */
+export interface PressArticle {
+  id: string;
+  title: string;
+  source: string;
+  date: string;
+  url: string;
+  excerpt: string;
+}
+
 /** Contact form submission data */
 export interface ContactFormData {
   name: string;

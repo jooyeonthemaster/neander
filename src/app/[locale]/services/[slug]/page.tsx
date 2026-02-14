@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { ScrollReveal } from '@/components/animations';
 import {
@@ -42,6 +42,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ExperienceDetailPage({ params }: Props) {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
+
   const exp = getExperienceBySlug(slug);
   if (!exp) notFound();
 

@@ -15,6 +15,7 @@
     "about": "About",
     "contact": "Contact",
     "quote": "Get a Quote",
+    "press": "Press",
     "demo": "Try Demo",
     "language": "한국어",
     "menu": "Menu",
@@ -1636,10 +1637,10 @@
     },
     "info": {
       "title": "Contact Information",
-      "email": "contact@neanderco.com",
-      "phone": "+82 2-0000-0000",
-      "address": "Seoul, South Korea",
-      "addressDetail": "Detailed address"
+      "email": "ok@neander.co.kr",
+      "phone": "+82 2-336-3368",
+      "address": "22, Wausan-ro 29ra-gil, Mapo-gu, Seoul",
+      "addressDetail": "Accent ID / Accent Wow"
     },
     "businessHours": {
       "title": "Business Hours",
@@ -1664,6 +1665,66 @@
     }
   },
 
+  "flagship": {
+    "badge": "FLAGSHIP STORE",
+    "title": "NEANDER Flagship Store",
+    "subtitle": "Experience AI Content Offline",
+    "description": "Curious about offline experiential AI content? Visit our flagship stores to experience it firsthand.",
+    "address": "22, Wausan-ro 29ra-gil, Mapo-gu, Seoul",
+    "b2bNotice": "For B2B experience inquiries, feel free to give us a call.",
+    "phone": "+82 2-336-3368",
+    "stores": {
+      "accentId": {
+        "name": "Accent ID",
+        "nameEn": "AC'SCENT ID",
+        "description": "An offline store where you can experience diverse AI content and generate revenue through it",
+        "detail": "Analyze your personal image through AI and create a custom fragrance that matches your unique style.",
+        "features": ["AI Personal Image Analysis", "Custom Fragrance Blending", "Offline AI Content Experience"]
+      },
+      "accentWow": {
+        "name": "Accent Wow",
+        "nameEn": "AC'SCENT WOW",
+        "description": "A test bed for immersive media art and diverse AI content",
+        "detail": "Experience immersive media art and be the first to try the latest AI content developed by NEANDER.",
+        "features": ["Immersive Media Art", "AI Content Test Bed", "Latest AI Experiences"]
+      }
+    },
+    "viewMap": "View Map",
+    "visitStore": "Visit Store",
+    "callUs": "Call Us",
+    "b2bCta": "Visit Flagship Store"
+  },
+  "experience": {
+    "title": "B2B Free Experience",
+    "subtitle": "AI EXPERIENCE",
+    "heroTitle": "Experience Offline AI\nContent Firsthand",
+    "heroDescription": "Visit NEANDER's flagship stores to experience AI-driven experiential content in person. We offer free experience sessions for B2B clients.",
+    "storesTitle": "Flagship Stores",
+    "storesSubtitle": "Experience AI content firsthand at our two flagship stores in Mapo-gu, Seoul.",
+    "accentId": {
+      "name": "AC'SCENT ID",
+      "nameKo": "Accent ID",
+      "tagline": "AI Personal Image Analysis & Custom Fragrance Blending",
+      "description": "An offline store where you can experience diverse AI content and generate revenue through it. Analyze your personal image through AI and create a custom fragrance that matches your unique style.",
+      "features": ["AI Personal Image Analysis", "Custom Fragrance Blending", "Offline AI Content Experience", "Self-Revenue Model"]
+    },
+    "accentWow": {
+      "name": "AC'SCENT WOW",
+      "nameKo": "Accent Wow",
+      "tagline": "Immersive Media Art & AI Test Bed",
+      "description": "A space used as a test bed for immersive media art and diverse AI content. Be the first to experience the latest AI content developed by NEANDER.",
+      "features": ["Immersive Media Art", "AI Content Test Bed", "Latest AI Experiences", "Full-Space AI Experience"]
+    },
+    "ctaTitle": "Book an Experience",
+    "ctaDescription": "If you'd like a free B2B experience session or need more information, feel free to reach out.",
+    "ctaPhone": "+82 2-336-3368",
+    "ctaEmail": "ok@neander.co.kr",
+    "ctaPhoneLabel": "Call Us",
+    "ctaEmailLabel": "Email Us",
+    "address": "22, Wausan-ro 29ra-gil, Mapo-gu, Seoul",
+    "viewMap": "View on Naver Maps",
+    "galleryTitle": "Store Gallery"
+  },
   "footer": {
     "tagline": "Sensory Experiences, Designed by AI",
     "description": "We bring unforgettable experiences to offline spaces with AI-driven experiential content.",
@@ -1938,5 +1999,12 @@
       "ctaButton": "Get a Quote",
       "selectUpTo": "Select up to {count}"
     }
+  },
+  "press": {
+    "title": "Press",
+    "subtitle": "Read the latest media coverage about NEANDERco",
+    "readMore": "Read article",
+    "source": "Source",
+    "noArticles": "No press articles available."
   }
 }

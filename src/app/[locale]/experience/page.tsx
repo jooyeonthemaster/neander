@@ -1,48 +1,37 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ScrollReveal } from '@/components/animations';
-import { IndustryShowcase } from '@/components/services/IndustryShowcase';
-import { ProcessFlow } from '@/components/services/ProcessFlow';
-import { ServiceCTA } from '@/components/services/ServiceCTA';
-import type { PillarId } from '@/data/experiences';
-
-const VALID_PILLARS: PillarId[] = ['ai-photo', 'ai-diagnosis', 'ai-fortune', 'ai-creative', 'ai-immersive'];
+import { ExperienceContent } from '@/components/experience/ExperienceContent';
 
 interface Props {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ pillar?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'services' });
+  const t = await getTranslations({ locale, namespace: 'experience' });
 
   return {
     title: t('title'),
-    description: t('description'),
+    description: t('heroDescription'),
     openGraph: {
-      title: t('subtitle'),
-      description: t('description'),
+      title: t('title'),
+      description: t('heroDescription'),
     },
   };
 }
 
-export default async function ServicesPage({ params, searchParams }: Props) {
+export default async function ExperiencePage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { pillar: pillarParam } = await searchParams;
-  const t = await getTranslations({ locale, namespace: 'services' });
-
-  const initialPillar = VALID_PILLARS.includes(pillarParam as PillarId)
-    ? (pillarParam as PillarId)
-    : undefined;
+  const t = await getTranslations({ locale, namespace: 'experience' });
 
   return (
-    <main className="bg-neutral-950">
+    <main>
       {/* ── Hero ────────────────────────────────────────── */}
       <section
-        className="relative overflow-hidden pb-20 pt-32 sm:pb-28 sm:pt-40"
-        aria-labelledby="services-hero-title"
+        className="relative overflow-hidden bg-neutral-950 pb-20 pt-32 sm:pb-28 sm:pt-40"
+        aria-labelledby="experience-hero-title"
       >
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-b from-neutral-950 via-[#0a1214] to-neutral-950" />
@@ -81,33 +70,24 @@ export default async function ServicesPage({ params, searchParams }: Props) {
             <div className="mx-auto max-w-2xl text-center">
               <span className="inline-flex items-center gap-2 mb-5 px-4 py-1.5 rounded-full border border-teal-500/20 bg-teal-500/[0.06] text-[11px] font-semibold uppercase tracking-[0.25em] text-teal-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
-                {t('title')}
+                {t('subtitle')}
               </span>
               <h1
-                id="services-hero-title"
-                className="mb-6 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl leading-[1.15] [word-break:keep-all]"
+                id="experience-hero-title"
+                className="mb-6 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl leading-[1.15] whitespace-pre-line [word-break:keep-all]"
               >
-                {t('subtitle')}
+                {t('heroTitle')}
               </h1>
               <p className="text-base sm:text-lg text-neutral-400 leading-relaxed max-w-xl mx-auto">
-                {t('description')}
-              </p>
-              <p className="mt-6 text-xl font-semibold text-teal-300">
-                {t('heroTagline')}
+                {t('heroDescription')}
               </p>
             </div>
           </ScrollReveal>
         </div>
       </section>
 
-      {/* ── Industry Showcase (Main Selling Section) ──── */}
-      <IndustryShowcase initialPillar={initialPillar} />
-
-      {/* ── Process Flow ────────────────────────────────── */}
-      <ProcessFlow />
-
-      {/* ── CTA ─────────────────────────────────────────── */}
-      <ServiceCTA />
+      {/* ── Main Content (Client Component) ──────────── */}
+      <ExperienceContent />
     </main>
   );
 }

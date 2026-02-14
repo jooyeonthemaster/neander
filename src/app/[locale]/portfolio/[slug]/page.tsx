@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { portfolioProjects } from '@/data/portfolio';
 import { services } from '@/data/services';
 import { ScrollReveal } from '@/components/animations';
@@ -36,6 +36,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PortfolioCaseStudyPage({ params }: Props) {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
+
   const project = portfolioProjects.find((p) => p.slug === slug);
 
   if (!project) {

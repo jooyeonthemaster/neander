@@ -14,6 +14,7 @@
     "about": "회사 소개",
     "contact": "문의하기",
     "quote": "견적 요청",
+    "press": "언론 보도",
     "demo": "데모 체험",
     "language": "English",
     "menu": "메뉴",
@@ -3056,10 +3057,10 @@
     },
     "info": {
       "title": "연락처 정보",
-      "email": "contact@neanderco.com",
-      "phone": "02-0000-0000",
-      "address": "서울특별시",
-      "addressDetail": "상세주소"
+      "email": "ok@neander.co.kr",
+      "phone": "02-336-3368",
+      "address": "서울특별시 마포구 와우산로 29라길 22",
+      "addressDetail": "악센트 아이디 / 악센트 와우"
     },
     "businessHours": {
       "title": "운영 시간",
@@ -3082,6 +3083,66 @@
       "blog": "블로그",
       "linkedin": "링크드인"
     }
+  },
+  "flagship": {
+    "badge": "FLAGSHIP STORE",
+    "title": "NEANDER 플래그십 스토어",
+    "subtitle": "오프라인에서 직접 체험하는 AI 콘텐츠",
+    "description": "오프라인 체험형 AI 콘텐츠가 궁금하신가요? NEANDER의 플래그십 스토어에 방문하시면 직접 체험하실 수 있습니다.",
+    "address": "서울특별시 마포구 와우산로 29라길 22",
+    "b2bNotice": "B2B 체험 안내를 희망하시는 경우 편하게 전화 주세요.",
+    "phone": "02-336-3368",
+    "stores": {
+      "accentId": {
+        "name": "악센트 아이디",
+        "nameEn": "AC'SCENT ID",
+        "description": "다양한 AI 콘텐츠를 오프라인 공간에서 체험하고, 자체 수익화를 실현하는 매장",
+        "detail": "AI를 통해 퍼스널 이미지를 분석하고, 나만의 퍼스널 이미지에 어울리는 향을 직접 조향할 수 있는 특별한 경험을 제공합니다.",
+        "features": ["AI 퍼스널 이미지 분석", "맞춤형 향 조향 체험", "오프라인 AI 콘텐츠 체험"]
+      },
+      "accentWow": {
+        "name": "악센트 와우",
+        "nameEn": "AC'SCENT WOW",
+        "description": "몰입형 미디어아트와 다양한 AI 콘텐츠의 테스트 베드",
+        "detail": "몰입형 미디어아트를 경험하며, 네안데르가 개발하는 다양한 AI 콘텐츠를 가장 먼저 만나볼 수 있습니다.",
+        "features": ["몰입형 미디어아트", "AI 콘텐츠 테스트 베드", "최신 AI 체험"]
+      }
+    },
+    "viewMap": "지도 보기",
+    "visitStore": "매장 방문하기",
+    "callUs": "전화 문의",
+    "b2bCta": "플래그십 스토어 체험하기"
+  },
+  "experience": {
+    "title": "B2B 무료 체험",
+    "subtitle": "AI EXPERIENCE",
+    "heroTitle": "오프라인 AI 체험을\n직접 경험해보세요",
+    "heroDescription": "NEANDER의 플래그십 스토어에서 체험형 AI 콘텐츠를 직접 만나보세요. B2B 고객 대상 무료 체험을 운영하고 있습니다.",
+    "storesTitle": "플래그십 스토어",
+    "storesSubtitle": "서울 마포구에 위치한 두 곳의 플래그십 스토어에서 AI 콘텐츠를 직접 체험하실 수 있습니다.",
+    "accentId": {
+      "name": "AC'SCENT ID",
+      "nameKo": "악센트 아이디",
+      "tagline": "AI 퍼스널 이미지 분석 & 맞춤 조향",
+      "description": "다양한 AI 콘텐츠를 오프라인 공간에서 체험하고, 자체적으로 수익화를 실현하는 매장입니다. AI를 통해 퍼스널 이미지를 분석하고, 나만의 퍼스널 이미지에 어울리는 향을 직접 조향할 수 있는 특별한 경험을 제공합니다.",
+      "features": ["AI 퍼스널 이미지 분석", "맞춤형 향 조향 체험", "오프라인 AI 콘텐츠 체험", "자체 수익화 모델 운영"]
+    },
+    "accentWow": {
+      "name": "AC'SCENT WOW",
+      "nameKo": "악센트 와우",
+      "tagline": "몰입형 미디어아트 & AI 테스트 베드",
+      "description": "몰입형 미디어아트와 함께 다양한 AI 콘텐츠의 테스트 베드로 활용되고 있습니다. 네안데르가 개발하는 최신 AI 콘텐츠를 가장 먼저 만나볼 수 있는 공간입니다.",
+      "features": ["몰입형 미디어아트", "AI 콘텐츠 테스트 베드", "최신 AI 체험 콘텐츠", "공간 전체 AI 체험"]
+    },
+    "ctaTitle": "체험 예약 & 문의",
+    "ctaDescription": "B2B 고객 대상 무료 체험을 희망하시거나, 체험 안내가 필요하신 경우 편하게 연락 주세요.",
+    "ctaPhone": "02-336-3368",
+    "ctaEmail": "ok@neander.co.kr",
+    "ctaPhoneLabel": "전화 문의",
+    "ctaEmailLabel": "이메일 문의",
+    "address": "서울특별시 마포구 와우산로 29라길 22",
+    "viewMap": "네이버 지도에서 보기",
+    "galleryTitle": "매장 갤러리"
   },
   "footer": {
     "tagline": "AI로 설계하는 감각의 경험",
@@ -3349,5 +3410,12 @@
       "ctaButton": "견적 요청하기",
       "selectUpTo": "최대 {count}개 선택"
     }
+  },
+  "press": {
+    "title": "언론 보도",
+    "subtitle": "네안데르의 이야기를 전하는 언론 보도를 확인하세요",
+    "readMore": "기사 보기",
+    "source": "출처",
+    "noArticles": "등록된 보도 자료가 없습니다."
   }
 }
