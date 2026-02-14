@@ -1,0 +1,1942 @@
+{
+  "metadata": {
+    "title": "NEANDERco — AI-Powered Experiential Content",
+    "description": "We transform offline spaces with AI-driven experiential content. Pop-ups, festivals, exhibitions, concerts — NEANDERco.ltd designs unforgettable experiences.",
+    "keywords": "AI content, experiential content, pop-up store, interactive media, AI fragrance, photo booth, spatial design, NEANDERco",
+    "ogTitle": "NEANDERco — Design the Experience",
+    "ogDescription": "190+ events. 10,000+ visitors. Setting a new standard in AI experiential content.",
+    "ogSiteName": "NEANDERco.ltd"
+  },
+
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "portfolio": "Portfolio",
+    "about": "About",
+    "contact": "Contact",
+    "quote": "Get a Quote",
+    "demo": "Try Demo",
+    "language": "한국어",
+    "menu": "Menu",
+    "close": "Close"
+  },
+
+  "hero": {
+    "taglineSub": "Everything AI, Experienced Offline",
+    "tagline": "AI Experience Content Studio",
+    "companyName": "NEANDERco",
+    "description": "Fragrance, imagery, light, sound — we engineer sensory experiences\nwith AI and bring unforgettable moments to offline spaces.",
+    "cta": "Start Your Project",
+    "ctaSecondary": "View Portfolio",
+    "scrollIndicator": "Scroll to explore",
+    "badge": "190+ Events Delivered"
+  },
+
+  "heroGame": {
+    "title": "SENSE RUSH",
+    "description": "Collect sensory particles to design the ultimate experience space. Avoid the grey noise!",
+    "howTo": "Move the collector with your mouse or finger to catch particles",
+    "startGame": "Start Game",
+    "score": "SCORE",
+    "noise": "Noise (avoid!)",
+    "orbs": {
+      "scent": "Scent",
+      "photo": "Photo",
+      "media": "Media",
+      "spatial": "Spatial",
+      "custom": "Custom"
+    },
+    "yourRank": "Your Experience Designer Rank",
+    "ranks": {
+      "bronze": "Rookie Designer",
+      "silver": "Sensory Designer",
+      "gold": "Immersion Designer",
+      "diamond": "Hypersense Designer"
+    },
+    "finalScore": "Final Score",
+    "maxCombo": "Max Combo",
+    "aiAnalysis": "AI ANALYSIS",
+    "aiMessage": "Based on your sensory collection data, this combination can design an experience space with 42-min avg. dwell time and 87% social share rate. Want to make it real?",
+    "ctaQuote": "Get a Quote for This Experience",
+    "replay": "Play Again"
+  },
+
+  "services": {
+    "title": "Services",
+    "subtitle": "Unforgettable Offline Experiences Powered by AI",
+    "description": "We plan experiential AI content that makes your brand shine. We create AI experiences that visitors can participate in and enjoy in physical spaces.",
+    "heroTagline": "What experience shall we create for you?",
+    "pillarsTitle": "AI Experiences by NEANDER",
+    "pillarsSubtitle": "We design brand-tailored experiences across 5 AI experience categories",
+    "industryTitle": "Which brands can use this?",
+    "industrySubtitle": "Explore AI experience concepts designed for your industry",
+    "processTitle": "From Planning to On-site Operations",
+    "processSubtitle": "NEANDER handles everything end-to-end",
+    "ctaTitle": "Your brand is the star of the next experience",
+    "ctaSubtitle": "The AI experience you imagine — NEANDER makes it real",
+    "ctaConsult": "Book Free Consultation",
+    "ctaQuote": "Request a Quote",
+    "allPillars": "All",
+    "noExperiences": "No experiences for this combination. Try a different filter.",
+    "viewDetail": "Learn More",
+    "relatedExperiences": "Related Experiences",
+    "inquiryBtn": "Inquire About This Experience",
+    "features": "Key Features",
+    "backToServices": "Back to Services",
+    "detailProcessTitle": "Experience Process",
+    "useCasesTitle": "Use Cases",
+    "ctaInquiryTitle": "Interested in this experience?",
+    "ctaInquirySubtitle": "NEANDER designs tailored experiences for your brand",
+
+    "pillars": {
+      "aiPhoto": {
+        "name": "AI Photo Experience",
+        "tagline": "A special AI transformation in a single photo",
+        "description": "Photo experiences that transform visitors using AI image generation and compositing technology"
+      },
+      "aiDiagnosis": {
+        "name": "AI Diagnosis Experience",
+        "tagline": "Personalized results analyzed by AI",
+        "description": "Experiences that provide personalized diagnosis results using computer vision and AI analysis"
+      },
+      "aiFortune": {
+        "name": "AI Fortune Experience",
+        "tagline": "Fun AI fortune telling",
+        "description": "Entertainment experiences where AI analyzes fortune, face reading, palm reading, aura and more"
+      },
+      "aiCreative": {
+        "name": "AI Creative Experience",
+        "tagline": "One-of-a-kind creations by AI",
+        "description": "Experiences where AI generates unique creations (recipes, designs, music, etc.) for each visitor"
+      },
+      "aiImmersive": {
+        "name": "AI Immersive Experience",
+        "tagline": "The entire space becomes an AI experience",
+        "description": "Large-scale content using projection mapping, LED displays, and interactive installations"
+      }
+    },
+
+    "industries": {
+      "beauty": "Beauty / Cosmetics",
+      "fnb": "F&B",
+      "fashion": "Fashion",
+      "entertainment": "Entertainment / K-POP",
+      "education": "Education / Science",
+      "festival": "Festivals / Events",
+      "corporate": "Corporate / B2B",
+      "tourism": "Tourism / Culture",
+      "wedding": "Wedding / Private"
+    },
+
+    "process": {
+      "step1": { "name": "Planning & Consulting", "description": "We plan AI experiences tailored to your brand" },
+      "step2": { "name": "Content Development", "description": "We develop custom AI content" },
+      "step3": { "name": "Space Design & Installation", "description": "We design the space and install equipment" },
+      "step4": { "name": "On-site Operations", "description": "We take responsibility for on-site operations" }
+    },
+
+    "exp": {
+      "beauty01": {
+        "name": "AI Personal Color Diagnosis",
+        "oneLiner": "Find your personal color and get matched product recommendations by AI",
+        "description": "An experience where a camera analyzes your skin tone to diagnose your personal color season and recommend brand products",
+        "features": ["Real-time skin tone analysis", "Personal color type diagnosis (Spring/Summer/Autumn/Winter)", "Instant personal color card printing", "Brand product color matching", "Digital card for SNS sharing"],
+        "processSteps": [
+          { "title": "Skin Tone Capture", "description": "High-resolution camera captures your skin tone" },
+          { "title": "AI Color Analysis", "description": "AI analyzes skin tone data to diagnose your personal color" },
+          { "title": "Results & Recommendations", "description": "Receive diagnosis results and personalized color product recommendations" }
+        ],
+        "highlights": [
+          { "value": "99.2%", "label": "Color Analysis Accuracy" },
+          { "value": "30s", "label": "Average Diagnosis Time" },
+          { "value": "4 Types", "label": "Personal Color Categories" }
+        ],
+        "useCases": [
+          { "title": "Beauty Brand Pop-ups", "description": "Recommend customer-matched color products at cosmetic brand pop-ups to boost conversion rates" },
+          { "title": "Department Stores", "description": "Provide premium color diagnosis services to beauty counter visitors" },
+          { "title": "Wedding Expos", "description": "Diagnose personal colors for brides-to-be matching their wedding makeup" }
+        ]
+      },
+      "beauty02": {
+        "name": "AI Skincare Analyzer",
+        "oneLiner": "Get your personalized skincare routine through AI skin analysis",
+        "description": "An experience where AI precisely analyzes your skin condition and recommends a customized skincare routine",
+        "features": ["High-resolution skin scanning (pores, hydration, wrinkles, tone, elasticity)", "5 skin indicator scoring", "Custom skincare routine report", "Brand product sample matching", "Before/after comparison (on revisit)"],
+        "processSteps": [
+          { "title": "Skin Scanning", "description": "Professional equipment captures skin condition in high resolution" },
+          { "title": "AI Precision Analysis", "description": "Analyzes 5 indicators: pores, hydration, wrinkles, tone, elasticity" },
+          { "title": "Custom Report", "description": "Outputs personalized skincare routine and product recommendation report" }
+        ],
+        "highlights": [
+          { "value": "5", "label": "Skin Analysis Indicators" },
+          { "value": "94%", "label": "Customer Satisfaction" },
+          { "value": "Instant", "label": "Report Output" }
+        ],
+        "useCases": [
+          { "title": "Skincare Brand Stores", "description": "Increase dwell time and purchase rates with skin diagnosis and product recommendations" },
+          { "title": "Beauty Fairs", "description": "Attract exhibition visitors and provide memorable brand experiences" },
+          { "title": "Dermatology Clinics", "description": "Use as a consultation tool to build trust with clients" }
+        ]
+      },
+      "beauty03": {
+        "name": "AI Virtual Makeup Studio",
+        "oneLiner": "Real-time AR makeup try-on + AI personalized makeup recommendations",
+        "description": "An experience where you virtually try on brand makeup products via real-time AR while AI recommends your optimal look",
+        "features": ["Real-time AR makeup application", "Various makeup look presets", "Before/after comparison photo print", "Product QR code linking (instant purchase)", "AI-recommended makeup by skin tone"],
+        "processSteps": [
+          { "title": "Face Scan", "description": "Precisely recognizes facial landmarks from a front-facing photo" },
+          { "title": "AR Makeup Application", "description": "Experience various makeup looks in real-time AR" },
+          { "title": "Comparison Print", "description": "Print before/after comparison photos with recommended products" }
+        ],
+        "highlights": [
+          { "value": "Real-time", "label": "AR Makeup Application" },
+          { "value": "50+", "label": "Makeup Presets" },
+          { "value": "88%", "label": "SNS Share Rate" }
+        ],
+        "useCases": [
+          { "title": "Cosmetic Stores", "description": "Virtual try-on without testers — hygienic and engaging" },
+          { "title": "Pop-up Stores", "description": "Let customers try new color line-ups at product launches" },
+          { "title": "Online Integration", "description": "Connect in-store experience to online purchase via QR for O2O conversion" }
+        ]
+      },
+      "beauty04": {
+        "name": "AI Scent Soulmate",
+        "oneLiner": "AI finds your perfect fragrance soulmate",
+        "description": "An experience that matches you with your ideal fragrance through personality tests and AI analysis, with real scent sampling",
+        "features": ["Personality/preference quiz interaction", "AI fragrance matching algorithm", "Real scent diffuser experience", "Fragrance profile card printing", "Brand product sampling connection"],
+        "processSteps": [
+          { "title": "Preference Analysis", "description": "Personality and preference quiz builds your scent profile" },
+          { "title": "AI Matching", "description": "AI matches the optimal fragrance from the database" },
+          { "title": "Scent Experience", "description": "Smell the matched fragrance via real diffuser and receive your profile card" }
+        ],
+        "highlights": [
+          { "value": "200+", "label": "Fragrance Database" },
+          { "value": "92%", "label": "Match Satisfaction" },
+          { "value": "Real", "label": "Scent Sampling" }
+        ],
+        "useCases": [
+          { "title": "Fragrance Brand Pop-ups", "description": "AI-matched personalized fragrance recommendations at product launches" },
+          { "title": "Department Store Counters", "description": "Eliminate choice paralysis and offer joyful fragrance discovery" },
+          { "title": "Lifestyle Fairs", "description": "Create sensory brand experiences through scent interaction" }
+        ]
+      },
+      "beauty05": {
+        "name": "AI Nail Designer",
+        "oneLiner": "AI creates your unique nail design",
+        "description": "An experience where AI analyzes your taste and mood to generate one-of-a-kind nail designs",
+        "features": ["Style/mood quiz", "AI nail art image generation", "Instant nail sticker printing (wearable)", "Seasonal/trend themes", "Design sharing & saving"],
+        "processSteps": [
+          { "title": "Style Selection", "description": "Interactive quiz to select mood and preferences" },
+          { "title": "AI Design Generation", "description": "AI generates one-of-a-kind nail art designs" },
+          { "title": "Sticker Printing", "description": "Print wearable nail stickers on the spot" }
+        ],
+        "highlights": [
+          { "value": "Infinite", "label": "Design Combinations" },
+          { "value": "3 min", "label": "Generation Time" },
+          { "value": "Real", "label": "Nail Sticker Output" }
+        ],
+        "useCases": [
+          { "title": "Beauty Pop-ups", "description": "Gift AI-custom nail art at nail brand pop-ups to drive viral sharing" },
+          { "title": "Fashion Week Booths", "description": "Run trendy nail design experience booth at fashion events" },
+          { "title": "Gen Z Events", "description": "Maximize SNS virality with unique AI nail art experiences for young audiences" }
+        ]
+      },
+      "fnb01": {
+        "name": "AI Sommelier",
+        "oneLiner": "The perfect glass matched to your palate by AI",
+        "description": "An experience where AI analyzes your taste preferences to recommend wines/spirits and generate tasting notes",
+        "features": ["Taste preference quiz (sweetness/acidity/bitterness/body)", "AI beverage matching algorithm", "Personal tasting note card printing", "Brand tasting connection", "Drink profile sharing"],
+        "processSteps": [
+          { "title": "Taste Test", "description": "Analyze taste preferences for sweetness, acidity, bitterness, body" },
+          { "title": "AI Recommendation", "description": "AI matches wines or traditional spirits to your palate" },
+          { "title": "Tasting Experience", "description": "Sample recommended beverages and receive tasting note card" }
+        ],
+        "highlights": [
+          { "value": "500+", "label": "Beverage Database" },
+          { "value": "95%", "label": "Recommendation Accuracy" },
+          { "value": "1 min", "label": "Analysis Time" }
+        ],
+        "useCases": [
+          { "title": "Wineries / Distilleries", "description": "Drive tasting and purchases with personalized wine recommendations" },
+          { "title": "Beverage Expos", "description": "Stand out among hundreds of booths with AI-powered recommendations" },
+          { "title": "Hotels / Restaurants", "description": "Offer personalized pairing recommendations for premium dining" }
+        ]
+      },
+      "fnb02": {
+        "name": "AI Cocktail Creator",
+        "oneLiner": "AI creates your signature cocktail",
+        "description": "An experience where AI analyzes your mood/personality/taste to create your unique cocktail recipe",
+        "features": ["Mood/personality analysis interaction", "AI recipe generation (ingredients, ratios, instructions)", "AI-generated cocktail visual image", "Recipe card printing", "Actual cocktail making connection (optional)"],
+        "processSteps": [
+          { "title": "Mood Analysis", "description": "Interactive quiz analyzes your mood and personality" },
+          { "title": "Recipe Generation", "description": "AI creates your signature cocktail recipe" },
+          { "title": "Cocktail Making", "description": "Actual cocktail is made from the generated recipe" }
+        ],
+        "highlights": [
+          { "value": "\u221e", "label": "Cocktail Combinations" },
+          { "value": "Real", "label": "Cocktail Making" },
+          { "value": "97%", "label": "SNS Share Rate" }
+        ],
+        "useCases": [
+          { "title": "Bars / Lounges", "description": "Serve signature cocktails personalized to each customer" },
+          { "title": "Brand Events", "description": "Maximize buzz at product launches with AI-crafted cocktails" },
+          { "title": "Corporate Receptions", "description": "Facilitate networking with personalized cocktails at corporate events" }
+        ]
+      },
+      "fnb03": {
+        "name": "AI Barista Matching",
+        "oneLiner": "AI finds your perfect coffee",
+        "description": "A cafe experience where AI analyzes your coffee preferences to recommend beans/blending/brewing methods",
+        "features": ["In-depth coffee preference test", "Bean origin/roasting matching", "Brewing method recommendation", "Coffee profile card printing", "Recommended coffee tasting connection"],
+        "processSteps": [
+          { "title": "Coffee Test", "description": "In-depth test analyzing coffee preferences" },
+          { "title": "AI Matching", "description": "AI recommends bean origin, roasting, and brewing method" },
+          { "title": "Tasting", "description": "Sample recommended coffee and receive profile card" }
+        ],
+        "highlights": [
+          { "value": "100+", "label": "Bean Data" },
+          { "value": "Custom", "label": "Brewing Recommendations" },
+          { "value": "Instant", "label": "Coffee Served" }
+        ],
+        "useCases": [
+          { "title": "Cafes / Roasteries", "description": "Offer personalized bean and brewing recommendations for a special experience" },
+          { "title": "Coffee Brand Pop-ups", "description": "Create buzz with AI barista experiences at brand pop-ups" },
+          { "title": "Food Fairs", "description": "Increase booth dwell time by analyzing visitors' coffee preferences" }
+        ]
+      },
+      "fnb04": {
+        "name": "AI Taste DNA Profile",
+        "oneLiner": "AI decodes your unique taste DNA",
+        "description": "An experience where AI creates your personal taste DNA through comprehensive palate analysis",
+        "features": ["Comprehensive taste survey", "AI taste preference analysis", "Taste DNA infographic printing", "Food/beverage recommendation matching", "SNS-optimized design sharing"],
+        "processSteps": [
+          { "title": "Taste Survey", "description": "Comprehensive survey to assess overall taste tendencies" },
+          { "title": "AI DNA Analysis", "description": "AI analyzes taste data to generate your taste DNA" },
+          { "title": "Profile Output", "description": "Receive taste DNA infographic and food/drink recommendations" }
+        ],
+        "highlights": [
+          { "value": "8", "label": "Taste Analysis Axes" },
+          { "value": "Custom", "label": "Food Recommendations" },
+          { "value": "SNS", "label": "Optimized Design" }
+        ],
+        "useCases": [
+          { "title": "Food Company Events", "description": "Increase product interest by analyzing audience taste types at food events" },
+          { "title": "Food Festivals", "description": "Engage festival visitors with fun taste DNA cards" },
+          { "title": "Restaurants / Hotels", "description": "Offer custom menu recommendations based on taste analysis for premium service" }
+        ]
+      },
+      "fashion01": {
+        "name": "AI Style Profiler",
+        "oneLiner": "AI diagnoses your unique fashion style type",
+        "description": "An experience where AI analyzes full-body photos to diagnose body type/color/style and recommend fashion",
+        "features": ["Full-body photography", "Body/color/style comprehensive analysis", "Style type card printing", "Brand product coordination recommendation", "Seasonal style guide"],
+        "processSteps": [
+          { "title": "Full-body Photo", "description": "Full-body photo captured by AI camera" },
+          { "title": "Comprehensive Analysis", "description": "AI diagnoses body type, color, and style type" },
+          { "title": "Style Guide", "description": "Receive custom style card and brand coordination recommendations" }
+        ],
+        "highlights": [
+          { "value": "12 Types", "label": "Style Categories" },
+          { "value": "AI", "label": "Body Analysis" },
+          { "value": "Custom", "label": "Coord Recommendations" }
+        ],
+        "useCases": [
+          { "title": "Fashion Brand Stores", "description": "Boost purchase rates with post-diagnosis optimal coordination" },
+          { "title": "Fashion Week Booths", "description": "Run popular experience booths diagnosing visitor styles" },
+          { "title": "Shopping Mall Events", "description": "Increase foot traffic and dwell time with interactive experiences" }
+        ]
+      },
+      "fashion02": {
+        "name": "AI Runway Photo Booth",
+        "oneLiner": "AI creates your runway look",
+        "description": "A photo booth where AI dresses you in brand outfits for a runway model version of yourself",
+        "features": ["Face/full-body photography", "Virtual brand outfit try-on", "Runway background compositing", "Fashion magazine cover-style printing", "Multiple pose options"],
+        "processSteps": [
+          { "title": "Photo Shoot", "description": "Strike a pose under professional lighting" },
+          { "title": "AI Transformation", "description": "AI composites brand outfits and runway backgrounds" },
+          { "title": "Magazine Print", "description": "Print photos in fashion magazine cover style" }
+        ],
+        "highlights": [
+          { "value": "30+", "label": "Brand Outfits" },
+          { "value": "HD", "label": "High-quality Print" },
+          { "value": "90%", "label": "Share Rate" }
+        ],
+        "useCases": [
+          { "title": "Fashion Brand Pop-ups", "description": "Boost brand awareness with runway experiences at collection launches" },
+          { "title": "Department Store Promos", "description": "Gift fashion photo experiences to customers during seasonal promotions" },
+          { "title": "Fashion Exhibitions", "description": "Let visitors become models at fashion exhibitions" }
+        ]
+      },
+      "fashion03": {
+        "name": "AI Fashion Time Machine",
+        "oneLiner": "A fashion time travel with AI",
+        "description": "An experience where AI shows you wearing fashion from the 1920s to the future",
+        "features": ["10+ era-specific fashion styles", "Period background compositing", "Auto-applied era-specific hair/makeup", "Timeline poster printing", "Fashion history educational content"],
+        "processSteps": [
+          { "title": "Era Selection", "description": "Choose your era from the 1920s to the future" },
+          { "title": "AI Transformation", "description": "AI applies fashion, hair, and makeup of the chosen era" },
+          { "title": "Timeline Print", "description": "Print era-specific transformation timeline poster" }
+        ],
+        "highlights": [
+          { "value": "10+", "label": "Era Styles" },
+          { "value": "Auto", "label": "Hair/Makeup Applied" },
+          { "value": "Edu", "label": "Fashion History" }
+        ],
+        "useCases": [
+          { "title": "Fashion Exhibitions", "description": "Edutainment content combining fashion history with experiential learning" },
+          { "title": "Museum Specials", "description": "Interactive visitor content for costume-related special exhibitions" },
+          { "title": "School Events", "description": "Engaging educational content for students to experience fashion history" }
+        ]
+      },
+      "fashion04": {
+        "name": "AI Coord Recommender Kiosk",
+        "oneLiner": "Personalized outfit recommendations by AI stylist",
+        "description": "An experience where AI recommends optimal outfit combinations from brand collections after style analysis",
+        "features": ["Style preference analysis", "Brand product DB integration", "AI outfit combination generation (3+ looks)", "Styling tips", "Product purchase QR linking"],
+        "processSteps": [
+          { "title": "Style Analysis", "description": "Analyze style preferences and TPO" },
+          { "title": "AI Coord Generation", "description": "AI generates optimal outfit combinations from brand product DB" },
+          { "title": "Coord Card Print", "description": "Print recommended coordination card with purchase QR codes" }
+        ],
+        "highlights": [
+          { "value": "3+", "label": "Outfit Combos" },
+          { "value": "QR", "label": "Instant Purchase" },
+          { "value": "Custom", "label": "TPO Styling" }
+        ],
+        "useCases": [
+          { "title": "Fashion Stores", "description": "Drive experience and purchases simultaneously with AI stylist" },
+          { "title": "Online Brand Pop-ups", "description": "Let online brands offer physical coordination try-on at pop-ups" },
+          { "title": "Shopping Festivals", "description": "Boost engagement with AI coord recommendations at large shopping events" }
+        ]
+      },
+      "ent01": {
+        "name": "AI Idol Makeup Photo Booth",
+        "oneLiner": "Transform with AI idol makeup",
+        "description": "A photo booth where AI applies popular idol makeup/hair styles to create an idol version of you",
+        "features": ["Idol makeup/hair style application", "Concept background selection (stage, photo shoot, etc.)", "Photo card size instant printing", "Idol frame customization", "Fan signing/album concept integration"],
+        "processSteps": [
+          { "title": "Concept Selection", "description": "Choose your favorite idol makeup/hair style" },
+          { "title": "AI Transformation", "description": "AI applies the selected style in real-time" },
+          { "title": "Photocard Print", "description": "Print idol-concept photocard on the spot" }
+        ],
+        "highlights": [
+          { "value": "100+", "label": "Idol Styles" },
+          { "value": "Instant", "label": "Photocard Print" },
+          { "value": "95%", "label": "Fan Satisfaction" }
+        ],
+        "useCases": [
+          { "title": "K-POP Concerts", "description": "Offer idol transformation experiences at concert venues" },
+          { "title": "Fan Events", "description": "Gift special photo experiences at fan meetings/signings" },
+          { "title": "Entertainment Pop-ups", "description": "Core experience content for entertainment pop-up stores" }
+        ]
+      },
+      "ent02": {
+        "name": "AI Fan Photocard Maker",
+        "oneLiner": "You're the idol! AI fan photocard creation",
+        "description": "An experience that converts fan photos into official photocard-style images for trading card production",
+        "features": ["Official frame templates (by album/season)", "AI retouching and style application", "Trading card size instant printing", "Random photocard pack packaging", "Collection numbering"],
+        "processSteps": [
+          { "title": "Photo Shoot", "description": "Take photos in the photo booth" },
+          { "title": "AI Retouch & Style", "description": "AI retouches and applies official photocard-style frames" },
+          { "title": "Card Packaging", "description": "Print and package as random photocard packs" }
+        ],
+        "highlights": [
+          { "value": "Trading", "label": "Official Size Print" },
+          { "value": "Random", "label": "Pack Packaging" },
+          { "value": "Numbered", "label": "Collection Series" }
+        ],
+        "useCases": [
+          { "title": "Album Release Events", "description": "Boost participation with fan photocards at new album promotions" },
+          { "title": "K-POP Festivals", "description": "Run popular fan photocard booths at major K-POP festivals" },
+          { "title": "Merch Pop-ups", "description": "Provide custom photocards as additional merchandise at official pop-ups" }
+        ]
+      },
+      "ent03": {
+        "name": "AI Music Video Maker",
+        "oneLiner": "AI creates your own 15-second music video",
+        "description": "An experience where a short video is filmed and AI applies music video-style effects",
+        "features": ["15-second video recording", "AI effects/background application (cyberpunk, retro, fantasy, etc.)", "Auto BGM sync", "QR code download", "SNS-optimized output size"],
+        "processSteps": [
+          { "title": "Video Recording", "description": "Record a 15-second short video clip" },
+          { "title": "AI Effects Applied", "description": "Apply cyberpunk, retro, fantasy, or other effects" },
+          { "title": "BGM & Download", "description": "Auto-sync BGM and download via QR" }
+        ],
+        "highlights": [
+          { "value": "15s", "label": "Short-form Video" },
+          { "value": "10+", "label": "Effect Styles" },
+          { "value": "Auto", "label": "BGM Sync" }
+        ],
+        "useCases": [
+          { "title": "Music Festivals", "description": "Let fans create their own music videos at music festivals" },
+          { "title": "Entertainment Pop-ups", "description": "Spread content with music video creation experiences at artist pop-ups" },
+          { "title": "SNS Campaigns", "description": "Drive organic viral marketing with AI music video challenges" }
+        ]
+      },
+      "ent04": {
+        "name": "AI Celebrity Lookalike",
+        "oneLiner": "AI finds your celebrity doppelganger",
+        "description": "An experience where AI analyzes your face to find celebrity lookalikes and generate comparison images",
+        "features": ["Precise facial feature analysis (17 points)", "Celebrity lookalike matching (TOP 3)", "Similarity percentage display", "Side-by-side comparison image printing", "SNS viral-optimized design"],
+        "processSteps": [
+          { "title": "Face Photo", "description": "High-resolution front-facing face photo" },
+          { "title": "AI Analysis", "description": "Precisely analyzes 17 facial points to find lookalikes" },
+          { "title": "Result Print", "description": "Print TOP 3 lookalikes with similarity percentages" }
+        ],
+        "highlights": [
+          { "value": "17", "label": "Facial Analysis Points" },
+          { "value": "TOP 3", "label": "Lookalike Matches" },
+          { "value": "96%", "label": "Viral Conversion" }
+        ],
+        "useCases": [
+          { "title": "Entertainment Events", "description": "Most popular experience content at entertainment events" },
+          { "title": "Festivals / Fairs", "description": "Fun element anyone can enjoy at various festivals" },
+          { "title": "Brand Events", "description": "Fan participation content for brands using celebrity models" }
+        ]
+      },
+      "ent05": {
+        "name": "AI Voice Lab",
+        "oneLiner": "AI analyzes your voice and transforms it",
+        "description": "An experience where AI analyzes your voice and applies voice filters or recommends singing styles",
+        "features": ["Voice recording (singing/dialogue)", "AI timbre analysis (range, vocal characteristics)", "Voice filter application (robot, autotune, reverb, etc.)", "Result audio QR sharing", "Song style/genre recommendation"],
+        "processSteps": [
+          { "title": "Voice Recording", "description": "Record singing or dialogue" },
+          { "title": "AI Analysis & Filter", "description": "Analyze timbre and apply voice filters" },
+          { "title": "Share Results", "description": "Share analysis results and transformed audio via QR" }
+        ],
+        "highlights": [
+          { "value": "Range", "label": "Precision Analysis" },
+          { "value": "5+", "label": "Voice Filters" },
+          { "value": "QR", "label": "Audio Share" }
+        ],
+        "useCases": [
+          { "title": "Music Events", "description": "Drive participation with voice analysis experiences at music events" },
+          { "title": "Broadcasting Centers", "description": "Use as voice actor/singer experience content at broadcast centers" },
+          { "title": "School Festivals", "description": "Popular voice transformation experience at school festivals" }
+        ]
+      },
+      "edu01": {
+        "name": "AI Graduation Photo Booth",
+        "oneLiner": "Create special graduation photos with AI",
+        "description": "An experience that composites graduation caps and gowns via AI and creates graduation photos against campus backgrounds",
+        "features": ["Graduation cap/gown AI compositing", "Campus/ceremony background selection", "Graduation celebration frames", "Instant photo printing", "School-specific custom designs"],
+        "processSteps": [
+          { "title": "Photo Shoot", "description": "Take a photo in graduation pose" },
+          { "title": "AI Compositing", "description": "AI composites graduation cap/gown and campus background" },
+          { "title": "Photo Print", "description": "Print with graduation celebration frame" }
+        ],
+        "highlights": [
+          { "value": "Various", "label": "Gown Styles" },
+          { "value": "Instant", "label": "Photo Print" },
+          { "value": "Custom", "label": "School Designs" }
+        ],
+        "useCases": [
+          { "title": "University Graduations", "description": "Offer special photo experiences beyond official graduation photos" },
+          { "title": "School Festivals", "description": "Fun graduation photo booth experience at school events" },
+          { "title": "Education Expos", "description": "Provide campus photo experiences at university promotion booths" }
+        ]
+      },
+      "edu02": {
+        "name": "AI Future Career Diagnosis",
+        "oneLiner": "AI draws your future self",
+        "description": "An experience where AI analyzes aptitudes and interests to recommend future careers and generate future-self images",
+        "features": ["Aptitude/interest test", "AI career matching algorithm", "Future career AI image generation", "Career card printing", "Career info QR linking"],
+        "processSteps": [
+          { "title": "Aptitude Test", "description": "AI test analyzing aptitudes and interests" },
+          { "title": "Career Matching", "description": "AI recommends future careers and generates appearance" },
+          { "title": "Career Card Print", "description": "Print career card with future career image and info" }
+        ],
+        "highlights": [
+          { "value": "50+", "label": "Career Data" },
+          { "value": "AI", "label": "Image Generation" },
+          { "value": "Career", "label": "Info Integration" }
+        ],
+        "useCases": [
+          { "title": "Career Fairs", "description": "Offer fun career exploration at career/college fairs" },
+          { "title": "School Festivals", "description": "Combine education and fun with future-self experiences at school events" },
+          { "title": "Science Centers", "description": "Interactive career experience content for science center stations" }
+        ]
+      },
+      "edu03": {
+        "name": "AI Science Experience Kiosk",
+        "oneLiner": "Interactive science experiments with AI",
+        "description": "An educational experience where AI visually explains scientific principles and provides interactive experiments",
+        "features": ["Touch interaction experiments", "AI visualization (physics/chemistry/biology principles)", "Difficulty-based experiences (elementary/middle/high)", "Experience certificate printing", "Curriculum integration"],
+        "processSteps": [
+          { "title": "Topic Selection", "description": "Choose from physics, chemistry, biology topics" },
+          { "title": "Interactive Experiment", "description": "Conduct AI visualization experiments via touch interaction" },
+          { "title": "Experience Certificate", "description": "Print certificate after completion" }
+        ],
+        "highlights": [
+          { "value": "3 Levels", "label": "Difficulty Tiers" },
+          { "value": "Touch", "label": "Interaction" },
+          { "value": "Curriculum", "label": "Integration" }
+        ],
+        "useCases": [
+          { "title": "Science Centers", "description": "Operate as permanent interactive educational content" },
+          { "title": "Science Festivals", "description": "Spark scientific curiosity with engaging experiments" },
+          { "title": "School Activities", "description": "AI-based experiment content for school science events" }
+        ]
+      },
+      "edu04": {
+        "name": "AI History Travel",
+        "oneLiner": "Time travel through history with AI",
+        "description": "An educational photo experience where AI places you in historical scenes with period-appropriate costumes",
+        "features": ["Historical scene compositing (Joseon, Goryeo, Three Kingdoms, etc.)", "Period costume auto-application", "Historical figure/scene explanation cards", "Educational content integration", "History photo card printing"],
+        "processSteps": [
+          { "title": "Era Selection", "description": "Choose historical period: Joseon, Goryeo, etc." },
+          { "title": "AI Compositing", "description": "Place yourself in period costumes and historical scenes" },
+          { "title": "Education Card Print", "description": "Print history photo card and educational content" }
+        ],
+        "highlights": [
+          { "value": "5+", "label": "Historical Eras" },
+          { "value": "Edu", "label": "Content Integration" },
+          { "value": "Photo", "label": "Card Print" }
+        ],
+        "useCases": [
+          { "title": "Museums / Palaces", "description": "Offer era experiences to visitors at history museums and palaces" },
+          { "title": "History Festivals", "description": "Interactive visitor content at regional history festivals" },
+          { "title": "Field Trips", "description": "Educational content making history fun for students on field trips" }
+        ]
+      },
+      "edu05": {
+        "name": "AI Time Capsule Photo",
+        "oneLiner": "AI draws your future self",
+        "description": "An experience that photographs your current appearance and AI predicts your look 10, 20 years later",
+        "features": ["Current appearance photography", "AI aging simulation (10/20/30 years later)", "Time capsule envelope packaging", "Message to your future self", "QR code digital storage"],
+        "processSteps": [
+          { "title": "Current Photo", "description": "High-quality photo of current appearance" },
+          { "title": "AI Aging", "description": "AI predicts appearance 10/20/30 years into the future" },
+          { "title": "Time Capsule Packaging", "description": "Package future images and messages in time capsule envelope" }
+        ],
+        "highlights": [
+          { "value": "30 Years", "label": "Future Prediction" },
+          { "value": "Message", "label": "To Future Self" },
+          { "value": "Package", "label": "Capsule Envelope" }
+        ],
+        "useCases": [
+          { "title": "Graduation Events", "description": "Time capsule experiences with messages to future self at graduations" },
+          { "title": "Corporate Workshops", "description": "Visualize future vision as a team building exercise" },
+          { "title": "Family Events", "description": "Fun predictions of children's future appearance at family gatherings" }
+        ]
+      },
+      "fest01": {
+        "name": "AI Fortune Robot",
+        "oneLiner": "Fun fortune telling by AI",
+        "description": "An entertainment experience where AI analyzes your birthdate to provide fun fortune readings",
+        "features": ["Birthdate input interface", "AI fortune analysis (yearly fortune, love, wealth, health)", "Fun elements (humorous expressions)", "Fortune card instant printing", "Seasonal themes (New Year, Summer, etc.)"],
+        "processSteps": [
+          { "title": "Enter Birth Details", "description": "Enter birth date and time on touch screen" },
+          { "title": "AI Fortune Analysis", "description": "AI analyzes fortune and generates entertaining readings" },
+          { "title": "Fortune Card Print", "description": "Print fortune card on the spot" }
+        ],
+        "highlights": [
+          { "value": "4 Fortunes", "label": "Love/Wealth/Health/Year" },
+          { "value": "Humor", "label": "Fun Elements" },
+          { "value": "Seasonal", "label": "Theme Changes" }
+        ],
+        "useCases": [
+          { "title": "Local Festivals", "description": "Most popular experience booth attracting visitors at local festivals" },
+          { "title": "New Year Events", "description": "Special New Year fortune experience at seasonal celebrations" },
+          { "title": "Corporate Events", "description": "Fun fortune experience to enliven company year-end/new year parties" }
+        ]
+      },
+      "fest02": {
+        "name": "AI Face Reading",
+        "oneLiner": "AI reads your face for a fun physiognomy analysis",
+        "description": "An experience where AI analyzes your face to provide entertaining physiognomy readings",
+        "features": ["Face photography and AI analysis", "Physiognomy feature interpretation (forehead, eyes, nose, mouth, chin)", "Personality/wealth/love fortune readings", "Face reading report card printing", "Comparison reading (with friends/partner)"],
+        "processSteps": [
+          { "title": "Face Photo", "description": "Capture front-facing face with camera" },
+          { "title": "AI Physiognomy Analysis", "description": "AI analyzes forehead, eyes, nose, mouth, chin features" },
+          { "title": "Reading Report", "description": "Print report card with personality/wealth/love readings" }
+        ],
+        "highlights": [
+          { "value": "5 Areas", "label": "Facial Analysis" },
+          { "value": "3 Readings", "label": "Personality/Wealth/Love" },
+          { "value": "Compare", "label": "With Friends" }
+        ],
+        "useCases": [
+          { "title": "Traditional Festivals", "description": "Modern reinterpretation of face reading at cultural festivals" },
+          { "title": "Night Markets", "description": "Fun face reading booth attracting visitors at night markets" },
+          { "title": "Couple Events", "description": "Entertaining comparative face reading for couples" }
+        ]
+      },
+      "fest03": {
+        "name": "AI Palm Reading Robot",
+        "oneLiner": "AI reads the destiny in your palm",
+        "description": "An experience where a camera photographs your palm and AI analyzes your palm lines to read fortunes",
+        "features": ["High-resolution palm photography", "AI palm line recognition (life, head, heart, fate lines)", "Individual line meaning interpretation", "Palm reading report card printing", "AR overlay palm line visualization"],
+        "processSteps": [
+          { "title": "Palm Scan", "description": "Place palm on high-resolution camera" },
+          { "title": "AI Palm Line Recognition", "description": "AI recognizes life, head, heart, and fate lines" },
+          { "title": "Palm Report", "description": "Provide line-by-line meaning interpretation with AR visualization" }
+        ],
+        "highlights": [
+          { "value": "4 Lines", "label": "Major Palm Analysis" },
+          { "value": "AR", "label": "Line Visualization" },
+          { "value": "Instant", "label": "Report Print" }
+        ],
+        "useCases": [
+          { "title": "Festivals / Markets", "description": "Spark visitor curiosity with palm reading at festivals and flea markets" },
+          { "title": "Cultural Events", "description": "AI-reinterpreted traditional palm reading at cultural experience events" },
+          { "title": "Corporate Workshops", "description": "Light ice-breaking activity to energize team atmosphere" }
+        ]
+      },
+      "fest04": {
+        "name": "AI Caricature Artist",
+        "oneLiner": "AI artist draws your unique caricature",
+        "description": "An experience where AI analyzes your face to create caricatures in various art styles",
+        "features": ["Face photography", "Art style selection (cartoon, watercolor, pop art, pixel art, etc.)", "Real-time AI caricature generation", "Instant print (postcard/poster size)", "Festival theme frame integration"],
+        "processSteps": [
+          { "title": "Face Photo", "description": "Capture various expressions" },
+          { "title": "Art Style Selection", "description": "Choose from cartoon, watercolor, pop art, pixel art, etc." },
+          { "title": "Caricature Print", "description": "Print AI-generated caricature as postcard or poster" }
+        ],
+        "highlights": [
+          { "value": "8+", "label": "Art Styles" },
+          { "value": "Real-time", "label": "AI Generation" },
+          { "value": "Instant", "label": "Print Output" }
+        ],
+        "useCases": [
+          { "title": "Local Festivals", "description": "Fast, fun AI caricatures replacing traditional portrait artists" },
+          { "title": "Corporate Events", "description": "Gift commemorative caricatures to event attendees" },
+          { "title": "Art Fairs", "description": "Experience the intersection of AI and art at art exhibitions" }
+        ]
+      },
+      "fest05": {
+        "name": "AI Aura Reading",
+        "oneLiner": "AI reveals your aura color",
+        "description": "An experience where AI analyzes your expression and mood to generate your aura color and energy profile",
+        "features": ["Expression/mood AI analysis", "Aura color matching (7 aura types)", "Energy profile generation", "Aura art image printing", "Aura compatibility experience (2+ people)"],
+        "processSteps": [
+          { "title": "Expression Analysis", "description": "Camera analyzes your expression and mood" },
+          { "title": "Aura Matching", "description": "AI matches your aura color from 7 aura types" },
+          { "title": "Aura Art Print", "description": "Print your aura art image and energy profile" }
+        ],
+        "highlights": [
+          { "value": "7 Types", "label": "Aura Colors" },
+          { "value": "Art", "label": "Image Generation" },
+          { "value": "Compatibility", "label": "2+ People" }
+        ],
+        "useCases": [
+          { "title": "Wellness Fairs", "description": "Attract visitors with aura reading at health/healing expos" },
+          { "title": "Festivals / Markets", "description": "Drive SNS virality with mystical aura experiences" },
+          { "title": "Couples / Groups", "description": "Fun comparing aura compatibility between couples and friends" }
+        ]
+      },
+      "corp01": {
+        "name": "AI Brand Avatar Maker",
+        "oneLiner": "Create AI avatars in your brand style",
+        "description": "An experience that generates AI avatars of employees/customers in your corporate brand style",
+        "features": ["Brand CI/BI style customization", "Face photography and AI avatar generation", "Profile image/business card format printing", "Company messenger/email profile use", "Team group avatar generation"],
+        "processSteps": [
+          { "title": "Face Photo", "description": "Take a profile photo" },
+          { "title": "AI Avatar Generation", "description": "Generate AI avatar in corporate CI/BI style" },
+          { "title": "Profile Application", "description": "Print as business card/profile and distribute digitally" }
+        ],
+        "highlights": [
+          { "value": "CI/BI", "label": "Brand Style" },
+          { "value": "Team", "label": "Group Generation" },
+          { "value": "Digital", "label": "Profile Use" }
+        ],
+        "useCases": [
+          { "title": "Corporate Workshops", "description": "Fun team-wide avatar creation activity at team building events" },
+          { "title": "Brand Launches", "description": "Create buzz with brand-style avatars at brand launch events" },
+          { "title": "Conferences", "description": "Gift corporate avatar business cards to conference attendees" }
+        ]
+      },
+      "corp02": {
+        "name": "AI Product Interactive Experience",
+        "oneLiner": "Experience our products through AI conversation",
+        "description": "An interactive booth where AI converses with visitors to explain new products and provide personalized recommendations",
+        "features": ["AI conversational kiosk", "Product info DB integration", "Visitor-personalized product recommendations", "Experience report and coupon printing", "Visitor data collection/analysis"],
+        "processSteps": [
+          { "title": "Start AI Chat", "description": "Begin natural conversation with AI kiosk" },
+          { "title": "Custom Recommendation", "description": "Recommend optimal products based on conversation" },
+          { "title": "Experience Report", "description": "Output custom report and coupons" }
+        ],
+        "highlights": [
+          { "value": "Conversational", "label": "AI Kiosk" },
+          { "value": "Custom", "label": "Product Recommendation" },
+          { "value": "Data", "label": "Visitor Analytics" }
+        ],
+        "useCases": [
+          { "title": "Product Launches", "description": "AI explains and recommends products at new product launch events" },
+          { "title": "Expos / Trade Shows", "description": "AI docent effectively introduces products at trade show booths" },
+          { "title": "Showrooms", "description": "Provide personalized product experiences to showroom visitors" }
+        ]
+      },
+      "corp03": {
+        "name": "AI Team Chemistry Analysis",
+        "oneLiner": "AI analyzes your team's chemistry",
+        "description": "A team building experience where AI analyzes team member traits to suggest team chemistry and optimal roles",
+        "features": ["Individual team member trait test (MBTI compatible)", "AI team chemistry analysis", "Team strengths/improvement report", "Role recommendation cards (per member)", "Full team report printing"],
+        "processSteps": [
+          { "title": "Individual Tests", "description": "Each team member takes a personality test" },
+          { "title": "AI Chemistry Analysis", "description": "AI analyzes team-wide chemistry" },
+          { "title": "Team Report", "description": "Output team strengths/improvements and role recommendation report" }
+        ],
+        "highlights": [
+          { "value": "MBTI", "label": "Compatible" },
+          { "value": "Full Team", "label": "Chemistry Analysis" },
+          { "value": "Roles", "label": "Recommendations" }
+        ],
+        "useCases": [
+          { "title": "Team Building Workshops", "description": "Enhance mutual understanding between team members" },
+          { "title": "Onboarding", "description": "Fun team composition and role experience for new employees" },
+          { "title": "Corporate Events", "description": "Fun content comparing department chemistry at company events" }
+        ]
+      },
+      "corp04": {
+        "name": "AI Vision Wall",
+        "oneLiner": "Ideas bloom through AI on the vision wall",
+        "description": "An experience where participants' messages/ideas are visualized by AI in real-time on large screens",
+        "features": ["Text/voice input", "AI real-time visualization (text to image)", "Large LED display", "Participatory media art production", "Post-event archive provision"],
+        "processSteps": [
+          { "title": "Idea Input", "description": "Enter ideas/messages via text or voice" },
+          { "title": "AI Visualization", "description": "AI visualizes text as images in real-time" },
+          { "title": "Wall Display", "description": "Participants' visions come together as media art on large LED" }
+        ],
+        "highlights": [
+          { "value": "Real-time", "label": "AI Visualization" },
+          { "value": "Large", "label": "LED Display" },
+          { "value": "Archive", "label": "Post-event Delivery" }
+        ],
+        "useCases": [
+          { "title": "Corporate Conferences", "description": "Create impressive finales by gathering attendees' visions" },
+          { "title": "New Year Events", "description": "Moving experience where AI visualizes new year wishes on large screens" },
+          { "title": "Expos / Fairs", "description": "Expand brand experiences with participatory media art at exhibitions" }
+        ]
+      },
+      "corp05": {
+        "name": "AI Business Card Designer",
+        "oneLiner": "AI designs your unique creative business card",
+        "description": "An experience where AI analyzes your face and role to design one-of-a-kind creative business cards",
+        "features": ["Face photography and role input", "AI business card design generation (3+ variants)", "Instant business card printing", "Digital business card QR generation", "Networking event integration"],
+        "processSteps": [
+          { "title": "Info Input", "description": "Take face photo and enter job info" },
+          { "title": "AI Design", "description": "AI designs 3+ creative business card variants" },
+          { "title": "Card Print", "description": "Print selected design as business card on the spot" }
+        ],
+        "highlights": [
+          { "value": "3+", "label": "Design Variants" },
+          { "value": "Instant", "label": "Card Print" },
+          { "value": "QR", "label": "Digital Card" }
+        ],
+        "useCases": [
+          { "title": "Networking Events", "description": "Create special AI business cards for networking event attendees" },
+          { "title": "Conferences", "description": "Facilitate connection with creative business cards at conferences" },
+          { "title": "Corporate Events", "description": "Provide as memorabilia at open innovation events" }
+        ]
+      },
+      "tour01": {
+        "name": "AI Hanbok Photo Booth",
+        "oneLiner": "Try on beautiful Hanbok with AI",
+        "description": "A Korean cultural photo experience where AI virtually dresses you in Hanbok and composites traditional backgrounds",
+        "features": ["Various Hanbok style selection (king/queen/scholar/modern Hanbok)", "Traditional background compositing (Gyeongbokgung, Hanok Village, gardens)", "Multi-language support for international tourists", "Traditional frame design printing", "Korean culture explanation card included"],
+        "processSteps": [
+          { "title": "Hanbok Selection", "description": "Choose from king/queen/scholar/modern Hanbok styles" },
+          { "title": "AI Compositing", "description": "AI composites Hanbok and traditional backgrounds" },
+          { "title": "Traditional Photo Print", "description": "Print with traditional frame design" }
+        ],
+        "highlights": [
+          { "value": "5+", "label": "Hanbok Styles" },
+          { "value": "Multi-lang", "label": "Tourist Support" },
+          { "value": "Traditional", "label": "Frame Design" }
+        ],
+        "useCases": [
+          { "title": "Tourist Sites", "description": "Offer Hanbok experience to international tourists at palaces and Hanok villages" },
+          { "title": "Korean Culture Events", "description": "Promote Korean culture through Hanbok photo experiences at overseas events" },
+          { "title": "Traditional Festivals", "description": "Drive visitor participation with Hanbok photo booths at cultural festivals" }
+        ]
+      },
+      "tour02": {
+        "name": "AI Traditional Painter",
+        "oneLiner": "AI artist paints your traditional portrait",
+        "description": "A cultural experience where AI converts portraits into traditional East Asian art styles",
+        "features": ["Portrait photography", "Traditional art style selection (ink wash, folk painting, Dancheong, pottery patterns, etc.)", "AI style conversion", "Scroll/folding screen style print option", "Korean art history explanation integration"],
+        "processSteps": [
+          { "title": "Portrait Photo", "description": "Take a portrait photo" },
+          { "title": "Style Selection & Conversion", "description": "Choose ink wash, folk painting, etc. and AI converts" },
+          { "title": "Artwork Print", "description": "Print as scroll or folding screen style" }
+        ],
+        "highlights": [
+          { "value": "5+", "label": "Traditional Styles" },
+          { "value": "Scroll", "label": "Style Print" },
+          { "value": "Culture", "label": "History Integration" }
+        ],
+        "useCases": [
+          { "title": "Tourist Sites / Palaces", "description": "Offer traditional portrait experiences at palaces and traditional villages" },
+          { "title": "Art Museums", "description": "Interactive visitor content for Korean art exhibitions" },
+          { "title": "Cultural Exchange Events", "description": "Provide Korean art experiences at overseas cultural exchange events" }
+        ]
+      },
+      "tour03": {
+        "name": "AI Heritage Time Machine",
+        "oneLiner": "AI restores living cultural heritage",
+        "description": "An educational tourism experience where AI restores cultural heritage to its past appearance and places visitors in that era",
+        "features": ["Cultural asset original form AI restoration visualization", "Period scene compositing (architecture/people/landscape)", "Historical narration AI voice guide", "Interactive touch exploration", "Educational certificate issuance"],
+        "processSteps": [
+          { "title": "Heritage Selection", "description": "Choose cultural heritage to restore" },
+          { "title": "AI Restoration & Compositing", "description": "AI restores past appearance and places you in that era" },
+          { "title": "Educational Experience", "description": "Experience historical narration and interactive exploration" }
+        ],
+        "highlights": [
+          { "value": "AI", "label": "Heritage Restoration" },
+          { "value": "Voice", "label": "AI Guide" },
+          { "value": "Certificate", "label": "Educational Cert" }
+        ],
+        "useCases": [
+          { "title": "Heritage Sites / Palaces", "description": "Educational experience restoring and showing past appearances at historic sites" },
+          { "title": "Museums", "description": "AI restoration of original forms for exhibited artifacts" },
+          { "title": "Education Programs", "description": "Learn history through experience in student education programs" }
+        ]
+      },
+      "tour04": {
+        "name": "AI Travel Style Diagnosis",
+        "oneLiner": "AI finds your travel style",
+        "description": "An experience where AI analyzes your travel preferences to recommend destinations and travel styles",
+        "features": ["In-depth travel preference test", "AI travel style analysis (adventure/relaxation/culture/foodie types)", "Personalized destination recommendations", "Travel profile card printing", "Regional tourism info QR linking"],
+        "processSteps": [
+          { "title": "Preference Test", "description": "In-depth test analyzing travel preferences" },
+          { "title": "AI Analysis", "description": "Analyze travel style: adventure/relaxation/culture/foodie types" },
+          { "title": "Travel Card Print", "description": "Print personalized destination recommendations and profile card" }
+        ],
+        "highlights": [
+          { "value": "8 Types", "label": "Travel Styles" },
+          { "value": "Custom", "label": "Destination Picks" },
+          { "value": "QR", "label": "Tourism Info" }
+        ],
+        "useCases": [
+          { "title": "Tourism Expos", "description": "Diagnose visitor travel types and recommend destinations at tourism expos" },
+          { "title": "Regional Tourism Promo", "description": "Local governments run personalized tourism recommendation experiences" },
+          { "title": "Travel Agency Events", "description": "Recommend personalized travel packages to customers" }
+        ]
+      },
+      "wed01": {
+        "name": "AI Wedding Photo Booth",
+        "oneLiner": "AI creates fairy-tale wedding photos",
+        "description": "A wedding photo experience where AI transforms couple photos with various romantic themes",
+        "features": ["Various romantic themes (fairy tale, movie, period drama, travel destinations)", "AI style conversion + background compositing", "Couple frame designs", "Premium paper instant printing", "Guest group photo mode"],
+        "processSteps": [
+          { "title": "Theme Selection", "description": "Choose romantic themes: fairy tale, movie, period drama, etc." },
+          { "title": "AI Transformation", "description": "AI transforms couple photos with selected theme" },
+          { "title": "Premium Print", "description": "Print on premium paper with couple frames" }
+        ],
+        "highlights": [
+          { "value": "10+", "label": "Romantic Themes" },
+          { "value": "Premium", "label": "Paper Print" },
+          { "value": "Group", "label": "Guest Photo Mode" }
+        ],
+        "useCases": [
+          { "title": "Wedding Receptions", "description": "Gift guests special photo experiences at wedding receptions" },
+          { "title": "Wedding Expos", "description": "Offer romantic photo experiences to engaged couples" },
+          { "title": "Proposal Events", "description": "Create moving photo experiences for proposal events" }
+        ]
+      },
+      "wed02": {
+        "name": "AI Couple Chemistry",
+        "oneLiner": "AI analyzes your couple compatibility",
+        "description": "An experience where AI analyzes the couple's faces/traits for entertaining compatibility readings",
+        "features": ["Couple photo taking", "AI compatibility analysis (appearance, personality, future fortune)", "Chemistry score and report", "Couple card printing", "Wedding congratulations message integration"],
+        "processSteps": [
+          { "title": "Couple Photo", "description": "Take a couple photo together" },
+          { "title": "AI Compatibility Analysis", "description": "AI analyzes appearance, personality, and future fortune compatibility" },
+          { "title": "Chemistry Card Print", "description": "Print couple card with chemistry score and report" }
+        ],
+        "highlights": [
+          { "value": "3 Types", "label": "Compatibility Analysis" },
+          { "value": "Score", "label": "Chemistry Rating" },
+          { "value": "Congrats", "label": "Message Integration" }
+        ],
+        "useCases": [
+          { "title": "Wedding Parties", "description": "Fun experience for bride, groom, and guests at wedding celebrations" },
+          { "title": "Couple Events", "description": "Compatibility diagnosis at Valentine's Day and couple events" },
+          { "title": "Matchmaking Events", "description": "Ice-breaking activity at dating/matchmaking events" }
+        ]
+      },
+      "wed03": {
+        "name": "AI Future Family",
+        "oneLiner": "AI draws your future family",
+        "description": "An entertainment experience where AI analyzes the couple's faces to predict their future children's appearance",
+        "features": ["Couple photo taking", "AI face blending (baby/toddler/child versions)", "Family photo concept printing", "Growth timeline generation", "Frame packaging option"],
+        "processSteps": [
+          { "title": "Couple Photo", "description": "Take a couple photo" },
+          { "title": "AI Compositing", "description": "AI predicts baby/toddler/child appearance from couple's faces" },
+          { "title": "Family Photo Print", "description": "Print family concept photo with frame packaging" }
+        ],
+        "highlights": [
+          { "value": "3 Stages", "label": "Growth Prediction" },
+          { "value": "Family", "label": "Concept Photo" },
+          { "value": "Frame", "label": "Package Print" }
+        ],
+        "useCases": [
+          { "title": "Wedding Receptions", "description": "Moving experience gifting future family images at wedding ceremonies" },
+          { "title": "Family Events", "description": "Fun predicting future family members' appearance at family gatherings" },
+          { "title": "First Birthday Parties", "description": "Memorial content predicting children's growth at baby celebrations" }
+        ]
+      },
+      "wed04": {
+        "name": "AI Memory Movie Maker",
+        "oneLiner": "AI edits your memory movie",
+        "description": "An experience where AI edits couple/family photos into an emotional video and matches background music",
+        "features": ["Photo upload (5-20 photos)", "AI emotional video editing", "Auto BGM matching (by mood)", "Subtitle/message insertion", "QR code download"],
+        "processSteps": [
+          { "title": "Photo Upload", "description": "Upload 5-20 memory photos" },
+          { "title": "AI Video Editing", "description": "AI edits into emotional video and matches BGM" },
+          { "title": "Movie Download", "description": "Download completed memory movie via QR" }
+        ],
+        "highlights": [
+          { "value": "AI", "label": "Emotional Edit" },
+          { "value": "Auto", "label": "BGM Matching" },
+          { "value": "QR", "label": "Instant Download" }
+        ],
+        "useCases": [
+          { "title": "Wedding Receptions", "description": "Create real-time memory movies from guest celebration photos" },
+          { "title": "Birthdays / First Birthdays", "description": "Memorial content turning children's growth photos into emotional videos" },
+          { "title": "Reunions", "description": "Create moving moments by turning old memory photos into AI videos" }
+        ]
+      }
+    },
+
+    "cta": "Explore Services",
+    "consultCta": "Book a Free Consultation",
+
+    "items": {
+      "acscent": {
+        "title": "AC'SCENT — AI Fragrance Experience",
+        "shortTitle": "AI Fragrance",
+        "description": "AI analyzes your taste and personality to recommend a fragrance uniquely yours.",
+        "features": ["AI-powered personal scent profiling", "Live fragrance blending experience", "Custom label and package design", "Pop-up or permanent store deployment"],
+        "stat": "3 Stores Operating",
+        "tag": "Flagship"
+      },
+      "photobooth": {
+        "title": "AI Photo Booth",
+        "shortTitle": "AI Photo Booth",
+        "description": "AI-generated art. 100+ style filters and brand-tailored designs create keepsake images for visitors.",
+        "features": ["100+ AI style filters", "Brand-customized frame design", "Real-time generation and instant print", "Social media-optimized formats"],
+        "stat": "88% Social Sharing Rate",
+        "tag": "Popular"
+      },
+      "mediaArt": {
+        "title": "Interactive Media Art",
+        "shortTitle": "Media Art",
+        "description": "AI media art that responds to visitors' movement, sound, and touch, transforming spaces into living art.",
+        "features": ["Motion tracking interaction", "Real-time AI generative art", "Sound-reactive visuals", "Immersive projection mapping"],
+        "stat": "100% Satisfaction",
+        "tag": "Immersive"
+      },
+      "spatialDesign": {
+        "title": "Spatial Design",
+        "shortTitle": "Spatial Design",
+        "description": "We design spaces where brand identity and AI content converge.",
+        "features": ["3D rendering pre-visualization", "Brand identity-driven spatial design", "Visitor flow and experience mapping", "Full build-out and teardown management"],
+        "stat": "Total Solution",
+        "tag": "All-in-One"
+      },
+      "rental": {
+        "title": "All-in-One Rental",
+        "shortTitle": "All-in-One Rental",
+        "description": "Everything you need for AI content operations in one package.",
+        "features": ["AI kiosk and display rental", "Installation and teardown crews", "On-site operations manager", "Equipment insurance and tech support"],
+        "stat": "One-Stop Service",
+        "tag": "Convenient"
+      },
+      "custom": {
+        "title": "Custom Interactive Content",
+        "shortTitle": "Custom Content",
+        "description": "Fully bespoke AI interactive content from concept to operations.",
+        "features": ["Brand-specific AI content development", "End-to-end planning, design, and build", "Operations manual and training", "Post-event maintenance and updates"],
+        "stat": "Limitless Possibilities",
+        "tag": "Bespoke"
+      }
+    }
+  },
+
+  "stats": {
+    "title": "NEANDERco in Numbers",
+    "subtitle": "Results That Speak for Themselves",
+    "items": {
+      "events": {
+        "number": "190",
+        "suffix": "+",
+        "label": "Events Delivered",
+        "description": "Pop-ups, festivals, exhibitions, and more"
+      },
+      "visitors": {
+        "number": "10K",
+        "suffix": "+",
+        "label": "Total Visitors",
+        "description": "People who experienced our AI content"
+      },
+      "stores": {
+        "number": "3",
+        "suffix": "",
+        "label": "AC'SCENT Stores",
+        "description": "Sinchon, Wau, and ID flagship locations"
+      },
+      "satisfaction": {
+        "number": "100",
+        "suffix": "%",
+        "label": "Client Satisfaction",
+        "description": "Post-experience participant satisfaction rate"
+      }
+    }
+  },
+
+  "portfolio": {
+    "title": "Portfolio",
+    "subtitle": "Stories Told Through Experience",
+    "description": "Explore the sensory experiences designed by NEANDERco.",
+    "filterAll": "All",
+    "filterCategories": {
+      "popup": "Pop-up Store",
+      "festival": "Festival",
+      "exhibition": "Exhibition",
+      "brand": "Brand Collab",
+      "store": "Flagship Store"
+    },
+    "viewProject": "View Project",
+    "viewAll": "View All Projects",
+    "projects": {
+      "crossTheLine": {
+        "title": "CROSS THE LINE — Immersive Exhibition",
+        "description": "An experience that transcends boundaries. An interactive media art exhibition where visitors become part of the artwork. We built an immersive space using motion tracking and AI generative art.",
+        "date": "2022",
+        "location": "Seoul",
+        "tags": ["Interactive Exhibition", "Media Art", "Motion Tracking"],
+        "result": "2,000+ visitors, 45-minute average dwell time"
+      },
+      "acscentSinchon": {
+        "title": "AC'SCENT Sinchon — Flagship Store Launch",
+        "description": "Your signature scent, recommended by AI. We opened the first AC'SCENT flagship store in Sinchon, setting a new standard for AI fragrance experiences. From personal scent profiling to on-site blending, a full sensory journey.",
+        "date": "2023",
+        "location": "Seoul, Sinchon",
+        "tags": ["AI Fragrance", "Flagship Store", "Experiential Retail"],
+        "result": "1,500 monthly visitors, 40% return rate"
+      },
+      "jecheonMusicFilm": {
+        "title": "Jecheon International Music & Film Festival — AI Experience Zone",
+        "description": "Adding AI to the intersection of music and film. We operated an AI photo booth and interactive sound-visual experience zone for festival-goers, delivering a new kind of festival engagement.",
+        "date": "Aug 2024",
+        "location": "Jecheon",
+        "tags": ["Festival", "AI Photo Booth", "Sound Visual"],
+        "result": "3,500 visitors in 4 days, 2,800 social shares"
+      },
+      "seoulWritersFestival": {
+        "title": "Seoul Writers' Festival — Interactive Exhibition",
+        "description": "Where literature meets technology. We presented an interactive installation that transforms authors' text into AI-generated visual language. Visitors' voices became real-time visual art.",
+        "date": "Oct 2024",
+        "location": "Seoul",
+        "tags": ["Literary Festival", "AI Art", "Interactive Installation"],
+        "result": "50 participating authors, 100% visitor satisfaction"
+      },
+      "ansanScienceFestival": {
+        "title": "Ansan International Science Film Festival — AI Experience Zone",
+        "description": "Where science meets imagination. We planned and operated interactive content that lets visitors experience the principles of AI technology firsthand. A hands-on zone that turns science into play.",
+        "date": "2025",
+        "location": "Ansan",
+        "tags": ["Science Festival", "Educational Content", "AI Experience"],
+        "result": "2,000 family groups, 95% experience completion rate"
+      },
+      "acscentWau": {
+        "title": "AC'SCENT Wau — Second Store Opening",
+        "description": "A fragrance space infused with Hongdae character. We opened the second AC'SCENT store on Wausan-ro in Hongdae, featuring a locally inspired limited fragrance line and an upgraded AI profiling system.",
+        "date": "2024",
+        "location": "Seoul, Hongdae",
+        "tags": ["AI Fragrance", "Store Opening", "Local Identity"],
+        "result": "2,000 visitors in the first month"
+      },
+      "acscentId": {
+        "title": "AC'SCENT ID — Third Store Launch",
+        "description": "A fragrance that defines you. At AC'SCENT ID, our third store, a more refined AI expresses your identity through scent. Deep personality analysis and premium ingredients create a truly personal fragrance.",
+        "date": "2025",
+        "location": "Seoul",
+        "tags": ["AI Fragrance", "Premium", "Identity"],
+        "result": "Premium line launch, 35% increase in average spend"
+      }
+    }
+  },
+
+  "about": {
+    "title": "About Us",
+    "subtitle": "The People Who Design Sensory Experiences",
+    "mission": {
+      "title": "Mission",
+      "content": "By combining AI technology with creative sensibility, we deliver unforgettable offline experiences to people everywhere."
+    },
+    "vision": {
+      "title": "Vision",
+      "content": "As a global leader in experiential AI content, we are setting the standard for a new experience industry where technology and emotion coexist."
+    },
+    "ceo": {
+      "name": "Yoo Jae-young",
+      "title": "CEO & Founder",
+      "quote": "We don't build technology — we design experiences. AI is a tool; the real value lies in the emotions people feel. That single moment of experience creates an unforgettable connection between a brand and a person.",
+      "bio": "Founder and CEO of NEANDERco.ltd. Pioneering new experiential value in offline spaces by combining AI technology with creative direction."
+    },
+    "company": {
+      "name": "NEANDERco.ltd",
+      "nameEn": "NEANDERco.ltd",
+      "established": "Founded 2022",
+      "business": "AI Experiential Content Planning & Operations"
+    },
+    "timeline": {
+      "title": "Our Journey",
+      "entries": {
+        "2022": {
+          "year": "2022",
+          "title": "First Exhibition",
+          "events": [
+            "Selected for Content Impact Project",
+            "\"CROSS THE LINE\" immersive exhibition",
+            "NEANDERco.ltd established"
+          ]
+        },
+        "2023": {
+          "year": "2023",
+          "title": "AC'SCENT 1st Store",
+          "events": [
+            "Selected for Pre-Startup Package",
+            "AC'SCENT Sinchon — 1st store opening",
+            "Official launch of AI fragrance experience service"
+          ]
+        },
+        "2024": {
+          "year": "2024",
+          "title": "Festival Market Entry",
+          "events": [
+            "Designated as Tourism Venture Enterprise",
+            "AC'SCENT Wau — 2nd store opening",
+            "Jecheon International Music & Film Festival AI zone",
+            "Seoul Writers' Festival interactive exhibition",
+            "Full-scale B2B service launch"
+          ]
+        },
+        "2025": {
+          "year": "2025",
+          "title": "AC'SCENT ID Launch",
+          "events": [
+            "Selected for Youth Startup Academy",
+            "AC'SCENT ID — 3rd store launch",
+            "Ansan International Science Film Festival AI zone",
+            "AI content solution advancement"
+          ]
+        }
+      }
+    },
+    "values": {
+      "title": "Core Values",
+      "items": {
+        "experience": {
+          "title": "Experience First",
+          "description": "Technology serves the experience, not the other way around. Every project starts with one question: what will people feel?"
+        },
+        "innovation": {
+          "title": "Relentless Innovation",
+          "description": "We explore new possibilities at the frontier of AI technology. Never settling, always imagining the next experience."
+        },
+        "collaboration": {
+          "title": "Co-Created Value",
+          "description": "Through close collaboration with our clients, we understand the essence of their brand and design the optimal experience to match."
+        },
+        "impact": {
+          "title": "Measurable Impact",
+          "description": "Emotion can be measured. Visitor count, dwell time, social sharing rate — we prove our results through data."
+        }
+      }
+    },
+    "team": {
+      "title": "Our Team",
+      "description": "AI engineers, creative directors, spatial designers, and project managers working as one team to craft sensory experiences."
+    }
+  },
+
+  "quote": {
+    "category": "QUOTE",
+    "metaTitle": "Get a Quote | NEANDERco",
+    "metaDescription": "Request a custom quote for NEANDERco's AI experiential content services.",
+    "title": "Get a Quote",
+    "subtitle": "Ready to Start Your Project?",
+    "description": "Tell us about your event and the services you need. We will send you a tailored quote promptly.",
+    "step": {
+      "eventDetails": "Event Info",
+      "services": "Services",
+      "addOns": "Add-Ons",
+      "summary": "Review & Submit"
+    },
+    "prev": "Back",
+    "next": "Next",
+    "summaryReview": "Final Review",
+    "summaryDescription": "Review your selected services and options, then submit your quote request.",
+    "eventDetailsTitle": "Tell Us About Your Event",
+    "eventDetailsSubtitle": "Basic event details help us prepare an accurate estimate.",
+    "eventType": "Event Type",
+    "duration": "Event Duration",
+    "decrease": "Decrease",
+    "increase": "Increase",
+    "days": "days",
+    "multiplier": "multiplier",
+    "expectedAttendees": "Expected Attendees",
+    "people": "people",
+    "venueSize": "Venue Size",
+    "venueSizes": {
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large"
+    },
+    "location": "Event Location",
+    "locationPlaceholder": "e.g. COEX, Gangnam, Seoul",
+    "preferredDate": "Preferred Date",
+    "serviceTitle": "Choose Your Services",
+    "serviceSubtitle": "Select the services you need. You can choose more than one.",
+    "services": {
+      "acscent": { "name": "AC'SCENT AI Fragrance" },
+      "photoBooth": { "name": "AI Photo Booth" },
+      "mediaArt": { "name": "Interactive Media Art" },
+      "spatialDesign": { "name": "Spatial Design" },
+      "rental": { "name": "All-in-One Rental" },
+      "custom": { "name": "Custom AI Content" }
+    },
+    "from": "From",
+    "added": "Added",
+    "add": "Add",
+    "configure": "Configure options",
+    "customServiceCTA": "Don't see what you need? Contact us for custom interactive content.",
+    "options": {
+      "capacityPerHour": "Capacity per Hour",
+      "cap20": "20 people",
+      "cap40": "40 people",
+      "cap60": "60 people",
+      "customScentDesign": "Custom Scent Design",
+      "premiumPackaging": "Premium Packaging",
+      "numberOfBooths": "Number of Booths",
+      "printType": "Print Option",
+      "qrOnly": "QR Code Only",
+      "instantPrint": "Instant Print",
+      "photoCard": "Photo Card",
+      "aiStyleCount": "AI Style Count",
+      "complexityTier": "Content Tier",
+      "standard": "Standard",
+      "premium": "Premium",
+      "fullCustom": "Full Custom",
+      "motionSensors": "Motion Sensors",
+      "venueArea": "Venue Area",
+      "areaSmall": "Small (~100m2)",
+      "areaMedium": "Medium (100-300m2)",
+      "areaLarge": "Large (300m2+)",
+      "photoZoneDesign": "Photo Zone Design",
+      "customLighting": "Custom Lighting",
+      "aiKiosk": "AI Kiosk",
+      "cameraSetup": "Camera Setup",
+      "instantPrinter": "Instant Printer",
+      "contentType": "Content Type",
+      "brandContent": "Brand Content",
+      "festivalContent": "Event / Festival Content",
+      "aiContentDev": "Custom AI Content Development",
+      "consultationIncluded": "Planning Consultation",
+      "postEventSupport": "Post-Event Support"
+    },
+    "each": "each",
+    "subtotal": "Subtotal",
+    "removeService": "Remove",
+    "addOnsTitle": "Select Add-Ons",
+    "addOnsSubtitle": "Enhance your event with these additional services.",
+    "addOns": {
+      "title": "Add-Ons",
+      "staffing": "On-site Operations Staff",
+      "installation": "Installation & Teardown",
+      "branding": "Brand Customization",
+      "analytics": "Data Analytics Report",
+      "socialMedia": "Social Media Content Creation",
+      "consultation": "Pre-event Consultation",
+      "operationStaff": "On-site Operations Staff",
+      "brandedPackaging": "Branded Packaging",
+      "dataAnalytics": "Data Analytics Report",
+      "extendedHours": "Extended Hours",
+      "remoteMonitoring": "Remote Monitoring"
+    },
+    "addOnsLabel": "Add-Ons",
+    "quoteSummary": "Quote Summary",
+    "selectedServices": "Selected Services",
+    "durationMultiplier": "Duration Multiplier",
+    "estimatedTotal": "Estimated Total",
+    "manwon": "0K KRW",
+    "emptyServices": "Select services to see an estimated quote",
+    "requestQuote": "Request Quote",
+    "reset": "Reset",
+    "steps": {
+      "eventInfo": "Event Info",
+      "serviceSelect": "Select Services",
+      "details": "Details",
+      "confirm": "Review & Submit"
+    },
+    "eventTypes": {
+      "title": "Event Type",
+      "popup": "Pop-up Store",
+      "festival": "Festival",
+      "exhibition": "Exhibition",
+      "concert": "Concert / Performance",
+      "corporate": "Corporate Event",
+      "wedding": "Wedding / Private",
+      "launch": "Product Launch",
+      "brand-event": "Brand Event",
+      "other": "Other"
+    },
+    "serviceOptions": {
+      "title": "Select Your Services",
+      "acscent": "AC'SCENT AI Fragrance Experience",
+      "photobooth": "AI Photo Booth",
+      "mediaArt": "Interactive Media Art",
+      "spatialDesign": "Spatial Design",
+      "rental": "All-in-One Rental",
+      "custom": "Custom Interactive Content"
+    },
+    "form": {
+      "companyName": "Company / Organization",
+      "companyNamePlaceholder": "Enter your company name",
+      "contactName": "Contact Name",
+      "contactNamePlaceholder": "Enter your name",
+      "email": "Email",
+      "emailPlaceholder": "example@company.com",
+      "phone": "Phone",
+      "phonePlaceholder": "+82 10-0000-0000",
+      "eventName": "Event Name",
+      "eventNamePlaceholder": "Enter your event name",
+      "eventDate": "Event Date",
+      "eventDatePlaceholder": "Select a date",
+      "eventLocation": "Event Location",
+      "eventLocationPlaceholder": "Enter the venue or location",
+      "expectedVisitors": "Expected Visitors",
+      "expectedVisitorsPlaceholder": "Enter estimated attendance",
+      "budget": "Budget Range",
+      "budgetOptions": {
+        "under5m": "Under $4,000",
+        "5mTo10m": "$4,000 – $8,000",
+        "10mTo30m": "$8,000 – $23,000",
+        "30mTo50m": "$23,000 – $38,000",
+        "50mTo100m": "$38,000 – $75,000",
+        "over100m": "Over $75,000",
+        "negotiable": "Flexible / Negotiable"
+      },
+      "additionalInfo": "Additional Notes",
+      "additionalInfoPlaceholder": "Share any specific requirements or ideas you have in mind.",
+      "referenceLink": "Reference Link",
+      "referenceLinkPlaceholder": "Paste a URL for reference (optional)",
+      "fileUpload": "Attachments",
+      "fileUploadDescription": "Upload proposals, reference images, etc. (max 10MB)",
+      "privacyConsent": "I agree to the collection and use of personal information.",
+      "marketingConsent": "I agree to receive marketing communications. (Optional)",
+      "submit": "Request Quote",
+      "submitting": "Submitting..."
+    },
+    "disclaimer": "Quotes may vary based on event scale, duration, and location. Exact pricing will be provided after consultation. A team member will contact you within 1–2 business days of your request.",
+    "success": {
+      "title": "Your Quote Request Has Been Submitted",
+      "description": "A team member will reach out within 1–2 business days. Thank you for your interest.",
+      "backToHome": "Back to Home"
+    },
+    "error": {
+      "title": "Something Went Wrong",
+      "description": "Please try again shortly. If the issue persists, reach out to us via email.",
+      "retry": "Try Again"
+    }
+  },
+
+  "demo": {
+    "title": "Try a Demo",
+    "subtitle": "Experience NEANDERco's AI Content Firsthand",
+    "description": "Preview the AC'SCENT fragrance quiz and AI Photo Booth right here on the web.",
+    "metaTitle": "Try a Demo | NEANDERco",
+    "metaDescription": "Experience the AC'SCENT fragrance quiz and AI Photo Booth on the web.",
+    "category": "DEMO",
+    "tryIt": "Try It",
+    "scent-quiz": {
+      "title": "AC'SCENT Scent Recommendation",
+      "description": "Answer a few questions and let AI recommend the perfect fragrance for you.",
+      "metaTitle": "AI Scent Quiz | NEANDERco",
+      "metaDescription": "Your signature scent, analyzed by AI. Take a quick quiz and discover your fragrance match."
+    },
+    "photo-booth": {
+      "title": "AI Photo Booth Preview",
+      "description": "Upload a photo and watch AI transform it into different artistic styles.",
+      "metaTitle": "AI Photo Booth Preview | NEANDERco",
+      "metaDescription": "Your portrait, reimagined by AI. Upload a photo and try different artistic styles."
+    },
+    "scentQuiz": {
+      "title": "AC'SCENT Scent Recommendation",
+      "subtitle": "Your Signature Scent, Analyzed by AI",
+      "description": "Answer a few questions and let AI recommend the perfect fragrance for you.",
+      "startButton": "Start the Quiz",
+      "restartButton": "Start Over",
+      "progress": "{current} / {total}",
+      "steps": {
+        "mood": {
+          "question": "If you could paint today's mood in one color, what would it be?",
+          "options": {
+            "warm": "A warm amber orange",
+            "cool": "A serene cerulean blue",
+            "vibrant": "A vivid emerald green",
+            "deep": "A deep violet purple",
+            "soft": "A gentle blush pink",
+            "dark": "An intense crimson"
+          }
+        },
+        "season": {
+          "question": "Your favorite seasonal moment?",
+          "options": {
+            "springMorning": "Cherry blossoms drifting on a spring morning",
+            "summerNight": "A summer night with the sound of waves",
+            "autumnWalk": "Crunching through fallen leaves on an autumn afternoon",
+            "winterCafe": "A warm cafe on a snowy winter day",
+            "rainyDay": "A day spent listening to the rain",
+            "sunsetBeach": "A beach at sunset"
+          }
+        },
+        "place": {
+          "question": "Where does your mind find rest?",
+          "options": {
+            "forest": "A quiet trail through the forest",
+            "ocean": "The vast, open ocean",
+            "city": "A city alive with lights at night",
+            "garden": "A garden full of fragrant blooms",
+            "mountain": "A misty mountain retreat",
+            "library": "An old library filled with books"
+          }
+        },
+        "memory": {
+          "question": "What scent lives in your most cherished memory?",
+          "options": {
+            "bakery": "Freshly baked bread",
+            "rain": "Earth after the rain",
+            "perfume": "Someone's lingering perfume",
+            "laundry": "Sun-dried laundry",
+            "coffee": "Morning coffee",
+            "bonfire": "Campfire smoke"
+          }
+        },
+        "personality": {
+          "question": "How would the people around you describe you?",
+          "options": {
+            "warm": "Warm and comforting",
+            "sharp": "Sophisticated and intellectual",
+            "free": "Free-spirited and energetic",
+            "calm": "Calm and thoughtful",
+            "unique": "Distinctive and original",
+            "romantic": "Sentimental and romantic"
+          }
+        }
+      },
+      "results": {
+        "freshCitrus": {
+          "name": "Fresh Citrus Blend",
+          "description": "A scent for your bright, vibrant energy. The zest of bergamot and grapefruit harmonizes with green tea notes in this uplifting composition.",
+          "notes": "Top: Bergamot, Grapefruit | Middle: Green Tea, Jasmine | Base: White Musk",
+          "mood": "Fresh and energizing"
+        },
+        "woodyAmber": {
+          "name": "Woody Amber Signature",
+          "description": "A scent for your deep, intellectual allure. The warmth of sandalwood and amber is grounded by the strength of cedar in this timeless composition.",
+          "notes": "Top: Pink Pepper, Cardamom | Middle: Cedarwood, Iris | Base: Sandalwood, Amber",
+          "mood": "Deep and warm"
+        },
+        "floralMusk": {
+          "name": "Floral Musk Soft",
+          "description": "A scent for your gentle, emotional nature. A tender blend of white florals and musk that captures delicate sensibility.",
+          "notes": "Top: Pear, Freesia | Middle: Peony, Rose | Base: White Musk, Cashmere Wood",
+          "mood": "Soft and elegant"
+        },
+        "oceanBreeze": {
+          "name": "Ocean Breeze Aqua",
+          "description": "A scent for your free, refreshing spirit. The freshness of the sea and mineral notes come together to evoke a wide-open sense of liberation.",
+          "notes": "Top: Sea Salt, Lime | Middle: Marine Notes, Lavender | Base: Driftwood, Ambergris",
+          "mood": "Free and refreshing"
+        },
+        "darkRose": {
+          "name": "Dark Rose Intense",
+          "description": "A scent for your bold, captivating presence. The richness of Damask rose meets wood and spice in a composition that commands attention.",
+          "notes": "Top: Saffron, Black Pepper | Middle: Damask Rose, Geranium | Base: Oud, Patchouli, Leather",
+          "mood": "Bold and magnetic"
+        },
+        "vanillaDream": {
+          "name": "Vanilla Dream Ancien",
+          "description": "A scent for your warm, nurturing soul. The sweetness of vanilla and the velvety depth of tonka bean create a comforting sanctuary.",
+          "notes": "Top: Bergamot, Almond | Middle: Vanilla, Tonka Bean | Base: Benzoin, White Musk",
+          "mood": "Cozy and sweet"
+        }
+      },
+      "resultPage": {
+        "title": "Your Signature Scent",
+        "subtitle": "Your AI-Analyzed Fragrance Profile",
+        "notesLabel": "Fragrance Notes",
+        "moodLabel": "Mood",
+        "shareResult": "Share Your Result",
+        "tryInStore": "Experience It In-Store",
+        "disclaimer": "This result is a simplified AI-based recommendation. Visit our store for a more precise profiling experience."
+      }
+    },
+    "photoBooth": {
+      "title": "AI Photo Booth Preview",
+      "subtitle": "Your Portrait, Reimagined by AI",
+      "description": "Upload a photo and watch AI transform it into different artistic styles.",
+      "uploadButton": "Upload Photo",
+      "uploadDescription": "Supports JPG and PNG files (max 5MB)",
+      "processing": "AI is generating your image...",
+      "processingDescription": "This takes approximately 10–15 seconds",
+      "styles": {
+        "watercolor": "Watercolor",
+        "oilPainting": "Oil Painting",
+        "popArt": "Pop Art",
+        "anime": "Anime",
+        "cyberpunk": "Cyberpunk",
+        "renaissance": "Renaissance",
+        "minimalist": "Minimalist",
+        "neonGlow": "Neon Glow"
+      },
+      "instructions": {
+        "step1": "Upload your photo",
+        "step2": "Choose an AI style",
+        "step3": "See your AI-transformed image",
+        "step4": "Download or share on social media"
+      },
+      "download": "Download Image",
+      "share": "Share",
+      "tryAnother": "Try Another Style",
+      "disclaimer": "This demo is a preview of our AI Photo Booth. At live events, you will experience higher quality and a wider selection of styles."
+    }
+  },
+
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Let's Talk About Your Project",
+    "description": "We are happy to consult from the very first idea. Reach out anytime.",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Enter your name",
+      "email": "Email",
+      "emailPlaceholder": "example@company.com",
+      "phone": "Phone",
+      "phonePlaceholder": "+82 10-0000-0000",
+      "company": "Company (Optional)",
+      "companyPlaceholder": "Enter your company name",
+      "subject": "Inquiry Type",
+      "subjectOptions": {
+        "general": "General Inquiry",
+        "partnership": "Partnership / Collaboration",
+        "quote": "Quote Request",
+        "media": "Media / Press",
+        "career": "Careers",
+        "other": "Other"
+      },
+      "message": "Message",
+      "messagePlaceholder": "Tell us what you have in mind.",
+      "submit": "Send Message",
+      "submitting": "Sending..."
+    },
+    "info": {
+      "title": "Contact Information",
+      "email": "contact@neanderco.com",
+      "phone": "+82 2-0000-0000",
+      "address": "Seoul, South Korea",
+      "addressDetail": "Detailed address"
+    },
+    "businessHours": {
+      "title": "Business Hours",
+      "weekday": "Mon – Fri: 10:00 AM – 7:00 PM (KST)",
+      "weekend": "Closed on weekends and public holidays",
+      "note": "Email inquiries are accepted around the clock."
+    },
+    "success": {
+      "title": "Your Message Has Been Sent",
+      "description": "We will get back to you as soon as possible. Thank you."
+    },
+    "error": {
+      "title": "Failed to Send Message",
+      "description": "Please try again shortly."
+    },
+    "social": {
+      "title": "Social Media",
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "blog": "Blog",
+      "linkedin": "LinkedIn"
+    }
+  },
+
+  "footer": {
+    "tagline": "Sensory Experiences, Designed by AI",
+    "description": "We bring unforgettable experiences to offline spaces with AI-driven experiential content.",
+    "columns": {
+      "services": {
+        "title": "Services",
+        "acscent": "AC'SCENT AI Fragrance",
+        "photobooth": "AI Photo Booth",
+        "mediaArt": "Interactive Media Art",
+        "spatialDesign": "Spatial Design",
+        "rental": "All-in-One Rental",
+        "custom": "Custom Content"
+      },
+      "company": {
+        "title": "Company",
+        "about": "About Us",
+        "portfolio": "Portfolio",
+        "careers": "Careers",
+        "press": "Press",
+        "blog": "Blog"
+      },
+      "support": {
+        "title": "Support",
+        "contact": "Contact",
+        "quote": "Get a Quote",
+        "faq": "FAQ",
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy"
+      }
+    },
+    "copyright": "© {year} NEANDERco.ltd. All rights reserved.",
+    "companyInfo": "NEANDERco.ltd | CEO: Yoo Jae-young",
+    "links": {
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "sitemap": "Sitemap"
+    },
+    "newsletter": {
+      "title": "Subscribe to Our Newsletter",
+      "description": "Stay up to date with NEANDERco's latest projects and news.",
+      "placeholder": "Enter your email",
+      "subscribe": "Subscribe",
+      "success": "You are now subscribed!",
+      "error": "Something went wrong. Please try again."
+    }
+  },
+
+  "scentQuiz": {
+    "moodTitle": "Choose Your Mood",
+    "moodSubtitle": "What atmosphere draws you in right now?",
+    "moodCalm": "Calm",
+    "moodEnergetic": "Energetic",
+    "moodRomantic": "Romantic",
+    "moodMysterious": "Mysterious",
+    "colorTitle": "Pick Colors That Speak to You",
+    "colorSubtitle": "Select up to 3 colors you feel instinctively drawn to",
+    "colorRose": "Rose",
+    "colorAmber": "Amber",
+    "colorTeal": "Teal",
+    "colorViolet": "Violet",
+    "colorSky": "Sky",
+    "colorLime": "Lime",
+    "colorSlate": "Slate",
+    "colorCream": "Cream",
+    "memoryTitle": "Recall a Place in Your Memory",
+    "memorySubtitle": "Select up to 2 scenes that bring you peace",
+    "memBeach": "A Morning by the Sea",
+    "memForest": "Rain in the Forest",
+    "memLibrary": "An Old Library",
+    "memCity": "The City at Night",
+    "memCafe": "A Warm Cafe",
+    "memGarden": "A Garden in Spring",
+    "intensityTitle": "Set Your Intensity",
+    "intensitySubtitle": "From subtle and airy to rich and bold — choose your preferred strength",
+    "intensityLabel": "Scent intensity",
+    "subtle": "Subtle",
+    "intense": "Intense",
+    "selectUpTo": "Select up to {count}",
+    "back": "Back",
+    "next": "Next",
+    "seeResult": "See Result",
+    "analyzing": "AI is analyzing your scent profile...",
+    "analyzingSubtitle": "Finding your signature fragrance",
+    "complete": "Complete",
+    "yourScent": "Your Scent",
+    "topNotes": "Top Notes",
+    "middleNotes": "Middle Notes",
+    "baseNotes": "Base Notes",
+    "ctaMessage": "Experience this fragrance in person at our store",
+    "ctaButton": "Find a Store",
+    "tryAgain": "Take the Quiz Again",
+    "resultTitle": "Your Signature Scent",
+    "resultNotes": "Fragrance Composition",
+    "auroraMist": "Aurora Mist",
+    "auroraMistDesc": "A gentle whisper of morning light on dewy petals",
+    "midnightEmber": "Midnight Ember",
+    "midnightEmberDesc": "Deep and magnetic, like candlelight in a velvet room",
+    "citrusWave": "Citrus Wave",
+    "citrusWaveDesc": "An invigorating splash of sun-kissed coastal energy",
+    "velvetBloom": "Velvet Bloom",
+    "velvetBloomDesc": "Lush, romantic, like walking through a midnight garden",
+    "terraNoir": "Terra Noir",
+    "terraNoirDesc": "Earth-rooted sophistication with smoky depth",
+    "crystalGarden": "Crystal Garden",
+    "crystalGardenDesc": "Pure and luminous, like sunlight through crystal",
+    "visitStore": "Visit a Store"
+  },
+
+  "photoBooth": {
+    "category": "AI Photo Booth",
+    "title": "AI Photo Booth Preview",
+    "subtitle": "Your Portrait, Reimagined by AI",
+    "uploadLabel": "Upload a photo",
+    "dragOrClick": "Drag and drop a photo here, or click to browse",
+    "dropHere": "Drop here",
+    "upTo": "up to",
+    "uploadedImage": "Uploaded image",
+    "processing": "AI is generating your image...",
+    "ctaMessage": "Experience even more styles at a live event",
+    "ctaButton": "Inquire About an Event",
+    "tryAgain": "Try Again",
+    "errorNotImage": "Only image files are accepted",
+    "errorTooLarge": "File size exceeds 5MB",
+    "selectStyle": "Choose an AI style",
+    "styles": {
+      "watercolor": "Watercolor",
+      "pixel": "Pixel Art",
+      "retro": "Retro",
+      "cyberpunk": "Cyberpunk"
+    }
+  },
+
+  "common": {
+    "learnMore": "Learn More",
+    "getStarted": "Get Started",
+    "viewProject": "View Project",
+    "viewAll": "View All",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "required": "Required",
+    "optional": "Optional",
+    "search": "Search",
+    "searchPlaceholder": "Search...",
+    "noResults": "No results found",
+    "seeMore": "See More",
+    "seeLess": "See Less",
+    "scrollToTop": "Back to Top",
+    "share": "Share",
+    "download": "Download",
+    "copyLink": "Copy Link",
+    "copiedLink": "Link copied",
+    "readTime": "{minutes} min read",
+    "new": "NEW",
+    "popular": "Popular",
+    "recommended": "Recommended"
+  },
+
+  "errors": {
+    "404": {
+      "title": "Page Not Found",
+      "description": "The page you are looking for does not exist or has been moved.",
+      "backToHome": "Back to Home"
+    },
+    "500": {
+      "title": "Server Error",
+      "description": "A temporary error occurred. Please try again in a moment.",
+      "retry": "Refresh"
+    },
+    "offline": {
+      "title": "You Are Offline",
+      "description": "Please check your internet connection and try again."
+    }
+  },
+
+  "validation": {
+    "required": "This field is required",
+    "email": "Please enter a valid email address",
+    "phone": "Please enter a valid phone number",
+    "minLength": "Must be at least {min} characters",
+    "maxLength": "Must be no more than {max} characters",
+    "fileSize": "File size must be under {max}MB",
+    "fileType": "This file type is not supported",
+    "url": "Please enter a valid URL",
+    "date": "Please select a valid date",
+    "number": "Please enter a number"
+  },
+
+  "accessibility": {
+    "skipToContent": "Skip to content",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "openSubmenu": "Open submenu",
+    "closeSubmenu": "Close submenu",
+    "previousSlide": "Previous slide",
+    "nextSlide": "Next slide",
+    "goToSlide": "Go to slide {number}",
+    "expandSection": "Expand section",
+    "collapseSection": "Collapse section",
+    "externalLink": "Opens in a new tab",
+    "currentPage": "Current page",
+    "loading": "Content is loading",
+    "imageOf": "Image of {alt}"
+  },
+
+  "cookie": {
+    "title": "Cookie Notice",
+    "description": "NEANDERco uses cookies to provide a better experience.",
+    "accept": "Accept All",
+    "decline": "Essential Only",
+    "settings": "Cookie Settings",
+    "learnMore": "Learn More"
+  },
+
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Have Questions?",
+    "items": {
+      "q1": {
+        "question": "Can you handle events of any size?",
+        "answer": "Absolutely. From intimate private events to large-scale festivals, we offer tailored solutions for every scale and budget. We will work with you to design the optimal experience for your needs."
+      },
+      "q2": {
+        "question": "How is pricing determined?",
+        "answer": "Pricing considers event type, duration, location, selected services, and expected attendance. Submit a quote request with basic details and we will send you a detailed proposal within 1–2 business days."
+      },
+      "q3": {
+        "question": "How far in advance should I plan?",
+        "answer": "It varies by service, but we generally recommend reaching out 4–6 weeks before your event. For custom interactive content, we suggest a lead time of 8 weeks or more."
+      },
+      "q4": {
+        "question": "Do you operate outside of Seoul or internationally?",
+        "answer": "Yes. We have experience with events outside Seoul and internationally. We develop logistics and installation plans tailored to each venue, wherever it may be."
+      },
+      "q5": {
+        "question": "Can I visit an AC'SCENT store?",
+        "answer": "Of course! We currently operate three stores: Sinchon, Wau, and ID. No reservation required — walk in anytime to experience AI fragrance profiling in person."
+      },
+      "q6": {
+        "question": "What does the data analytics report include?",
+        "answer": "Our reports cover visitor count, average dwell time, top-performing content, social share count, satisfaction survey results, and more. These insights help you plan even more impactful future events."
+      }
+    },
+    "contactCta": "Still have questions?",
+    "contactButton": "Contact Us Directly"
+  },
+  "demos": {
+    "sectionTitle": "Try It Now",
+    "sectionSubtitle": "Experience a mini version of this AI service",
+    "tryDemo": "Try the Demo",
+    "common": {
+      "back": "Back",
+      "next": "Next",
+      "seeResult": "See My Result",
+      "analyzing": "AI is analyzing your profile...",
+      "analyzingSubtitle": "Finding your perfect match",
+      "complete": "Complete",
+      "restart": "Try Again",
+      "ctaMessage": "Want the full experience at your event?",
+      "ctaButton": "Get a Quote",
+      "selectUpTo": "Select up to {count}"
+    }
+  }
+}

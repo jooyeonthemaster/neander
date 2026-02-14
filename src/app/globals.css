@@ -1,0 +1,390 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────
+   Font Face Declarations
+   ───────────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/fonts/PretendardVariable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Syne';
+  src: url('/fonts/Syne-Variable.woff2') format('woff2');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ─────────────────────────────────────────────────────────
+   NEANDERco.ltd  |  Design Tokens & Theme
+   White base + Teal/Cyan accent, tech-forward premium
+   ───────────────────────────────────────────────────────── */
+
+@theme {
+  /* ── Primary: Teal ──────────────────────────────────── */
+  --color-teal-50: #effcfc;
+  --color-teal-100: #d6f7f7;
+  --color-teal-200: #b2eeef;
+  --color-teal-300: #7de0e3;
+  --color-teal-400: #40c9cf;
+  --color-teal-500: #24adb5;
+  --color-teal-600: #218b98;
+  --color-teal-700: #22707c;
+  --color-teal-800: #245b66;
+  --color-teal-900: #224c56;
+  --color-teal-950: #11323a;
+
+  /* ── Neutral Grays ──────────────────────────────────── */
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f4f4f5;
+  --color-neutral-200: #e4e4e7;
+  --color-neutral-300: #d4d4d8;
+  --color-neutral-400: #a1a1aa;
+  --color-neutral-500: #71717a;
+  --color-neutral-600: #52525b;
+  --color-neutral-700: #3f3f46;
+  --color-neutral-800: #27272a;
+  --color-neutral-900: #18181b;
+  --color-neutral-950: #09090b;
+
+  /* ── Service Accent Colors ──────────────────────────── */
+  --color-scent: #f59e0b;
+  --color-scent-light: #fef3c7;
+  --color-scent-dark: #b45309;
+
+  --color-photo: #f43f5e;
+  --color-photo-light: #ffe4e6;
+  --color-photo-dark: #be123c;
+
+  --color-media: #3b82f6;
+  --color-media-light: #dbeafe;
+  --color-media-dark: #1d4ed8;
+
+  --color-spatial: #10b981;
+  --color-spatial-light: #d1fae5;
+  --color-spatial-dark: #047857;
+
+  /* ── Typography ─────────────────────────────────────── */
+  --font-display: "Syne", system-ui, sans-serif;
+  --font-body: "Pretendard", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* ── Animation Easings ──────────────────────────────── */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out-cubic: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Animation Durations ────────────────────────────── */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 700ms;
+  --duration-slowest: 1000ms;
+
+  /* ── Spacing: Section ───────────────────────────────── */
+  --spacing-section-sm: 4rem;
+  --spacing-section-md: 6rem;
+  --spacing-section-lg: 8rem;
+  --spacing-section-xl: 10rem;
+
+  /* ── Z-Index Scale ──────────────────────────────────── */
+  --z-base: 0;
+  --z-above: 10;
+  --z-header: 100;
+  --z-overlay: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+  --z-max: 9999;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Base Styles
+   ───────────────────────────────────────────────────────── */
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-neutral-900);
+  background-color: #ffffff;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── Selection ────────────────────────────────────────── */
+
+::selection {
+  background-color: var(--color-teal-200);
+  color: var(--color-teal-950);
+}
+
+::-moz-selection {
+  background-color: var(--color-teal-200);
+  color: var(--color-teal-950);
+}
+
+/* ── Focus Visible ────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--color-teal-500);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Scrollbar (Chromium) ─────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-neutral-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-300);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-400);
+}
+
+/* ─────────────────────────────────────────────────────────
+   Custom Utility Classes
+   ───────────────────────────────────────────────────────── */
+
+@utility section-padding-sm {
+  padding-top: var(--spacing-section-sm);
+  padding-bottom: var(--spacing-section-sm);
+}
+
+@utility section-padding-md {
+  padding-top: var(--spacing-section-md);
+  padding-bottom: var(--spacing-section-md);
+}
+
+@utility section-padding-lg {
+  padding-top: var(--spacing-section-lg);
+  padding-bottom: var(--spacing-section-lg);
+}
+
+@utility section-padding-xl {
+  padding-top: var(--spacing-section-xl);
+  padding-bottom: var(--spacing-section-xl);
+}
+
+@utility text-gradient-teal {
+  background: linear-gradient(135deg, var(--color-teal-400), var(--color-teal-600));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@utility text-gradient-dark {
+  background: linear-gradient(135deg, var(--color-neutral-700), var(--color-neutral-950));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@utility text-gradient-accent {
+  background: linear-gradient(135deg, var(--color-teal-500), var(--color-media));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Glass Effect ─────────────────────────────────────── */
+
+@utility glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+
+@utility glass-dark {
+  background: rgba(9, 9, 11, 0.72);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+
+/* ── Content Container ────────────────────────────────── */
+
+@utility section-padding {
+  padding-top: var(--spacing-section-md);
+  padding-bottom: var(--spacing-section-md);
+}
+
+@utility container-default {
+  max-width: 72rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@utility scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility container-tight {
+  max-width: 64rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@utility container-wide {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Keyframe Animations for Components
+   ───────────────────────────────────────────────────────── */
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@utility animate-marquee {
+  animation: marquee linear infinite;
+}
+
+/* ── Neural Circuit Grid Animations ────────────────────── */
+
+@keyframes scanLine {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(calc(100vh + 100%));
+    opacity: 0;
+  }
+}
+
+@keyframes nodePulse {
+  0%, 100% {
+    opacity: 0.3;
+    box-shadow: 0 0 4px 1px currentColor;
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 12px 3px currentColor;
+  }
+}
+
+@keyframes dataFlow {
+  0% {
+    stroke-dashoffset: 200;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@utility animate-scan-line {
+  animation: scanLine 8s ease-in-out infinite;
+}
+
+@utility animate-node-pulse {
+  animation: nodePulse 3s ease-in-out infinite;
+}
+
+@utility animate-data-flow {
+  animation: dataFlow 4s linear infinite;
+}
+
+@utility circuit-grid {
+  --grid-size: 60px;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent calc(var(--grid-size) - 1px),
+      rgba(36, 173, 181, 0.07) calc(var(--grid-size) - 1px),
+      rgba(36, 173, 181, 0.07) var(--grid-size)
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent calc(var(--grid-size) - 1px),
+      rgba(36, 173, 181, 0.07) calc(var(--grid-size) - 1px),
+      rgba(36, 173, 181, 0.07) var(--grid-size)
+    );
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 20%, transparent 70%);
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 20%, transparent 70%);
+}
+
+@media (max-width: 768px) {
+  .circuit-grid {
+    --grid-size: 40px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   Screen Reader Only (utility)
+   ───────────────────────────────────────────────────────── */
+
+@utility sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Reduced Motion
+   ───────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
