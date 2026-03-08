@@ -16,28 +16,34 @@ export function AcscentDemo() {
   const [userType, setUserType] = useState<AcscentType | null>(null);
   const [selectedPerfumeId, setSelectedPerfumeId] = useState<string | null>(null);
 
-  const handleStartTest = useCallback(() => setView('test'), []);
+  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const handleStartTest = useCallback(() => { setView('test'); scrollTop(); }, []);
 
   const handleTestComplete = useCallback((finalScores: Record<string, number>) => {
     setScores(finalScores);
     setView('analyzing');
+    scrollTop();
 
     setTimeout(() => {
       const typeCode = calculateType(finalScores);
       const type = getTypeByCode(typeCode);
       setUserType(type ?? getTypeByCode('IGLW')!);
       setView('result');
+      scrollTop();
     }, 3500);
   }, []);
 
   const handleSelectPerfume = useCallback((perfumeId: string) => {
     setSelectedPerfumeId(perfumeId);
     setView('perfume-detail');
+    scrollTop();
   }, []);
 
   const handleBackToResult = useCallback(() => {
     setSelectedPerfumeId(null);
     setView('result');
+    scrollTop();
   }, []);
 
   const handleRestart = useCallback(() => {
@@ -45,6 +51,7 @@ export function AcscentDemo() {
     setUserType(null);
     setSelectedPerfumeId(null);
     setView('landing');
+    scrollTop();
   }, []);
 
   return (

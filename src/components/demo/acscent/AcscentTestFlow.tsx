@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { TEST_FRAGRANCES, type TestFragrance, type NoteOption } from '@/data/acscent-types';
 
@@ -21,8 +21,6 @@ export function AcscentTestFlow({ onComplete }: Props) {
   const [fragranceIdx, setFragranceIdx] = useState(0);
   const [answers, setAnswers] = useState<FragranceAnswers>({ ...INITIAL_ANSWERS });
   const [axisScores, setAxisScores] = useState<Record<string, number>>({ IO: 0, BG: 0, LS: 0, CW: 0 });
-  const scrollRef = useRef<HTMLDivElement>(null);
-
   const fragrance = TEST_FRAGRANCES[fragranceIdx];
   const progress = ((fragranceIdx + 1) / TEST_FRAGRANCES.length) * 100;
   const canProceed = answers.notes.length > 0 && answers.cardIndex !== null;
@@ -88,11 +86,11 @@ export function AcscentTestFlow({ onComplete }: Props) {
     setAxisScores(newScores);
     setAnswers({ ...INITIAL_ANSWERS });
     setFragranceIdx((i) => i + 1);
-    scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [canProceed, fragrance, answers, axisScores, isLast, onComplete]);
 
   return (
-    <div ref={scrollRef} className="min-h-screen overflow-y-auto">
+    <div className="min-h-screen">
       {/* ── Sticky Header ──────────────────────────────── */}
       <div className="sticky top-0 z-20 border-b border-neutral-800/50 bg-neutral-950/80 px-6 py-4 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center justify-between">
