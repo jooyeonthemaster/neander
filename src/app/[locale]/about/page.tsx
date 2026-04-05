@@ -3,8 +3,8 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SectionHeader } from '@/components/ui';
 import { ScrollReveal, TextReveal } from '@/components/animations';
 import { Timeline } from '@/components/about/Timeline';
-import { CEOSection } from '@/components/about/CEOSection';
 import { ValuesSection } from '@/components/about/ValuesSection';
+import { BusinessDivisions } from '@/components/about/BusinessDivisions';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -99,15 +99,8 @@ export default async function AboutPage({ params }: Props) {
         </div>
       </section>
 
-      {/* CEO Section */}
-      <section className="bg-slate-50 py-20 sm:py-28" aria-labelledby="ceo-section-title">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 id="ceo-section-title" className="sr-only">
-            CEO
-          </h2>
-          <CEOSection />
-        </div>
-      </section>
+      {/* Business Divisions */}
+      <BusinessDivisions />
 
       {/* Core Values */}
       <section className="py-20 sm:py-28" aria-labelledby="values-title">

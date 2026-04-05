@@ -1092,11 +1092,9 @@
     "description": "Explore the sensory experiences designed by NEANDERco.",
     "filterAll": "All",
     "filterCategories": {
-      "popup": "Pop-up Store",
-      "festival": "Festival",
-      "exhibition": "Exhibition",
-      "brand": "Brand Collab",
-      "store": "Flagship Store"
+      "online": "Online Solution",
+      "offline": "Offline Solution",
+      "service": "Neander Service"
     },
     "viewProject": "View Project",
     "viewAll": "View All Projects",
@@ -1246,6 +1244,25 @@
           "title": "Measurable Impact",
           "description": "Emotion can be measured. Visitor count, dwell time, social sharing rate — we prove our results through data."
         }
+      }
+    },
+    "divisions": {
+      "title": "Business Divisions",
+      "subtitle": "Designing experiences across three pillars",
+      "online": {
+        "name": "Online Solution",
+        "description": "Digital AI solutions for brands. We design interactive online experiences including web-based activations, AI diagnostic tools, and digital photo booths.",
+        "items": ["AI Photo Booth (Digital)", "AI Diagnostic Tools", "Web-Based Interactive Content"]
+      },
+      "offline": {
+        "name": "Offline Solution",
+        "description": "Physical AI experiences at festivals, exhibitions, and events. We create unforgettable on-site experiences through spatial design, media art, and installations.",
+        "items": ["Festival/Event AI Zones", "Media Art Exhibitions", "Spatial Design & Installation"]
+      },
+      "service": {
+        "name": "Neander Service",
+        "description": "Neander's own brands and services. Through flagship projects like AC'SCENT fragrance stores, we set new standards for AI-powered experiences.",
+        "items": ["AC'SCENT Fragrance Stores", "Proprietary Brand Operations", "AI Experience R&D"]
       }
     },
     "team": {

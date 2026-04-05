@@ -12,6 +12,6 @@ export const config = {
      * - _vercel (Vercel internals)
      * - Static files with extensions (e.g. .ico, .png, .svg, .woff2)
      */
-    '/((?!api|_next|_vercel|.*\\..*).*)',
+    '/((?!api|admin|_next|_vercel|.*\\..*).*)',
   ],
 };

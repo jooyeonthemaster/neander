@@ -9,10 +9,12 @@ import type { PortfolioProject } from '@/data/portfolio';
 
 interface PortfolioCardProps {
   project: PortfolioProject;
+  titleOverride?: string;
 }
 
-export function PortfolioCard({ project }: PortfolioCardProps) {
+export function PortfolioCard({ project, titleOverride }: PortfolioCardProps) {
   const t = useTranslations('portfolio');
+  const displayTitle = titleOverride || t(`projects.${project.titleKey}.title`);
 
   return (
     <motion.div
@@ -37,7 +39,7 @@ export function PortfolioCard({ project }: PortfolioCardProps) {
           {/* Project image */}
           <img
             src={project.image}
-            alt={t(`projects.${project.titleKey}.title`)}
+            alt={displayTitle}
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
           />
@@ -76,7 +78,7 @@ export function PortfolioCard({ project }: PortfolioCardProps) {
         {/* Card content */}
         <div className="p-5">
           <h3 className="mb-1.5 text-base font-bold text-slate-900 transition-colors group-hover:text-teal-600 sm:text-lg">
-            {t(`projects.${project.titleKey}.title`)}
+            {displayTitle}
           </h3>
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <span>{project.client}</span>

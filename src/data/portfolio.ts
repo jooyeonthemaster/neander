@@ -3,7 +3,7 @@ export interface PortfolioProject {
   titleKey: string;
   descriptionKey: string;
   year: number;
-  category: 'popup' | 'festival' | 'exhibition' | 'brand' | 'store';
+  category: 'online' | 'offline' | 'service';
   tags: string[];
   image: string;
   images: string[];
@@ -19,7 +19,7 @@ export const portfolioProjects: PortfolioProject[] = [
     titleKey: 'crossTheLine',
     descriptionKey: 'crossTheLineDesc',
     year: 2022,
-    category: 'exhibition',
+    category: 'offline',
     tags: ['mediaArt', 'immersive', 'liveMusic'],
     image: '/images/portfolio/cross-the-line-1.webp',
     images: [
@@ -38,7 +38,7 @@ export const portfolioProjects: PortfolioProject[] = [
     titleKey: 'acscentSinchon',
     descriptionKey: 'acscentSinchonDesc',
     year: 2023,
-    category: 'store',
+    category: 'service',
     tags: ['ai', 'scent', 'experience'],
     image: '/images/portfolio/acscent-sinchon-1.webp',
     images: [
@@ -57,7 +57,7 @@ export const portfolioProjects: PortfolioProject[] = [
     titleKey: 'jecheonMusicFilm',
     descriptionKey: 'jecheonFestivalDesc',
     year: 2024,
-    category: 'festival',
+    category: 'offline',
     tags: ['ai', 'scent', 'festival', 'film'],
     image: '/images/portfolio/jecheon-festival-1.webp',
     images: [
@@ -77,7 +77,7 @@ export const portfolioProjects: PortfolioProject[] = [
     titleKey: 'seoulWritersFestival',
     descriptionKey: 'seoulWritersDesc',
     year: 2024,
-    category: 'festival',
+    category: 'offline',
     tags: ['ai', 'scent', 'literature', 'bookPerfume'],
     image: '/images/portfolio/seoul-writers-1.webp',
     images: [
@@ -96,7 +96,7 @@ export const portfolioProjects: PortfolioProject[] = [
     titleKey: 'ansanScienceFestival',
     descriptionKey: 'ansanScienceDesc',
     year: 2025,
-    category: 'festival',
+    category: 'offline',
     tags: ['ai', 'photoBooth', 'science'],
     image: '/images/portfolio/ansan-science-1.webp',
     images: [
@@ -114,7 +114,7 @@ export const portfolioProjects: PortfolioProject[] = [
     titleKey: 'acscentWau',
     descriptionKey: 'acscentWauDesc',
     year: 2024,
-    category: 'store',
+    category: 'service',
     tags: ['ai', 'scent', 'experience'],
     image: '/images/portfolio/acscent-wau-1.webp',
     images: [
@@ -133,7 +133,7 @@ export const portfolioProjects: PortfolioProject[] = [
     titleKey: 'acscentId',
     descriptionKey: 'acscentIdDesc',
     year: 2025,
-    category: 'store',
+    category: 'service',
     tags: ['ai', 'scent', 'flagship'],
     image: '/images/portfolio/acscent-id-1.webp',
     images: [
@@ -151,11 +151,9 @@ export const portfolioProjects: PortfolioProject[] = [
 
 export const portfolioCategories = [
   'all',
-  'popup',
-  'festival',
-  'exhibition',
-  'brand',
-  'store',
+  'online',
+  'offline',
+  'service',
 ] as const;
 
 export type PortfolioCategory = (typeof portfolioCategories)[number];
