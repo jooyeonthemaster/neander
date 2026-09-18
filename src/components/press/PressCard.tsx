@@ -1,7 +1,7 @@
 'use client';
 
 import type { PressArticle } from '@/types';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 interface PressCardProps {
   article: PressArticle;
@@ -9,19 +9,26 @@ interface PressCardProps {
 
 export function PressCard({ article }: PressCardProps) {
   const t = useTranslations('press');
+  const locale = useLocale();
 
-  const formattedDate = new Date(article.date).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const formattedDate = new Date(article.date).toLocaleDateString(
+    locale === 'ko' ? 'ko-KR' : 'en-US',
+    { year: 'numeric', month: 'long', day: 'numeric' }
+  );
+
+  // 원문 주소가 없는 글(공지·이벤트)은 클릭해도 갈 곳이 없으므로 링크로 만들지 않는다
+  const hasLink = Boolean(article.url) && article.url !== '#';
+  const cardClassName =
+    'group block rounded-2xl border border-slate-200 bg-white p-6 transition-all duration-300 sm:p-8' +
+    (hasLink ? ' hover:border-teal-200 hover:shadow-lg hover:shadow-teal-500/5' : '');
+  const Wrapper = hasLink ? 'a' : 'div';
 
   return (
-    <a
-      href={article.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group block rounded-2xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:border-teal-200 hover:shadow-lg hover:shadow-teal-500/5 sm:p-8"
+    <Wrapper
+      {...(hasLink
+        ? { href: article.url, target: '_blank', rel: 'noopener noreferrer' }
+        : {})}
+      className={cardClassName}
     >
       {/* Source badge + date */}
       <div className="mb-4 flex items-center gap-3">
@@ -46,7 +53,8 @@ export function PressCard({ article }: PressCardProps) {
         {article.excerpt}
       </p>
 
-      {/* Read more */}
+      {/* Read more (원문이 있을 때만) */}
+      {hasLink && (
       <span className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-600 transition-colors group-hover:text-teal-500">
         {t('readMore')}
         <svg
@@ -62,6 +70,7 @@ export function PressCard({ article }: PressCardProps) {
           />
         </svg>
       </span>
-    </a>
+      )}
+    </Wrapper>
   );
 }

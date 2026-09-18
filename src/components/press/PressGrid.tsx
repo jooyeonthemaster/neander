@@ -32,11 +32,13 @@ export function PressGrid({ articles: staticArticles }: PressGridProps) {
               title: data.title,
               source: data.source_name || '',
               date: data.published_at?.split('T')[0] || data.created_at?.split('T')[0] || '',
-              url: data.source_url || '#',
+              url: data.source_url || '',
               excerpt: data.summary,
             };
           })
           .filter(Boolean) as PressArticle[];
+        // 여러 기사를 한 번에 등록하면 created_at이 같아지므로 보도일 기준으로 최신순 정렬한다.
+        items.sort((a, b) => b.date.localeCompare(a.date));
         setArticles(items);
         setLoading(false);
       },

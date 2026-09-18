@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface ScentRadarChartProps {
@@ -16,15 +17,8 @@ interface ScentRadarChartProps {
   className?: string;
 }
 
+// 축 라벨은 messages의 scentQuiz.axes.* 에서 가져온다
 const AXES = ['floral', 'citrus', 'woody', 'oriental', 'fresh', 'sweet'] as const;
-const AXIS_LABELS: Record<string, string> = {
-  floral: 'Floral',
-  citrus: 'Citrus',
-  woody: 'Woody',
-  oriental: 'Oriental',
-  fresh: 'Fresh',
-  sweet: 'Sweet',
-};
 
 const CENTER = 120;
 const RADIUS = 90;
@@ -49,6 +43,7 @@ function getGridPath(level: number): string {
 }
 
 export function ScentRadarChart({ scores, className }: ScentRadarChartProps) {
+  const t = useTranslations('scentQuiz');
   const ref = useRef<SVGSVGElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-20px' });
 
@@ -68,7 +63,7 @@ export function ScentRadarChart({ scores, className }: ScentRadarChartProps) {
       viewBox="0 0 240 240"
       className={cn('w-full max-w-[280px]', className)}
       role="img"
-      aria-label="Scent profile radar chart"
+      aria-label={t('radarLabel')}
     >
       {/* Grid rings */}
       {Array.from({ length: GRID_LEVELS }, (_, i) => (
@@ -147,7 +142,7 @@ export function ScentRadarChart({ scores, className }: ScentRadarChartProps) {
             dominantBaseline="central"
             className="fill-slate-400 text-[10px] font-medium"
           >
-            {AXIS_LABELS[axis]}
+            {t(`axes.${axis}`)}
           </text>
         );
       })}

@@ -31,5 +31,30 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // 문의·견적 접수함
+    // - 누구나 새 문의를 남길 수 있지만(create), 읽거나 고치는 것은 관리자만 가능하다.
+    // - 필드와 길이를 검증해 스팸·대용량 문서를 막는다.
+    match /inquiries/{doc} {
+      allow read, update, delete: if isAdmin();
+
+      allow create: if request.resource.data.keys().hasOnly([
+            'kind', 'name', 'email', 'phone', 'company', 'subject', 'message',
+            'locale', 'quote', 'status', 'created_at', 'source_path'
+          ])
+        && request.resource.data.kind in ['contact', 'quote']
+        && request.resource.data.status == 'new'
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.email is string
+        && request.resource.data.email.matches('^[^@ ]+@[^@ ]+[.][^@ ]+$')
+        && request.resource.data.email.size() <= 200
+        && request.resource.data.subject is string
+        && request.resource.data.subject.size() <= 200
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 5000
+        && request.resource.data.created_at is string;
+    }
   }
 }

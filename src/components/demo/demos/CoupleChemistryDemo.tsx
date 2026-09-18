@@ -1,9 +1,13 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { QUOTE_HREF } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type { DemoModule, DemoConfig, DemoAnswers, DemoStepProps, DemoResultProps } from '@/types/demo';
+import type { PrintSpec } from '../kit';
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -84,16 +88,13 @@ const config: DemoConfig = {
 
 /* ── Step 1 : Love Language ──────────────────────────────── */
 
-function StepLoveLanguage({ answers, onUpdate }: DemoStepProps) {
-  const val = (answers['loveLanguage'] as { a?: string; b?: string }) ?? {};
+type Partner = 'a' | 'b';
 
-  const select = (partner: 'a' | 'b', id: string) => {
-    onUpdate('loveLanguage', { ...val, [partner]: id });
-  };
-
-  const Column = ({ partner, label, heart, selected }: {
-    partner: 'a' | 'b'; label: string; heart: string; selected?: string;
-  }) => (
+function LoveLanguageColumn({ partner, label, heart, selected, onSelect }: {
+  partner: Partner; label: string; heart: string; selected?: string;
+  onSelect: (partner: Partner, id: string) => void;
+}) {
+  return (
     <div className="flex-1 space-y-3">
       <p className="text-center text-sm font-semibold text-slate-200">
         {heart} {label}
@@ -107,7 +108,7 @@ function StepLoveLanguage({ answers, onUpdate }: DemoStepProps) {
               type="button"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.96 }}
-              onClick={() => select(partner, lang.id)}
+              onClick={() => onSelect(partner, lang.id)}
               className={cn(
                 'flex w-full items-center gap-2 rounded-xl border px-3 py-2.5 text-left transition-all',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400',
@@ -127,10 +128,18 @@ function StepLoveLanguage({ answers, onUpdate }: DemoStepProps) {
       </div>
     </div>
   );
+}
+
+function StepLoveLanguage({ answers, onUpdate }: DemoStepProps) {
+  const val = (answers['loveLanguage'] as { a?: string; b?: string }) ?? {};
+
+  const select = (partner: Partner, id: string) => {
+    onUpdate('loveLanguage', { ...val, [partner]: id });
+  };
 
   return (
     <div className="flex gap-4">
-      <Column partner="a" label="파트너 A" heart="💜" selected={val.a} />
+      <LoveLanguageColumn partner="a" label="파트너 A" heart="💜" selected={val.a} onSelect={select} />
       <div className="flex items-center px-1">
         <motion.span
           className="text-2xl text-purple-400"
@@ -140,7 +149,7 @@ function StepLoveLanguage({ answers, onUpdate }: DemoStepProps) {
           💕
         </motion.span>
       </div>
-      <Column partner="b" label="파트너 B" heart="💛" selected={val.b} />
+      <LoveLanguageColumn partner="b" label="파트너 B" heart="💛" selected={val.b} onSelect={select} />
     </div>
   );
 }
@@ -305,8 +314,13 @@ function ScoreRing({ score }: { score: number }) {
 
 /* ── Result Component ──────────────────────────────────── */
 
+function coupleFor(resultKey: string) {
+  return RESULTS[resultKey as ResultKey] ?? RESULTS['balanced-harmony'];
+}
+
 function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps) {
-  const data = RESULTS[resultKey as ResultKey] ?? RESULTS['balanced-harmony'];
+  const tCommon = useTranslations('demos.common');
+  const data = coupleFor(resultKey);
 
   return (
     <motion.div
@@ -377,14 +391,13 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
         >
           다시 분석하기
         </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="rounded-xl px-6 py-3 text-sm font-semibold text-white"
+        <Link
+          href={QUOTE_HREF}
+          className="rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
           style={{ backgroundColor: pillarColor }}
         >
-          체험 상담 신청
-        </motion.button>
+          {tCommon('ctaButton')}
+        </Link>
       </div>
     </motion.div>
   );
@@ -392,11 +405,46 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
 
 /* ── Export ──────────────────────────────────────────────── */
 
+/* ── Print ──────────────────────────────────────────────── */
+
+function labelOf(options: readonly { id: string; label: string }[], id: string | undefined): string {
+  return options.find((o) => o.id === id)?.label ?? '-';
+}
+
+function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
+  const data = coupleFor(resultKey);
+  const ll = (answers['loveLanguage'] as { a?: string; b?: string } | undefined) ?? {};
+  const dream = (answers['dreamLife'] as { first?: string; second?: string } | undefined) ?? {};
+  return {
+    kind: 'receipt',
+    eyebrow: '커플 케미스트리 결과',
+    title: data.name,
+    sections: [
+      { type: 'big', title: '케미 점수', text: `${data.score}%` },
+      {
+        type: 'rows',
+        title: '두 사람의 케미 데이터',
+        rows: [
+          { label: 'A의 사랑 언어', value: labelOf(LOVE_LANGS, ll.a) },
+          { label: 'B의 사랑 언어', value: labelOf(LOVE_LANGS, ll.b) },
+          { label: '갈등 해결', value: labelOf(CONFLICTS, answers['conflict'] as string | undefined) },
+          { label: '꿈 1순위', value: labelOf(DREAMS, dream.first) },
+          { label: '꿈 2순위', value: labelOf(DREAMS, dream.second) },
+        ],
+      },
+      { type: 'list', title: '커플 강점', items: data.strengths },
+      { type: 'text', title: '사랑의 조언', text: data.advice },
+    ],
+    footer: '오늘의 케미를 오래오래 간직하세요',
+  };
+}
+
 const CoupleChemistryDemo: DemoModule = {
   config,
   StepComponents: [StepLoveLanguage, StepConflict, StepDreamLife],
   ResultComponent,
   computeResult,
+  getPrint,
 };
 
 export default CoupleChemistryDemo;

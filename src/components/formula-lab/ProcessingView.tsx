@@ -117,7 +117,7 @@ function StageMetrics({ stage, progress }: { stage: number; progress: number }) 
   return (
     <div className="grid grid-cols-2 gap-4">
       {items.map(m => (
-        <div key={m.label} className="bg-neutral-50 rounded-xl px-5 py-4 border border-neutral-100">
+        <div key={m.label} className="bg-neutral-50 rounded-xl px-4 sm:px-5 py-4 border border-neutral-100">
           <div className="text-xs text-neutral-400 font-medium mb-1">{m.label}</div>
           <div className="text-2xl font-[family-name:var(--font-display)] font-bold text-neutral-950">
             <AnimatedNumber value={m.value} />
@@ -165,7 +165,7 @@ export function ProcessingView() {
       </div>
 
       {/* Centered Content */}
-      <div className="relative z-10 max-w-2xl w-full px-8">
+      <div className="relative z-10 max-w-2xl w-full px-4 sm:px-8">
         {/* Circular Progress */}
         <div className="flex justify-center mb-12">
           <div className="relative w-56 h-56">

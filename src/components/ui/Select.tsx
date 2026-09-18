@@ -35,84 +35,87 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
 
     return (
       <div className={cn('relative w-full', className)}>
-        <select
-          ref={ref}
-          id={selectId}
-          value={value}
-          aria-invalid={!!error || undefined}
-          aria-describedby={errorId}
-          onFocus={(e) => {
-            setIsFocused(true);
-            onFocus?.(e);
-          }}
-          onBlur={(e) => {
-            setIsFocused(false);
-            onBlur?.(e);
-          }}
-          className={cn(
-            'peer w-full appearance-none rounded-lg border bg-white px-4 pt-5 pb-2 pr-10 text-sm',
-            'outline-none transition-all duration-200 cursor-pointer',
-            isFocused
-              ? 'border-teal-500 ring-2 ring-teal-500/20'
-              : 'border-slate-300 hover:border-slate-400',
-            error && 'border-rose-500 ring-2 ring-rose-500/20',
-            !hasValue && !isFocused && 'text-transparent',
-            'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-slate-50'
-          )}
-          {...props}
-        >
-          {placeholder && (
-            <option value="" disabled>
-              {placeholder}
-            </option>
-          )}
-          {options.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-              disabled={option.disabled}
-            >
-              {option.label}
-            </option>
-          ))}
-        </select>
-
-        {/* Custom chevron icon */}
-        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <path
-              d="M4 6L8 10L12 6"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-
-        {label && (
-          <label
-            htmlFor={selectId}
+        {/* 라벨·화살표의 top-1/2 기준이 선택칸 높이가 되도록 오류 문구와 분리한다 */}
+        <div className="relative">
+          <select
+            ref={ref}
+            id={selectId}
+            value={value}
+            aria-invalid={!!error || undefined}
+            aria-describedby={errorId}
+            onFocus={(e) => {
+              setIsFocused(true);
+              onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setIsFocused(false);
+              onBlur?.(e);
+            }}
             className={cn(
-              'absolute left-4 transition-all duration-200 pointer-events-none',
-              'text-slate-500',
-              isFloating
-                ? 'top-1.5 text-[11px] font-medium'
-                : 'top-1/2 -translate-y-1/2 text-sm',
-              isFocused && !error && 'text-teal-600',
-              error && 'text-rose-500'
+              'peer w-full appearance-none rounded-lg border bg-white px-4 pt-5 pb-2 pr-10 text-sm',
+              'outline-none transition-all duration-200 cursor-pointer',
+              isFocused
+                ? 'border-teal-500 ring-2 ring-teal-500/20'
+                : 'border-slate-300 hover:border-slate-400',
+              error && 'border-rose-500 ring-2 ring-rose-500/20',
+              !hasValue && !isFocused && 'text-transparent',
+              'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-slate-50'
             )}
+            {...props}
           >
-            {label}
-          </label>
-        )}
+            {placeholder && (
+              <option value="" disabled>
+                {placeholder}
+              </option>
+            )}
+            {options.map((option) => (
+              <option
+                key={option.value}
+                value={option.value}
+                disabled={option.disabled}
+              >
+                {option.label}
+              </option>
+            ))}
+          </select>
+
+          {/* Custom chevron icon */}
+          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M4 6L8 10L12 6"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+
+          {label && (
+            <label
+              htmlFor={selectId}
+              className={cn(
+                'absolute left-4 transition-all duration-200 pointer-events-none',
+                'text-slate-500',
+                isFloating
+                  ? 'top-1.5 text-[11px] font-medium'
+                  : 'top-1/2 -translate-y-1/2 text-sm',
+                isFocused && !error && 'text-teal-600',
+                error && 'text-rose-500'
+              )}
+            >
+              {label}
+            </label>
+          )}
+        </div>
 
         {error && (
           <p id={errorId} className="mt-1.5 text-xs text-rose-500" role="alert">

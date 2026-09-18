@@ -1,15 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
-import { useTranslations } from 'next-intl';
-import { useQuoteStore } from '@/stores/quoteStore';
+import { useLocale, useTranslations } from 'next-intl';
+import { useQuoteStore, getStartingPrice } from '@/stores/quoteStore';
 import { services } from '@/data/services';
-import { formatKRW } from '@/lib/pricing';
+import { formatPrice } from '@/lib/pricing';
 import { cn } from '@/lib/utils';
 import { ServiceConfigPanel } from './ServiceConfigPanel';
 
 export function ServiceSelector() {
+  const locale = useLocale();
   const t = useTranslations('quote');
   const selectedServices = useQuoteStore((s) => s.services);
   const addService = useQuoteStore((s) => s.addService);
@@ -56,7 +58,7 @@ export function ServiceSelector() {
                 <motion.div
                   layout
                   className={cn(
-                    'relative rounded-xl border-2 p-5 transition-all duration-300 cursor-pointer',
+                    'group relative rounded-xl border-2 p-5 transition-all duration-300',
                     'focus-within:ring-2 focus-within:ring-teal-400 focus-within:ring-offset-2',
                     isSelected
                       ? 'border-teal-500 bg-gradient-to-br from-teal-50/80 to-white shadow-lg shadow-teal-500/10'
@@ -81,6 +83,30 @@ export function ServiceSelector() {
                     )}
                   </AnimatePresence>
 
+                  {/* 서비스 현장 사진 */}
+                  <div className="relative -mx-5 -mt-5 mb-4 aspect-[2/1] overflow-hidden rounded-t-[10px] bg-slate-100">
+                    <Image
+                      src={service.image}
+                      alt={t(`services.${service.key}.name`)}
+                      fill
+                      sizes="(max-width: 640px) 100vw, 360px"
+                      className={cn(
+                        'object-cover transition-transform duration-500',
+                        !isSelected && 'group-hover:scale-105'
+                      )}
+                    />
+                    {/* 어떤 행사의 어떤 장면인지 알려주는 캡션 */}
+                    <div
+                      className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/10 to-transparent"
+                      aria-hidden="true"
+                    />
+                    <p className="absolute inset-x-3 bottom-2.5 text-[11px] leading-snug text-white/90">
+                      <span className="font-semibold text-teal-200">{t('photoCase')}</span>
+                      <span className="mx-1 text-white/50" aria-hidden="true">·</span>
+                      {t(`services.${service.key}.photoCaption`)}
+                    </p>
+                  </div>
+
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <span
@@ -95,7 +121,9 @@ export function ServiceSelector() {
                           {t(`services.${service.key}.name`)}
                         </h4>
                         <p className="text-xs text-slate-500 mt-0.5">
-                          {t('from')} {formatKRW(service.basePriceKRW)}
+                          {t('from', {
+                            price: formatPrice(getStartingPrice(service.key) || service.basePriceKRW, locale),
+                          })}
                         </p>
                       </div>
                     </div>

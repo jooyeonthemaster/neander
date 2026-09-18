@@ -1,6 +1,8 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { Link } from '@/i18n/navigation';
+import { QUOTE_HREF } from '@/lib/constants';
 import { useFormulaLabStore } from '@/stores/formulaLabStore';
 import { EMOTION_TYPES, USAGE_OPTIONS, AGE_OPTIONS } from '@/data/formula-lab-data';
 import { EmotionBarChart, EmotionRadarChart, DominantEmotionCards } from './EmotionChart';
@@ -27,9 +29,9 @@ export function ResultsDashboard() {
     <div className="min-h-screen bg-neutral-50/50">
       {/* ── Dashboard Header ── */}
       <div className="bg-white border-b border-neutral-100">
-        <div className="max-w-[1400px] mx-auto px-8 py-10">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-8 sm:py-10">
           <motion.div {...fadeUp(0.1)}>
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-4">
               <div className="h-px w-8 bg-teal-500" />
               <span className="text-xs font-medium text-teal-600 tracking-[0.2em] uppercase">
                 Analysis Complete
@@ -38,9 +40,10 @@ export function ResultsDashboard() {
                 {results.processingTimeSec}s · {results.totalCandidatesGenerated.toLocaleString()} candidates evaluated
               </span>
             </div>
-            <h1 className="font-[family-name:var(--font-display)] text-4xl font-bold text-neutral-950 mb-3">
-              {brief.brandName || 'Untitled Project'}
-              <span className="text-neutral-300 font-normal ml-3">Formula Report</span>
+            <h1 className="font-[family-name:var(--font-display)] text-3xl sm:text-4xl font-bold text-neutral-950 mb-3">
+              {/* 실제 공백으로 구분 (복사 시 "BrandFormula Report" 로 붙지 않게). 공백+ml-0.5 ≈ 기존 ml-3 간격 */}
+              {brief.brandName.trim() || 'Untitled Project'}{' '}
+              <span className="text-neutral-300 font-normal ml-0.5">Formula Report</span>
             </h1>
             <p className="text-neutral-500 max-w-2xl leading-relaxed">
               &ldquo;{brief.emotionalDescription}&rdquo;
@@ -48,7 +51,7 @@ export function ResultsDashboard() {
           </motion.div>
 
           {/* Summary Stats */}
-          <motion.div {...fadeUp(0.2)} className="grid grid-cols-6 gap-4 mt-8">
+          <motion.div {...fadeUp(0.2)} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mt-6 sm:mt-8">
             {[
               { label: 'Target', value: `${ageLabel} ${genderLabel}` },
               { label: 'Context', value: usageLabel },
@@ -67,21 +70,22 @@ export function ResultsDashboard() {
       </div>
 
       {/* ── Main Dashboard Grid ── */}
-      <div className="max-w-[1400px] mx-auto px-8 py-10">
-        <div className="grid grid-cols-12 gap-8">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-8 sm:py-10">
+        {/* 모바일은 1단, lg 부터 5:7 2단 */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
           {/* ── Left Column: Emotion Analysis ── */}
-          <div className="col-span-5 space-y-8">
+          <div className="lg:col-span-5 space-y-8 min-w-0">
             {/* Section: OPT-16 Emotion Profile */}
             <motion.section {...fadeUp(0.3)} className="bg-white rounded-2xl border border-neutral-100 p-6">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between gap-4 mb-6">
                 <div>
                   <h2 className="text-xs font-semibold text-neutral-400 tracking-[0.15em] uppercase">
                     OPT-16 Emotion Profile
                   </h2>
                   <p className="text-sm text-neutral-500 mt-1">감성 브리프의 16차원 벡터 분석 결과</p>
                 </div>
-                <span className="text-[10px] font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full">
+                <span className="shrink-0 text-[10px] font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full">
                   OPT-16
                 </span>
               </div>
@@ -138,10 +142,10 @@ export function ResultsDashboard() {
           </div>
 
           {/* ── Right Column: Formulas + Consumer Insights ── */}
-          <div className="col-span-7 space-y-8">
+          <div className="lg:col-span-7 space-y-8 min-w-0">
             {/* Section: Formula Recommendations */}
             <motion.section {...fadeUp(0.35)}>
-              <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center justify-between gap-4 mb-5">
                 <div>
                   <h2 className="text-xs font-semibold text-neutral-400 tracking-[0.15em] uppercase">
                     AI-Generated Formulas
@@ -150,7 +154,7 @@ export function ResultsDashboard() {
                     CVAE-PA + CINN + BO-OC 파이프라인으로 최적화된 배합 3종
                   </p>
                 </div>
-                <span className="text-[10px] font-bold text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-full">
+                <span className="shrink-0 whitespace-nowrap text-[10px] font-bold text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-full">
                   {results.formulas.length} Formulas
                 </span>
               </div>
@@ -187,17 +191,24 @@ export function ResultsDashboard() {
               <h2 className="text-xs font-semibold text-neutral-400 tracking-[0.15em] uppercase mb-5">
                 Next Steps
               </h2>
-              <div className="grid grid-cols-2 gap-4">
-                <button className="flex items-center gap-3 px-5 py-4 bg-teal-600 text-white rounded-xl hover:bg-teal-500 transition-colors cursor-pointer">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="flex items-center gap-3 px-5 py-4 bg-teal-600 text-white rounded-xl hover:bg-teal-500 transition-colors cursor-pointer"
+                >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
                   </svg>
                   <div className="text-left">
-                    <div className="text-sm font-semibold">리포트 다운로드</div>
-                    <div className="text-xs text-teal-200">PDF 형식 상세 보고서</div>
+                    <div className="text-sm font-semibold">리포트 저장</div>
+                    <div className="text-xs text-teal-200">인쇄 창에서 PDF로 저장</div>
                   </div>
                 </button>
-                <button className="flex items-center gap-3 px-5 py-4 bg-neutral-950 text-white rounded-xl hover:bg-neutral-800 transition-colors cursor-pointer">
+                <Link
+                  href={QUOTE_HREF}
+                  className="flex items-center gap-3 px-5 py-4 bg-neutral-950 text-white rounded-xl hover:bg-neutral-800 transition-colors"
+                >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
                   </svg>
@@ -205,7 +216,7 @@ export function ResultsDashboard() {
                     <div className="text-sm font-semibold">시제품 요청</div>
                     <div className="text-xs text-neutral-400">선택된 배합으로 제조 의뢰</div>
                   </div>
-                </button>
+                </Link>
               </div>
               <p className="text-xs text-neutral-400 mt-4 text-center">
                 시제품 제조는 10-50ml 소량 제조(자체 공방) 또는 대량 양산(AROKOR OEM) 중 선택 가능합니다.
@@ -217,8 +228,9 @@ export function ResultsDashboard() {
 
       {/* Footer */}
       <div className="border-t border-neutral-100 bg-white">
-        <div className="max-w-[1400px] mx-auto px-8 py-6 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-neutral-400">
+        {/* 모바일·태블릿은 세로로 쌓고 lg 부터 좌우 배치 */}
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-6 flex flex-col items-start gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-400">
             <div className="w-1.5 h-1.5 rounded-full bg-teal-500" />
             <span>Powered by ONSCENT AI Pipeline</span>
             <span className="text-neutral-200">·</span>

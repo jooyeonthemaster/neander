@@ -1,6 +1,9 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { QUOTE_HREF } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type {
@@ -10,6 +13,7 @@ import type {
   DemoStepProps,
   DemoResultProps,
 } from '@/types/demo';
+import type { PrintSpec } from '../kit';
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -38,9 +42,18 @@ const VIBES = [
 type ResultKey = 'idol-visual' | 'actor-chic' | 'nation-sweetheart' | 'hiphop-icon'
   | 'action-star' | 'model-face' | 'classic-beauty' | 'runway-model';
 
+type Scores = { face: number; feature: number; vibe: number };
+
+/** 결과 화면 · 출력물이 같은 순서와 이름으로 보여 주는 3가지 점수 */
+const SCORE_ITEMS: { key: keyof Scores; label: string }[] = [
+  { key: 'face', label: '얼굴형 일치도' },
+  { key: 'feature', label: '이목구비 유사도' },
+  { key: 'vibe', label: '분위기 매칭' },
+];
+
 const RESULTS: Record<ResultKey, {
   name: string; traits: string[]; desc: string;
-  scores: { face: number; feature: number; vibe: number };
+  scores: Scores;
 }> = {
   'idol-visual': { name: '아이돌 비주얼', traits: ['균형 잡힌 이목구비', '맑은 피부톤', '사랑스러운 매력', '무대 위 존재감'], desc: '카메라가 사랑하는 완벽한 비율의 비주얼! K-POP 아이돌 센터를 닮은 화사한 매력이 돋보입니다.', scores: { face: 92, feature: 88, vibe: 95 } },
   'actor-chic': { name: '배우 시크', traits: ['깊은 눈매', '시크한 분위기', '카메라 장악력', '분위기 전환 능력'], desc: '어떤 장르든 소화하는 배우형 비주얼! 깊이 있는 눈빛과 시크한 무드가 스크린을 지배합니다.', scores: { face: 87, feature: 91, vibe: 89 } },
@@ -231,8 +244,18 @@ function ScoreBar({ label, value, color }: { label: string; value: number; color
 
 /* ── Result Component ──────────────────────────────────── */
 
+function lookalikeFor(resultKey: string) {
+  return RESULTS[resultKey as ResultKey] ?? RESULTS['idol-visual'];
+}
+
+/** 3가지 점수 평균 — 출력물 헤드라인 */
+function overallMatch(scores: Scores): number {
+  return Math.round(SCORE_ITEMS.reduce((sum, item) => sum + scores[item.key], 0) / SCORE_ITEMS.length);
+}
+
 function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps) {
-  const data = RESULTS[resultKey as ResultKey] ?? RESULTS['idol-visual'];
+  const tCommon = useTranslations('demos.common');
+  const data = lookalikeFor(resultKey);
 
   return (
     <motion.div
@@ -253,9 +276,9 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
 
       {/* Score bars */}
       <div className="w-full max-w-sm space-y-4">
-        <ScoreBar label="얼굴형 일치도" value={data.scores.face} color={pillarColor} />
-        <ScoreBar label="이목구비 유사도" value={data.scores.feature} color={pillarColor} />
-        <ScoreBar label="분위기 매칭" value={data.scores.vibe} color={pillarColor} />
+        {SCORE_ITEMS.map((item) => (
+          <ScoreBar key={item.key} label={item.label} value={data.scores[item.key]} color={pillarColor} />
+        ))}
       </div>
 
       {/* Traits */}
@@ -285,14 +308,13 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
         >
           다시 진단하기
         </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="rounded-xl px-6 py-3 text-sm font-semibold text-white"
+        <Link
+          href={QUOTE_HREF}
+          className="rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
           style={{ backgroundColor: pillarColor }}
         >
-          체험 상담 신청
-        </motion.button>
+          {tCommon('ctaButton')}
+        </Link>
       </div>
     </motion.div>
   );
@@ -300,11 +322,46 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
 
 /* ── Export ─────────────────────────────────────────────── */
 
+/* ── Print ──────────────────────────────────────────────── */
+
+function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
+  const data = lookalikeFor(resultKey);
+  const face = FACE_SHAPES.find((f) => f.id === answers['faceShape']);
+  const feature = FEATURES.find((f) => f.id === answers['feature']);
+  const vibe = VIBES.find((v) => v.id === answers['vibe']);
+  return {
+    kind: 'receipt',
+    eyebrow: '당신의 셀럽 닮은꼴',
+    title: data.name,
+    sections: [
+      { type: 'big', text: `${overallMatch(data.scores)}% MATCH` },
+      {
+        type: 'bars',
+        title: '닮은꼴 분석',
+        bars: SCORE_ITEMS.map((item) => ({ label: item.label, value: data.scores[item.key] })),
+      },
+      {
+        type: 'rows',
+        title: '분석 포인트',
+        rows: [
+          { label: '얼굴형', value: face?.label ?? '-' },
+          { label: '자신 있는 곳', value: feature?.label ?? '-' },
+          { label: '첫인상', value: vibe?.label ?? '-' },
+        ],
+      },
+      { type: 'list', title: '공통 특성', items: data.traits },
+      { type: 'text', text: data.desc },
+    ],
+    footer: '닮은꼴은 재미로, 당신은 유일한 오리지널이에요',
+  };
+}
+
 const CelebLookalikeDemo: DemoModule = {
   config,
   StepComponents: [StepFaceShape, StepFeature, StepVibe],
   ResultComponent,
   computeResult,
+  getPrint,
 };
 
 export default CelebLookalikeDemo;

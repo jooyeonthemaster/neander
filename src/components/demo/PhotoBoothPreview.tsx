@@ -243,7 +243,7 @@ export function PhotoBoothPreview() {
                 {isDragging ? t('dropHere') : t('dragOrClick')}
               </p>
               <p className="text-xs text-slate-500">
-                JPEG, PNG {t('upTo')} 5MB
+                JPEG, PNG, WebP {t('upTo')} 5MB
               </p>
             </div>
 

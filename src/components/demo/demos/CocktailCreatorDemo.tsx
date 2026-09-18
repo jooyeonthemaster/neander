@@ -1,9 +1,13 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { QUOTE_HREF } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type { DemoModule, DemoConfig, DemoAnswers, DemoStepProps, DemoResultProps } from '@/types/demo';
+import type { PrintSpec } from '../kit';
 
 /* ── Static Data ─────────────────────────────────────── */
 
@@ -57,10 +61,6 @@ function MoodStep({ answers, onUpdate }: DemoStepProps) {
   const selected = answers['mood'] as string | undefined;
   return (
     <div className="space-y-8">
-      <div className="text-center">
-        <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">오늘의 기분은?</h2>
-        <p className="mt-2 text-sm text-slate-400">칵테일에 담고 싶은 무드를 골라주세요</p>
-      </div>
       <div className="grid grid-cols-2 gap-4">
         {MOODS.map((mood) => {
           const isSel = selected === mood.id;
@@ -105,6 +105,15 @@ function MoodStep({ answers, onUpdate }: DemoStepProps) {
 
 interface FlavorValues { sweetness: number; strength: number }
 
+/** 슬라이더 눈금 (1 ~ FLAVOR_MAX) */
+const FLAVOR_MAX = 10;
+const DEFAULT_FLAVOR: FlavorValues = { sweetness: 5, strength: 5 };
+
+/** 슬라이더를 건드리지 않았으면 기본값 */
+function getFlavor(answers: DemoAnswers): FlavorValues {
+  return (answers['flavor'] as FlavorValues | undefined) ?? DEFAULT_FLAVOR;
+}
+
 function FlavorSlider({ label, labelMin, labelMax, value, onChange }: {
   label: string; labelMin: string; labelMax: string; value: number; onChange: (v: number) => void;
 }) {
@@ -114,10 +123,10 @@ function FlavorSlider({ label, labelMin, labelMax, value, onChange }: {
       <div className="relative">
         <div className="h-3 w-full rounded-full" style={{ background: GRADIENT_BAR }} />
         <input
-          type="range" min={1} max={10} step={1} value={value}
+          type="range" min={1} max={FLAVOR_MAX} step={1} value={value}
           onChange={(e) => onChange(Number(e.target.value))}
           className={cn('absolute inset-0 w-full h-3 appearance-none bg-transparent cursor-pointer', THUMB)}
-          aria-label={label} aria-valuemin={1} aria-valuemax={10} aria-valuenow={value}
+          aria-label={label} aria-valuemin={1} aria-valuemax={FLAVOR_MAX} aria-valuenow={value}
         />
       </div>
       <div className="flex items-center justify-between text-sm">
@@ -127,7 +136,7 @@ function FlavorSlider({ label, labelMin, labelMax, value, onChange }: {
         <span className="text-slate-400 font-medium">{labelMax}</span>
       </div>
       <div className="flex justify-center gap-1">
-        {Array.from({ length: 10 }, (_, i) => (
+        {Array.from({ length: FLAVOR_MAX }, (_, i) => (
           <motion.div key={i} className="rounded-full" transition={{ duration: 0.2, delay: i * 0.02 }}
             animate={{ height: i < value ? 20 + i * 3 : 8, width: 6, backgroundColor: i < value ? 'rgb(20,184,166)' : 'rgb(51,65,85)' }} />
         ))}
@@ -137,14 +146,10 @@ function FlavorSlider({ label, labelMin, labelMax, value, onChange }: {
 }
 
 function FlavorStep({ answers, onUpdate }: DemoStepProps) {
-  const f = (answers['flavor'] as FlavorValues) ?? { sweetness: 5, strength: 5 };
+  const f = getFlavor(answers);
   const set = (k: keyof FlavorValues, v: number) => onUpdate('flavor', { ...f, [k]: v });
   return (
     <div className="space-y-8">
-      <div className="text-center">
-        <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">맛 프로필을 조절해 보세요</h2>
-        <p className="mt-2 text-sm text-slate-400">슬라이더를 움직여 원하는 맛을 설정하세요</p>
-      </div>
       <div className="space-y-10 py-4">
         <FlavorSlider label="당도" labelMin="드라이" labelMax="스위트" value={f.sweetness} onChange={(v) => set('sweetness', v)} />
         <FlavorSlider label="도수" labelMin="라이트" labelMax="스트롱" value={f.strength} onChange={(v) => set('strength', v)} />
@@ -159,10 +164,6 @@ function SpiritStep({ answers, onUpdate }: DemoStepProps) {
   const selected = answers['spirit'] as string | undefined;
   return (
     <div className="space-y-8">
-      <div className="text-center">
-        <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">베이스를 선택해 주세요</h2>
-        <p className="mt-2 text-sm text-slate-400">칵테일의 기본이 될 술을 골라주세요</p>
-      </div>
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
         {SPIRITS.map((s) => {
           const isSel = selected === s.id;
@@ -189,8 +190,13 @@ function SpiritStep({ answers, onUpdate }: DemoStepProps) {
 
 /* ── Result Component ────────────────────────────────── */
 
+function cocktailFor(resultKey: string): CD {
+  return C[resultKey] ?? C['classic-blend']!;
+}
+
 function CocktailResult({ resultKey, onRestart, pillarColor }: DemoResultProps) {
-  const d = C[resultKey] ?? C['classic-blend']!;
+  const tCommon = useTranslations('demos.common');
+  const d = cocktailFor(resultKey);
   return (
     <div className="space-y-8 text-center">
       <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
@@ -230,11 +236,18 @@ function CocktailResult({ resultKey, onRestart, pillarColor }: DemoResultProps) 
       </motion.div>
 
       {/* Restart */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.75 }} className="flex justify-center pt-4">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.75 }} className="flex flex-wrap justify-center gap-3 pt-4">
         <button type="button" onClick={onRestart}
           className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-6 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400">
           다시 만들기
         </button>
+        <Link
+          href={QUOTE_HREF}
+          className="inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+          style={{ backgroundColor: pillarColor }}
+        >
+          {tCommon('ctaButton')}
+        </Link>
       </motion.div>
     </div>
   );
@@ -268,11 +281,51 @@ const config: DemoConfig = {
   ],
 };
 
+/* ── Print — 바 주문 영수증 ─────────────────────────────── */
+
+function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
+  const d = cocktailFor(resultKey);
+  const flavor = getFlavor(answers);
+  const mood = MOODS.find((m) => m.id === answers['mood']);
+  const spirit = SPIRITS.find((s) => s.id === answers['spirit']);
+  const noAlcohol = spirit?.id === 'nonalcohol';
+  const toBar = (v: number) => (v / FLAVOR_MAX) * 100;
+  return {
+    kind: 'receipt',
+    eyebrow: '당신을 위한 칵테일',
+    title: d.name,
+    sections: [
+      { type: 'text', text: d.desc },
+      {
+        type: 'rows',
+        title: '주문 내역',
+        rows: [
+          { label: '오늘의 무드', value: mood?.label ?? '-' },
+          { label: '베이스', value: spirit?.label ?? '-' },
+        ],
+      },
+      {
+        type: 'bars',
+        title: '주문한 맛',
+        bars: [
+          { label: '당도', value: toBar(flavor.sweetness) },
+          // 목테일은 도수가 없으니 빼고 찍는다
+          ...(noAlcohol ? [] : [{ label: '도수', value: toBar(flavor.strength) }]),
+        ],
+      },
+      { type: 'list', title: '레시피', items: d.ingredients },
+      { type: 'rows', rows: [{ label: '가니쉬', value: d.garnish }] },
+    ],
+    footer: noAlcohol ? '알콜 없이도 충분히 근사한 한 잔이에요' : '마신 뒤에는 운전대를 잡지 마세요',
+  };
+}
+
 const cocktailCreatorDemo: DemoModule = {
   config,
   StepComponents: [MoodStep, FlavorStep, SpiritStep],
   ResultComponent: CocktailResult,
   computeResult,
+  getPrint,
 };
 
 export default cocktailCreatorDemo;

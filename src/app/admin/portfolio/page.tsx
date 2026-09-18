@@ -41,6 +41,7 @@ const CATEGORY_COLORS: Record<PortfolioItem['category'], string> = {
   online: 'bg-blue-100 text-blue-700',
   offline: 'bg-amber-100 text-amber-700',
   service: 'bg-teal-100 text-teal-700',
+  ip: 'bg-rose-100 text-rose-700',
 }
 
 // ── Toast ──────────────────────────────────────────────────

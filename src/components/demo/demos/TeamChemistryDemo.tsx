@@ -1,9 +1,13 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { QUOTE_HREF } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type { DemoModule, DemoConfig, DemoAnswers, DemoStepProps, DemoResultProps } from '@/types/demo';
+import type { PrintSpec } from '../kit';
 
 /* ── Static Data ─────────────────────────────────────── */
 
@@ -216,8 +220,13 @@ function computeResult(answers: DemoAnswers): string {
 
 /* ── Result Component ────────────────────────────────── */
 
+function archetypeFor(resultKey: string): ResultData {
+  return RESULTS[resultKey as ResultKey] ?? RESULTS['strategic-thinker'];
+}
+
 function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps) {
-  const d = RESULTS[resultKey as ResultKey] ?? RESULTS['strategic-thinker'];
+  const tCommon = useTranslations('demos.common');
+  const d = archetypeFor(resultKey);
 
   return (
     <motion.div
@@ -323,13 +332,13 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
         >
           {'\uB2E4\uC2DC \uC9C4\uB2E8\uD558\uAE30'}
         </button>
-        <button
-          type="button"
-          className="rounded-xl px-6 py-3 text-sm font-semibold text-white"
+        <Link
+          href={QUOTE_HREF}
+          className="rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
           style={{ backgroundColor: pillarColor }}
         >
-          {'\uCCB4\uD5D8 \uC0C1\uB2F4 \uC2E0\uCCAD'}
-        </button>
+          {tCommon('ctaButton')}
+        </Link>
       </motion.div>
     </motion.div>
   );
@@ -337,11 +346,42 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
 
 /* ── Export ───────────────────────────────────────────── */
 
+/* ── Print ───────────────────────────────────────────── */
+
+function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
+  const d = archetypeFor(resultKey);
+  const role = ROLES.find((r) => r.id === answers['role']);
+  const comm = COMM_STYLES.find((c) => c.id === answers['communication']);
+  const stress = STRESS_RESPONSES.find((s) => s.id === answers['stress']);
+  return {
+    kind: 'receipt',
+    eyebrow: 'TEAM ARCHETYPE',
+    title: d.name,
+    sections: [
+      { type: 'text', text: d.desc },
+      {
+        type: 'rows',
+        title: '나의 협업 스타일',
+        rows: [
+          { label: '팀 역할', value: role?.title ?? '-' },
+          { label: '소통 방식', value: comm?.title ?? '-' },
+          { label: '위기 대응', value: stress?.title ?? '-' },
+        ],
+      },
+      { type: 'list', title: '강점', items: d.strengths },
+      { type: 'list', title: '성장 포인트', items: d.challenges },
+      { type: 'big', title: '찰떡 보완 파트너', text: d.partner },
+    ],
+    footer: '오늘 회의실에서 보완 파트너를 찾아보세요',
+  };
+}
+
 const TeamChemistryDemo: DemoModule = {
   config,
   StepComponents: [StepRole, StepCommunication, StepStress],
   ResultComponent,
   computeResult,
+  getPrint,
 };
 
 export default TeamChemistryDemo;

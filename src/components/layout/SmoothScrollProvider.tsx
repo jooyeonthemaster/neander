@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useRef, type ReactNode } from 'react';
 import Lenis from 'lenis';
+import { usePathname } from '@/i18n/navigation';
 
 /* ─────────────────────────────────────────────────────────
    Smooth Scroll Provider
@@ -26,8 +27,12 @@ interface SmoothScrollProviderProps {
 
 export default function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
   const lenisRef = useRef<Lenis | null>(null);
+  // The home page uses native CSS scroll snapping, which Lenis would fight
+  const isHome = usePathname() === '/';
 
   useEffect(() => {
+    if (isHome) return;
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -49,7 +54,7 @@ export default function SmoothScrollProvider({ children }: SmoothScrollProviderP
       lenis.destroy();
       lenisRef.current = null;
     };
-  }, []);
+  }, [isHome]);
 
   return (
     <SmoothScrollContext.Provider value={{ lenis: lenisRef.current }}>

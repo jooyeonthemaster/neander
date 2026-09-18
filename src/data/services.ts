@@ -55,7 +55,9 @@ export const services: ServiceData[] = [
     colorClass: 'text-rose-500',
     basePriceKRW: 2000000,
     features: ['aiTransform', 'brandCustom', 'printOption', 'qrShare'],
-    image: '/images/services/photo-booth.webp',
+    // 평택 AI 페스타에서 운영한 'AI 포토부스(닮은 연예인)' 키오스크
+    // (기존 photo-booth.webp는 포토부스가 아니라 향수 추천 결과 화면 사진이었다)
+    image: '/images/services/photo-booth-ai-festa.webp',
   },
   {
     id: 'mediaArt',
@@ -65,7 +67,8 @@ export const services: ServiceData[] = [
     colorClass: 'text-blue-500',
     basePriceKRW: 5000000,
     features: ['interactive', 'realtime', 'motionSensor', 'projection'],
-    image: '/images/services/media-art.webp',
+    // CROSS THE LINE — 모션 트래킹 인터랙티브 미디어 아트 전시
+    image: '/images/portfolio/cross-the-line-1.webp',
   },
   {
     id: 'custom',
@@ -75,7 +78,8 @@ export const services: ServiceData[] = [
     colorClass: 'text-teal-600',
     basePriceKRW: 5000000,
     features: ['consultation', 'development', 'integration', 'maintenance'],
-    image: '/images/services/custom-content.webp',
+    // 2025 서울국제작가축제 AI 북퍼퓸. 90도 누워 있던 옛 파일을 바로잡으며 이름을 바꿨다 (옛 주소는 이미지 캐시에 남는다)
+    image: '/images/services/custom-content-book-perfume.webp',
   },
 ];
 

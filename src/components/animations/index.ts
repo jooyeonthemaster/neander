@@ -5,3 +5,4 @@ export { CountUp } from './CountUp';
 export { ParallaxWrapper } from './ParallaxWrapper';
 export { MagneticElement } from './MagneticElement';
 export { ScrollOverlaySection } from './ScrollOverlaySection';
+export { FitToViewport } from './FitToViewport';

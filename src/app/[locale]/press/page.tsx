@@ -58,7 +58,8 @@ export default async function PressPage({ params }: Props) {
               category={t('title')}
               title={t('subtitle')}
               align="center"
-              className="max-w-3xl [&_h2]:text-white [&_span]:text-teal-400"
+              as="h1"
+              className="max-w-3xl [&_h1]:text-white [&_span]:text-teal-400"
             />
           </ScrollReveal>
         </div>

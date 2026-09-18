@@ -14,6 +14,7 @@ import {
 } from '@/data/experiences';
 import { ScrollReveal } from '@/components/animations';
 import { ExperienceCard } from './ExperienceCard';
+import { EXPERIENCE_PHOTOS } from '@/data/experience-photos';
 import { cn } from '@/lib/utils';
 
 /* ── Pillar icon SVGs ────────────────────────────────── */
@@ -233,31 +234,37 @@ function TabButton({
   isActive,
   onClick,
   label,
+  isEmpty = false,
 }: {
   industry: Industry;
   isActive: boolean;
   onClick: () => void;
   label: string;
+  /** 현재 필라에 이 산업군 체험이 없으면 흐리게 표시하고 선택할 수 없게 한다 */
+  isEmpty?: boolean;
 }) {
   return (
     <button
       role="tab"
       aria-selected={isActive}
       onClick={onClick}
+      disabled={isEmpty}
       className={cn(
-        'relative flex flex-shrink-0 items-center gap-2 px-4 py-3 text-sm font-medium',
+        'relative flex flex-shrink-0 items-center gap-2 lg:gap-1.5 px-4 lg:px-2 py-3 text-sm font-medium',
         'whitespace-nowrap transition-all duration-200',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 rounded-md',
-        isActive
-          ? 'text-teal-700'
-          : 'text-neutral-500 hover:text-neutral-800'
+        isEmpty
+          ? 'text-neutral-300 cursor-not-allowed'
+          : isActive
+            ? 'text-teal-700'
+            : 'text-neutral-500 hover:text-neutral-800'
       )}
     >
       <IndustryIcon
         icon={industry.icon}
         className={cn(
           'h-4 w-4 transition-colors',
-          isActive ? 'text-teal-600' : 'text-neutral-400'
+          isEmpty ? 'text-neutral-300' : isActive ? 'text-teal-600' : 'text-neutral-400'
         )}
       />
       <span>{label}</span>
@@ -274,18 +281,39 @@ function TabButton({
   );
 }
 
+/* ── Helpers ─────────────────────────────────────────── */
+
+/** 해당 필라 + 산업군 조합의 체험 개수 */
+function countExperiences(pillar: PillarId | 'all', industry: IndustryId): number {
+  return experiences.filter(
+    (exp) => (pillar === 'all' || exp.pillar === pillar) && exp.industry === industry
+  ).length;
+}
+
+/** 해당 필라에서 체험이 있는 첫 산업군 (없으면 첫 번째 탭) */
+function firstIndustryWithExperiences(pillar: PillarId | 'all'): IndustryId {
+  const found = industries.find((industry) => countExperiences(pillar, industry.id) > 0);
+  return found?.id ?? industries[0].id;
+}
+
 /* ── Main IndustryShowcase Section ────────────────────── */
 
 interface IndustryShowcaseProps {
   initialPillar?: PillarId;
+  initialIndustry?: IndustryId;
 }
 
-export function IndustryShowcase({ initialPillar }: IndustryShowcaseProps) {
+export function IndustryShowcase({ initialPillar, initialIndustry }: IndustryShowcaseProps) {
   const t = useTranslations('services');
   const router = useRouter();
   const pathname = usePathname();
   const [activePillar, setActivePillar] = useState<PillarId | 'all'>(initialPillar ?? 'all');
-  const [activeTab, setActiveTab] = useState<IndustryId>('beauty');
+  // 필라에 해당 산업군 체험이 없으면 빈 화면이 되므로, 체험이 있는 첫 탭에서 시작한다.
+  const [activeTab, setActiveTab] = useState<IndustryId>(() =>
+    initialIndustry && countExperiences(initialPillar ?? 'all', initialIndustry) > 0
+      ? initialIndustry
+      : firstIndustryWithExperiences(initialPillar ?? 'all')
+  );
   const sectionRef = useRef<HTMLElement>(null);
   const tabListRef = useRef<HTMLDivElement>(null);
 
@@ -302,8 +330,16 @@ export function IndustryShowcase({ initialPillar }: IndustryShowcaseProps) {
     return filtered.filter((exp) => exp.industry === activeTab);
   }, [activeTab, activePillar]);
 
+  const hasPhotoCard = activeExperiences.some((exp) => EXPERIENCE_PHOTOS[exp.slug]);
+
   const handlePillarClick = useCallback((pillarId: PillarId | 'all') => {
     setActivePillar(pillarId);
+    // 지금 보고 있는 산업군에 해당 필라 체험이 없으면 결과가 있는 탭으로 옮긴다.
+    setActiveTab((current) =>
+      countExperiences(pillarId, current) > 0
+        ? current
+        : firstIndustryWithExperiences(pillarId)
+    );
     if (pillarId === 'all') {
       router.replace(pathname, { scroll: false });
     } else {
@@ -393,18 +429,22 @@ export function IndustryShowcase({ initialPillar }: IndustryShowcaseProps) {
                 className={cn(
                   'flex overflow-x-auto scrollbar-none',
                   'border-b border-neutral-200',
-                  '-mx-4 px-4 sm:mx-0 sm:px-0 sm:justify-center'
+                  '-mx-4 px-4 sm:mx-0 sm:px-0 sm:justify-center-safe lg:flex-wrap'
                 )}
               >
-                {industries.map((industry) => (
-                  <TabButton
-                    key={industry.id}
-                    industry={industry}
-                    isActive={activeTab === industry.id}
-                    onClick={() => handleTabClick(industry.id)}
-                    label={t(industry.nameKey)}
-                  />
-                ))}
+                {industries.map((industry) => {
+                  const count = countExperiences(activePillar, industry.id);
+                  return (
+                    <TabButton
+                      key={industry.id}
+                      industry={industry}
+                      isActive={activeTab === industry.id}
+                      onClick={() => handleTabClick(industry.id)}
+                      label={count > 0 ? `${t(industry.nameKey)} ${count}` : t(industry.nameKey)}
+                      isEmpty={count === 0}
+                    />
+                  );
+                })}
               </div>
             </div>
           </ScrollReveal>
@@ -420,7 +460,13 @@ export function IndustryShowcase({ initialPillar }: IndustryShowcaseProps) {
                 transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
               >
                 {activeExperiences.length > 0 ? (
-                  <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
+                  <div
+                    className={cn(
+                      'grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3',
+                      // 현장 사진 카드가 섞이면 높이를 맞추지 않는다 (사진 없는 카드가 늘어나 비어 보이지 않게)
+                      hasPhotoCard && 'items-start'
+                    )}
+                  >
                     {activeExperiences.map((exp) => {
                       const pillar = pillarMap.get(exp.pillar);
                       return (
@@ -432,6 +478,7 @@ export function IndustryShowcase({ initialPillar }: IndustryShowcaseProps) {
                           pillarId={exp.pillar}
                           pillarName={pillar ? t(pillar.nameKey) : ''}
                           pillarColor={pillar?.color ?? '#0D9488'}
+                          stretch={!hasPhotoCard}
                         />
                       );
                     })}

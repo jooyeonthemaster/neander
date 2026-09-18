@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { Link } from '@/i18n/navigation';
+import { QUOTE_HREF } from '@/lib/constants';
 import { ScrollReveal } from '@/components/animations';
 import {
   experiences,
@@ -104,38 +106,21 @@ export default async function ExperienceDetailPage({ params }: Props) {
 
   /* -- Demo section labels -------------------------------- */
   const hasDemo = hasDemoForSlug(slug);
-  let demoLabels:
-    | {
-        sectionTitle: string;
-        sectionSubtitle: string;
-        tryDemoLabel: string;
-        labels: {
-          back: string;
-          next: string;
-          seeResult: string;
-          analyzing: string;
-          analyzingSubtitle: string;
-          complete: string;
-        };
-      }
-    | undefined;
-
-  if (hasDemo) {
-    const tDemo = await getTranslations({ locale, namespace: 'demos' });
-    demoLabels = {
-      sectionTitle: tDemo('sectionTitle'),
-      sectionSubtitle: tDemo('sectionSubtitle'),
-      tryDemoLabel: tDemo('tryDemo'),
-      labels: {
-        back: tDemo('common.back'),
-        next: tDemo('common.next'),
-        seeResult: tDemo('common.seeResult'),
-        analyzing: tDemo('common.analyzing'),
-        analyzingSubtitle: tDemo('common.analyzingSubtitle'),
-        complete: tDemo('common.complete'),
-      },
-    };
-  }
+  const tDemo = await getTranslations({ locale, namespace: 'demos' });
+  const demoLabels = {
+    back: tDemo('common.back'),
+    next: tDemo('common.next'),
+    seeResult: tDemo('common.seeResult'),
+    analyzing: tDemo('common.analyzing'),
+    analyzingSubtitle: tDemo('common.analyzingSubtitle'),
+    complete: tDemo('common.complete'),
+    loading: tDemo('stage.loading'),
+    fullscreen: tDemo('stage.fullscreen'),
+    exitFullscreen: tDemo('stage.exitFullscreen'),
+    scrollHint: tDemo('stage.scrollHint'),
+    disclaimer: tDemo('stage.disclaimer'),
+  };
+  const backHref = `/services?pillar=${exp.pillar}&industry=${exp.industry}`;
 
   const relatedData = related.map((r) => {
     const rPillar = getPillarById(r.pillar);
@@ -152,174 +137,206 @@ export default async function ExperienceDetailPage({ params }: Props) {
   return (
     <main>
       {/* ══════════════════════════════════════════════════════
-          1. HERO SECTION
+          1. DEMO STAGE — 데모가 있으면 첫 화면을 데모로 채우고 바로 시작한다
           ══════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-slate-950 pb-20 pt-32 sm:pb-28 sm:pt-44">
-        {/* Grid background */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              'linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-          }}
-          aria-hidden="true"
-        />
-
-        {/* Large colored glow */}
-        <div
-          className="absolute left-1/2 top-1/4 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[800px] rounded-full"
-          style={{
-            backgroundColor: pillarColor,
-            opacity: 0.08,
-            filter: 'blur(160px)',
-          }}
-          aria-hidden="true"
-        />
-
-        {/* Secondary glow, offset */}
-        <div
-          className="absolute right-0 bottom-0 h-[300px] w-[400px] rounded-full"
-          style={{
-            backgroundColor: pillarColor,
-            opacity: 0.05,
-            filter: 'blur(120px)',
-          }}
-          aria-hidden="true"
-        />
-
-        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <ScrollReveal>
-            {/* Breadcrumb */}
-            <nav
-              className="mb-8 flex items-center justify-center gap-2 text-sm"
-              aria-label="Breadcrumb"
-            >
-              <a
-                href={`/${locale}/services`}
-                className="text-slate-500 transition-colors duration-200 hover:text-white"
-              >
-                {t('backToServices')}
-              </a>
-              <svg
-                className="h-3.5 w-3.5 text-slate-600"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                aria-hidden="true"
-              >
-                <path d="M6 4l4 4-4 4" />
-              </svg>
-              <span className="text-slate-400">{pillarName}</span>
-              <svg
-                className="h-3.5 w-3.5 text-slate-600"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                aria-hidden="true"
-              >
-                <path d="M6 4l4 4-4 4" />
-              </svg>
-              <span className="text-slate-300 font-medium">{name}</span>
-            </nav>
-
-            <div className="text-center">
-              {/* Badges */}
-              <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
-                <span
-                  className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white"
-                  style={{ backgroundColor: pillarColor }}
-                >
-                  <span
-                    className="h-1.5 w-1.5 rounded-full bg-white/60"
-                    aria-hidden="true"
-                  />
-                  {pillarName}
-                </span>
-                <span
-                  className="inline-flex items-center rounded-full border px-4 py-1.5 text-xs font-medium tracking-wide text-slate-400"
-                  style={{ borderColor: `${pillarColor}40` }}
-                >
-                  {industryName}
-                </span>
-              </div>
-
-              {/* Title */}
-              <h1 className="font-display mb-6 text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
-                {name}
-              </h1>
-
-              {/* Subtitle */}
-              <p className="mx-auto max-w-2xl text-lg leading-relaxed text-slate-400 sm:text-xl">
-                {oneLiner}
-              </p>
-
-              {/* CTA Buttons */}
-              <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-                <a
-                  href={`/${locale}/contact`}
-                  className="group inline-flex items-center gap-2.5 rounded-xl px-8 py-4 text-base font-bold text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-                  style={{
-                    backgroundColor: pillarColor,
-                    boxShadow: `0 8px 32px ${pillarColor}30`,
-                  }}
-                >
-                  {t('inquiryBtn')}
-                  <svg
-                    className="h-5 w-5 transition-transform duration-200 group-hover:translate-x-0.5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </a>
-                <a
-                  href={`/${locale}/quote`}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-8 py-4 text-base font-semibold text-slate-300 transition-all duration-300 hover:border-slate-500 hover:text-white hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-                  style={{ borderColor: `${pillarColor}30` }}
-                >
-                  {t('ctaQuote')}
-                </a>
-              </div>
-            </div>
-          </ScrollReveal>
-        </div>
-
-        {/* Bottom edge fade */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-px"
-          style={{
-            background: `linear-gradient(to right, transparent, ${pillarColor}30, transparent)`,
-          }}
-          aria-hidden="true"
-        />
-      </section>
-
-      {/* ══════════════════════════════════════════════════════
-          1.5 INTERACTIVE DEMO
-          ══════════════════════════════════════════════════════ */}
-      {hasDemo && demoLabels && (
+      {hasDemo && (
         <DemoSection
           slug={slug}
           pillarColor={pillarColor}
-          sectionTitle={demoLabels.sectionTitle}
-          sectionSubtitle={demoLabels.sectionSubtitle}
-          tryDemoLabel={demoLabels.tryDemoLabel}
-          labels={demoLabels.labels}
+          title={name}
+          subtitle={oneLiner}
+          pillarName={pillarName}
+          industryName={industryName}
+          backHref={backHref}
+          backLabel={t('backToPillar', { pillar: pillarName })}
+          inquiryLabel={t('inquiryBtn')}
+          labels={demoLabels}
         />
+      )}
+
+      {/* ══════════════════════════════════════════════════════
+          1-B. HERO SECTION (데모가 없는 서비스)
+          ══════════════════════════════════════════════════════ */}
+      {!hasDemo && (
+        <section className="relative overflow-hidden bg-slate-950 pb-20 pt-32 sm:pb-28 sm:pt-44">
+          {/* Grid background */}
+          <div
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage:
+                'linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)',
+              backgroundSize: '60px 60px',
+            }}
+            aria-hidden="true"
+          />
+
+          {/* Large colored glow */}
+          <div
+            className="absolute left-1/2 top-1/4 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[800px] rounded-full"
+            style={{
+              backgroundColor: pillarColor,
+              opacity: 0.08,
+              filter: 'blur(160px)',
+            }}
+            aria-hidden="true"
+          />
+
+          {/* Secondary glow, offset */}
+          <div
+            className="absolute right-0 bottom-0 h-[300px] w-[400px] rounded-full"
+            style={{
+              backgroundColor: pillarColor,
+              opacity: 0.05,
+              filter: 'blur(120px)',
+            }}
+            aria-hidden="true"
+          />
+
+          {/* Back button — 이전 단계(해당 필라·산업군으로 필터된 목록)로 이동 */}
+          <div className="absolute inset-x-0 top-[76px] z-10 sm:top-24 lg:top-28">
+            <div className="container-wide">
+              <Link
+                href={backHref}
+                aria-label={t('backToPillar', { pillar: pillarName })}
+                title={t('backToPillar', { pillar: pillarName })}
+                className="group inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 backdrop-blur-sm transition-all duration-200 hover:border-white/25 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              >
+                <svg
+                  className="h-5 w-5 transition-transform duration-200 group-hover:-translate-x-0.5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </Link>
+            </div>
+          </div>
+
+          <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <ScrollReveal>
+              {/* Breadcrumb */}
+              <nav
+                className="mb-8 flex items-center justify-center gap-2 text-sm"
+                aria-label="Breadcrumb"
+              >
+                <Link
+                  href="/services"
+                  className="text-slate-500 transition-colors duration-200 hover:text-white"
+                >
+                  {t('backToServices')}
+                </Link>
+                <svg
+                  className="h-3.5 w-3.5 text-slate-600"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  aria-hidden="true"
+                >
+                  <path d="M6 4l4 4-4 4" />
+                </svg>
+                <span className="text-slate-400">{pillarName}</span>
+                <svg
+                  className="h-3.5 w-3.5 text-slate-600"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  aria-hidden="true"
+                >
+                  <path d="M6 4l4 4-4 4" />
+                </svg>
+                <span className="text-slate-300 font-medium">{name}</span>
+              </nav>
+
+              <div className="text-center">
+                {/* Badges */}
+                <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
+                  <span
+                    className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white"
+                    style={{ backgroundColor: pillarColor }}
+                  >
+                    <span
+                      className="h-1.5 w-1.5 rounded-full bg-white/60"
+                      aria-hidden="true"
+                    />
+                    {pillarName}
+                  </span>
+                  <span
+                    className="inline-flex items-center rounded-full border px-4 py-1.5 text-xs font-medium tracking-wide text-slate-400"
+                    style={{ borderColor: `${pillarColor}40` }}
+                  >
+                    {industryName}
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h1 className="font-display mb-6 text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                  {name}
+                </h1>
+
+                {/* Subtitle */}
+                <p className="mx-auto max-w-2xl text-lg leading-relaxed text-slate-400 sm:text-xl">
+                  {oneLiner}
+                </p>
+
+                {/* CTA Buttons */}
+                <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+                  <Link
+                    href="/contact"
+                    className="group inline-flex items-center gap-2.5 rounded-xl px-8 py-4 text-base font-bold text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                    style={{
+                      backgroundColor: pillarColor,
+                      boxShadow: `0 8px 32px ${pillarColor}30`,
+                    }}
+                  >
+                    {t('inquiryBtn')}
+                    <svg
+                      className="h-5 w-5 transition-transform duration-200 group-hover:translate-x-0.5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </Link>
+                  <Link
+                    href={QUOTE_HREF}
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-8 py-4 text-base font-semibold text-slate-300 transition-all duration-300 hover:border-slate-500 hover:text-white hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                    style={{ borderColor: `${pillarColor}30` }}
+                  >
+                    {t('ctaQuote')}
+                  </Link>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+
+          {/* Bottom edge fade */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-px"
+            style={{
+              background: `linear-gradient(to right, transparent, ${pillarColor}30, transparent)`,
+            }}
+            aria-hidden="true"
+          />
+        </section>
       )}
 
       {/* ══════════════════════════════════════════════════════
           2. DESCRIPTION + HIGHLIGHT STATS
           ══════════════════════════════════════════════════════ */}
-      <section className="relative py-20 sm:py-28">
+      {/* overflow-x-clip: 600px 글로우가 모바일에서 페이지 폭을 넓히지 않도록 가로만 자른다 */}
+      <section id="overview" className="relative scroll-mt-16 overflow-x-clip py-20 sm:py-28 lg:scroll-mt-20">
         {/* Subtle top glow bleed from hero */}
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 h-[200px] w-[600px] rounded-full"
@@ -614,8 +631,8 @@ export default async function ExperienceDetailPage({ params }: Props) {
             </p>
 
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <a
-                href={`/${locale}/contact`}
+              <Link
+                href="/contact"
                 className="group inline-flex items-center gap-2.5 rounded-xl px-10 py-4 text-base font-bold text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
                 style={{
                   backgroundColor: pillarColor,
@@ -626,14 +643,14 @@ export default async function ExperienceDetailPage({ params }: Props) {
                 <svg className="h-5 w-5 transition-transform duration-200 group-hover:translate-x-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clipRule="evenodd" />
                 </svg>
-              </a>
-              <a
-                href={`/${locale}/quote`}
+              </Link>
+              <Link
+                href={QUOTE_HREF}
                 className="inline-flex items-center gap-2 rounded-xl border px-10 py-4 text-base font-semibold text-slate-300 transition-all duration-300 hover:text-white hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
                 style={{ borderColor: `${pillarColor}30` }}
               >
                 {t('ctaQuote')}
-              </a>
+              </Link>
             </div>
           </ScrollReveal>
         </div>

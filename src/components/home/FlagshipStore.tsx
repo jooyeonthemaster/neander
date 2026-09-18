@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
 import { Link } from '@/i18n/navigation';
-import { ScrollReveal, StaggerChildren, StaggerItem } from '@/components/animations';
+import { FitToViewport, ScrollReveal, StaggerChildren, StaggerItem } from '@/components/animations';
 import { cn } from '@/lib/utils';
 
 /* ─────────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ export function FlagshipStore() {
   const t = useTranslations('flagship');
 
   return (
-    <section className="relative overflow-hidden bg-white" id="flagship">
+    <section className="home-screen relative overflow-hidden bg-white" id="flagship">
       {/* ── Background layers (light, matching ServicesOverview) ── */}
       <div
         className="absolute inset-0 opacity-[0.35]"
@@ -85,23 +85,23 @@ export function FlagshipStore() {
       {/* Divider line from previous section */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
 
-      <div className="relative container-wide py-16 lg:py-20">
+      <FitToViewport className="container-wide py-16 lg:py-0">
         {/* Section header */}
-        <ScrollReveal className="text-center mb-10 lg:mb-14">
-          <span className="inline-flex items-center gap-2 mb-5 px-4 py-1.5 rounded-full border border-teal-600/20 bg-teal-500/[0.06] text-[11px] font-semibold uppercase tracking-[0.25em] text-teal-600">
+        <ScrollReveal className="text-center mb-10 lg:mb-[3.5vh]">
+          <span className="inline-flex items-center gap-2 mb-5 lg:mb-[1.6vh] px-4 py-1.5 rounded-full border border-teal-600/20 bg-teal-500/[0.06] text-[11px] font-semibold uppercase tracking-[0.25em] text-teal-600">
             <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
             {t('badge')}
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-neutral-900 leading-[1.1]">
+          <h2 className="text-3xl sm:text-4xl lg:text-[clamp(2rem,5vh,3.75rem)] font-bold tracking-tight text-neutral-900 leading-[1.1]">
             {t('title')}
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-neutral-500 leading-relaxed max-w-2xl mx-auto">
+          <p className="mt-4 lg:mt-[1.4vh] text-base sm:text-lg text-neutral-500 leading-relaxed max-w-2xl mx-auto">
             {t('description')}
           </p>
         </ScrollReveal>
 
         {/* ── Store cards (2 columns) ──────────────────────── */}
-        <StaggerChildren staggerDelay={0.1} className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 mb-8 lg:mb-10">
+        <StaggerChildren staggerDelay={0.1} className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 mb-8 lg:mb-[3vh]">
           {/* AC'SCENT ID */}
           <StaggerItem>
             <StoreCard
@@ -141,7 +141,7 @@ export function FlagshipStore() {
 
         {/* ── Bottom info strip ────────────────────────────── */}
         <ScrollReveal>
-          <div className="rounded-2xl border border-neutral-200 bg-neutral-50/80 backdrop-blur-sm p-5 sm:p-6">
+          <div className="rounded-2xl border border-neutral-200 bg-neutral-50/80 backdrop-blur-sm p-5 sm:p-6 lg-short:py-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               {/* Address + Phone */}
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-neutral-500">
@@ -150,7 +150,7 @@ export function FlagshipStore() {
                   <span>{t('address')}</span>
                 </span>
                 <a
-                  href="tel:02-336-3368"
+                  href="tel:+8223363368"
                   className="inline-flex items-center gap-1.5 text-teal-600 font-medium hover:text-teal-700 transition-colors"
                 >
                   <PhoneIcon />
@@ -161,18 +161,18 @@ export function FlagshipStore() {
               {/* Flagship CTA button */}
               <Link
                 href="/experience"
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-teal-600 text-white text-base sm:text-lg font-bold transition-all duration-300 hover:bg-teal-700 hover:gap-4 hover:shadow-lg hover:shadow-teal-600/20 shrink-0"
+                className="inline-flex items-center gap-3 px-8 py-4 lg-short:py-3 rounded-2xl bg-teal-600 text-white text-base sm:text-lg font-bold transition-all duration-300 hover:bg-teal-700 hover:gap-4 hover:shadow-lg hover:shadow-teal-600/20 shrink-0"
               >
                 <span>{t('b2bCta')}</span>
                 <ArrowRightIcon className="w-5 h-5 transition-transform duration-300" />
               </Link>
             </div>
-            <p className="mt-3 text-xs text-neutral-400">
+            <p className="mt-3 lg-short:mt-2 text-xs text-neutral-400">
               {t('b2bNotice')}
             </p>
           </div>
         </ScrollReveal>
-      </div>
+      </FitToViewport>
     </section>
   );
 }
@@ -222,9 +222,9 @@ function StoreCard({
         aria-hidden="true"
       />
 
-      <div className="relative flex flex-col h-full p-6 sm:p-7">
+      <div className="relative flex flex-col h-full p-6 sm:p-7 lg-short:p-5">
         {/* Icon + Name */}
-        <div className="flex items-start gap-4 mb-4">
+        <div className="flex items-start gap-4 mb-4 lg-short:mb-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-500/[0.08] text-teal-600 ring-1 ring-teal-500/20 transition-all duration-500 group-hover:scale-110 group-hover:bg-teal-500/[0.12]">
             {icon}
           </div>
@@ -247,7 +247,7 @@ function StoreCard({
         </p>
 
         {/* Feature tags */}
-        <div className="flex flex-wrap gap-2 mb-5">
+        <div className="flex flex-wrap gap-2 mb-5 lg-short:mb-4">
           {features.map((feature) => (
             <span
               key={feature}

@@ -4,7 +4,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { motion } from 'motion/react';
 import { Link } from '@/i18n/navigation';
 import { SectionHeader, Badge } from '@/components/ui';
-import { ScrollReveal } from '@/components/animations';
+import { FitToViewport, ScrollReveal } from '@/components/animations';
 import { useFirestorePortfolio } from '@/hooks/useFirestorePortfolio';
 import { cn } from '@/lib/utils';
 
@@ -12,28 +12,30 @@ const CATEGORY_BADGE_MAP: Record<string, string> = {
   online: 'blue',
   offline: 'amber',
   service: 'teal',
+  ip: 'rose',
 };
 
 export function FeaturedPortfolio() {
   const t = useTranslations('portfolio');
   const locale = useLocale();
   const { projects, loading } = useFirestorePortfolio();
-  const featured = projects.filter((p) => p.is_featured);
+  // Two rows of three fill the one-screen desktop layout; the rest live on /portfolio
+  const featured = projects.filter((p) => p.is_featured).slice(0, 6);
 
   if (loading || featured.length === 0) {
     return null;
   }
 
   return (
-    <section className="section-padding-lg bg-neutral-50" id="portfolio">
-      <div className="container-wide">
+    <section className="home-screen bg-neutral-50" id="portfolio">
+      <FitToViewport className="container-wide section-padding-lg lg:py-0">
         <SectionHeader
           category="PORTFOLIO"
           title={t('title')}
           subtitle={t('subtitle')}
         />
 
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="mt-16 lg:mt-[3.5vh] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-6">
           {featured.map((project, idx) => {
             const title = locale === 'ko' ? project.title_ko : project.title_en;
             const description = locale === 'ko' ? project.description_ko : project.description_en;
@@ -45,17 +47,21 @@ export function FeaturedPortfolio() {
                   href={`/portfolio/${project.slug}`}
                   className="group block relative rounded-2xl overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
                 >
-                  <div className="relative aspect-[16/10] bg-neutral-200 overflow-hidden">
-                    <img
-                      src={project.thumbnail}
-                      alt={title}
-                      className={cn(
-                        'absolute inset-0 h-full w-full object-cover',
-                        'transition-transform duration-700 ease-out',
-                        'group-hover:scale-105'
-                      )}
-                      loading="lazy"
-                    />
+                  <div className="relative aspect-[16/10] lg:aspect-auto lg:h-[clamp(10rem,27vh,17rem)] bg-neutral-200 overflow-hidden">
+                    {project.thumbnail ? (
+                      <img
+                        src={project.thumbnail}
+                        alt={title}
+                        className={cn(
+                          'absolute inset-0 h-full w-full object-cover',
+                          'transition-transform duration-700 ease-out',
+                          'group-hover:scale-105'
+                        )}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-teal-800 via-neutral-800 to-neutral-900" />
+                    )}
 
                     <div
                       className={cn(
@@ -65,7 +71,7 @@ export function FeaturedPortfolio() {
                       )}
                     />
 
-                    <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8">
+                    <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8 lg:p-6">
                       <motion.div className="flex flex-wrap gap-2 mb-3" initial={false}>
                         <Badge
                           variant={categoryBadge as 'teal' | 'amber' | 'blue' | 'default'}
@@ -78,7 +84,7 @@ export function FeaturedPortfolio() {
                         </span>
                       </motion.div>
 
-                      <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-tight">
+                      <h3 className="text-xl sm:text-2xl lg:text-xl font-bold text-white tracking-tight leading-tight">
                         {title}
                       </h3>
 
@@ -114,7 +120,7 @@ export function FeaturedPortfolio() {
           })}
         </div>
 
-        <ScrollReveal className="mt-12 text-center">
+        <ScrollReveal className="mt-12 lg:mt-[3vh] text-center">
           <Link
             href="/portfolio"
             className={cn(
@@ -131,7 +137,7 @@ export function FeaturedPortfolio() {
             </svg>
           </Link>
         </ScrollReveal>
-      </div>
+      </FitToViewport>
     </section>
   );
 }

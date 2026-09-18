@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui';
-import { ScrollReveal, ParallaxWrapper } from '@/components/animations';
+import { FitToViewport, ScrollReveal, ParallaxWrapper } from '@/components/animations';
 import { cn } from '@/lib/utils';
 
 export function CTASection() {
@@ -22,7 +22,9 @@ export function CTASection() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden bg-neutral-950"
+      // Shares the last screen with the footer (--footer-h is set by ScrollOverlayHome),
+      // but keeps at least 18rem for itself on short screens
+      className="home-screen relative overflow-hidden bg-neutral-950 [--screen-reserve:min(var(--footer-h,0px),100svh_-_18rem)]"
       aria-label={t('contact.subtitle')}
     >
       {/* ── Decorative elements ──────────────────────────── */}
@@ -82,21 +84,21 @@ export function CTASection() {
       />
 
       {/* ── Content ──────────────────────────────────────── */}
-      <div className="relative container-tight section-padding-lg text-center">
+      <FitToViewport className="container-tight section-padding-lg lg:py-0 text-center">
         <ScrollReveal>
-          <h2 className="font-[family-name:var(--font-display)] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight">
+          <h2 className="font-[family-name:var(--font-display)] text-3xl sm:text-4xl md:text-5xl lg:text-[clamp(2rem,5vh,3.75rem)] font-bold text-white tracking-tight leading-tight">
             {t('contact.subtitle')}
           </h2>
         </ScrollReveal>
 
         <ScrollReveal delay={0.15}>
-          <p className="mt-6 max-w-lg mx-auto text-base sm:text-lg text-neutral-400 leading-relaxed">
+          <p className="mt-6 lg:mt-[2vh] max-w-lg mx-auto text-base sm:text-lg text-neutral-400 leading-relaxed">
             {t('contact.description')}
           </p>
         </ScrollReveal>
 
         <ScrollReveal delay={0.3}>
-          <div className="mt-10 relative inline-block">
+          <div className="mt-10 lg:mt-[3.5vh] relative inline-block">
             {/* Animated glow behind button */}
             <motion.div
               className={cn(
@@ -115,13 +117,13 @@ export function CTASection() {
               aria-hidden="true"
             />
             <Button variant="primary" size="lg" className="relative px-10 py-3 text-base" asChild>
-              <Link href="/quote">
+              <Link href="/contact">
                 {t('hero.cta')}
               </Link>
             </Button>
           </div>
         </ScrollReveal>
-      </div>
+      </FitToViewport>
     </section>
   );
 }

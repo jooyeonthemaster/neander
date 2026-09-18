@@ -11,10 +11,13 @@ import {
   FolderOpen,
   Settings,
   LogOut,
+  Inbox,
+  ExternalLink,
 } from 'lucide-react'
 
 const navItems = [
   { href: '/admin', label: '대시보드', icon: LayoutDashboard },
+  { href: '/admin/inquiries', label: '문의함', icon: Inbox },
   { href: '/admin/portfolio', label: '포트폴리오 관리', icon: FolderOpen },
   { href: '/admin/news', label: '뉴스/프레스 관리', icon: Newspaper },
   { href: '/admin/popups', label: '팝업 관리', icon: Megaphone },
@@ -63,6 +66,15 @@ export default function AdminSidebar() {
 
       {/* User & Logout */}
       <div className="p-4 border-t border-white/10">
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 text-gray-400 hover:text-white text-sm transition-colors mb-3"
+        >
+          <ExternalLink className="w-4 h-4" />
+          사이트 보기
+        </a>
         <p className="text-xs text-gray-400 truncate mb-3">{user?.email}</p>
         <button
           onClick={signOut}

@@ -1,6 +1,9 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { QUOTE_HREF } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type {
@@ -10,6 +13,7 @@ import type {
   DemoStepProps,
   DemoResultProps,
 } from '@/types/demo';
+import type { PrintSpec } from '../kit';
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -25,7 +29,7 @@ const MONTHS = [
 const ELEMENTS = [
   { id: 'fire', label: '\uBD88 \uD83D\uDD25', gradient: 'from-red-500 to-orange-600' },
   { id: 'water', label: '\uBB3C \uD83D\uDCA7', gradient: 'from-blue-400 to-cyan-600' },
-  { id: 'earth', label: '\uD751 \uD83C\uDF0D', gradient: 'from-amber-600 to-yellow-800' },
+  { id: 'earth', label: '흙 🌍', gradient: 'from-amber-600 to-yellow-800' },
   { id: 'air', label: '\uBC14\uB78C \uD83C\uDF2C\uFE0F', gradient: 'from-sky-300 to-blue-400' },
   { id: 'metal', label: '\uAE08\uC18D \u2699\uFE0F', gradient: 'from-slate-400 to-zinc-600' },
 ] as const;
@@ -127,7 +131,7 @@ function StepMonth({ answers, onUpdate }: DemoStepProps) {
           )}
         >
           <span className="text-xl">{emoji}</span>
-          <span className="text-xs font-medium text-slate-300">{month}\uC6D4</span>
+          <span className="text-xs font-medium text-slate-300">{`${month}월`}</span>
         </motion.button>
       ))}
     </div>
@@ -139,7 +143,8 @@ function StepMonth({ answers, onUpdate }: DemoStepProps) {
 function StepElement({ answers, onUpdate }: DemoStepProps) {
   const selected = answers['element'] as string | undefined;
   return (
-    <div className="flex gap-3 overflow-x-auto pb-2 sm:justify-center sm:overflow-visible">
+    // 모바일에서 가로 스크롤로 숨겨지지 않도록 줄바꿈해 가운데 정렬한다
+    <div className="flex flex-wrap justify-center gap-3">
       {ELEMENTS.map((el) => (
         <motion.button
           key={el.id}
@@ -178,7 +183,7 @@ function StepElement({ answers, onUpdate }: DemoStepProps) {
 function StepCategory({ answers, onUpdate }: DemoStepProps) {
   const selected = answers['category'] as string | undefined;
   return (
-    <div className="flex gap-3 overflow-x-auto pb-2 sm:justify-center sm:overflow-visible">
+    <div className="flex flex-wrap justify-center gap-3">
       {CATEGORIES.map((cat) => (
         <motion.button
           key={cat.id}
@@ -202,16 +207,45 @@ function StepCategory({ answers, onUpdate }: DemoStepProps) {
   );
 }
 
+/* ── Fortune (결과 계산 · 결과 화면 · 출력물 공용) ─────────── */
+
+function seasonOf(month: number): string {
+  return month >= 3 && month <= 5 ? 'spring' :
+    month >= 6 && month <= 8 ? 'summer' :
+    month >= 9 && month <= 11 ? 'autumn' : 'winter';
+}
+
+const SEASON_DIRECTIONS: Record<string, string> = {
+  spring: '\uB3D9\uCABD', summer: '\uB0A8\uCABD', autumn: '\uC11C\uCABD', winter: '\uBD81\uCABD',
+};
+
+/** '연애 💕' → '연애' (감열지에는 이모지를 찍지 않는다) */
+function plainLabel(label: string): string {
+  return label.split(' ')[0] ?? label;
+}
+
+function readFortune(answers: DemoAnswers, resultKey: string) {
+  const data = RESULTS[resultKey as ResultKey] ?? RESULTS['rising-star'];
+  const month = (answers['month'] as number) ?? 1;
+  const category = (answers['category'] as CategoryId) ?? 'love';
+  return {
+    data,
+    month,
+    categoryLabel: CATEGORIES.find((c) => c.id === category)?.label ?? '',
+    element: ELEMENTS.find((e) => e.id === answers['element']),
+    luckyNumber: (month * 7) % 99 + 1,
+    advice: data.advice[category] ?? data.advice.love,
+    direction: SEASON_DIRECTIONS[seasonOf(month)] ?? data.direction,
+  };
+}
+
 /* ── Compute Result ────────────────────────────────────── */
 
 function computeResult(answers: DemoAnswers): string {
   const month = answers['month'] as number;
   const element = answers['element'] as string;
 
-  const season: string =
-    month >= 3 && month <= 5 ? 'spring' :
-    month >= 6 && month <= 8 ? 'summer' :
-    month >= 9 && month <= 11 ? 'autumn' : 'winter';
+  const season = seasonOf(month);
 
   if (element === 'fire' && (season === 'spring' || season === 'summer')) return 'phoenix-fire';
   if (element === 'water') return 'ocean-wisdom';
@@ -226,20 +260,8 @@ function computeResult(answers: DemoAnswers): string {
 /* ── Result Component ──────────────────────────────────── */
 
 function ResultComponent({ resultKey, answers, onRestart, pillarColor }: DemoResultProps) {
-  const data = RESULTS[resultKey as ResultKey] ?? RESULTS['rising-star'];
-  const month = (answers['month'] as number) ?? 1;
-  const category = (answers['category'] as CategoryId) ?? 'love';
-  const luckyNumber = (month * 7) % 99 + 1;
-  const advice = data.advice[category] ?? data.advice.love;
-
-  const SEASON_DIRECTIONS: Record<string, string> = {
-    spring: '\uB3D9\uCABD', summer: '\uB0A8\uCABD', autumn: '\uC11C\uCABD', winter: '\uBD81\uCABD',
-  };
-  const season =
-    month >= 3 && month <= 5 ? 'spring' :
-    month >= 6 && month <= 8 ? 'summer' :
-    month >= 9 && month <= 11 ? 'autumn' : 'winter';
-  const direction = SEASON_DIRECTIONS[season] ?? data.direction;
+  const tCommon = useTranslations('demos.common');
+  const { data, categoryLabel, luckyNumber, advice, direction } = readFortune(answers, resultKey);
 
   return (
     <motion.div
@@ -261,13 +283,13 @@ function ResultComponent({ resultKey, answers, onRestart, pillarColor }: DemoRes
           animate={{ opacity: [0.2, 0.6, 0.2], scale: [0.9, 1.1, 0.9] }}
           transition={{ duration: 3, repeat: Infinity, delay: i * 0.4 }}
         >
-          \u2726
+          ✦
         </motion.span>
       ))}
 
       {/* Archetype label */}
       <p className="text-sm font-medium tracking-widest text-purple-400/80 uppercase">
-        \uB2F9\uC2E0\uC758 \uC6B4\uC138 \uC544\uD0A4\uD0C0\uC785
+        당신의 운세 아키타입
       </p>
 
       {/* Archetype name */}
@@ -306,7 +328,7 @@ function ResultComponent({ resultKey, answers, onRestart, pillarColor }: DemoRes
       {/* Category advice */}
       <div className="rounded-xl border border-purple-700/30 bg-indigo-950/30 px-5 py-3">
         <p className="text-xs text-slate-400 mb-1">
-          {CATEGORIES.find((c) => c.id === category)?.label ?? ''} \uC6B4\uC138
+          {categoryLabel} 운세
         </p>
         <p className="text-sm font-semibold text-purple-200">{advice}</p>
       </div>
@@ -319,16 +341,15 @@ function ResultComponent({ resultKey, answers, onRestart, pillarColor }: DemoRes
           onClick={onRestart}
           className="rounded-xl border border-slate-700 px-6 py-3 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500"
         >
-          \uB2E4\uC2DC \uC810\uCE58\uAE30
+          다시 점치기
         </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="rounded-xl px-6 py-3 text-sm font-semibold text-white"
+        <Link
+          href={QUOTE_HREF}
+          className="rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
           style={{ backgroundColor: pillarColor }}
         >
-          \uCCB4\uD5D8 \uC0C1\uB2F4 \uC2E0\uCCAD
-        </motion.button>
+          {tCommon('ctaButton')}
+        </Link>
       </div>
     </motion.div>
   );
@@ -336,11 +357,39 @@ function ResultComponent({ resultKey, answers, onRestart, pillarColor }: DemoRes
 
 /* ── Export ──────────────────────────────────────────────── */
 
+/* ── Print — 운세 뽑기 종이 ───────────────────────────────── */
+
+function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
+  const { data, month, categoryLabel, element, luckyNumber, advice, direction } = readFortune(answers, resultKey);
+  return {
+    kind: 'receipt',
+    eyebrow: '로봇이 뽑아 준 오늘의 점괘',
+    title: data.name,
+    sections: [
+      { type: 'text', title: '점괘', text: data.message },
+      { type: 'big', title: '행운의 숫자', text: String(luckyNumber) },
+      {
+        type: 'rows',
+        title: '행운 아이템',
+        rows: [
+          { label: '행운의 색', value: data.luckyColor },
+          { label: '행운의 방향', value: direction },
+          { label: '태어난 달', value: `${month}월` },
+          { label: '끌린 원소', value: element ? plainLabel(element.label) : '-' },
+        ],
+      },
+      { type: 'text', title: `${plainLabel(categoryLabel)} 운세`, text: advice },
+    ],
+    footer: '좋은 점괘는 간직하고, 나쁜 점괘는 잊어요',
+  };
+}
+
 const FortuneRobotDemo: DemoModule = {
   config,
   StepComponents: [StepMonth, StepElement, StepCategory],
   ResultComponent,
   computeResult,
+  getPrint,
 };
 
 export default FortuneRobotDemo;

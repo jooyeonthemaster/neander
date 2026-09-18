@@ -29,12 +29,12 @@ export function AcscentResult({ type, scores, onSelectPerfume, onRestart }: Prop
             <span className="text-sm font-medium tracking-widest text-teal-400">YOUR OLFACTORY TYPE</span>
           </motion.div>
 
-          {/* Type code */}
+          {/* Type code — 가장 넓은 코드(OGSW)가 Syne ExtraBold 기준 약 5.4em이라, 좌우 패딩(48px)을 뺀 폭에 들어가도록 단계별로 키운다 */}
           <motion.h1
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="mb-6 font-display text-8xl font-extrabold tracking-tighter md:text-[10rem]"
+            className="mb-6 font-display text-5xl font-extrabold tracking-tighter min-[400px]:text-6xl sm:text-8xl lg:text-[10rem]"
             style={{ background: `linear-gradient(135deg, ${type.gradientFrom}, ${type.gradientTo})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
           >
             {type.code}
@@ -194,19 +194,19 @@ export function AcscentResult({ type, scores, onSelectPerfume, onRestart }: Prop
 
         {/* ── All 16 Types Grid ────────────────────────────── */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 2 }}
-          className="relative mb-20 rounded-3xl border border-neutral-800 bg-neutral-900/50 p-10"
+          className="relative mb-20 rounded-3xl border border-neutral-800 bg-neutral-900/50 p-5 sm:p-10"
         >
-          <div className="mb-8 flex items-center justify-between">
+          <div className="mb-8 flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium tracking-widest text-teal-400">16 TYPES</p>
               <h3 className="font-display text-2xl font-bold text-white">모든 후각 인지 유형</h3>
             </div>
-            <button onClick={() => setShowAllTypes(!showAllTypes)} className="text-sm font-medium text-teal-400 hover:text-teal-300 transition-colors">
+            <button onClick={() => setShowAllTypes(!showAllTypes)} className="shrink-0 text-sm font-medium text-teal-400 hover:text-teal-300 transition-colors">
               {showAllTypes ? '접기' : '모두 보기'}
             </button>
           </div>
 
-          <div className={`grid grid-cols-4 gap-4 ${showAllTypes ? '' : 'max-h-56 overflow-hidden'}`}>
+          <div className={`grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 ${showAllTypes ? '' : 'max-h-56 overflow-hidden'}`}>
             {ACSCENT_TYPES.map((t) => {
               const isMine = t.code === type.code;
               return (

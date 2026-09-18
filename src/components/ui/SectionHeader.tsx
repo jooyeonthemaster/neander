@@ -9,6 +9,8 @@ interface SectionHeaderProps {
   subtitle?: string;
   /** Text alignment */
   align?: 'left' | 'center' | 'right';
+  /** Heading level — use 'h1' when this is the page's main title */
+  as?: 'h1' | 'h2';
   className?: string;
 }
 
@@ -23,6 +25,7 @@ export function SectionHeader({
   title,
   subtitle,
   align = 'center',
+  as: Heading = 'h2',
   className,
 }: SectionHeaderProps) {
   return (
@@ -32,9 +35,9 @@ export function SectionHeader({
           {category}
         </span>
       )}
-      <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+      <Heading className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
         {title}
-      </h2>
+      </Heading>
       {subtitle && (
         <p className="mt-4 text-base text-slate-600 leading-relaxed sm:text-lg">
           {subtitle}

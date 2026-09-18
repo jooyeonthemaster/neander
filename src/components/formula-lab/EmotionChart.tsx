@@ -132,7 +132,7 @@ export function EmotionRadarChart({ vector }: { vector: EmotionScore[] }) {
 // ─── Dominant Emotion Cards ───────────────────────────────────────────
 export function DominantEmotionCards({ emotions }: { emotions: EmotionScore[] }) {
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-2 sm:gap-3">
       {emotions.slice(0, 3).map((em, i) => {
         const type = EMOTION_TYPES[em.typeId];
         return (
@@ -141,18 +141,18 @@ export function DominantEmotionCards({ emotions }: { emotions: EmotionScore[] })
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 + i * 0.1 }}
-            className="relative bg-white border border-neutral-100 rounded-xl p-5 overflow-hidden"
+            className="relative bg-white border border-neutral-100 rounded-xl p-3 sm:p-5 overflow-hidden"
           >
             {/* Rank indicator */}
-            <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-neutral-50 flex items-center justify-center">
+            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-6 h-6 rounded-full bg-neutral-50 flex items-center justify-center">
               <span className="text-[10px] font-bold text-neutral-400">#{i + 1}</span>
             </div>
             {/* Color bar */}
             <div className="w-8 h-1 rounded-full mb-4" style={{ backgroundColor: type.color }} />
             <div className="text-xs font-mono text-neutral-400 mb-1">Type {String(type.id).padStart(2, '0')}</div>
-            <div className="text-lg font-bold text-neutral-950 mb-1">{type.nameKo}</div>
+            <div className="text-base sm:text-lg font-bold text-neutral-950 mb-1">{type.nameKo}</div>
             <div className="text-xs text-neutral-400 mb-3 line-clamp-2">{type.description}</div>
-            <div className="text-2xl font-[family-name:var(--font-display)] font-bold text-teal-600">
+            <div className="text-xl sm:text-2xl font-[family-name:var(--font-display)] font-bold text-teal-600">
               {em.score}
               <span className="text-sm font-normal text-neutral-400">%</span>
             </div>

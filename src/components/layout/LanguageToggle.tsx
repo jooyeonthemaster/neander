@@ -12,9 +12,11 @@ import { motion } from 'motion/react';
 
 interface LanguageToggleProps {
   className?: string;
+  /** Translucent track and light labels for use over a dark background */
+  inverted?: boolean;
 }
 
-export default function LanguageToggle({ className }: LanguageToggleProps) {
+export default function LanguageToggle({ className, inverted = false }: LanguageToggleProps) {
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
@@ -29,7 +31,10 @@ export default function LanguageToggle({ className }: LanguageToggleProps) {
   return (
     <div
       className={cn(
-        'relative flex h-9 items-center rounded-full border border-neutral-200 bg-neutral-50 p-0.5',
+        'relative flex h-9 items-center rounded-full border p-0.5 transition-colors',
+        inverted
+          ? 'border-white/20 bg-white/10 backdrop-blur-sm'
+          : 'border-neutral-200 bg-neutral-50',
         className,
       )}
       role="radiogroup"
@@ -49,7 +54,11 @@ export default function LanguageToggle({ className }: LanguageToggleProps) {
         onClick={() => switchLocale('ko')}
         className={cn(
           'relative z-10 flex h-8 w-12 items-center justify-center rounded-full text-xs font-semibold tracking-wide transition-colors',
-          isKo ? 'text-teal-600' : 'text-neutral-400 hover:text-neutral-600',
+          isKo
+            ? 'text-teal-600'
+            : inverted
+              ? 'text-white/60 hover:text-white'
+              : 'text-neutral-400 hover:text-neutral-600',
         )}
       >
         KR
@@ -61,7 +70,11 @@ export default function LanguageToggle({ className }: LanguageToggleProps) {
         onClick={() => switchLocale('en')}
         className={cn(
           'relative z-10 flex h-8 w-12 items-center justify-center rounded-full text-xs font-semibold tracking-wide transition-colors',
-          !isKo ? 'text-teal-600' : 'text-neutral-400 hover:text-neutral-600',
+          !isKo
+            ? 'text-teal-600'
+            : inverted
+              ? 'text-white/60 hover:text-white'
+              : 'text-neutral-400 hover:text-neutral-600',
         )}
       >
         EN

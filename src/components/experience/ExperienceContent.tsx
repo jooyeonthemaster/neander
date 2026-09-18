@@ -1,6 +1,8 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { QUOTE_HREF } from '@/lib/constants';
 import Image from 'next/image';
 import { motion } from 'motion/react';
 import { ScrollReveal, StaggerChildren, StaggerItem } from '@/components/animations';
@@ -86,6 +88,7 @@ function CheckIcon() {
 
 export function ExperienceContent() {
   const t = useTranslations('experience');
+  const tNav = useTranslations('nav');
 
   return (
     <>
@@ -107,7 +110,10 @@ export function ExperienceContent() {
                   transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
                   className={cn(
                     'relative overflow-hidden rounded-2xl',
-                    idx === 0 ? 'sm:col-span-2 aspect-[16/10]' : 'aspect-[4/3]',
+                    // 큰 사진이 왼쪽 두 줄을 차지하고, 나머지 두 장은 오른쪽에 쌓인다
+                    idx === 0
+                      ? 'sm:col-span-2 sm:row-span-2 aspect-[16/10] sm:aspect-auto'
+                      : 'aspect-[4/3]',
                   )}
                 >
                   <Image
@@ -227,7 +233,7 @@ export function ExperienceContent() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Phone */}
                 <a
-                  href="tel:02-336-3368"
+                  href="tel:+8223363368"
                   className="group flex items-center gap-4 p-5 rounded-2xl border border-neutral-800 bg-neutral-900/60 backdrop-blur-sm transition-all duration-300 hover:border-teal-500/30 hover:shadow-lg hover:shadow-teal-500/5"
                 >
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-teal-500/[0.08] text-teal-400 ring-1 ring-teal-500/20 transition-all duration-300 group-hover:bg-teal-500/[0.12]">
@@ -262,8 +268,24 @@ export function ExperienceContent() {
                 </a>
               </div>
 
+              {/* 문의 폼으로 가는 길 (전화·메일은 PC에서 눌러도 동작하지 않는 경우가 많다) */}
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  href="/contact"
+                  className="inline-flex h-12 items-center justify-center rounded-xl bg-teal-500 px-7 text-sm font-semibold text-neutral-950 transition-colors hover:bg-teal-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
+                >
+                  {tNav('contact')}
+                </Link>
+                <Link
+                  href={QUOTE_HREF}
+                  className="inline-flex h-12 items-center justify-center rounded-xl border border-neutral-700 px-7 text-sm font-semibold text-neutral-200 transition-colors hover:border-neutral-500 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
+                >
+                  {tNav('quote')}
+                </Link>
+              </div>
+
               {/* Address bar */}
-              <div className="mt-4 flex items-center justify-center gap-2 text-sm text-neutral-500">
+              <div className="mt-6 flex items-center justify-center gap-2 text-sm text-neutral-500">
                 <MapPinIcon className="shrink-0" />
                 <span>{t('address')}</span>
               </div>

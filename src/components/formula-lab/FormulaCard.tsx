@@ -25,7 +25,7 @@ function NotePyramid({ formula }: { formula: Formula }) {
           initial={{ opacity: 0, scaleX: 0.5 }}
           animate={{ opacity: 1, scaleX: 1 }}
           transition={{ delay: 0.3 + i * 0.12 }}
-          className={`${layer.width} ${layer.color} border rounded-lg px-4 py-3`}
+          className={`${layer.width} ${layer.color} border rounded-lg px-3 sm:px-4 py-3`}
         >
           <div className="text-[10px] font-bold tracking-[0.15em] mb-1.5 opacity-60">{layer.label}</div>
           <div className="flex flex-wrap gap-1.5">
@@ -51,14 +51,15 @@ function NotePyramid({ formula }: { formula: Formula }) {
 // ─── Ingredient Table ─────────────────────────────────────────────────
 function IngredientTable({ formula }: { formula: Formula }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-neutral-100">
+    // 좁은 화면에서는 잘리지 않고 가로 스크롤 (rounded 모서리는 overflow 로 유지)
+    <div className="overflow-x-auto rounded-xl border border-neutral-100">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-neutral-50">
-            <th className="text-left px-4 py-2.5 text-xs font-semibold text-neutral-400 tracking-wider uppercase">성분</th>
-            <th className="text-left px-4 py-2.5 text-xs font-semibold text-neutral-400 tracking-wider uppercase">노트</th>
-            <th className="text-left px-4 py-2.5 text-xs font-semibold text-neutral-400 tracking-wider uppercase">카테고리</th>
-            <th className="text-right px-4 py-2.5 text-xs font-semibold text-neutral-400 tracking-wider uppercase">비율</th>
+            <th className="text-left px-3 sm:px-4 py-2.5 text-xs font-semibold text-neutral-400 tracking-wider uppercase">성분</th>
+            <th className="text-left px-3 sm:px-4 py-2.5 text-xs font-semibold text-neutral-400 tracking-wider uppercase">노트</th>
+            <th className="text-left px-3 sm:px-4 py-2.5 text-xs font-semibold text-neutral-400 tracking-wider uppercase">카테고리</th>
+            <th className="text-right px-3 sm:px-4 py-2.5 text-xs font-semibold text-neutral-400 tracking-wider uppercase">비율</th>
           </tr>
         </thead>
         <tbody>
@@ -79,19 +80,20 @@ function IngredientTable({ formula }: { formula: Formula }) {
                 transition={{ delay: 0.1 + i * 0.04 }}
                 className="border-t border-neutral-50 hover:bg-neutral-50/50 transition-colors"
               >
-                <td className="px-4 py-2.5">
+                <td className="px-3 sm:px-4 py-2.5">
                   <div className="font-medium text-neutral-900">{ing.nameKo}</div>
                   <div className="text-xs text-neutral-400">{ing.name}</div>
                 </td>
-                <td className="px-4 py-2.5">
+                <td className="px-3 sm:px-4 py-2.5">
                   <span className={`inline-flex items-center justify-center w-6 h-6 rounded-md text-[10px] font-bold ${noteColor}`}>
                     {noteLabel}
                   </span>
                 </td>
-                <td className="px-4 py-2.5 text-neutral-500">{ing.category}</td>
-                <td className="px-4 py-2.5 text-right">
+                <td className="px-3 sm:px-4 py-2.5 text-neutral-500">{ing.category}</td>
+                <td className="px-3 sm:px-4 py-2.5 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <div className="w-16 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                    {/* 모바일에서는 막대를 숨기고 수치만 */}
+                    <div className="hidden sm:block w-16 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
                       <motion.div
                         className="h-full bg-teal-500 rounded-full"
                         initial={{ width: 0 }}
@@ -135,44 +137,64 @@ export function FormulaCard({
       }`}
       onClick={onSelect}
     >
-      {/* Header */}
-      <div className="px-6 py-5 border-b border-neutral-100">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-mono text-xs text-teal-600 font-bold">{formula.id}</span>
-              {isSelected && (
-                <span className="text-[10px] font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full">SELECTED</span>
-              )}
+      {/* 요약부(헤더+지표)를 키보드로도 선택 가능한 버튼 영역으로. 펼친 표 등은 일반 콘텐츠로 남긴다 */}
+      <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={isSelected}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelect();
+          }
+        }}
+        className={`outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-500 ${
+          isSelected ? 'rounded-t-2xl' : 'rounded-2xl'
+        }`}
+      >
+        {/* Header */}
+        <div className="px-4 sm:px-6 py-5 border-b border-neutral-100">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-mono text-xs text-teal-600 font-bold">{formula.id}</span>
+                {isSelected && (
+                  <span className="text-[10px] font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full">SELECTED</span>
+                )}
+              </div>
+              <h3 className="font-[family-name:var(--font-display)] text-lg font-bold text-neutral-950">
+                {formula.nameKo}
+              </h3>
+              <p className="text-sm text-neutral-500 mt-1 leading-relaxed">{formula.concept}</p>
             </div>
-            <h3 className="font-[family-name:var(--font-display)] text-lg font-bold text-neutral-950">
-              {formula.nameKo}
-            </h3>
-            <p className="text-sm text-neutral-500 mt-1 leading-relaxed">{formula.concept}</p>
-          </div>
-          <div className="text-right shrink-0 ml-4">
-            <div className="text-3xl font-[family-name:var(--font-display)] font-bold text-teal-600">
-              {formula.matchScore}
+            <div className="text-right shrink-0 ml-4">
+              <div className="text-3xl font-[family-name:var(--font-display)] font-bold text-teal-600">
+                {formula.matchScore}
+              </div>
+              <div className="text-[10px] text-neutral-400 font-medium">MATCH SCORE</div>
             </div>
-            <div className="text-[10px] text-neutral-400 font-medium">MATCH SCORE</div>
           </div>
         </div>
-      </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-4 divide-x divide-neutral-100 border-b border-neutral-100">
-        {[
-          { label: '예상 원가', value: `₩${Math.round(formula.estimatedCostPer10ml).toLocaleString()}`, sub: '/ 10ml' },
-          { label: '지속력', value: `${formula.longevityHours}h`, sub: sillageLabel },
-          { label: '안정성', value: `${formula.stabilityScore}`, sub: '/ 100' },
-          { label: '독창성', value: `${formula.uniquenessIndex}`, sub: '/ 100' },
-        ].map(m => (
-          <div key={m.label} className="px-4 py-3 text-center">
-            <div className="text-[10px] text-neutral-400 font-medium mb-0.5">{m.label}</div>
-            <div className="text-sm font-bold text-neutral-950">{m.value}</div>
-            <div className="text-[10px] text-neutral-300">{m.sub}</div>
-          </div>
-        ))}
+        {/* Metrics Row */}
+        {/* 모바일 2x2(구분선은 항목별 border) → sm 부터 1x4(divide-x) */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 sm:divide-x divide-neutral-100 border-b border-neutral-100">
+          {[
+            { label: '예상 원가', value: `₩${Math.round(formula.estimatedCostPer10ml).toLocaleString()}`, sub: '/ 10ml' },
+            { label: '지속력', value: `${formula.longevityHours}h`, sub: sillageLabel },
+            { label: '안정성', value: `${formula.stabilityScore}`, sub: '/ 100' },
+            { label: '독창성', value: `${formula.uniquenessIndex}`, sub: '/ 100' },
+          ].map(m => (
+            <div
+              key={m.label}
+              className="px-4 py-3 text-center border-neutral-100 even:border-l [&:nth-child(n+3)]:border-t sm:even:border-l-0 sm:[&:nth-child(n+3)]:border-t-0"
+            >
+              <div className="text-[10px] text-neutral-400 font-medium mb-0.5">{m.label}</div>
+              <div className="text-sm font-bold text-neutral-950">{m.value}</div>
+              <div className="text-[10px] text-neutral-300">{m.sub}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Expanded Content */}
@@ -183,7 +205,7 @@ export function FormulaCard({
           transition={{ duration: 0.3 }}
           className="overflow-hidden"
         >
-          <div className="px-6 py-6 space-y-6">
+          <div className="px-4 sm:px-6 py-6 space-y-6">
             {/* Note Pyramid */}
             <div>
               <h4 className="text-xs font-semibold text-neutral-400 tracking-[0.15em] uppercase mb-4">
@@ -201,7 +223,7 @@ export function FormulaCard({
             </div>
 
             {/* IFRA Badge */}
-            <div className="flex items-center gap-2 bg-green-50 rounded-lg px-4 py-3 border border-green-100">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 bg-green-50 rounded-lg px-4 py-3 border border-green-100">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5">
                 <path d="M20 6L9 17l-5-5" />
               </svg>

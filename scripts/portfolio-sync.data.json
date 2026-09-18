@@ -1,0 +1,427 @@
+{
+  "projectId": "neander-4968a",
+  "order": [
+    "jimff-2026-ost-fair",
+    "pyeongtaek-ai-festa-2026",
+    "nflying-into-the-rem-md-2026",
+    "jongno-open-book-maru-2026",
+    "kto-ai-perfume-class-2026",
+    "korea-grand-sale-2026",
+    "heukseok-popup-testbed-2025",
+    "ansan-science-festival",
+    "seoul-writers-festival",
+    "namsangol-hanok-chwihyang-2025",
+    "tourism-venture-week-2025",
+    "jecheon-music-film-festival",
+    "epson-oneday-class-2025",
+    "acscent-id",
+    "hahyunsang-elegy-2024",
+    "acscent-wau",
+    "acscent-sinchon",
+    "cross-the-line"
+  ],
+  "upserts": [
+    {
+      "slug": "pyeongtaek-ai-festa-2026",
+      "title_ko": "평택 AI 페스타 — AI 체험 콘텐츠 4종 운영",
+      "title_en": "Pyeongtaek AI Festa — Four AI Experience Zones",
+      "description_ko": "평택아트센터에서 열린 AI 페스타에서 AI 체험 콘텐츠 4종을 기획·운영했습니다. 사진 분석으로 어울리는 향을 찾아 10ml 향수와 영수증 레시피를 만들어 주는 ‘AI 조향사’, 그리고 뮤직비디오 메이커·AI 포토부스·미래가족 상상 키오스크를 함께 운영해 하루 동안 관람객을 맞았습니다.",
+      "description_en": "At the AI Festa held at Pyeongtaek Art Center, we planned and ran four AI experience zones. Alongside the AI Perfumer — which analyzes a photo to find a matching scent and hands over a 10ml perfume with a receipt-style recipe — we operated the Music Video Maker, AI Photo Booth and Future Family kiosks for a full day of visitors.",
+      "year": 2026,
+      "period": "2026.09.05",
+      "category": "offline",
+      "tags": [
+        "AI Festa",
+        "AI Perfumer",
+        "Photo Booth"
+      ],
+      "services": [
+        "acscent",
+        "photoBooth",
+        "custom"
+      ],
+      "client": "미리내컴",
+      "location": "평택아트센터",
+      "result_ko": "체험 콘텐츠 4종 운영 · 조향 인력 2인 현장 배치",
+      "result_en": "4 experience zones · 2 on-site perfumers",
+      "images": [
+        "/images/portfolio/pyeongtaek-ai-festa-2026-1.webp",
+        "/images/portfolio/pyeongtaek-ai-festa-2026-2.webp",
+        "/images/portfolio/pyeongtaek-ai-festa-2026-3.webp",
+        "/images/portfolio/pyeongtaek-ai-festa-2026-4.webp"
+      ],
+      "is_featured": false,
+      "is_published": true
+    },
+    {
+      "slug": "jimff-2026-ost-fair",
+      "title_ko": "제천국제음악영화제 2026 OST페어 관객 체험 프로그램",
+      "title_en": "JIMFF 2026 OST Fair — Audience Experience Program",
+      "description_ko": "제22회 제천국제음악영화제 OST페어의 관객 체험 프로그램을 개발하고 운영했습니다. AI 조향사 부스에서는 터치 키오스크 3대로 관객에게 어울리는 향을 추천하고, 추천 결과로 10ml 향수를 제작해 드렸습니다. ‘OST FAIR ARCADE ZONE’에서는 직접 개발한 게임 ‘짐프러너(JIMFF Runner)’를 웹앱과 PC앱으로 선보였고, 영화제 디퓨저 키캡 키링 5종도 함께 제작했습니다.",
+      "description_en": "We developed and ran the audience experience program for the OST Fair at the 22nd Jecheon International Music & Film Festival. At the AI Perfumer booth, three touch kiosks recommended a scent to each visitor, and every result was made into a 10ml perfume. In the OST FAIR ARCADE ZONE we launched JIMFF Runner, an in-house game playable as a web app and PC app, and we also produced five festival diffuser keycap keyrings.",
+      "year": 2026,
+      "period": "2026.09.04 – 09.07",
+      "category": "offline",
+      "tags": [
+        "Film Festival",
+        "AI Perfumer",
+        "Web Game"
+      ],
+      "services": [
+        "acscent",
+        "custom"
+      ],
+      "client": "제천국제음악영화제",
+      "location": "제천 엽연초살롱 · 문화의거리",
+      "result_ko": "4일간 운영 · 터치 키오스크 3대 · 자체 개발 게임 짐프러너",
+      "result_en": "4 days · 3 touch kiosks · in-house game JIMFF Runner",
+      "images": [
+        "/images/portfolio/jimff-2026-ost-fair-1.webp",
+        "/images/portfolio/jimff-2026-ost-fair-2.webp",
+        "/images/portfolio/jimff-2026-ost-fair-3.webp",
+        "/images/portfolio/jimff-2026-ost-fair-4.webp"
+      ],
+      "is_featured": true,
+      "is_published": true
+    },
+    {
+      "slug": "nflying-into-the-rem-md-2026",
+      "title_ko": "엔플라잉 〈into REM〉 콘서트 공식 향 MD",
+      "title_en": "N.Flying <into REM> Concert — Official Scent MD",
+      "description_ko": "FNC엔터테인먼트와 함께 2026 엔플라잉(N.Flying) 콘서트 〈into REM〉의 공식 MD를 향으로 제작했습니다. 서울·대구·부산·광주 공연마다 향을 다르게 설계해, 도시별 200ml 룸스프레이와 포토카드를 동봉한 필로우 사쉐 키링으로 선보였습니다.",
+      "description_en": "With FNC Entertainment, we turned the official merchandise for N.Flying's 2026 concert <into REM> into scent. Each city — Seoul, Daegu, Busan and Gwangju — got its own fragrance, released as a 200ml room spray and a pillow sachet keyring packed with a photo card.",
+      "year": 2026,
+      "period": "2026.06 – 08",
+      "category": "ip",
+      "tags": [
+        "IP Collab",
+        "Concert MD",
+        "Room Spray"
+      ],
+      "services": [
+        "acscent",
+        "custom"
+      ],
+      "client": "FNC엔터테인먼트",
+      "location": "서울 · 대구 · 부산 · 광주",
+      "result_ko": "4개 도시 · 도시별 향 설계 · MD 1,945개 납품",
+      "result_en": "4 cities · city-specific scents · 1,945 MD items delivered",
+      "images": [
+        "/images/portfolio/nflying-into-rem-2.webp",
+        "/images/portfolio/nflying-into-rem-3.webp"
+      ],
+      "is_featured": true,
+      "is_published": true,
+      "thumbnail": "/images/portfolio/nflying-into-rem-1.webp"
+    },
+    {
+      "slug": "jongno-open-book-maru-2026",
+      "title_ko": "종로 열린 책마루 — AI 독서 취향 체험",
+      "title_en": "Jongno Open Book Maru — AI Reading Taste Experience",
+      "description_ko": "서울야외도서관 종로구 프로그램 ‘종로 열린 책마루’에서 AI 체험 부스를 운영했습니다. AI가 나의 독서 취향을 분석해 책을 추천하고, 독서 취향 MBTI에 어울리는 시집과 차(Tea)를 제안합니다. AI 조향사 키오스크에서는 나에게 맞는 향 레시피를 영수증으로 뽑아 드렸습니다.",
+      "description_en": "We ran an AI experience booth at Jongno Open Book Maru, the Jongno-gu program of Seoul Outdoor Library. AI analyzed each visitor's reading taste to recommend books, then suggested a poetry collection and a tea to match their reading-taste MBTI. At the AI Perfumer kiosk, visitors received their personal scent recipe printed as a receipt.",
+      "year": 2026,
+      "period": "2026.05 – 10 (5회)",
+      "category": "offline",
+      "tags": [
+        "Outdoor Library",
+        "AI Book Match",
+        "AI Perfumer"
+      ],
+      "services": [
+        "acscent",
+        "custom"
+      ],
+      "client": "종로문화재단",
+      "location": "서울 청운공원 · 마로니에공원",
+      "images": [
+        "/images/portfolio/jongno-open-book-maru-2026-1.webp",
+        "/images/portfolio/jongno-open-book-maru-2026-2.webp",
+        "/images/portfolio/jongno-open-book-maru-2026-3.webp",
+        "/images/portfolio/jongno-open-book-maru-2026-4.webp"
+      ],
+      "is_featured": false,
+      "is_published": true
+    },
+    {
+      "slug": "kto-ai-perfume-class-2026",
+      "title_ko": "한국관광공사 AI 조향 클래스",
+      "title_en": "Korea Tourism Organization — AI Perfume Class",
+      "description_ko": "한국관광공사 서울센터(하이커 그라운드)에서 30명을 대상으로 AI 조향 클래스를 진행했습니다. QR로 참여를 신청하고, 스타일과 사진을 입력해 AI 분석 결과를 받은 뒤 시향하고 향을 더해 나만의 10ml 향수를 완성하는, 약 30분간의 5단계 체험입니다.",
+      "description_en": "We held an AI perfume class for 30 participants at the Korea Tourism Organization Seoul Center (HiKR Ground). In a 30-minute, five-step experience, participants signed up via QR code, entered their style and a photo, smelled the scent AI recommended, added notes of their own, and finished with a personal 10ml perfume.",
+      "year": 2026,
+      "period": "2026.05.21",
+      "category": "offline",
+      "tags": [
+        "Perfume Class",
+        "AI Perfumer",
+        "Tourism"
+      ],
+      "services": [
+        "acscent",
+        "custom"
+      ],
+      "client": "한국관광공사",
+      "location": "서울 하이커 그라운드",
+      "result_ko": "30명 참여 · 10ml AI 퍼퓸 30개 제작",
+      "result_en": "30 participants · 30 AI perfumes (10ml)",
+      "images": [],
+      "is_featured": false,
+      "is_published": true
+    },
+    {
+      "slug": "korea-grand-sale-2026",
+      "title_ko": "2026 코리아그랜드세일 AI 맞춤형 향수 만들기",
+      "title_en": "Korea Grand Sale 2026 — AI Custom Perfume Workshop",
+      "description_ko": "코리아그랜드세일 플레이라운지 북촌에서 ‘AI 기반 이미지 분석 & 맞춤형 향수 만들기’를 운영했습니다. 나흘간 하루 두 차례, AI가 이미지를 분석해 추천한 향으로 참가자가 나만의 향수를 완성했습니다. 앞서 2025년 개막식에서는 영어로 진행하는 조향 클래스를 운영했습니다.",
+      "description_en": "At Play Lounge Bukchon during Korea Grand Sale, we ran \"AI Image Analysis & Custom Perfume Making.\" Twice a day for four days, participants completed their own perfume from a scent AI recommended by analyzing their image. Earlier, at the 2025 opening ceremony, we hosted an English-language perfume class.",
+      "year": 2026,
+      "period": "2026.02.14 – 02.17",
+      "category": "offline",
+      "tags": [
+        "Tourism Festival",
+        "AI Perfumer",
+        "Workshop"
+      ],
+      "services": [
+        "acscent",
+        "custom"
+      ],
+      "client": "코리아그랜드세일",
+      "location": "서울 북촌",
+      "images": [
+        "/images/portfolio/korea-grand-sale-2026-1.webp",
+        "/images/portfolio/korea-grand-sale-2026-2.webp",
+        "/images/portfolio/korea-grand-sale-2026-3.webp",
+        "/images/portfolio/korea-grand-sale-2026-4.webp"
+      ],
+      "is_featured": false,
+      "is_published": true
+    },
+    {
+      "slug": "heukseok-popup-testbed-2025",
+      "title_ko": "흑석 팝업 테스트베드 AI 조향 체험 부스",
+      "title_en": "Heukseok Pop-up Testbed — AI Perfume Booth",
+      "description_ko": "흑석역 팝업 테스트베드에서 AI 향수 전시와 조향 체험을 운영했습니다. 지하 1층에는 AI 분석으로 만든 향수를 소개하는 전시를, 지하 2층에는 미디어아트 플라워 전시와 향수 만들기 프로그램을 선보였습니다. 향료 오르간을 설치해 방문객이 AI 조향사가 추천한 레시피로 10ml 향수를 직접 조향했습니다.",
+      "description_en": "At the Heukseok Station pop-up testbed, we ran an AI perfume exhibition and blending experience. B1 featured an exhibition of perfumes created through AI analysis, while B2 hosted a media-art flower exhibition and a perfume-making program where visitors blended their own 10ml perfume at fragrance organs using recipes from the AI Perfumer.",
+      "year": 2025,
+      "period": "2025.11.14 – 11.17",
+      "category": "offline",
+      "tags": [
+        "Pop-up",
+        "AI Perfumer",
+        "Local"
+      ],
+      "services": [
+        "acscent",
+        "custom"
+      ],
+      "client": "흑석 팝업 테스트베드",
+      "location": "서울 흑석역",
+      "result_ko": "향료 오르간 2대 · 10ml 향수 120개",
+      "result_en": "2 fragrance organs · 120 perfumes (10ml)",
+      "images": [
+        "/images/portfolio/heukseok-popup-testbed-2025-1.webp",
+        "/images/portfolio/heukseok-popup-testbed-2025-2.webp",
+        "/images/portfolio/heukseok-popup-testbed-2025-3.webp",
+        "/images/portfolio/heukseok-popup-testbed-2025-4.webp"
+      ],
+      "is_featured": false,
+      "is_published": true
+    },
+    {
+      "slug": "seoul-writers-festival",
+      "title_ko": "서울국제작가축제 2025 AI 북퍼퓸 전시",
+      "title_en": "Seoul International Writers' Festival 2025 — AI Book Perfume Exhibition",
+      "description_ko": "책을 향으로 읽는 전시. 2025 서울국제작가축제에서 참가 도서 29종을 각각의 향수로 조향하고, 관람객의 이미지를 분석해 어울리는 책과 향을 매칭하는 AI 향 추천 시스템을 개발했습니다. 책 구절을 들려주는 AI 음성 내레이션과 필사 연동 인터랙션까지, 그라운드서울 1~3층의 전시를 연출했습니다.",
+      "description_en": "An exhibition where books are read through scent. For the 2025 Seoul International Writers' Festival, we blended a custom perfume for each of the 29 featured books and built an AI scent recommendation system that matches visitors with a book and its scent by analyzing their images. With AI voice narration of book passages and a transcription-linked interaction, we directed the exhibition across floors 1–3 of Ground Seoul.",
+      "year": 2025,
+      "period": "2025.09.12 – 09.17",
+      "tags": [
+        "Literary Festival",
+        "Book Perfume",
+        "AI Scent Matching"
+      ],
+      "location": "서울 그라운드서울",
+      "result_ko": "참가 도서 29종 커스텀 퍼퓸 · 책 시향지 30종 제작",
+      "result_en": "Custom perfumes for 29 books · 30 book scent strips",
+      "images": [
+        "/images/portfolio/seoul-writers-festival-1.webp",
+        "/images/portfolio/seoul-writers-festival-2.webp",
+        "/images/portfolio/seoul-writers-festival-3.webp",
+        "/images/portfolio/seoul-writers-festival-4.webp"
+      ],
+      "thumbnail": "/images/portfolio/seoul-writers-festival-1.webp"
+    },
+    {
+      "slug": "namsangol-hanok-chwihyang-2025",
+      "title_ko": "남산골한옥마을 〈취향(趣向·取香)〉",
+      "title_en": "Namsangol Hanok Village <Chwihyang>",
+      "description_ko": "취향(趣向)을 따라 향을 취(取)하다. 남산골한옥마을의 한옥콘서트 〈취향〉과 함께 남산골한옥마을 × AC'SCENT IDENTITY 공동 브랜딩 시향지를 제작하고, 관람객이 AI 조향사의 추천으로 나만의 향수를 만드는 조향 체험을 운영했습니다.",
+      "description_en": "Taking a scent (取香) by following your taste (趣向). Alongside Namsangol Hanok Village's hanok concert <Chwihyang>, we produced co-branded Namsangol Hanok Village × AC'SCENT IDENTITY scent strips and ran a blending experience where visitors made their own perfume with the AI Perfumer's recommendation.",
+      "year": 2025,
+      "period": "2025.09 – 10",
+      "category": "offline",
+      "tags": [
+        "Traditional Culture",
+        "AI Perfumer",
+        "Co-branding"
+      ],
+      "services": [
+        "acscent",
+        "custom"
+      ],
+      "client": "남산골한옥마을",
+      "location": "서울 남산골한옥마을",
+      "result_ko": "50ml 180개 · 10ml 300개 분량 조향 체험 운영",
+      "result_en": "Blending experience for 180 × 50ml and 300 × 10ml perfumes",
+      "images": [
+        "/images/portfolio/namsangol-hanok-chwihyang-2025-1.webp",
+        "/images/portfolio/namsangol-hanok-chwihyang-2025-2.webp",
+        "/images/portfolio/namsangol-hanok-chwihyang-2025-3.webp",
+        "/images/portfolio/namsangol-hanok-chwihyang-2025-4.webp"
+      ],
+      "is_featured": false,
+      "is_published": true
+    },
+    {
+      "slug": "tourism-venture-week-2025",
+      "title_ko": "관광벤처 이음주간 AI 향수 조향 체험",
+      "title_en": "Tourism Venture Connect Week — AI Perfume Experience",
+      "description_ko": "관광벤처 이음주간에서 ‘AI 이미지 분석 기반 맞춤형 향수 조향 체험’을 운영했습니다. AI가 방문객의 이미지를 분석해 어울리는 향을 추천하고, 방문객은 추천 레시피로 나만의 향수를 조향했습니다.",
+      "description_en": "At Tourism Venture Connect Week, we ran \"Custom Perfume Blending Based on AI Image Analysis.\" AI analyzed each visitor's image to recommend a matching scent, and visitors blended their own perfume from the recommended recipe.",
+      "year": 2025,
+      "period": "2025.09.24",
+      "category": "offline",
+      "tags": [
+        "Tourism Venture",
+        "AI Perfumer",
+        "Image Analysis"
+      ],
+      "services": [
+        "acscent",
+        "custom"
+      ],
+      "client": "관광벤처 이음주간",
+      "location": null,
+      "images": [
+        "/images/portfolio/tourism-venture-week-2025-1.webp",
+        "/images/portfolio/tourism-venture-week-2025-2.webp",
+        "/images/portfolio/tourism-venture-week-2025-3.webp",
+        "/images/portfolio/tourism-venture-week-2025-4.webp"
+      ],
+      "is_featured": false,
+      "is_published": true
+    },
+    {
+      "slug": "jecheon-music-film-festival",
+      "title_ko": "제천국제음악영화제 2025 AI 조향사 부스",
+      "title_en": "JIMFF 2025 — AI Perfumer Booth",
+      "description_ko": "‘AI와 완성하는 나만의 시네마 향수’. 제21회 제천국제음악영화제에서 AI 조향사 부스를 운영했습니다. AI가 관람객의 이미지를 분석해 어울리는 향을 추천하고, 그 자리에서 10ml 시네마 향수로 조향해 드렸습니다. 영화 〈화양연화〉와 〈해리포터〉를 모티프로 한 영화 시향지 2종도 함께 선보였습니다.",
+      "description_en": "\"Your own cinema perfume, completed with AI.\" At the 21st Jecheon International Music & Film Festival, we ran an AI Perfumer booth: AI analyzed each visitor's image to recommend a matching scent, blended on the spot into a 10ml cinema perfume. We also presented two film scent strips inspired by In the Mood for Love and Harry Potter.",
+      "year": 2025,
+      "period": "2025.09.04 – 09.07",
+      "tags": [
+        "Film Festival",
+        "AI Perfumer",
+        "Cinema Perfume"
+      ],
+      "result_ko": "4일간 AI 조향사 부스 운영 · 영화 시향지 2종 제작",
+      "result_en": "4-day AI Perfumer booth · 2 film scent strips",
+      "images": [
+        "/images/portfolio/jecheon-music-film-festival-1.webp",
+        "/images/portfolio/jecheon-music-film-festival-2.webp",
+        "/images/portfolio/jecheon-music-film-festival-3.webp",
+        "/images/portfolio/jecheon-music-film-festival-4.webp"
+      ],
+      "thumbnail": "/images/portfolio/jecheon-music-film-festival-1.webp"
+    },
+    {
+      "slug": "epson-oneday-class-2025",
+      "title_ko": "EPSON 원데이클래스 — AI로 만드는 나만의 향수",
+      "title_en": "EPSON One-day Class — Make Your Own Perfume with AI",
+      "description_ko": "한국엡손과 함께한 ‘AI로 만드는 나만의 향수’ 원데이클래스. AC'SCENT의 AI 조향사가 참가자에게 어울리는 향을 추천하고, 참가자는 추천 결과를 바탕으로 50ml 향수를 직접 완성했습니다.",
+      "description_en": "\"Make Your Own Perfume with AI,\" a one-day class with Epson Korea. AC'SCENT's AI Perfumer recommended a scent for each participant, who then blended their own 50ml perfume based on the recommendation.",
+      "year": 2025,
+      "period": "2025.08",
+      "category": "offline",
+      "tags": [
+        "Brand Collab",
+        "AI Perfumer",
+        "One-day Class"
+      ],
+      "services": [
+        "acscent",
+        "custom"
+      ],
+      "client": "한국엡손",
+      "location": null,
+      "images": [
+        "/images/portfolio/epson-oneday-class-2025-1.webp",
+        "/images/portfolio/epson-oneday-class-2025-2.webp",
+        "/images/portfolio/epson-oneday-class-2025-3.webp",
+        "/images/portfolio/epson-oneday-class-2025-4.webp"
+      ],
+      "is_featured": false,
+      "is_published": true
+    },
+    {
+      "slug": "hahyunsang-elegy-2024",
+      "title_ko": "하현상 〈Elegy〉 앨범 향수 컬렉션 & 팝업",
+      "title_en": "Ha Hyun-sang <Elegy> Album Perfume Collection & Pop-up",
+      "description_ko": "음악을 향으로 듣다. 싱어송라이터 하현상의 EP 〈Elegy〉 발매를 기념해 수록곡 6곡을 각각의 향으로 옮긴 앨범 향수 컬렉션을 제작했습니다. AC'SCENT 신촌에서 열린 공식 미디어아트 팝업스토어에서는 관람권에 50ml 향수와 손글씨 시향지를 함께 구성했고, 콘서트 현장에도 향을 납품했습니다.",
+      "description_en": "Listening to music through scent. To celebrate singer-songwriter Ha Hyun-sang's EP <Elegy>, we translated each of its six tracks into its own fragrance. At the official media-art pop-up at AC'SCENT Sinchon, every ticket came with a 50ml perfume and a handwritten scent strip, and we also supplied scent for the concert.",
+      "year": 2024,
+      "period": "2024.10.24 – 10.26",
+      "category": "ip",
+      "tags": [
+        "IP Collab",
+        "Album Perfume",
+        "Pop-up"
+      ],
+      "services": [
+        "acscent",
+        "custom"
+      ],
+      "client": "하현상 〈Elegy〉",
+      "location": "서울 신촌",
+      "result_ko": "수록곡 6곡 · 향수 6종",
+      "result_en": "6 tracks · 6 perfumes",
+      "images": [
+        "/images/portfolio/hahyunsang-elegy-2024-1.webp"
+      ],
+      "is_featured": false,
+      "is_published": true
+    },
+    {
+      "slug": "cross-the-line",
+      "images": [
+        "/images/portfolio/cross-the-line-1.webp",
+        "/images/portfolio/cross-the-line-2.webp",
+        "/images/portfolio/cross-the-line-3.webp",
+        "/images/portfolio/cross-the-line-4.webp"
+      ],
+      "thumbnail": "/images/portfolio/cross-the-line-1.webp"
+    },
+    {
+      "slug": "acscent-sinchon",
+      "images": [
+        "/images/portfolio/acscent-sinchon-1.webp",
+        "/images/portfolio/acscent-sinchon-2.webp",
+        "/images/portfolio/acscent-sinchon-3.webp",
+        "/images/portfolio/acscent-sinchon-4.webp"
+      ],
+      "thumbnail": "/images/portfolio/acscent-sinchon-1.webp"
+    },
+    {
+      "slug": "acscent-id",
+      "images": [
+        "/images/portfolio/acscent-id-1.webp",
+        "/images/portfolio/acscent-id-2.webp",
+        "/images/portfolio/acscent-id-3.webp",
+        "/images/portfolio/acscent-id-4.webp"
+      ],
+      "thumbnail": "/images/portfolio/acscent-id-1.webp"
+    }
+  ]
+}

@@ -70,6 +70,16 @@ export default function MobileMenu() {
     };
   }, [isMobileMenuOpen]);
 
+  // Close with Escape
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMobileMenuOpen, setMobileMenuOpen]);
+
   // Close on route change
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -94,6 +104,8 @@ export default function MobileMenu() {
             className="fixed inset-0 bg-neutral-950/40 backdrop-blur-sm"
             style={{ zIndex: 'var(--z-overlay)' }}
             onClick={handleClose}
+            // Lenis가 휠을 가로채 body overflow 잠금을 무시하고 뒤 페이지를 스크롤하지 않도록
+            data-lenis-prevent
             aria-hidden="true"
           />
 
@@ -106,6 +118,7 @@ export default function MobileMenu() {
             exit="exit"
             className="fixed top-0 right-0 bottom-0 flex w-full max-w-sm flex-col bg-white"
             style={{ zIndex: 'var(--z-modal)' }}
+            data-lenis-prevent
             role="dialog"
             aria-modal="true"
             aria-label={t('menu')}

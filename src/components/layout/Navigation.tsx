@@ -12,14 +12,19 @@ import { useUIStore } from '@/stores/uiStore';
    Horizontal nav links with animated teal underline indicator
    ───────────────────────────────────────────────────────── */
 
-export default function Navigation() {
+interface NavigationProps {
+  /** Light text for use over a dark background */
+  inverted?: boolean;
+}
+
+export default function Navigation({ inverted = false }: NavigationProps) {
   const t = useTranslations('nav');
   const pathname = usePathname();
   const setCursorVariant = useUIStore((s) => s.setCursorVariant);
 
-  // Only show the main nav items (exclude quote from nav center)
+  // 문의하기는 헤더 오른쪽 버튼으로 보여주므로 가운데 메뉴에서는 뺀다
   const navItems = NAV_ITEMS.filter(
-    (item) => item.path !== '/quote',
+    (item) => item.path !== '/contact',
   );
 
   return (
@@ -40,8 +45,10 @@ export default function Navigation() {
                 className={cn(
                   'relative inline-flex items-center px-4 py-2 text-sm font-medium transition-colors duration-200',
                   isActive
-                    ? 'text-teal-600'
-                    : 'text-neutral-600 hover:text-neutral-900',
+                    ? inverted ? 'text-teal-300' : 'text-teal-600'
+                    : inverted
+                      ? 'text-white/75 hover:text-white'
+                      : 'text-neutral-600 hover:text-neutral-900',
                 )}
               >
                 <motion.span

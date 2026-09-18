@@ -55,7 +55,8 @@ export function AcscentDemo() {
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-hidden font-body">
+    // overflow-x-clip: 전환 애니메이션의 가로 이동만 자르고 스크롤 컨테이너는 만들지 않아 시향 단계의 sticky 헤더가 동작한다
+    <div className="relative min-h-screen overflow-x-clip font-body">
       {/* Background grain texture */}
       <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")' }} />
 

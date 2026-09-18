@@ -73,7 +73,7 @@ export function ConsumerInsightsPanel({ prediction, targetInsight }: {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-2xl p-8 text-white relative overflow-hidden"
+        className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-2xl p-6 sm:p-8 text-white relative overflow-hidden"
       >
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-10"
@@ -110,7 +110,8 @@ export function ConsumerInsightsPanel({ prediction, targetInsight }: {
         <h4 className="text-xs font-semibold text-neutral-400 tracking-[0.15em] uppercase mb-5">
           Consumer Response Metrics
         </h4>
-        <div className="grid grid-cols-4 gap-4">
+        {/* 게이지(96px) 4개가 모바일 폭을 넘으므로 2x2 → sm 부터 1x4 */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <GaugeMetric value={prediction.purchaseIntentRate} label="구매 의향" />
           <GaugeMetric value={prediction.repurchaseRate} label="재구매율" />
           <GaugeMetric value={prediction.targetAudienceMatch} label="타깃 매칭" />
@@ -119,7 +120,7 @@ export function ConsumerInsightsPanel({ prediction, targetInsight }: {
       </motion.div>
 
       {/* Demographics */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Gender Breakdown */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}

@@ -92,7 +92,8 @@ export function AcscentTestFlow({ onComplete }: Props) {
   return (
     <div className="min-h-screen">
       {/* ── Sticky Header ──────────────────────────────── */}
-      <div className="sticky top-0 z-20 border-b border-neutral-800/50 bg-neutral-950/80 px-6 py-4 backdrop-blur-xl">
+      {/* 사이트 고정 헤더(h-16 / lg:h-20, z-index 100) 바로 아래에 붙는다 */}
+      <div className="sticky top-16 z-20 lg:top-20border-b border-neutral-800/50 bg-neutral-950/80 px-6 py-4 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-2xl">{fragrance.icon}</span>

@@ -5,10 +5,11 @@ import { useLocale, useTranslations } from 'next-intl';
 import { AnimatePresence, motion } from 'motion/react';
 import { useFirestorePortfolio, type DisplayPortfolio } from '@/hooks/useFirestorePortfolio';
 import { PortfolioCard } from './PortfolioCard';
+import { portfolioProjects } from '@/data/portfolio';
 import { ScrollReveal } from '@/components/animations';
 import { cn } from '@/lib/utils';
 
-type Division = 'all' | 'online' | 'offline' | 'service';
+type Division = 'all' | 'online' | 'offline' | 'service' | 'ip';
 
 interface DivisionConfig {
   id: Exclude<Division, 'all'>
@@ -48,6 +49,15 @@ const DIVISIONS: DivisionConfig[] = [
     dotColor: 'bg-teal-500',
     borderActive: 'border-teal-500',
   },
+  {
+    id: 'ip',
+    labelKo: 'IP 콜라보',
+    labelEn: 'IP Collaboration',
+    descKo: '아티스트·브랜드 IP를 향으로 옮기는 협업',
+    descEn: 'Turning artist and brand IP into scent',
+    dotColor: 'bg-rose-500',
+    borderActive: 'border-rose-500',
+  },
 ];
 
 function toCardProps(project: DisplayPortfolio, locale: string) {
@@ -57,7 +67,7 @@ function toCardProps(project: DisplayPortfolio, locale: string) {
       titleKey: project.slug,
       descriptionKey: project.slug,
       year: project.year,
-      category: project.category as 'online' | 'offline' | 'service',
+      category: project.category as 'online' | 'offline' | 'service' | 'ip',
       tags: project.tags,
       image: project.thumbnail,
       images: project.images,
@@ -74,7 +84,31 @@ export function PortfolioGrid() {
   const [active, setActive] = useState<Division>('all');
   const locale = useLocale();
   const t = useTranslations('portfolio');
-  const { projects, loading } = useFirestorePortfolio();
+  const { projects: firestoreProjects, loading } = useFirestorePortfolio();
+
+  // Firestore가 비어 있거나 읽기에 실패하면 코드에 있는 기본 프로젝트를 보여준다.
+  // (상세 페이지도 같은 방식으로 대체 데이터를 쓴다)
+  const projects: DisplayPortfolio[] =
+    firestoreProjects.length > 0
+      ? firestoreProjects
+      : portfolioProjects.map((project) => ({
+          id: project.slug,
+          slug: project.slug,
+          // 정적 데이터의 제목·설명은 번역 파일에 있다
+          title_ko: t(`projects.${project.titleKey}.title`),
+          title_en: t(`projects.${project.titleKey}.title`),
+          description_ko: t(`projects.${project.titleKey}.description`),
+          description_en: t(`projects.${project.titleKey}.description`),
+          year: project.year,
+          category: project.category,
+          tags: project.tags,
+          thumbnail: project.image,
+          images: project.images,
+          services: project.services,
+          client: project.client,
+          location: project.location,
+          is_featured: project.featured ?? false,
+        }));
 
   if (loading) {
     return (
@@ -103,14 +137,14 @@ export function PortfolioGrid() {
             <div className="h-8 w-px bg-slate-300" />
           </div>
 
-          {/* Horizontal branch line with 3 drops */}
-          <div className="relative mx-auto max-w-3xl px-4 sm:px-0">
+          {/* Horizontal branch line with one drop per division */}
+          <div className="relative mx-auto max-w-4xl px-4 sm:px-0">
             {/* The horizontal line - spans from first card center to last card center */}
-            <div className="absolute left-[calc(16.667%)] right-[calc(16.667%)] top-0 h-px bg-slate-300 hidden sm:block" />
+            <div className="absolute left-[calc(25%)] right-[calc(25%)] top-0 h-px bg-slate-300 hidden sm:block" />
             {/* Mobile: no horizontal line, just stack */}
 
-            {/* 3 columns */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {/* 4 columns */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {DIVISIONS.map((div, idx) => {
                 const isActive = active === div.id;
                 const divProjects = projects.filter((p) => p.category === div.id);

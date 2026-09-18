@@ -4,13 +4,14 @@ import { ScrollReveal } from '@/components/animations';
 import { IndustryShowcase } from '@/components/services/IndustryShowcase';
 import { ProcessFlow } from '@/components/services/ProcessFlow';
 import { ServiceCTA } from '@/components/services/ServiceCTA';
-import type { PillarId } from '@/data/experiences';
+import { industries, type IndustryId, type PillarId } from '@/data/experiences';
 
 const VALID_PILLARS: PillarId[] = ['ai-photo', 'ai-diagnosis', 'ai-fortune', 'ai-creative', 'ai-immersive'];
+const VALID_INDUSTRIES: IndustryId[] = industries.map((industry) => industry.id);
 
 interface Props {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ pillar?: string }>;
+  searchParams: Promise<{ pillar?: string; industry?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -30,11 +31,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ServicesPage({ params, searchParams }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { pillar: pillarParam } = await searchParams;
+  const { pillar: pillarParam, industry: industryParam } = await searchParams;
   const t = await getTranslations({ locale, namespace: 'services' });
 
   const initialPillar = VALID_PILLARS.includes(pillarParam as PillarId)
     ? (pillarParam as PillarId)
+    : undefined;
+  const initialIndustry = VALID_INDUSTRIES.includes(industryParam as IndustryId)
+    ? (industryParam as IndustryId)
     : undefined;
 
   return (
@@ -101,7 +105,7 @@ export default async function ServicesPage({ params, searchParams }: Props) {
       </section>
 
       {/* ── Industry Showcase (Main Selling Section) ──── */}
-      <IndustryShowcase initialPillar={initialPillar} />
+      <IndustryShowcase initialPillar={initialPillar} initialIndustry={initialIndustry} />
 
       {/* ── Process Flow ────────────────────────────────── */}
       <ProcessFlow />

@@ -1,8 +1,9 @@
 'use client';
 
-import { type ReactNode } from 'react';
+import { useContext, type ReactNode } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { RevealMarginContext } from './ScrollReveal';
 
 interface StaggerChildrenProps {
   children: ReactNode;
@@ -44,13 +45,15 @@ export function StaggerChildren({
   staggerDelay = 0.1,
   className,
 }: StaggerChildrenProps) {
+  const margin = useContext(RevealMarginContext) ?? '-60px';
+
   return (
     <motion.div
       variants={containerVariants}
       custom={staggerDelay}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: '-60px' }}
+      viewport={{ once: true, margin }}
       className={cn(className)}
     >
       {children}

@@ -1,8 +1,9 @@
 'use client';
 
+import type { ComponentProps } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { SOCIAL_LINKS } from '@/lib/constants';
+import { SOCIAL_LINKS, type SocialPlatform, QUOTE_HREF } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/uiStore';
 
@@ -60,33 +61,33 @@ const socialIcons = {
 
 /* ── Footer link columns definition ──────────────────── */
 
+// 서비스 페이지의 5개 필라로 연결한다. (?pillar= 값은 services 페이지가 해석함)
 const SERVICE_LINKS = [
-  { labelKey: 'acscent' as const, href: '/services' },
-  { labelKey: 'photobooth' as const, href: '/services' },
-  { labelKey: 'mediaArt' as const, href: '/services' },
-  { labelKey: 'spatialDesign' as const, href: '/services' },
-  { labelKey: 'rental' as const, href: '/services' },
-  { labelKey: 'custom' as const, href: '/services' },
+  { labelKey: 'aiPhoto' as const, href: '/services?pillar=ai-photo' },
+  { labelKey: 'aiDiagnosis' as const, href: '/services?pillar=ai-diagnosis' },
+  { labelKey: 'aiFortune' as const, href: '/services?pillar=ai-fortune' },
+  { labelKey: 'aiCreative' as const, href: '/services?pillar=ai-creative' },
+  { labelKey: 'aiImmersive' as const, href: '/services?pillar=ai-immersive' },
 ];
 
+// 실제 페이지가 있는 항목만 남긴다. (채용·블로그는 페이지가 생기면 다시 추가)
 const COMPANY_LINKS = [
   { labelKey: 'about' as const, href: '/about' },
   { labelKey: 'portfolio' as const, href: '/portfolio' },
-  { labelKey: 'careers' as const, href: '#' },
-  { labelKey: 'press' as const, href: '#' },
-  { labelKey: 'blog' as const, href: '#' },
+  { labelKey: 'press' as const, href: '/press' },
 ];
 
+// 이용약관·개인정보처리방침은 페이지가 준비되면 추가한다.
 const SUPPORT_LINKS = [
   { labelKey: 'contact' as const, href: '/contact' },
-  { labelKey: 'quote' as const, href: '/quote' },
-  { labelKey: 'faq' as const, href: '#' },
-  { labelKey: 'terms' as const, href: '#' },
-  { labelKey: 'privacy' as const, href: '#' },
+  { labelKey: 'quote' as const, href: QUOTE_HREF },
+  { labelKey: 'faq' as const, href: '/faq' },
+  { labelKey: 'demo' as const, href: '/demo' },
 ];
 
 export default function Footer() {
   const t = useTranslations('footer');
+  const tPillars = useTranslations('services.pillars');
   const setCursorVariant = useUIStore((s) => s.setCursorVariant);
   const currentYear = new Date().getFullYear();
 
@@ -95,7 +96,7 @@ export default function Footer() {
     children,
     external = false,
   }: {
-    href: string;
+    href: ComponentProps<typeof Link>['href'];
     children: React.ReactNode;
     external?: boolean;
   }) {
@@ -103,7 +104,7 @@ export default function Footer() {
       'text-sm text-neutral-400 transition-colors duration-200 hover:text-teal-400',
     );
 
-    if (external || href.startsWith('http')) {
+    if (typeof href === 'string' && (external || href.startsWith('http'))) {
       return (
         <a
           href={href}
@@ -168,7 +169,7 @@ export default function Footer() {
                 {SERVICE_LINKS.map((link) => (
                   <li key={link.labelKey}>
                     <FooterLink href={link.href}>
-                      {t(`columns.services.${link.labelKey}`)}
+                      {tPillars(`${link.labelKey}.name`)}
                     </FooterLink>
                   </li>
                 ))}
@@ -226,11 +227,10 @@ export default function Footer() {
           {/* Social icons */}
           <div className="flex items-center gap-3">
             {(
-              Object.entries(SOCIAL_LINKS) as [
-                keyof typeof SOCIAL_LINKS,
-                string,
-              ][]
-            ).map(([platform, url]) => {
+              Object.entries(SOCIAL_LINKS) as [SocialPlatform, string][]
+            )
+              .filter(([, url]) => Boolean(url))
+              .map(([platform, url]) => {
               const Icon = socialIcons[platform];
               return (
                 <a

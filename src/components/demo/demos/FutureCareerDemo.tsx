@@ -1,6 +1,9 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { QUOTE_HREF } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type {
@@ -10,6 +13,7 @@ import type {
   DemoStepProps,
   DemoResultProps,
 } from '@/types/demo';
+import type { PrintSpec } from '../kit';
 
 /* ── Static Data ─────────────────────────────────────── */
 const INTERESTS = [
@@ -161,8 +165,8 @@ function WorkStyleStep({ answers, onUpdate }: DemoStepProps) {
       {/* Axis labels - top */}
       <div className="grid grid-cols-[2rem_1fr_1fr] gap-2">
         <div />
-        <p className="text-center text-xs font-medium text-slate-500">\uD63C\uC790 Solo</p>
-        <p className="text-center text-xs font-medium text-slate-500">\uD568\uAED8 Team</p>
+        <p className="text-center text-xs font-medium text-slate-500">혼자 Solo</p>
+        <p className="text-center text-xs font-medium text-slate-500">함께 Team</p>
       </div>
 
       {/* Matrix rows */}
@@ -257,9 +261,16 @@ function SuperpowerStep({ answers, onUpdate }: DemoStepProps) {
 }
 
 /* ── Result Component ────────────────────────────────── */
-function CareerResult({ resultKey, onRestart }: DemoResultProps) {
-  const career = CAREERS[resultKey] ?? CAREERS['tech-entrepreneur']!;
-  const yearLabels = ['Year 1', 'Year 3', 'Year 5'];
+/** 성장 로드맵 timeline 3단계의 시점 */
+const YEAR_LABELS = ['Year 1', 'Year 3', 'Year 5'] as const;
+
+function careerFor(resultKey: string): CareerData {
+  return CAREERS[resultKey] ?? CAREERS['tech-entrepreneur']!;
+}
+
+function CareerResult({ resultKey, onRestart, pillarColor }: DemoResultProps) {
+  const tCommon = useTranslations('demos.common');
+  const career = careerFor(resultKey);
 
   return (
     <div className="space-y-8">
@@ -270,7 +281,7 @@ function CareerResult({ resultKey, onRestart }: DemoResultProps) {
         className="text-center space-y-3"
       >
         <p className="text-sm font-medium tracking-widest text-blue-400 uppercase">
-          AI \uBBF8\uB798 \uCEE4\uB9AC\uC5B4 \uBD84\uC11D \uACB0\uACFC
+          AI 미래 커리어 분석 결과
         </p>
         <p className="text-5xl">{career.emoji}</p>
         <h2 className="font-display text-3xl font-bold text-white sm:text-4xl">
@@ -278,7 +289,7 @@ function CareerResult({ resultKey, onRestart }: DemoResultProps) {
         </h2>
         <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/15 border border-blue-500/30 px-4 py-1.5">
           <span className="text-sm font-semibold text-blue-300">
-            \uC801\uD569\uB3C4 {career.compatibility}%
+            적합도 {career.compatibility}%
           </span>
         </div>
       </motion.div>
@@ -301,7 +312,7 @@ function CareerResult({ resultKey, onRestart }: DemoResultProps) {
         className="space-y-3"
       >
         <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">
-          \uC131\uC7A5 \uB85C\uB4DC\uB9F5
+          성장 로드맵
         </p>
         <div className="relative ml-8 space-y-6 py-2">
           {/* Vertical line */}
@@ -317,7 +328,7 @@ function CareerResult({ resultKey, onRestart }: DemoResultProps) {
             >
               <div className="relative z-10 mt-0.5 h-3 w-3 shrink-0 rounded-full bg-blue-500 shadow-sm shadow-blue-500/40" />
               <div>
-                <p className="text-xs font-semibold text-blue-400">{yearLabels[i]}</p>
+                <p className="text-xs font-semibold text-blue-400">{YEAR_LABELS[i]}</p>
                 <p className="text-sm text-slate-300">{text}</p>
               </div>
             </motion.div>
@@ -333,7 +344,7 @@ function CareerResult({ resultKey, onRestart }: DemoResultProps) {
         className="space-y-3"
       >
         <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">
-          \uD575\uC2EC \uC2A4\uD0AC
+          핵심 스킬
         </p>
         <div className="flex flex-wrap justify-center gap-2">
           {career.skills.map((skill) => (
@@ -352,15 +363,22 @@ function CareerResult({ resultKey, onRestart }: DemoResultProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
-        className="flex flex-col items-center gap-3 pt-4"
+        className="flex flex-wrap justify-center gap-3 pt-4"
       >
         <button
           type="button"
           onClick={onRestart}
           className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-6 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
         >
-          \uB2E4\uC2DC \uBD84\uC11D\uD558\uAE30
+          다시 분석하기
         </button>
+        <Link
+          href={QUOTE_HREF}
+          className="inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+          style={{ backgroundColor: pillarColor }}
+        >
+          {tCommon('ctaButton')}
+        </Link>
       </motion.div>
     </div>
   );
@@ -426,11 +444,41 @@ const config: DemoConfig = {
   ],
 };
 
+/* ── Print ───────────────────────────────────────────── */
+function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
+  const career = careerFor(resultKey);
+  const interest = INTERESTS.find((i) => i.id === answers['interest']);
+  const workStyle = QUADRANTS.find((q) => q.id === answers['workStyle']);
+  const superpower = SUPERPOWERS.find((s) => s.id === answers['superpower']);
+  return {
+    kind: 'receipt',
+    eyebrow: 'AI 미래 커리어 분석 결과',
+    title: career.name,
+    sections: [
+      { type: 'big', title: '커리어 적합도', text: `${career.compatibility}%` },
+      { type: 'text', text: career.desc },
+      {
+        type: 'rows',
+        title: '나의 커리어 DNA',
+        rows: [
+          { label: '관심 분야', value: interest?.label ?? '-' },
+          { label: '업무 스타일', value: workStyle?.label ?? '-' },
+          { label: '나의 초능력', value: superpower?.label ?? '-' },
+        ],
+      },
+      { type: 'list', title: '성장 로드맵', items: career.timeline.map((step, i) => `${YEAR_LABELS[i]} · ${step}`) },
+      { type: 'list', title: '핵심 스킬', items: career.skills },
+    ],
+    footer: '10년 뒤의 나에게 이 영수증을 보여 주세요',
+  };
+}
+
 const futureCareerDemo: DemoModule = {
   config,
   StepComponents: [InterestStep, WorkStyleStep, SuperpowerStep],
   ResultComponent: CareerResult,
   computeResult,
+  getPrint,
 };
 
 export default futureCareerDemo;

@@ -3,9 +3,11 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { TextReveal } from '@/components/animations';
 import { Badge } from '@/components/ui';
 import { NeuralCircuitGrid } from './NeuralCircuitGrid';
+import { HeroSlideshow } from './HeroSlideshow';
 
 export function HeroSection() {
   const t = useTranslations('hero');
@@ -29,15 +31,18 @@ export function HeroSection() {
       className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
       aria-label={t('tagline')}
     >
-      {/* ── Gradient mesh background ─────────────────────── */}
+      {/* ── Photo slideshow + gradient mesh background ───── */}
       <motion.div
-        className="absolute inset-0 -z-10"
+        className="absolute inset-0 -z-10 bg-neutral-950"
         style={{ y: bgY }}
       >
-        {/* Base gradient — strengthened teal */}
-        <div className="absolute inset-0 bg-gradient-to-b from-teal-50/30 via-teal-100/40 to-white" />
+        <HeroSlideshow />
 
-        {/* Radial mesh spots — boosted opacity */}
+        {/* Dark scrim — keeps white copy readable over bright photos */}
+        <div className="absolute inset-0 bg-neutral-950/60" />
+        <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/50 via-transparent to-neutral-950/70" />
+
+        {/* Radial mesh spots — teal glow over the photos */}
         <div
           className="absolute top-[-20%] right-[-10%] w-[80vw] h-[80vw] rounded-full opacity-45"
           style={{
@@ -82,14 +87,14 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <Badge variant="teal" className="mb-6 px-4 py-1.5 text-sm font-medium tracking-wide">
+          <Badge variant="teal" className="mb-6 px-4 py-1.5 text-sm font-medium tracking-wide bg-white/10 text-teal-200 ring-1 ring-white/15 backdrop-blur-sm">
             {t('badge')}
           </Badge>
         </motion.div>
 
         {/* Sub-tagline (above main heading) */}
         <motion.p
-          className="mb-3 text-base sm:text-lg md:text-xl font-medium text-neutral-500 tracking-wide"
+          className="mb-3 text-base sm:text-lg md:text-xl font-medium text-white/70 tracking-wide"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.4 }}
@@ -98,10 +103,10 @@ export function HeroSection() {
         </motion.p>
 
         {/* Main heading */}
-        <h1 className="font-[family-name:var(--font-display)] font-extrabold tracking-tight text-neutral-950">
+        <h1 className="font-[family-name:var(--font-display)] font-extrabold tracking-tight text-white">
           <TextReveal
             text={t('tagline')}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[0.95]"
+            className="justify-center text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[0.95]"
             delay={0.6}
             staggerDelay={0.06}
           />
@@ -109,7 +114,7 @@ export function HeroSection() {
 
         {/* Company name */}
         <motion.p
-          className="mt-3 text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold font-[family-name:var(--font-display)] text-gradient-teal tracking-tight"
+          className="mt-3 text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold font-[family-name:var(--font-display)] bg-linear-135 from-teal-300 to-teal-500 bg-clip-text text-transparent tracking-tight"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 1.2 }}
@@ -119,13 +124,34 @@ export function HeroSection() {
 
         {/* Description */}
         <motion.p
-          className="mt-6 max-w-xl text-base sm:text-lg text-neutral-600 leading-relaxed whitespace-pre-line"
+          className="mt-6 max-w-xl text-base sm:text-lg text-white/75 leading-relaxed whitespace-pre-line"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 1.5 }}
         >
           {t('description')}
         </motion.p>
+
+        {/* CTA */}
+        <motion.div
+          className="mt-8 flex flex-wrap items-center justify-center gap-3"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 1.8 }}
+        >
+          <Link
+            href="/contact"
+            className="inline-flex h-12 items-center justify-center rounded-lg bg-teal-600 px-7 text-base font-medium text-white transition-colors hover:bg-teal-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
+          >
+            {t('cta')}
+          </Link>
+          <Link
+            href="/portfolio"
+            className="inline-flex h-12 items-center justify-center rounded-lg border-2 border-white/30 px-7 text-base font-medium text-white transition-colors hover:border-white/50 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
+          >
+            {t('ctaSecondary')}
+          </Link>
+        </motion.div>
       </motion.div>
 
       {/* ── Scroll indicator ─────────────────────────────── */}
@@ -135,7 +161,7 @@ export function HeroSection() {
         animate={{ opacity: 1 }}
         transition={{ delay: 2.2, duration: 0.8 }}
       >
-        <span className="text-xs font-medium text-neutral-400 tracking-widest uppercase">
+        <span className="text-xs font-medium text-white/50 tracking-widest uppercase">
           {t('scrollIndicator')}
         </span>
         <motion.div
@@ -151,7 +177,7 @@ export function HeroSection() {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-teal-500"
+            className="text-teal-300"
             aria-hidden="true"
           >
             <polyline points="6 9 12 15 18 9" />

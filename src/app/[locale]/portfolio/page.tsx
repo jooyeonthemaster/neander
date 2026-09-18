@@ -63,7 +63,8 @@ export default async function PortfolioPage({ params }: Props) {
               title={t('subtitle')}
               subtitle={t('description')}
               align="center"
-              className="max-w-3xl [&_h2]:text-white [&_p]:text-slate-400 [&_span]:text-teal-400"
+              as="h1"
+              className="max-w-3xl [&_h1]:text-white [&_p]:text-slate-400 [&_span]:text-teal-400"
             />
           </ScrollReveal>
         </div>

@@ -64,11 +64,21 @@ export function BrandBriefForm({ onSubmit }: Props) {
   const [avoidedNotes, setAvoidedNotes] = useState<string[]>([]);
   const [lifestyleKeywords, setLifestyleKeywords] = useState<string[]>([]);
 
+  // 같은 계열을 선호·회피에 동시에 둘 수 없다 — 한쪽에서 고르면 다른 쪽에서 빠진다
+  const handlePreferredChange = (next: string[]) => {
+    setPreferredNotes(next);
+    setAvoidedNotes(prev => prev.filter(t => !next.includes(t)));
+  };
+  const handleAvoidedChange = (next: string[]) => {
+    setAvoidedNotes(next);
+    setPreferredNotes(prev => prev.filter(t => !next.includes(t)));
+  };
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!emotionalDescription.trim()) return;
     onSubmit({
-      brandName, targetAge, targetGender, emotionalDescription,
+      brandName: brandName.trim(), targetAge, targetGender, emotionalDescription,
       usageContext, budgetLevel, preferredNotes, avoidedNotes, lifestyleKeywords,
     });
   };
@@ -96,7 +106,7 @@ export function BrandBriefForm({ onSubmit }: Props) {
         {/* Teal Glow */}
         <div className="absolute top-0 right-1/4 w-[600px] h-[400px] bg-teal-500/8 rounded-full blur-[120px]" />
 
-        <div className="relative max-w-[1400px] mx-auto px-8 py-24 pb-20">
+        <div className="relative max-w-[1400px] mx-auto px-4 sm:px-8 py-16 pb-14 sm:py-24 sm:pb-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -108,7 +118,7 @@ export function BrandBriefForm({ onSubmit }: Props) {
                 AI-Powered Fragrance Design
               </span>
             </div>
-            <h1 className="font-[family-name:var(--font-display)] text-5xl md:text-6xl font-bold tracking-tight leading-[1.1] mb-4">
+            <h1 className="font-[family-name:var(--font-display)] text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.1] mb-4">
               Emotional Brief
             </h1>
             <p className="text-neutral-400 text-lg max-w-xl leading-relaxed">
@@ -121,11 +131,12 @@ export function BrandBriefForm({ onSubmit }: Props) {
 
       {/* Form Body */}
       <form onSubmit={handleSubmit} className="flex-1 bg-white">
-        <div className="max-w-[1400px] mx-auto px-8 py-16">
-          <div className="grid grid-cols-12 gap-x-12 gap-y-16">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-12 sm:py-16">
+          {/* 모바일은 1단, lg 부터 7:5 2단 */}
+          <div className="grid grid-cols-1 gap-y-12 lg:grid-cols-12 lg:gap-x-12 lg:gap-y-16">
 
             {/* ── Left Column: Core Info ── */}
-            <div className="col-span-7 space-y-12">
+            <div className="lg:col-span-7 space-y-12">
               {/* Brand Name */}
               <motion.div custom={0} variants={fadeUp} initial="hidden" animate="visible">
                 <label className="block text-xs font-semibold text-neutral-950 tracking-[0.15em] uppercase mb-3">
@@ -155,7 +166,7 @@ export function BrandBriefForm({ onSubmit }: Props) {
                   rows={4}
                   className="w-full border-2 border-neutral-200 focus:border-teal-500 rounded-xl px-5 py-4 text-base text-neutral-800 placeholder:text-neutral-300 outline-none transition-colors resize-none leading-relaxed"
                 />
-                <div className="flex gap-2 mt-3">
+                <div className="flex flex-wrap gap-2 mt-3">
                   {['세련되고 도시적인', '따뜻하고 포근한', '신비롭고 관능적인', '상쾌하고 자유로운'].map(tag => (
                     <button
                       key={tag}
@@ -174,7 +185,7 @@ export function BrandBriefForm({ onSubmit }: Props) {
                 <label className="block text-xs font-semibold text-neutral-950 tracking-[0.15em] uppercase mb-5">
                   Target Audience
                 </label>
-                <div className="grid grid-cols-2 gap-8">
+                <div className="grid grid-cols-2 gap-4 sm:gap-8">
                   {/* Age */}
                   <div>
                     <span className="text-sm font-medium text-neutral-950 mb-3 block">연령대</span>
@@ -243,7 +254,7 @@ export function BrandBriefForm({ onSubmit }: Props) {
             </div>
 
             {/* ── Right Column: Preferences ── */}
-            <div className="col-span-5 space-y-12">
+            <div className="lg:col-span-5 space-y-12">
               {/* Usage Context */}
               <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible">
                 <label className="block text-xs font-semibold text-neutral-950 tracking-[0.15em] uppercase mb-3">
@@ -303,7 +314,7 @@ export function BrandBriefForm({ onSubmit }: Props) {
                   Preferred Notes <span className="text-neutral-500">(optional)</span>
                 </label>
                 <p className="text-sm text-neutral-700 mb-4">선호하는 향의 계열을 선택하세요.</p>
-                <TagSelect options={NOTE_TAG_OPTIONS} selected={preferredNotes} onChange={setPreferredNotes} />
+                <TagSelect options={NOTE_TAG_OPTIONS} selected={preferredNotes} onChange={handlePreferredChange} />
               </motion.div>
 
               {/* Avoided Notes */}
@@ -312,7 +323,7 @@ export function BrandBriefForm({ onSubmit }: Props) {
                   Notes to Avoid <span className="text-neutral-500">(optional)</span>
                 </label>
                 <p className="text-sm text-neutral-700 mb-4">피하고 싶은 향의 계열을 선택하세요.</p>
-                <TagSelect options={NOTE_TAG_OPTIONS} selected={avoidedNotes} onChange={setAvoidedNotes} color="red" />
+                <TagSelect options={NOTE_TAG_OPTIONS} selected={avoidedNotes} onChange={handleAvoidedChange} color="red" />
               </motion.div>
 
               {/* Submit */}

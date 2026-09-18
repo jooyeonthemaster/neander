@@ -46,3 +46,10 @@ next-env.d.ts
 nul
 
 .vercel
+
+# firebase admin service account keys
+*firebase-adminsdk*.json
+service-account*.json
+
+# firebase CLI logs
+firebase-debug*.log

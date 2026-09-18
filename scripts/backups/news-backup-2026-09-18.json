@@ -1,0 +1,244 @@
+{
+  "documents": [
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/BvCtpjmXEv6smGeWNNd8",
+      "fields": {
+        "source_url": {
+          "nullValue": null
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "source_name": {
+          "stringValue": "스타트업투데이"
+        },
+        "summary": {
+          "stringValue": "AI 체험 콘텐츠 전문 기업 네안데르가 시리즈A 투자를 유치하며 공간 디자인 사업을 본격 확대한다고 밝혔다."
+        },
+        "title": {
+          "stringValue": "네안데르, 시리즈A 투자 유치… AI 공간 디자인 사업 확대"
+        },
+        "published_at": {
+          "stringValue": "2025-07-22T00:00:00.000Z"
+        },
+        "content": {
+          "stringValue": "\u003cp\u003eAI 체험 콘텐츠 전문 기업 네안데르가 시리즈A 투자를 유치하며 공간 디자인 사업을 본격 확대한다고 밝혔다.\u003c/p\u003e"
+        },
+        "created_at": {
+          "stringValue": "2025-07-22T00:00:00.000Z"
+        },
+        "updated_at": {
+          "stringValue": "2025-07-22T00:00:00.000Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "category": {
+          "stringValue": "press"
+        }
+      },
+      "createTime": "2026-04-05T15:47:42.016723Z",
+      "updateTime": "2026-04-05T15:47:42.016723Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/JOivS3wTcKkYzZp8Wzw6",
+      "fields": {
+        "content": {
+          "stringValue": "\u003cp\u003eAI 포토부스를 운영하는 네안데르가 누적 체험 인원 1만 명을 돌파했다고 밝혔다. 행사 맞춤형 AI 이미지 생성 기술이 핵심 경쟁력이다.\u003c/p\u003e"
+        },
+        "created_at": {
+          "stringValue": "2025-11-20T00:00:00.000Z"
+        },
+        "published_at": {
+          "stringValue": "2025-11-20T00:00:00.000Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "summary": {
+          "stringValue": "AI 포토부스를 운영하는 네안데르가 누적 체험 인원 1만 명을 돌파했다고 밝혔다."
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "updated_at": {
+          "stringValue": "2025-11-20T00:00:00.000Z"
+        },
+        "title": {
+          "stringValue": "“감각을 설계하다” 네안데르의 AI 포토부스, 누적 체험 1만 명 돌파"
+        },
+        "source_name": {
+          "stringValue": "한국경제"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "source_url": {
+          "nullValue": null
+        }
+      },
+      "createTime": "2026-04-05T15:47:10.848205Z",
+      "updateTime": "2026-04-05T15:47:10.848205Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/OUbS7YkEq4DqUwglFOSq",
+      "fields": {
+        "updated_at": {
+          "stringValue": "2025-09-05T00:00:00.000Z"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "created_at": {
+          "stringValue": "2025-09-05T00:00:00.000Z"
+        },
+        "source_url": {
+          "nullValue": null
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "title": {
+          "stringValue": "체험형 AI 콘텐츠, 브랜드 마케팅의 새 트랜드로 부상"
+        },
+        "source_name": {
+          "stringValue": "동아일보"
+        },
+        "summary": {
+          "stringValue": "오프라인 매장과 행사에서 AI 기술을 활용한 체험형 콘텐츠가 새로운 마케팅 수단으로 주목받고 있다."
+        },
+        "published_at": {
+          "stringValue": "2025-09-05T00:00:00.000Z"
+        },
+        "content": {
+          "stringValue": "\u003cp\u003e오프라인 매장과 행사에서 AI 기술을 활용한 체험형 콘텐츠가 새로운 마케팅 수단으로 주목받고 있다. 네안데르는 190회 이상의 행사 운영 경험을 보유하고 있다.\u003c/p\u003e"
+        }
+      },
+      "createTime": "2026-04-05T15:47:32.994269Z",
+      "updateTime": "2026-04-05T15:47:32.994269Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/ezLnbTeGf2zFYlw8RNVS",
+      "fields": {
+        "created_at": {
+          "stringValue": "2025-06-10T00:00:00.000Z"
+        },
+        "title": {
+          "stringValue": "글로벌 뷰티 브랜드 X 네안데르, AI 향기 팝업 스토어 성료"
+        },
+        "content": {
+          "stringValue": "\u003cp\u003e글로벌 뷰티 브랜드와 네안데르가 협업한 AI 향기 팝업 스토어가 성공적으로 마무리됐다. 방문객 만족도 95%를 기록했다.\u003c/p\u003e"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "updated_at": {
+          "stringValue": "2025-06-10T00:00:00.000Z"
+        },
+        "summary": {
+          "stringValue": "글로벌 뷰티 브랜드와 네안데르가 협업한 AI 향기 팝업 스토어가 성공적으로 마무리됐다. 방문객 만족도 95%를 기록했다."
+        },
+        "source_name": {
+          "stringValue": "뷰티경제"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "published_at": {
+          "stringValue": "2025-06-10T00:00:00.000Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "source_url": {
+          "nullValue": null
+        }
+      },
+      "createTime": "2026-04-05T15:47:50.335976Z",
+      "updateTime": "2026-04-05T15:47:50.335976Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/hR8OzWnBxvefD5Kjuw6b",
+      "fields": {
+        "created_at": {
+          "stringValue": "2025-10-08T00:00:00.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "title": {
+          "stringValue": "네안데르, 서울 디자인 페스티벌서 인터랙티브 미디어아트 전시"
+        },
+        "updated_at": {
+          "stringValue": "2025-10-08T00:00:00.000Z"
+        },
+        "source_name": {
+          "stringValue": "조선일보"
+        },
+        "published_at": {
+          "stringValue": "2025-10-08T00:00:00.000Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "content": {
+          "stringValue": "\u003cp\u003e네안데르가 서울 디자인 페스티벌에 참가해 AI 기반 인터랙티브 미디어아트를 선보였다. 관람객의 움직임에 반응하는 실시간 영상 기술이 화제를 모았다.\u003c/p\u003e"
+        },
+        "source_url": {
+          "nullValue": null
+        },
+        "summary": {
+          "stringValue": "네안데르가 서울 디자인 페스티벌에 참가해 AI 기반 인터랙티브 미디어아트를 선보였다."
+        }
+      },
+      "createTime": "2026-04-05T15:47:21.791815Z",
+      "updateTime": "2026-04-05T15:47:21.791815Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/yzHNpz33drhXcH4S0G25",
+      "fields": {
+        "summary": {
+          "stringValue": "AI 기반 체험형 콘텐츠 기업 네안데르가 맞춤형 향수 제조 솔루션을 선보이며 팝업 스토어 시장에서 주목받고 있다."
+        },
+        "source_name": {
+          "stringValue": "매일경제"
+        },
+        "created_at": {
+          "stringValue": "2025-12-15T00:00:00.000Z"
+        },
+        "content": {
+          "stringValue": "\u003cp\u003eAI 기반 체험형 콘텐츠 기업 네안데르가 맞춤형 향수 제조 솔루션을 선보이며 팝업 스토어 시장에서 주목받고 있다.\u003c/p\u003e"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "updated_at": {
+          "stringValue": "2025-12-15T00:00:00.000Z"
+        },
+        "title": {
+          "stringValue": "네안데르, AI 향수 체험형 콘텐츠로 팝업 시장 공략"
+        },
+        "published_at": {
+          "stringValue": "2025-12-15T00:00:00.000Z"
+        },
+        "source_url": {
+          "nullValue": null
+        }
+      },
+      "createTime": "2026-04-05T15:47:00.568069Z",
+      "updateTime": "2026-04-05T15:47:00.568069Z"
+    }
+  ]
+}

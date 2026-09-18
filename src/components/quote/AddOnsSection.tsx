@@ -1,13 +1,14 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useQuoteStore } from '@/stores/quoteStore';
 import { addOns } from '@/data/pricing';
-import { formatKRW } from '@/lib/pricing';
+import { formatPrice } from '@/lib/pricing';
 import { cn } from '@/lib/utils';
 
 export function AddOnsSection() {
+  const locale = useLocale();
   const t = useTranslations('quote');
   const selectedAddOns = useQuoteStore((s) => s.selectedAddOns);
   const toggleAddOn = useQuoteStore((s) => s.toggleAddOn);
@@ -84,7 +85,8 @@ export function AddOnsSection() {
                     isActive ? 'text-teal-600' : 'text-slate-500'
                   )}
                 >
-                  +{formatKRW(addon.priceKRW)}
+                  +{formatPrice(addon.priceKRW, locale)}
+                  {addon.perDay && t('perDay')}
                 </span>
 
                 {isActive && (

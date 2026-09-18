@@ -52,6 +52,8 @@ export interface NewsArticle {
   source_url: string | null
   is_published: boolean
   published_at: string | null
+  /** 예시(샘플)로 넣어둔 글. 관리자 목록에서만 배지로 표시하고 공개 화면에는 영향을 주지 않는다 */
+  is_sample?: boolean
   created_at: string
   updated_at: string
 }
@@ -67,7 +69,7 @@ export interface PortfolioItem {
   description_en: string
   slug: string
   year: number
-  category: 'online' | 'offline' | 'service'
+  category: 'online' | 'offline' | 'service' | 'ip'
   tags: string[]
   images: string[]        // Firebase Storage URLs
   thumbnail: string       // 대표 이미지 URL
@@ -77,6 +79,11 @@ export interface PortfolioItem {
   is_featured: boolean
   display_order: number
   is_published: boolean
+  /** 상세 페이지에 표시할 기간 (예: "2026.09.04 – 09.07"). 없으면 year 사용 */
+  period?: string
+  /** 상세 페이지 Result 박스 문구. 없으면 박스를 숨김 */
+  result_ko?: string
+  result_en?: string
   created_at: string
   updated_at: string
 }
@@ -122,6 +129,7 @@ export const PORTFOLIO_CATEGORY_LABELS: Record<PortfolioItem['category'], string
   online: '온라인 솔루션',
   offline: '오프라인 솔루션',
   service: '네안데르 서비스',
+  ip: 'IP 콜라보',
 }
 
 export const ASPECT_RATIO_OPTIONS = [

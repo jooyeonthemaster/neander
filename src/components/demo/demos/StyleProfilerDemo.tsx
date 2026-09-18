@@ -1,6 +1,9 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { QUOTE_HREF } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type {
@@ -10,6 +13,7 @@ import type {
   DemoStepProps,
   DemoResultProps,
 } from '@/types/demo';
+import type { PrintSpec } from '../kit';
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -289,8 +293,13 @@ function computeResult(answers: DemoAnswers): string {
 
 /* ── Result Component ──────────────────────────────────── */
 
+function archetypeFor(resultKey: string): ArchetypeData {
+  return RESULTS[resultKey as ArchetypeKey] ?? RESULTS['modern-essentialist'];
+}
+
 function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps) {
-  const data = RESULTS[resultKey as ArchetypeKey] ?? RESULTS['modern-essentialist'];
+  const tCommon = useTranslations('demos.common');
+  const data = archetypeFor(resultKey);
 
   return (
     <motion.div
@@ -372,14 +381,13 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
         >
           다시 진단하기
         </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="rounded-xl px-6 py-3 text-sm font-semibold text-white"
+        <Link
+          href={QUOTE_HREF}
+          className="rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
           style={{ backgroundColor: pillarColor }}
         >
-          체험 상담 신청
-        </motion.button>
+          {tCommon('ctaButton')}
+        </Link>
       </div>
     </motion.div>
   );
@@ -387,11 +395,43 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
 
 /* ── Export ──────────────────────────────────────────────── */
 
+/* ── Print — 스타일 태그 영수증 ─────────────────────────── */
+
+function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
+  const data = archetypeFor(resultKey);
+  const palette = (answers['palette'] as string[] | undefined) ?? [];
+  const vibe = VIBES.find((v) => v.id === answers['vibe']);
+  const occasion = OCCASIONS.find((o) => o.id === answers['occasion']);
+  const palettes = PALETTES.filter((p) => palette.includes(p.id)).map((p) => p.label);
+  return {
+    kind: 'receipt',
+    eyebrow: '당신의 스타일 아키타입',
+    title: data.name,
+    sections: [
+      { type: 'text', text: data.tags.join(' ') },
+      {
+        type: 'rows',
+        title: '스타일 프로필',
+        rows: [
+          { label: '무드', value: vibe?.label ?? '-' },
+          { label: '컬러', value: palettes.join(' · ') || '-' },
+          { label: 'TPO', value: occasion?.label ?? '-' },
+        ],
+      },
+      { type: 'list', title: '추천 워드로브', items: data.wardrobe.map((w) => `${w.item} (${w.why})`) },
+      { type: 'text', title: '추천 컬러 코드', text: data.colors.join(' ') },
+      { type: 'text', title: '스타일 노트', text: data.desc },
+    ],
+    footer: '내일 아침 옷장 앞에서 꺼내 보세요',
+  };
+}
+
 const StyleProfilerDemo: DemoModule = {
   config,
   StepComponents: [StepVibe, StepPalette, StepOccasion],
   ResultComponent,
   computeResult,
+  getPrint,
 };
 
 export default StyleProfilerDemo;

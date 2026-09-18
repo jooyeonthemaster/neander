@@ -66,6 +66,28 @@ function calculateServicePrice(serviceKey: string, options: Record<string, strin
   return total;
 }
 
+/**
+ * 옵션을 모두 최솟값으로 골랐을 때의 가격 ("~부터" 표시용).
+ * 기본가만 보여주면 최소 수량이 1 이상인 옵션(예: AI 스타일)의 비용이 빠져 실제보다 싸게 보인다.
+ */
+export function getStartingPrice(serviceKey: string): number {
+  const tier = pricingTiers.find((t) => t.serviceKey === serviceKey);
+  if (!tier) return 0;
+
+  const options: Record<string, string | number | boolean> = {};
+  for (const opt of tier.options) {
+    if (opt.type === 'toggle') {
+      options[opt.id] = false;
+    } else if (opt.type === 'select' && typeof opt.priceModifier === 'object') {
+      const prices = opt.priceModifier as Record<string, number>;
+      options[opt.id] = Object.keys(prices).reduce((a, b) => (prices[a] <= prices[b] ? a : b));
+    } else if (opt.type === 'number') {
+      options[opt.id] = opt.min ?? 0;
+    }
+  }
+  return calculateServicePrice(serviceKey, options);
+}
+
 function getDefaultOptions(serviceKey: string): Record<string, string | number | boolean> {
   const tier = pricingTiers.find((t) => t.serviceKey === serviceKey);
   if (!tier) return {};
@@ -167,6 +189,9 @@ export const useQuoteStore = create<QuoteState>()(
     }),
     {
       name: 'neander-quote',
+      // 서버는 저장값 없이 그리므로, 첫 렌더에 localStorage 값을 쓰면 하이드레이션 불일치가 난다.
+      // QuoteBuilder가 마운트된 뒤 rehydrate()로 불러온다.
+      skipHydration: true,
     }
   )
 );

@@ -120,6 +120,9 @@ body {
   background-color: #ffffff;
   line-height: 1.6;
   overflow-x: hidden;
+  /* Wrap Korean at spaces, not mid-word; still break words too long for their box */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 /* ── Selection ────────────────────────────────────────── */
@@ -210,14 +213,16 @@ body {
 
 @utility glass {
   background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(16px) saturate(180%);
+  /* -webkit- 먼저: 순서가 반대면 CSS 최적화 과정에서 표준 속성이 빠져 크롬에서 블러가 사라진다 */
   -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
 }
 
 @utility glass-dark {
   background: rgba(9, 9, 11, 0.72);
-  backdrop-filter: blur(16px) saturate(180%);
+  /* -webkit- 먼저: 순서가 반대면 CSS 최적화 과정에서 표준 속성이 빠져 크롬에서 블러가 사라진다 */
   -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
 }
 
 /* ── Content Container ────────────────────────────────── */
@@ -369,6 +374,46 @@ body {
   white-space: nowrap;
   border-width: 0;
 }
+
+/* ─────────────────────────────────────────────────────────
+   Home Section Snapping
+   Mouse / trackpad only — touch devices keep free scrolling.
+   Snap targets come from ScrollOverlaySection's `snap` markers;
+   the footer gets its own so the page end stays reachable.
+   ───────────────────────────────────────────────────────── */
+
+@media (hover: hover) and (pointer: fine) {
+  html.home-snap {
+    scroll-snap-type: y mandatory;
+  }
+
+  html.home-snap footer {
+    scroll-snap-align: end;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   Home Screens
+   On desktop each home section fills exactly one screen so
+   a snap always lands on a complete page; <FitToViewport>
+   keeps the content inside it. The top padding clears the
+   fixed header, and --screen-reserve carves out room for
+   whatever shares the screen (the footer, under the CTA).
+   ───────────────────────────────────────────────────────── */
+
+@utility home-screen {
+  @media (width >= 64rem) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: calc(100svh - var(--screen-reserve, 0px));
+    padding-top: calc(5rem + 2vh);
+    padding-bottom: 3vh;
+  }
+}
+
+/* Laptop-height desktop screens — home sections use compact spacing */
+@custom-variant lg-short (@media (width >= 64rem) and (height <= 860px));
 
 /* ─────────────────────────────────────────────────────────
    Reduced Motion

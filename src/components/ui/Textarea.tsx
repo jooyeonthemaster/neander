@@ -17,8 +17,7 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ label, error, className, id, onFocus, onBlur, value, defaultValue, ...props }, ref) => {
     const [isFocused, setIsFocused] = useState(false);
-    const hasValue = value !== undefined ? String(value).length > 0 : false;
-    const isFloating = isFocused || hasValue || !!defaultValue;
+    // 값이 있는지는 CSS(:placeholder-shown)로 판단한다. (Input.tsx와 동일)
 
     const textareaId = id || (label ? `textarea-${label.replace(/\s+/g, '-').toLowerCase()}` : undefined);
     const errorId = error && textareaId ? `${textareaId}-error` : undefined;
@@ -59,9 +58,9 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             className={cn(
               'absolute left-4 transition-all duration-200 pointer-events-none',
               'text-slate-500',
-              isFloating
-                ? 'top-2 text-[11px] font-medium'
-                : 'top-4 text-sm',
+              'top-2 text-[11px] font-medium',
+              'peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm',
+              'peer-focus:top-2 peer-focus:text-[11px] peer-focus:font-medium',
               isFocused && !error && 'text-teal-600',
               error && 'text-rose-500'
             )}

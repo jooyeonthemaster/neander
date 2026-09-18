@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface BeforeAfterSliderProps {
@@ -11,6 +12,7 @@ interface BeforeAfterSliderProps {
 }
 
 export function BeforeAfterSlider({ beforeSrc, afterSrc, className }: BeforeAfterSliderProps) {
+  const t = useTranslations('photoBooth');
   const [position, setPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -55,7 +57,7 @@ export function BeforeAfterSlider({ beforeSrc, afterSrc, className }: BeforeAfte
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       role="slider"
-      aria-label="Before and after comparison slider"
+      aria-label={t('compareSlider')}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.round(position)}
@@ -72,25 +74,20 @@ export function BeforeAfterSlider({ beforeSrc, afterSrc, className }: BeforeAfte
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={afterSrc}
-        alt="After transformation"
+        alt={t('afterImage')}
         className="block w-full h-auto max-h-[500px] object-contain"
         draggable={false}
       />
 
-      {/* Before image (clipped) */}
-      <div
-        className="absolute inset-0 overflow-hidden"
-        style={{ width: `${position}%` }}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={beforeSrc}
-          alt="Before transformation"
-          className="block w-full h-auto max-h-[500px] object-contain"
-          style={{ width: containerRef.current ? `${containerRef.current.offsetWidth}px` : '100%' }}
-          draggable={false}
-        />
-      </div>
+      {/* Before image — after 이미지와 같은 크기로 겹쳐 두고 왼쪽 position%만 보이게 자른다 */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={beforeSrc}
+        alt={t('beforeImage')}
+        className="absolute inset-0 block h-full w-full object-contain"
+        style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
+        draggable={false}
+      />
 
       {/* Divider line */}
       <div

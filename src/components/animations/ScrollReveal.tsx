@@ -1,10 +1,17 @@
 'use client';
 
-import { type ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 type Direction = 'up' | 'down' | 'left' | 'right';
+
+/**
+ * Overrides the in-view margin of reveals below it. The default negative
+ * margin waits until an element is well inside the viewport, which never
+ * happens near the bottom of a section that exactly fills the screen.
+ */
+export const RevealMarginContext = createContext<string | undefined>(undefined);
 
 interface ScrollRevealProps {
   children: ReactNode;
@@ -44,6 +51,7 @@ export function ScrollReveal({
   className,
 }: ScrollRevealProps) {
   const offset = getDirectionOffset(direction, distance);
+  const margin = useContext(RevealMarginContext) ?? '-80px';
 
   const variants: Variants = {
     hidden: {
@@ -68,7 +76,7 @@ export function ScrollReveal({
       variants={variants}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once, margin: '-80px' }}
+      viewport={{ once, margin }}
       className={cn(className)}
     >
       {children}

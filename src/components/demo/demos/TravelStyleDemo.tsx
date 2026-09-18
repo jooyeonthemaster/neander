@@ -1,6 +1,9 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { QUOTE_HREF } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type {
@@ -10,6 +13,7 @@ import type {
   DemoStepProps,
   DemoResultProps,
 } from '@/types/demo';
+import { answersSeed, seededInt, seededPick, type PrintSpec } from '../kit';
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -41,53 +45,55 @@ type ResultKey =
 interface ResultData {
   name: string; emoji: string; destination: string; tip: string;
   packing: string[]; desc: string;
+  /** 출력물(보딩패스)에 찍는 첫 번째 여행지의 공항 코드 */
+  airport: string;
 }
 
 const RESULTS: Record<ResultKey, ResultData> = {
   'urban-explorer': {
-    name: '어반 익스플로러', emoji: '\u{1F303}', destination: '도쿄 & 뉴욕',
+    name: '어반 익스플로러', emoji: '\u{1F303}', destination: '도쿄 & 뉴욕', airport: 'NRT',
     tip: '구글맵에 가고 싶은 곳을 미리 저장해 두세요. 효율적인 동선이 핵심!',
     packing: ['편한 운동화', '보조배터리', '폴딩 에코백'],
     desc: '도시의 모든 것을 경험하고 싶은 탐험가! 효율적인 동선으로 숨겨진 명소까지 정복합니다.',
   },
   'city-flaneur': {
-    name: '시티 플라뇌르', emoji: '\u{1F6B6}', destination: '파리 & 리스본',
+    name: '시티 플라뇌르', emoji: '\u{1F6B6}', destination: '파리 & 리스본', airport: 'CDG',
     tip: '계획 없이 걸어보세요. 골목에서 만나는 예상치 못한 발견이 최고의 여행입니다.',
     packing: ['가죽 노트', '필름 카메라', '편안한 로퍼'],
     desc: '느린 걸음으로 도시의 감성을 흡수하는 플라뇌르! 일상처럼 여행하는 것이 당신의 스타일.',
   },
   'nature-wanderer': {
-    name: '네이처 원더러', emoji: '\u{1F33F}', destination: '뉴질랜드 & 스위스',
+    name: '네이처 원더러', emoji: '\u{1F33F}', destination: '뉴질랜드 & 스위스', airport: 'AKL',
     tip: '국립공원 연간 패스를 확인해 보세요. 자연은 아침이 가장 아름답습니다.',
     packing: ['트레킹 부츠', '경량 방수 재킷', '쌍안경'],
     desc: '자연 속에서 진정한 자유를 느끼는 방랑자! 산과 숲이 당신에게 최고의 힐링을 선물합니다.',
   },
   'culture-pilgrim': {
-    name: '컬처 필그림', emoji: '\u{1FAFE}', destination: '로마 & 교토',
+    name: '컬처 필그림', emoji: '\u{1FAFE}', destination: '로마 & 교토', airport: 'FCO',
     tip: '현지 가이드 투어를 추천해요. 역사적 맥락을 알면 감동이 배가 됩니다.',
     packing: ['여행 가이드북', '접이식 우산', '스케치북'],
     desc: '역사와 문화의 깊이를 탐구하는 순례자! 박물관과 유적지에서 시간을 초월한 감동을 느낍니다.',
   },
   'beach-soul': {
-    name: '비치 소울', emoji: '\u{1F41A}', destination: '몰디브 & 발리',
+    name: '비치 소울', emoji: '\u{1F41A}', destination: '몰디브 & 발리', airport: 'MLE',
     tip: '해먹에 누워 책 한 권. 아무것도 안 하는 게 최고의 여행이에요.',
     packing: ['선크림 SPF50', '해먹', '블루투스 스피커'],
     desc: '바다가 부르면 떠나는 해변의 영혼! 파도 소리와 함께하는 느긋한 시간이 삶을 충전합니다.',
   },
   'coastal-drifter': {
-    name: '코스탈 드리프터', emoji: '\u26F5', destination: '산토리니 & 아말피',
+    name: '코스탈 드리프터', emoji: '\u26F5', destination: '산토리니 & 아말피', airport: 'JTR',
     tip: '해안 드라이브 코스를 찾아보세요. 바다를 따라 달리는 로드트립은 최고!',
     packing: ['스노클링 장비', '드론', '방수 파우치'],
     desc: '해안선을 따라 자유롭게 떠도는 여행자! 새로운 해변을 발견하는 것이 인생의 즐거움입니다.',
   },
   'adrenaline-junkie': {
-    name: '아드레날린 정키', emoji: '\u{1FA82}', destination: '퀸즈타운 & 코스타리카',
+    name: '아드레날린 정키', emoji: '\u{1FA82}', destination: '퀸즈타운 & 코스타리카', airport: 'ZQN',
     tip: '현지 어드벤처 투어를 미리 예약하세요. 인기 액티비티는 금방 마감됩니다!',
     packing: ['액션캠', '스포츠 선글라스', '드라이핏 의류'],
     desc: '스릴과 도전을 사랑하는 모험가! 번지점프든 래프팅이든, 심장이 뛰는 곳에 당신이 있습니다.',
   },
   trailblazer: {
-    name: '트레일블레이저', emoji: '\u{1F9ED}', destination: '파타고니아 & 네팔',
+    name: '트레일블레이저', emoji: '\u{1F9ED}', destination: '파타고니아 & 네팔', airport: 'PUQ',
     tip: '체력 관리가 핵심! 출발 전 한 달간 트레이닝을 추천합니다.',
     packing: ['65L 백팩', '헤드랜턴', '에너지바'],
     desc: '아무도 가지 않은 길을 개척하는 탐험가! 극한의 환경에서도 빛나는 도전 정신의 소유자.',
@@ -291,8 +297,13 @@ function computeResult(answers: DemoAnswers): string {
 
 /* ── Result Component ──────────────────────────────────── */
 
+function personaFor(resultKey: string): ResultData {
+  return RESULTS[resultKey as ResultKey] ?? RESULTS['urban-explorer'];
+}
+
 function TravelResult({ resultKey, onRestart, pillarColor }: DemoResultProps) {
-  const data = RESULTS[resultKey as ResultKey] ?? RESULTS['urban-explorer'];
+  const tCommon = useTranslations('demos.common');
+  const data = personaFor(resultKey);
 
   return (
     <motion.div
@@ -379,13 +390,13 @@ function TravelResult({ resultKey, onRestart, pillarColor }: DemoResultProps) {
         >
           다시 진단하기
         </button>
-        <button
-          type="button"
+        <Link
+          href={QUOTE_HREF}
           className="rounded-xl px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
           style={{ backgroundColor: pillarColor }}
         >
-          체험 상담 신청
-        </button>
+          {tCommon('ctaButton')}
+        </Link>
       </motion.div>
     </motion.div>
   );
@@ -393,11 +404,46 @@ function TravelResult({ resultKey, onRestart, pillarColor }: DemoResultProps) {
 
 /* ── Export ─────────────────────────────────────────────── */
 
+/* ── Print — 보딩패스 영수증 ───────────────────────────── */
+
+function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
+  const data = personaFor(resultKey);
+  const seed = answersSeed(answers);
+  const pace = PACES.find((p) => p.id === answers['pace']);
+  const mustHave = (answers['mustHave'] as string[] | undefined) ?? [];
+  const mustHaves = MUST_HAVES.filter((m) => mustHave.includes(m.id)).map((m) => m.label);
+  return {
+    kind: 'receipt',
+    eyebrow: 'BOARDING PASS · 여행 페르소나',
+    title: data.name,
+    sections: [
+      { type: 'big', text: `ICN → ${data.airport}` },
+      {
+        type: 'rows',
+        title: '탑승 정보',
+        rows: [
+          { label: 'FLIGHT', value: `NE ${seededInt(seed, 'flight', 100, 999)}` },
+          { label: 'TO', value: data.destination },
+          { label: 'CLASS', value: pace?.label ?? '-' },
+          { label: 'GATE', value: String(seededInt(seed, 'gate', 1, 48)) },
+          { label: 'SEAT', value: `${seededInt(seed, 'row', 2, 42)}${seededPick(seed, 'seat', ['A', 'F'])} 창가` },
+          { label: 'MUST-HAVE', value: mustHaves.join(' · ') || '-' },
+        ],
+      },
+      { type: 'text', text: data.desc },
+      { type: 'list', title: '패킹 리스트', items: data.packing },
+      { type: 'text', title: '여행 팁', text: data.tip },
+    ],
+    footer: 'Bon voyage! 좋은 여행 되세요',
+  };
+}
+
 const TravelStyleDemo: DemoModule = {
   config,
   StepComponents: [StepDestination, StepPace, StepMustHave],
   ResultComponent: TravelResult,
   computeResult,
+  getPrint,
 };
 
 export default TravelStyleDemo;

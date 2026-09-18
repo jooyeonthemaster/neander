@@ -181,7 +181,7 @@ export function ScentQuiz() {
           <span className="text-xs font-medium text-slate-400">
             {showResult
               ? t('complete')
-              : `${currentStep + 1} / ${quizSteps.length}`}
+              : `${Math.min(currentStep + 1, quizSteps.length)} / ${quizSteps.length}`}
           </span>
           <span className="text-xs text-slate-500">{Math.round(progress)}%</span>
         </div>

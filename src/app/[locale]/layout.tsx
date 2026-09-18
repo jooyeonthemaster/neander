@@ -3,6 +3,7 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
+import { SITE_URL } from '@/lib/constants';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -28,6 +29,8 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'metadata' });
 
   return {
+    // 상대 경로 og:image 등을 운영 도메인 기준 절대 URL로 만든다
+    metadataBase: new URL(SITE_URL),
     title: {
       default: t('title'),
       template: `%s | NEANDERco.`,
@@ -76,7 +79,12 @@ export default async function LocaleLayout({
           <SmoothScrollProvider>
             <CustomCursor />
             <Header />
-            <main id="main-content" className="pt-16 lg:pt-20">
+            {/* 페이지 이동 시 Next가 새 페이지 첫 요소로 스크롤하는데, 헤더 여백(pt)만큼 내려가 멈추지 않도록
+                같은 크기의 scroll-margin을 준다 */}
+            <main
+              id="main-content"
+              className="pt-16 lg:pt-20 [&>*:first-child]:scroll-mt-16 lg:[&>*:first-child]:scroll-mt-20"
+            >
               {children}
             </main>
             <Footer />

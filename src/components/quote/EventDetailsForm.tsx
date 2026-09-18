@@ -11,9 +11,9 @@ const EVENT_TYPES = ['popup', 'festival', 'exhibition', 'concert', 'brand-event'
 const ATTENDEE_MARKS = [50, 100, 200, 500, 1000];
 
 const VENUE_SIZES = [
-  { value: 'small' as const, icon: 'S', area: '~100m2' },
-  { value: 'medium' as const, icon: 'M', area: '100-300m2' },
-  { value: 'large' as const, icon: 'L', area: '300m2+' },
+  { value: 'small' as const, icon: 'S', area: '~100m²' },
+  { value: 'medium' as const, icon: 'M', area: '100-300m²' },
+  { value: 'large' as const, icon: 'L', area: '300m²+' },
 ];
 
 export function EventDetailsForm() {
@@ -118,7 +118,7 @@ export function EventDetailsForm() {
             +
           </motion.button>
 
-          <span className="text-sm text-slate-500 ml-1">{t('days')}</span>
+          <span className="text-sm text-slate-500 ml-1">{t('days', { count: eventDetails.duration })}</span>
 
           {eventDetails.duration > 1 && (
             <motion.span

@@ -3,6 +3,7 @@
 import { motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { QUOTE_HREF } from '@/lib/constants';
 import { Button } from '@/components/ui';
 import { ScrollReveal } from '@/components/animations';
 import { cn } from '@/lib/utils';
@@ -117,7 +118,7 @@ export function ServiceCTA() {
               )}
               asChild
             >
-              <Link href="/quote">{t('ctaQuote')}</Link>
+              <Link href={QUOTE_HREF}>{t('ctaQuote')}</Link>
             </Button>
           </div>
         </ScrollReveal>

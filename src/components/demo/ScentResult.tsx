@@ -12,8 +12,21 @@ interface ScentResultProps {
   onRestart: () => void;
 }
 
+// 노트 이름(영문) → 메시지 키: 'Lily of the Valley' → 'lilyOfTheValley'
+function toNoteKey(note: string): string {
+  return note
+    .split(' ')
+    .map((word, i) => (i === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()))
+    .join('');
+}
+
 export function ScentResult({ profile, onRestart }: ScentResultProps) {
   const t = useTranslations('scentQuiz');
+  // 번역 키가 없는 노트는 데이터의 영문 이름을 그대로 보여준다
+  const noteLabel = (note: string) => {
+    const key = `notes.${toNoteKey(note)}`;
+    return t.has(key) ? t(key) : note;
+  };
 
   return (
     <div className="space-y-8">
@@ -33,7 +46,7 @@ export function ScentResult({ profile, onRestart }: ScentResultProps) {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="font-display text-4xl font-bold text-white sm:text-5xl"
         >
-          {profile.name}
+          {t(profile.nameKey)}
         </motion.h2>
         <motion.p
           initial={{ opacity: 0 }}
@@ -41,7 +54,7 @@ export function ScentResult({ profile, onRestart }: ScentResultProps) {
           transition={{ delay: 0.4 }}
           className="mt-3 text-base text-slate-400 italic"
         >
-          &ldquo;{profile.description}&rdquo;
+          &ldquo;{t(profile.descriptionKey)}&rdquo;
         </motion.p>
       </div>
 
@@ -76,7 +89,7 @@ export function ScentResult({ profile, onRestart }: ScentResultProps) {
                 key={note}
                 className="rounded-full bg-teal-500/10 border border-teal-500/20 px-3 py-1 text-sm text-teal-300 font-medium"
               >
-                {note}
+                {noteLabel(note)}
               </span>
             ))}
           </div>
@@ -96,7 +109,7 @@ export function ScentResult({ profile, onRestart }: ScentResultProps) {
                 key={note}
                 className="rounded-full bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 text-sm text-cyan-300 font-medium"
               >
-                {note}
+                {noteLabel(note)}
               </span>
             ))}
           </div>
@@ -116,7 +129,7 @@ export function ScentResult({ profile, onRestart }: ScentResultProps) {
                 key={note}
                 className="rounded-full bg-slate-500/10 border border-slate-500/20 px-3 py-1 text-sm text-slate-300 font-medium"
               >
-                {note}
+                {noteLabel(note)}
               </span>
             ))}
           </div>
@@ -135,7 +148,7 @@ export function ScentResult({ profile, onRestart }: ScentResultProps) {
             {t('ctaMessage')}
           </p>
           <Link
-            href="/contact"
+            href="/experience"
             className={cn(
               'inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold',
               'bg-gradient-to-r from-teal-500 to-cyan-500 text-white',

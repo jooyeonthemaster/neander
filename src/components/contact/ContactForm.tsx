@@ -4,27 +4,37 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'motion/react';
 import { Input, Textarea, Select } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import { createInquiry } from '@/lib/firebase/inquiries';
+
+// 최대 길이는 firestore.rules 의 inquiries 생성 규칙과 맞춘다 (넘으면 저장이 거부된다)
+const MAX_LENGTH = { name: 100, email: 200, message: 5000 } as const;
 
 const contactSchema = z.object({
-  name: z.string().min(1, 'required'),
-  email: z.string().min(1, 'required').email('email'),
+  name: z.string().trim().min(1, 'required').max(MAX_LENGTH.name, 'maxLength'),
+  email: z.string().trim().min(1, 'required').max(MAX_LENGTH.email, 'maxLength').email('email'),
   phone: z.string().optional(),
   company: z.string().optional(),
   subject: z.string().min(1, 'required'),
-  message: z.string().min(10, 'minLength'),
+  message: z.string().trim().min(10, 'minLength').max(MAX_LENGTH.message, 'maxLength'),
 });
 
 type ContactFormValues = z.infer<typeof contactSchema>;
 
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
-export function ContactForm() {
+interface ContactFormProps {
+  /** '견적 문의'를 고르면 견적 계산 탭으로 안내한다 */
+  onRequestQuote?: () => void;
+}
+
+export function ContactForm({ onRequestQuote }: ContactFormProps = {}) {
   const t = useTranslations('contact');
   const tValidation = useTranslations('validation');
+  const locale = useLocale();
   const [status, setStatus] = useState<FormStatus>('idle');
 
   const {
@@ -51,7 +61,11 @@ export function ContactForm() {
     const err = errors[field];
     if (!err?.message) return undefined;
     try {
-      return tValidation(err.message as 'required' | 'email' | 'minLength', { min: 10 });
+      const max = field in MAX_LENGTH ? MAX_LENGTH[field as keyof typeof MAX_LENGTH] : 0;
+      return tValidation(err.message as 'required' | 'email' | 'minLength' | 'maxLength', {
+        min: 10,
+        max,
+      });
     } catch {
       return err.message;
     }
@@ -61,12 +75,20 @@ export function ContactForm() {
     setStatus('submitting');
 
     try {
-      // Placeholder: console log for now, API route later
-      console.log('Contact form submitted:', data);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await createInquiry({
+        kind: 'contact',
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        company: data.company,
+        subject: data.subject,
+        message: data.message,
+        locale,
+      });
       setStatus('success');
       reset();
-    } catch {
+    } catch (error) {
+      console.error('[ContactForm] 문의 저장 실패:', error);
       setStatus('error');
     }
   }
@@ -110,7 +132,7 @@ export function ContactForm() {
               onClick={() => setStatus('idle')}
               className="mt-6 inline-flex items-center gap-2 rounded-lg border border-teal-300 bg-white px-5 py-2 text-sm font-medium text-teal-700 transition-colors hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
             >
-              Send another message
+              {t('success.sendAnother')}
             </button>
           </motion.div>
         ) : status === 'error' ? (
@@ -139,7 +161,7 @@ export function ContactForm() {
               onClick={() => setStatus('idle')}
               className="mt-6 inline-flex items-center gap-2 rounded-lg border border-rose-300 bg-white px-5 py-2 text-sm font-medium text-rose-700 transition-colors hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
             >
-              Try again
+              {t('error.retry')}
             </button>
           </motion.div>
         ) : (
@@ -191,6 +213,20 @@ export function ContactForm() {
               value={subjectValue}
               {...register('subject')}
             />
+
+            {/* 견적 문의라면 예상 비용을 바로 볼 수 있는 견적 계산으로 안내 */}
+            {subjectValue === 'quote' && onRequestQuote && (
+              <div className="flex flex-col gap-3 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-800 sm:flex-row sm:items-center sm:justify-between">
+                <p>{t('quoteHint')}</p>
+                <button
+                  type="button"
+                  onClick={onRequestQuote}
+                  className="shrink-0 self-start rounded-lg bg-teal-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 sm:self-auto"
+                >
+                  {t('quoteHintCta')}
+                </button>
+              </div>
+            )}
 
             {/* Message textarea */}
             <Textarea

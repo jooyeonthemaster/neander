@@ -1,17 +1,22 @@
 'use client';
 
 import { useRef, useMemo } from 'react';
-import { motion, AnimatePresence, useInView } from 'motion/react';
-import { useTranslations } from 'next-intl';
+import { motion, AnimatePresence } from 'motion/react';
+import { useLocale, useTranslations } from 'next-intl';
 import { useQuoteStore } from '@/stores/quoteStore';
 import { services as servicesData } from '@/data/services';
 import { addOns } from '@/data/pricing';
-import { formatKRW } from '@/lib/pricing';
+import { formatPrice } from '@/lib/pricing';
 import { useCountUp } from '@/hooks/useCountUp';
-import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
-export function QuoteSummary() {
+interface QuoteSummaryProps {
+  /** 사이드바의 '견적 요청' 버튼을 눌렀을 때 제출 단계로 이동 */
+  onRequestQuote?: () => void;
+}
+
+export function QuoteSummary({ onRequestQuote }: QuoteSummaryProps) {
+  const locale = useLocale();
   const t = useTranslations('quote');
   const selectedServices = useQuoteStore((s) => s.services);
   const eventDetails = useQuoteStore((s) => s.eventDetails);
@@ -22,12 +27,13 @@ export function QuoteSummary() {
   const estimate = getEstimate();
 
   const totalRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(totalRef, { once: false });
 
+  // 화면에 들어왔는지와 무관하게 값이 항상 맞도록 애니메이션은 항상 켜 둔다.
+  // (예전에는 isInView가 false면 0원으로 표시됐다)
   const animatedTotal = useCountUp({
-    target: Math.round(estimate.total / 10000),
+    target: estimate.total,
     duration: 0.8,
-    enabled: isInView,
+    enabled: true,
   });
 
   const selectedAddOnDetails = useMemo(
@@ -65,7 +71,7 @@ export function QuoteSummary() {
             )}
             <div className="flex justify-between">
               <span>{t('duration')}</span>
-              <span className="font-medium text-slate-700">{eventDetails.duration} {t('days')}</span>
+              <span className="font-medium text-slate-700">{eventDetails.duration} {t('days', { count: eventDetails.duration })}</span>
             </div>
           </div>
         )}
@@ -98,7 +104,7 @@ export function QuoteSummary() {
                           </span>
                         </div>
                         <span className="text-xs font-semibold text-slate-900 tabular-nums">
-                          {formatKRW(svc.subtotal)}
+                          {formatPrice(svc.subtotal, locale)}
                         </span>
                       </motion.div>
                     );
@@ -118,7 +124,8 @@ export function QuoteSummary() {
                     <div key={addon.id} className="flex items-center justify-between text-xs">
                       <span className="text-slate-600">{t(`addOns.${addon.labelKey}`)}</span>
                       <span className="font-medium text-slate-700 tabular-nums">
-                        +{formatKRW(addon.priceKRW)}
+                        +{formatPrice(addon.priceKRW, locale)}
+                        {addon.perDay && t('perDay')}
                       </span>
                     </div>
                   ))}
@@ -147,9 +154,7 @@ export function QuoteSummary() {
                     animate={{ scale: 1 }}
                     className="font-display text-2xl font-bold text-slate-900 tabular-nums"
                   >
-                    {estimate.total >= 10000
-                      ? `${animatedTotal.toLocaleString()}${t('manwon')}`
-                      : formatKRW(estimate.total)}
+                    {formatPrice(animatedTotal, locale)}
                   </motion.div>
                 </div>
               </div>
@@ -176,20 +181,23 @@ export function QuoteSummary() {
 
         {/* Actions */}
         <div className="space-y-2.5">
-          <Link
-            href="/contact"
+          {/* 입력한 견적 내용을 그대로 들고 제출 단계로 이동한다 */}
+          <button
+            type="button"
+            onClick={onRequestQuote}
+            disabled={!hasContent || !onRequestQuote}
             className={cn(
               'flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-200',
               hasContent
                 ? 'bg-teal-600 text-white hover:bg-teal-500 shadow-md shadow-teal-600/20'
-                : 'bg-slate-200 text-slate-400 pointer-events-none'
+                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
             )}
           >
             {t('requestQuote')}
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M3 7h8M8 3l3 4-3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-          </Link>
+          </button>
 
           {hasContent && (
             <button

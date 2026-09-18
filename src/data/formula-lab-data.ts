@@ -260,3 +260,32 @@ export const NOTE_TAG_OPTIONS = [
   '프루티', '그린', '파우더리', '발사믹', '스위트',
   '어시', '아쿠아틱', '레더', '스모키',
 ];
+
+// ─── Note Tag → Ingredient Matching ───────────────────────────────────
+// 선호/회피 계열 태그가 어떤 향료에 해당하는지. 카테고리 단위 + 카테고리로 안 잡히는 개별 향료(ids).
+// 아쿠아틱·레더는 현재 향료 팔레트에 대응 원료가 없어 비워 둔다
+export const NOTE_TAG_MATCH: Record<string, { categories: string[]; ids?: string[] }> = {
+  '시트러스': { categories: ['Citrus'] },
+  '플로럴': { categories: ['Floral'] },
+  '우디': { categories: ['Woody'] },
+  '머스크': { categories: ['Musk', 'Musky'] },
+  '스파이시': { categories: ['Spice'] },
+  '프루티': { categories: ['Fruity'] },
+  '그린': { categories: ['Green', 'Fresh'] },
+  '파우더리': { categories: ['Powdery'], ids: ['iris'] },
+  '발사믹': { categories: ['Balsamic', 'Resinous'] },
+  '스위트': { categories: ['Sweet'] },
+  '어시': { categories: ['Earthy'] },
+  '아쿠아틱': { categories: [] },
+  '레더': { categories: [] },
+  '스모키': { categories: [], ids: ['oud', 'vetiver'] },
+};
+
+// ─── Lifestyle → Emotion Boost ────────────────────────────────────────
+// 라이프스타일 키워드를 OPT-16 감성 타입 가중치로 (엔진의 usageContext 부스트와 같은 방식)
+export const LIFESTYLE_EMOTION_MAP: Record<string, number[]> = {
+  '미니멀리스트': [12, 8, 1], '트렌드세터': [5, 12, 9], '클래식': [2, 14],
+  '아웃도어': [9, 13, 11], '크리에이티브': [6, 13, 5], '웰니스': [8, 11, 0],
+  '럭셔리': [2, 12], '캐주얼': [0, 1, 5], '프로페셔널': [7, 12],
+  '아티스틱': [6, 14, 2], '에코': [11, 1], '어반': [7, 12],
+};

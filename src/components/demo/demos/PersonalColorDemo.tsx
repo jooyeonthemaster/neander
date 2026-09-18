@@ -1,6 +1,9 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { QUOTE_HREF } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type {
@@ -10,6 +13,7 @@ import type {
   DemoStepProps,
   DemoResultProps,
 } from '@/types/demo';
+import type { PrintSpec } from '../kit';
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -237,10 +241,27 @@ function computeResult(answers: DemoAnswers): string {
   return 'spring';
 }
 
+/* ── Diagnosis (결과 화면 · 출력물 공용) ─────────────────── */
+
+function seasonResult(resultKey: string) {
+  return RESULTS[resultKey as SeasonKey] ?? RESULTS.spring;
+}
+
+/** 진단에 쓰인 답변을 사람이 읽는 이름으로 */
+function diagnosisInputs(answers: DemoAnswers) {
+  const coloring = (answers['coloring'] as string[] | undefined) ?? [];
+  return {
+    undertone: UNDERTONES.find((t) => t.id === answers['undertone'])?.label,
+    coloring: COLOR_SWATCHES.filter((c) => coloring.includes(c.id)).map((c) => c.label),
+    preference: SEASON_PALETTES.find((s) => s.id === answers['preference'])?.label,
+  };
+}
+
 /* ── Result Component ───────────────────────────────────── */
 
 function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps) {
-  const data = RESULTS[resultKey as SeasonKey] ?? RESULTS.spring;
+  const tCommon = useTranslations('demos.common');
+  const data = seasonResult(resultKey);
 
   return (
     <motion.div
@@ -313,17 +334,44 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
         >
           다시 진단하기
         </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="rounded-xl px-6 py-3 text-sm font-semibold text-white"
+        <Link
+          href={QUOTE_HREF}
+          className="rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
           style={{ backgroundColor: pillarColor }}
         >
-          체험 상담 신청
-        </motion.button>
+          {tCommon('ctaButton')}
+        </Link>
       </div>
     </motion.div>
   );
+}
+
+/* ── Print ──────────────────────────────────────────────── */
+
+function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
+  const data = seasonResult(resultKey);
+  const inputs = diagnosisInputs(answers);
+  return {
+    kind: 'receipt',
+    eyebrow: '당신의 퍼스널 컬러',
+    title: data.name,
+    sections: [
+      { type: 'big', title: '시그니처 컬러', text: data.colors[0] },
+      { type: 'text', text: data.desc },
+      {
+        type: 'rows',
+        title: '진단 근거',
+        rows: [
+          { label: '언더톤', value: inputs.undertone ?? '-' },
+          { label: '눈·모발 컬러', value: inputs.coloring.join(' · ') || '-' },
+          { label: '끌린 팔레트', value: inputs.preference ?? '-' },
+        ],
+      },
+      { type: 'text', title: '추천 컬러 코드', text: data.colors.join(' ') },
+      { type: 'text', title: '피해야 할 컬러', text: data.avoid.join(' ') },
+    ],
+    footer: '자연광 아래에서 옷장 속 컬러와 맞춰 보세요',
+  };
 }
 
 /* ── Export ──────────────────────────────────────────────── */
@@ -333,6 +381,7 @@ const PersonalColorDemo: DemoModule = {
   StepComponents: [StepUndertone, StepColoring, StepPreference],
   ResultComponent,
   computeResult,
+  getPrint,
 };
 
 export default PersonalColorDemo;

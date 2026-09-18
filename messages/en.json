@@ -14,7 +14,7 @@
     "portfolio": "Portfolio",
     "about": "About",
     "contact": "Contact",
-    "quote": "Get a Quote",
+    "quote": "Get an Estimate",
     "press": "Press",
     "demo": "Try Demo",
     "language": "한국어",
@@ -80,10 +80,15 @@
     "allPillars": "All",
     "noExperiences": "No experiences for this combination. Try a different filter.",
     "viewDetail": "Learn More",
+    "statExperiences": "Experiences",
+    "statIndustries": "Industries",
+    "statCategories": "Categories",
+    "photoCase": "On site",
     "relatedExperiences": "Related Experiences",
     "inquiryBtn": "Inquire About This Experience",
     "features": "Key Features",
     "backToServices": "Back to Services",
+    "backToPillar": "Back to {pillar}",
     "detailProcessTitle": "Experience Process",
     "useCasesTitle": "Use Cases",
     "ctaInquiryTitle": "Interested in this experience?",
@@ -1094,10 +1099,24 @@
     "filterCategories": {
       "online": "Online Solution",
       "offline": "Offline Solution",
-      "service": "Neander Service"
+      "service": "Neander Service",
+      "ip": "IP Collaboration"
     },
     "viewProject": "View Project",
     "viewAll": "View All Projects",
+    "featured": "Featured",
+    "detail": {
+      "result": "Result",
+      "gallery": "Gallery",
+      "projectDetails": "Project Details",
+      "client": "Client",
+      "date": "Date",
+      "location": "Location",
+      "services": "Services",
+      "ctaTitle": "Interested in a similar project?",
+      "ctaButton": "Get in touch",
+      "backToList": "Back to portfolio"
+    },
     "projects": {
       "crossTheLine": {
         "title": "CROSS THE LINE — Immersive Exhibition",
@@ -1116,20 +1135,20 @@
         "result": "1,500 monthly visitors, 40% return rate"
       },
       "jecheonMusicFilm": {
-        "title": "Jecheon International Music & Film Festival — AI Experience Zone",
-        "description": "Adding AI to the intersection of music and film. We operated an AI photo booth and interactive sound-visual experience zone for festival-goers, delivering a new kind of festival engagement.",
-        "date": "Aug 2024",
+        "title": "JIMFF 2025 — AI Perfumer Booth",
+        "description": "\"Your own cinema perfume, completed with AI.\" At the 21st Jecheon International Music & Film Festival, we ran an AI Perfumer booth: AI analyzed each visitor's image to recommend a matching scent, blended on the spot into a 10ml cinema perfume. We also presented two film scent strips inspired by In the Mood for Love and Harry Potter.",
+        "date": "Sep 4–7, 2025",
         "location": "Jecheon",
-        "tags": ["Festival", "AI Photo Booth", "Sound Visual"],
-        "result": "3,500 visitors in 4 days, 2,800 social shares"
+        "tags": ["Film Festival", "AI Perfumer", "Cinema Perfume"],
+        "result": "4-day AI Perfumer booth · 2 film scent strips"
       },
       "seoulWritersFestival": {
-        "title": "Seoul Writers' Festival — Interactive Exhibition",
-        "description": "Where literature meets technology. We presented an interactive installation that transforms authors' text into AI-generated visual language. Visitors' voices became real-time visual art.",
-        "date": "Oct 2024",
+        "title": "Seoul International Writers' Festival 2025 — AI Book Perfume Exhibition",
+        "description": "An exhibition where books are read through scent. For the 2025 Seoul International Writers' Festival, we blended a custom perfume for each of the 29 featured books and built an AI scent recommendation system that matches visitors with a book and its scent by analyzing their images. With AI voice narration of book passages and a transcription-linked interaction, we directed the exhibition across floors 1–3 of Ground Seoul.",
+        "date": "Sep 12–17, 2025",
         "location": "Seoul",
-        "tags": ["Literary Festival", "AI Art", "Interactive Installation"],
-        "result": "50 participating authors, 100% visitor satisfaction"
+        "tags": ["Literary Festival", "Book Perfume", "AI Scent Matching"],
+        "result": "Custom perfumes for 29 books · 30 book scent strips"
       },
       "ansanScienceFestival": {
         "title": "Ansan International Science Film Festival — AI Experience Zone",
@@ -1183,6 +1202,19 @@
     },
     "timeline": {
       "title": "Our Journey",
+      "details": {
+        "crossTheLine": "An interactive media art exhibition where visitors become part of the work, built with motion tracking and AI generative art.",
+        "acscentSinchon": "The first AC'SCENT flagship store, offering the full AI fragrance experience from personal scent profiling to on-site blending.",
+        "acscentWau": "Our second store, on Wausan-ro in Hongdae, with a limited scent line reflecting the neighbourhood and an upgraded AI profiling system.",
+        "hahyunsangElegy": "An album fragrance collection translating all six tracks of singer-songwriter Ha Hyun-sang's EP <Elegy> into scent, with a media-art pop-up at AC'SCENT Sinchon.",
+        "acscentId": "AC'SCENT ID, our third store, where deeper preference analysis and premium materials turn your identity into a fragrance.",
+        "jecheonFestival": "The AI Perfumer booth at the 21st Jecheon International Music & Film Festival: AI analysed each visitor's image and blended a 10ml cinema perfume on the spot.",
+        "seoulWriters": "The AI Book Perfume exhibition at the 2025 Seoul International Writers' Festival: a custom scent for each of the 29 featured books, matched to visitors by AI.",
+        "ansanScience": "Interactive content that lets visitors experience how AI works, turning science into play.",
+        "ktoPerfumeClass": "An AI perfume class for 30 participants at the Korea Tourism Organization Seoul Center (HiKR Ground) — a five-step, 30-minute experience ending in a 10ml perfume.",
+        "nflyingMd": "With FNC Entertainment, we turned the official merchandise for N.Flying's <into REM> concert into scent, designing a different fragrance for each city.",
+        "jimffOstFair": "The audience experience programme for the OST Fair at the 22nd Jecheon International Music & Film Festival, with three touch kiosks recommending and blending 10ml perfumes."
+      },
       "entries": {
         "2022": {
           "year": "2022",
@@ -1197,20 +1229,20 @@
           "year": "2023",
           "title": "AC'SCENT 1st Store",
           "events": [
-            "Selected for Pre-Startup Package",
+            "Pre-Startup Package — selected, graduated with top honors",
             "AC'SCENT Sinchon — 1st store opening",
-            "Official launch of AI fragrance experience service"
+            "Award at the Youth Alley Startup Competition",
+            "Excellent Venture Award, Seodaemun-gu Youth Venture Program"
           ]
         },
         "2024": {
           "year": "2024",
-          "title": "Festival Market Entry",
+          "title": "AC'SCENT 2nd Store",
           "events": [
-            "Designated as Tourism Venture Enterprise",
+            "Selected for Early-Stage Tourism Venture Program",
+            "Resident company, Chung-Ang University Campus Town",
             "AC'SCENT Wau — 2nd store opening",
-            "Jecheon International Music & Film Festival AI zone",
-            "Seoul Writers' Festival interactive exhibition",
-            "Full-scale B2B service launch"
+            "Ha Hyun-sang <Elegy> album perfume collection & pop-up"
           ]
         },
         "2025": {
@@ -1219,8 +1251,19 @@
           "events": [
             "Selected for Youth Startup Academy",
             "AC'SCENT ID — 3rd store launch",
-            "Ansan International Science Film Festival AI zone",
-            "AI content solution advancement"
+            "AI Perfumer booth at Jecheon International Music & Film Festival",
+            "AI book perfume exhibition at Seoul International Writers' Festival",
+            "Ansan International Science Film Festival AI zone"
+          ]
+        },
+        "2026": {
+          "year": "2026",
+          "title": "Deep Tech Value-Up",
+          "events": [
+            "Selected for Deep Tech Value-Up Program",
+            "AI perfume class for Korea Tourism Organization",
+            "Official scent MD for N.Flying <into REM> concert",
+            "Audience program at the 22nd JIMFF OST Fair"
           ]
         }
       }
@@ -1273,7 +1316,7 @@
 
   "quote": {
     "category": "QUOTE",
-    "metaTitle": "Get a Quote | NEANDERco",
+    "metaTitle": "Get a Quote",
     "metaDescription": "Request a custom quote for NEANDERco's AI experiential content services.",
     "title": "Get a Quote",
     "subtitle": "Ready to Start Your Project?",
@@ -1294,7 +1337,8 @@
     "duration": "Event Duration",
     "decrease": "Decrease",
     "increase": "Increase",
-    "days": "days",
+    "days": "{count, plural, one {day} other {days}}",
+    "perDay": "/day",
     "multiplier": "multiplier",
     "expectedAttendees": "Expected Attendees",
     "people": "people",
@@ -1309,15 +1353,16 @@
     "preferredDate": "Preferred Date",
     "serviceTitle": "Choose Your Services",
     "serviceSubtitle": "Select the services you need. You can choose more than one.",
+    "photoCase": "On site",
     "services": {
-      "acscent": { "name": "AC'SCENT AI Fragrance" },
-      "photoBooth": { "name": "AI Photo Booth" },
-      "mediaArt": { "name": "Interactive Media Art" },
+      "acscent": { "name": "AC'SCENT AI Fragrance", "photoCaption": "Namsangol Hanok Village 〈Chwihyang〉 · AI perfume display" },
+      "photoBooth": { "name": "AI Photo Booth", "photoCaption": "Pyeongtaek AI Festa 2026 · AI photo booth (celebrity look-alike)" },
+      "mediaArt": { "name": "Interactive Media Art", "photoCaption": "CROSS THE LINE · motion-tracking media art exhibition" },
       "spatialDesign": { "name": "Spatial Design" },
       "rental": { "name": "All-in-One Rental" },
-      "custom": { "name": "Custom AI Content" }
+      "custom": { "name": "Custom AI Content", "photoCaption": "Seoul Int'l Writers' Festival 2025 · AI book perfume" }
     },
-    "from": "From",
+    "from": "From {price}",
     "added": "Added",
     "add": "Add",
     "configure": "Configure options",
@@ -1341,9 +1386,9 @@
       "fullCustom": "Full Custom",
       "motionSensors": "Motion Sensors",
       "venueArea": "Venue Area",
-      "areaSmall": "Small (~100m2)",
-      "areaMedium": "Medium (100-300m2)",
-      "areaLarge": "Large (300m2+)",
+      "areaSmall": "Small (~100m²)",
+      "areaMedium": "Medium (100-300m²)",
+      "areaLarge": "Large (300m²+)",
       "photoZoneDesign": "Photo Zone Design",
       "customLighting": "Custom Lighting",
       "aiKiosk": "AI Kiosk",
@@ -1382,6 +1427,7 @@
     "estimatedTotal": "Estimated Total",
     "manwon": "0K KRW",
     "emptyServices": "Select services to see an estimated quote",
+    "portfolioLink": "View Portfolio",
     "requestQuote": "Request Quote",
     "reset": "Reset",
     "steps": {
@@ -1447,7 +1493,8 @@
       "privacyConsent": "I agree to the collection and use of personal information.",
       "marketingConsent": "I agree to receive marketing communications. (Optional)",
       "submit": "Request Quote",
-      "submitting": "Submitting..."
+      "submitting": "Submitting...",
+      "privacyConsentDetail": "Collected: name, email, phone, company, message · Purpose: responding to your quote request"
     },
     "disclaimer": "Quotes may vary based on event scale, duration, and location. Exact pricing will be provided after consultation. A team member will contact you within 1–2 business days of your request.",
     "success": {
@@ -1466,20 +1513,20 @@
     "title": "Try a Demo",
     "subtitle": "Experience NEANDERco's AI Content Firsthand",
     "description": "Preview the AC'SCENT fragrance quiz and AI Photo Booth right here on the web.",
-    "metaTitle": "Try a Demo | NEANDERco",
+    "metaTitle": "Try a Demo",
     "metaDescription": "Experience the AC'SCENT fragrance quiz and AI Photo Booth on the web.",
     "category": "DEMO",
     "tryIt": "Try It",
     "scent-quiz": {
       "title": "AC'SCENT Scent Recommendation",
       "description": "Answer a few questions and let AI recommend the perfect fragrance for you.",
-      "metaTitle": "AI Scent Quiz | NEANDERco",
+      "metaTitle": "AI Scent Quiz",
       "metaDescription": "Your signature scent, analyzed by AI. Take a quick quiz and discover your fragrance match."
     },
     "photo-booth": {
       "title": "AI Photo Booth Preview",
       "description": "Upload a photo and watch AI transform it into different artistic styles.",
-      "metaTitle": "AI Photo Booth Preview | NEANDERco",
+      "metaTitle": "AI Photo Booth Preview",
       "metaDescription": "Your portrait, reimagined by AI. Upload a photo and try different artistic styles."
     },
     "scentQuiz": {
@@ -1628,7 +1675,16 @@
   "contact": {
     "title": "Contact Us",
     "subtitle": "Let's Talk About Your Project",
-    "description": "We are happy to consult from the very first idea. Reach out anytime.",
+    "description": "Leave a quick message, or pick your event details and services to get an instant estimate.",
+    "tabs": {
+      "label": "How would you like to reach us?",
+      "inquiry": "Quick Inquiry",
+      "inquiryDesc": "Ideas, partnerships, press, careers — anything",
+      "quote": "Get an Estimate",
+      "quoteDesc": "Pick your event details and services to see the estimated cost"
+    },
+    "quoteHint": "Want to know the cost? Get an instant estimate in 'Get an Estimate'.",
+    "quoteHintCta": "Get an estimate",
     "form": {
       "name": "Name",
       "namePlaceholder": "Enter your name",
@@ -1654,6 +1710,9 @@
     },
     "info": {
       "title": "Contact Information",
+      "emailLabel": "Email",
+      "phoneLabel": "Phone",
+      "addressLabel": "Address",
       "email": "ok@neander.co.kr",
       "phone": "+82 2-336-3368",
       "address": "22, Wausan-ro 29ra-gil, Mapo-gu, Seoul",
@@ -1667,11 +1726,13 @@
     },
     "success": {
       "title": "Your Message Has Been Sent",
-      "description": "We will get back to you as soon as possible. Thank you."
+      "description": "We will get back to you as soon as possible. Thank you.",
+      "sendAnother": "Send another message"
     },
     "error": {
       "title": "Failed to Send Message",
-      "description": "Please try again shortly."
+      "description": "Please try again shortly, or email us at ok@neander.co.kr.",
+      "retry": "Try again"
     },
     "social": {
       "title": "Social Media",
@@ -1766,14 +1827,15 @@
       "support": {
         "title": "Support",
         "contact": "Contact",
-        "quote": "Get a Quote",
+        "quote": "Get an Estimate",
         "faq": "FAQ",
+        "demo": "Try Demo",
         "terms": "Terms of Service",
         "privacy": "Privacy Policy"
       }
     },
     "copyright": "© {year} NEANDERco.ltd. All rights reserved.",
-    "companyInfo": "NEANDERco.ltd | CEO: Yoo Jae-young",
+    "companyInfo": "NEANDERco.ltd | CEO: Yoo Jae-young | Business Registration No.: 683-86-02812",
     "links": {
       "terms": "Terms of Service",
       "privacy": "Privacy Policy",
@@ -1847,7 +1909,54 @@
     "terraNoirDesc": "Earth-rooted sophistication with smoky depth",
     "crystalGarden": "Crystal Garden",
     "crystalGardenDesc": "Pure and luminous, like sunlight through crystal",
-    "visitStore": "Visit a Store"
+    "visitStore": "Visit a Store",
+    "radarLabel": "Scent profile radar chart",
+    "axes": {
+      "floral": "Floral",
+      "citrus": "Citrus",
+      "woody": "Woody",
+      "oriental": "Oriental",
+      "fresh": "Fresh",
+      "sweet": "Sweet"
+    },
+    "notes": {
+      "bergamot": "Bergamot",
+      "pinkPepper": "Pink Pepper",
+      "iris": "Iris",
+      "violetLeaf": "Violet Leaf",
+      "whiteMusk": "White Musk",
+      "cedarwood": "Cedarwood",
+      "blackPepper": "Black Pepper",
+      "cardamom": "Cardamom",
+      "oud": "Oud",
+      "roseAbsolute": "Rose Absolute",
+      "amber": "Amber",
+      "sandalwood": "Sandalwood",
+      "yuzu": "Yuzu",
+      "grapefruit": "Grapefruit",
+      "neroli": "Neroli",
+      "greenTea": "Green Tea",
+      "whiteCedar": "White Cedar",
+      "seaSalt": "Sea Salt",
+      "peony": "Peony",
+      "lychee": "Lychee",
+      "turkishRose": "Turkish Rose",
+      "jasmineSambac": "Jasmine Sambac",
+      "vanilla": "Vanilla",
+      "cashmereMusk": "Cashmere Musk",
+      "saffron": "Saffron",
+      "juniperBerry": "Juniper Berry",
+      "vetiver": "Vetiver",
+      "patchouli": "Patchouli",
+      "darkAmber": "Dark Amber",
+      "tobaccoLeaf": "Tobacco Leaf",
+      "whitePeach": "White Peach",
+      "freesia": "Freesia",
+      "lilyOfTheValley": "Lily of the Valley",
+      "magnolia": "Magnolia",
+      "sheerMusk": "Sheer Musk",
+      "blondeWood": "Blonde Wood"
+    }
   },
 
   "photoBooth": {
@@ -1859,6 +1968,9 @@
     "dropHere": "Drop here",
     "upTo": "up to",
     "uploadedImage": "Uploaded image",
+    "beforeImage": "Before transformation",
+    "afterImage": "After transformation",
+    "compareSlider": "Before and after comparison slider",
     "processing": "AI is generating your image...",
     "ctaMessage": "Experience even more styles at a live event",
     "ctaButton": "Inquire About an Event",
@@ -2001,6 +2113,13 @@
     "contactButton": "Contact Us Directly"
   },
   "demos": {
+    "stage": {
+      "loading": "Loading the demo",
+      "fullscreen": "Full screen",
+      "exitFullscreen": "Exit full screen",
+      "scrollHint": "Learn more about this service",
+      "disclaimer": "This is a demo version and may not match the quality of the program used on site."
+    },
     "sectionTitle": "Try It Now",
     "sectionSubtitle": "Experience a mini version of this AI service",
     "tryDemo": "Try the Demo",

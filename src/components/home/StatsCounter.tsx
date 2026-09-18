@@ -1,24 +1,21 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { ScrollReveal, CountUp } from '@/components/animations';
+import { ScrollReveal, CountUp, FitToViewport } from '@/components/animations';
 import { cn } from '@/lib/utils';
 
 /* ─────────────────────────────────────────────────────────
    Stat definitions -- ordered for visual impact
    ───────────────────────────────────────────────────────── */
-const STATS = [
-  { key: 'events', target: 190 },
-  { key: 'visitors', target: 1 },
-  { key: 'stores', target: 3 },
-  { key: 'satisfaction', target: 100 },
-] as const;
+// 숫자는 번역 파일의 items.<key>.number 를 그대로 쓴다.
+// (예전에는 코드에 박힌 값을 써서 영문에서 '1+ Total Visitors'로 보였다)
+const STAT_KEYS = ['events', 'visitors', 'stores', 'satisfaction'] as const;
 
 export function StatsCounter() {
   const t = useTranslations('stats');
 
   return (
-    <section className="relative overflow-hidden" aria-label={t('title')}>
+    <section className="home-screen relative overflow-hidden" aria-label={t('title')}>
       {/* ── Gradient background band ─────────────────────── */}
       <div className="absolute inset-0 bg-gradient-to-r from-teal-950 via-teal-900 to-teal-950" />
       <div
@@ -31,24 +28,26 @@ export function StatsCounter() {
         aria-hidden="true"
       />
 
-      <div className="relative container-wide section-padding-md">
+      <FitToViewport className="container-wide section-padding-md lg:py-0">
         {/* Section heading */}
-        <ScrollReveal className="text-center mb-12">
+        <ScrollReveal className="text-center mb-12 lg:mb-[8vh]">
           <p className="text-xs font-semibold uppercase tracking-[0.15em] text-teal-300 mb-3">
             {t('subtitle')}
           </p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-[clamp(1.875rem,4.5vh,3rem)] font-bold text-white tracking-tight">
             {t('title')}
           </h2>
         </ScrollReveal>
 
         {/* Stats grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-8 lg:gap-x-6">
-          {STATS.map((stat, idx) => {
-            const suffix = t(`items.${stat.key}.suffix`);
+          {STAT_KEYS.map((key, idx) => {
+            const suffix = t(`items.${key}.suffix`);
+            const rawNumber = t(`items.${key}.number`);
+            const numericValue = Number(rawNumber);
             return (
               <ScrollReveal
-                key={stat.key}
+                key={key}
                 delay={idx * 0.1}
                 className={cn(
                   'flex flex-col items-center text-center',
@@ -57,11 +56,15 @@ export function StatsCounter() {
               >
                 {/* Number + suffix */}
                 <div className="flex items-baseline justify-center gap-0.5">
-                  <span className="font-[family-name:var(--font-display)] font-extrabold text-4xl sm:text-5xl lg:text-6xl text-white tabular-nums tracking-tight">
-                    <CountUp target={stat.target} duration={2.5} />
+                  <span className="font-[family-name:var(--font-display)] font-extrabold text-4xl sm:text-5xl lg:text-[clamp(3.75rem,8vh,5rem)] text-white tabular-nums tracking-tight">
+                    {Number.isFinite(numericValue) && rawNumber.trim() !== '' ? (
+                      <CountUp target={numericValue} duration={2.5} />
+                    ) : (
+                      rawNumber
+                    )}
                   </span>
                   {suffix && (
-                    <span className="font-[family-name:var(--font-display)] font-bold text-2xl sm:text-3xl lg:text-4xl text-teal-300">
+                    <span className="font-[family-name:var(--font-display)] font-bold text-2xl sm:text-3xl lg:text-[clamp(2.25rem,4.5vh,3rem)] text-teal-300">
                       {suffix}
                     </span>
                   )}
@@ -69,18 +72,18 @@ export function StatsCounter() {
 
                 {/* Label */}
                 <p className="mt-3 text-sm sm:text-base font-medium text-teal-200">
-                  {t(`items.${stat.key}.label`)}
+                  {t(`items.${key}.label`)}
                 </p>
 
                 {/* Description (hidden on mobile for cleanliness) */}
                 <p className="hidden sm:block mt-1 text-xs text-teal-400/70 max-w-[200px]">
-                  {t(`items.${stat.key}.description`)}
+                  {t(`items.${key}.description`)}
                 </p>
               </ScrollReveal>
             );
           })}
         </div>
-      </div>
+      </FitToViewport>
     </section>
   );
 }

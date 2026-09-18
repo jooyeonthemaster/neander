@@ -1,10 +1,10 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useQuoteStore, type SelectedService } from '@/stores/quoteStore';
 import { pricingTiers } from '@/data/pricing';
-import { formatKRW } from '@/lib/pricing';
+import { formatPrice } from '@/lib/pricing';
 import { cn } from '@/lib/utils';
 
 interface ServiceConfigPanelProps {
@@ -13,6 +13,7 @@ interface ServiceConfigPanelProps {
 }
 
 export function ServiceConfigPanel({ selectedService, onRemove }: ServiceConfigPanelProps) {
+  const locale = useLocale();
   const t = useTranslations('quote');
   const updateServiceOption = useQuoteStore((s) => s.updateServiceOption);
 
@@ -41,7 +42,7 @@ export function ServiceConfigPanel({ selectedService, onRemove }: ServiceConfigP
                 {/* Price indicator */}
                 {option.type === 'toggle' && (
                   <span className="text-xs text-slate-400">
-                    +{formatKRW(option.priceModifier as number)}
+                    +{formatPrice(option.priceModifier as number, locale)}
                   </span>
                 )}
               </div>
@@ -93,7 +94,7 @@ export function ServiceConfigPanel({ selectedService, onRemove }: ServiceConfigP
                       {t(`options.${choice.labelKey}`)}
                       {choice.price > 0 && (
                         <span className="ml-1 opacity-70">
-                          +{formatKRW(choice.price)}
+                          +{formatPrice(choice.price, locale)}
                         </span>
                       )}
                     </motion.button>
@@ -155,7 +156,7 @@ export function ServiceConfigPanel({ selectedService, onRemove }: ServiceConfigP
                   </motion.button>
 
                   <span className="text-xs text-slate-400 ml-1">
-                    +{formatKRW(option.priceModifier as number)}/{t('each')}
+                    +{formatPrice(option.priceModifier as number, locale)}/{t('each')}
                   </span>
                 </div>
               )}
@@ -168,7 +169,7 @@ export function ServiceConfigPanel({ selectedService, onRemove }: ServiceConfigP
           <div className="text-xs text-slate-500">
             {t('subtotal')}:{' '}
             <span className="font-semibold text-slate-900">
-              {formatKRW(selectedService.subtotal)}
+              {formatPrice(selectedService.subtotal, locale)}
             </span>
           </div>
           <button

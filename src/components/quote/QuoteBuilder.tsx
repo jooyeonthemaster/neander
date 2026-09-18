@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { useQuoteStore } from '@/stores/quoteStore';
@@ -9,6 +9,7 @@ import { EventDetailsForm } from './EventDetailsForm';
 import { ServiceSelector } from './ServiceSelector';
 import { AddOnsSection } from './AddOnsSection';
 import { QuoteSummary } from './QuoteSummary';
+import { QuoteSubmitForm } from './QuoteSubmitForm';
 
 const STEPS = ['eventDetails', 'services', 'addOns', 'summary'] as const;
 type Step = (typeof STEPS)[number];
@@ -24,6 +25,12 @@ export function QuoteBuilder() {
   const t = useTranslations('quote');
   const [currentStep, setCurrentStep] = useState<Step>('eventDetails');
   const services = useQuoteStore((s) => s.services);
+  const stepNavRef = useRef<HTMLElement>(null);
+
+  // 저장해 둔 견적을 하이드레이션이 끝난 뒤 불러온다 (quoteStore의 skipHydration 참고)
+  useEffect(() => {
+    void useQuoteStore.persist.rehydrate();
+  }, []);
 
   const currentIndex = STEPS.indexOf(currentStep);
 
@@ -36,24 +43,41 @@ export function QuoteBuilder() {
     };
   }, [services.length]);
 
+  /** idx 단계로 건너뛸 수 있는지: 앞선 모든 단계의 조건을 만족해야 한다 */
+  function canJumpTo(idx: number) {
+    return STEPS.slice(0, idx).every((step) => canProceedFromStep[step]);
+  }
+
+  /**
+   * 단계를 바꾸고, 단계 표시줄이 화면 위로 지나가 있으면 그 위치로 올려준다.
+   * (모바일에서는 요약 카드가 폼 아래에 있어 바뀐 단계가 화면 밖에 그려진다)
+   */
+  function goToStep(step: Step) {
+    setCurrentStep(step);
+    const nav = stepNavRef.current;
+    if (nav && nav.getBoundingClientRect().top < 0) {
+      nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
   function goNext() {
     const idx = STEPS.indexOf(currentStep);
     if (idx < STEPS.length - 1) {
-      setCurrentStep(STEPS[idx + 1]);
+      goToStep(STEPS[idx + 1]);
     }
   }
 
   function goPrev() {
     const idx = STEPS.indexOf(currentStep);
     if (idx > 0) {
-      setCurrentStep(STEPS[idx - 1]);
+      goToStep(STEPS[idx - 1]);
     }
   }
 
   return (
     <div className="space-y-8">
       {/* Step indicator */}
-      <nav aria-label="Quote builder steps" className="relative">
+      <nav ref={stepNavRef} aria-label="Quote builder steps" className="relative scroll-mt-24">
         <ol className="flex items-center justify-between gap-2">
           {STEPS.map((step, idx) => {
             const isActive = idx === currentIndex;
@@ -65,11 +89,11 @@ export function QuoteBuilder() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (idx <= currentIndex || canProceedFromStep[STEPS[idx - 1] ?? 'eventDetails']) {
+                    if (idx <= currentIndex || canJumpTo(idx)) {
                       setCurrentStep(step);
                     }
                   }}
-                  disabled={isFuture && !canProceedFromStep[STEPS[idx - 1] ?? 'eventDetails']}
+                  disabled={isFuture && !canJumpTo(idx)}
                   className={cn(
                     'w-full group flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-all duration-300',
                     isActive && 'bg-teal-600 text-white shadow-lg shadow-teal-600/20',
@@ -131,16 +155,7 @@ export function QuoteBuilder() {
               {currentStep === 'eventDetails' && <EventDetailsForm />}
               {currentStep === 'services' && <ServiceSelector />}
               {currentStep === 'addOns' && <AddOnsSection />}
-              {currentStep === 'summary' && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-6 lg:p-8">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-4">
-                    {t('summaryReview')}
-                  </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">
-                    {t('summaryDescription')}
-                  </p>
-                </div>
-              )}
+              {currentStep === 'summary' && <QuoteSubmitForm />}
             </motion.div>
           </AnimatePresence>
 
@@ -191,7 +206,7 @@ export function QuoteBuilder() {
         {/* Right column: sticky summary */}
         <div className="lg:col-span-1">
           <div className="lg:sticky lg:top-24">
-            <QuoteSummary />
+            <QuoteSummary onRequestQuote={() => goToStep('summary')} />
           </div>
         </div>
       </div>

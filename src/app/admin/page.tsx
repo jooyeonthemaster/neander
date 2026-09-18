@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import {
+  Inbox,
   FolderOpen,
   Newspaper,
   Megaphone,
@@ -10,6 +11,13 @@ import {
 } from 'lucide-react'
 
 const cards = [
+  {
+    href: '/admin/inquiries',
+    icon: Inbox,
+    label: '문의함',
+    description: '홈페이지 문의·견적 폼으로 들어온 요청 확인',
+    color: 'bg-teal-500',
+  },
   {
     href: '/admin/portfolio',
     icon: FolderOpen,

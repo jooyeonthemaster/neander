@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 import { SectionHeader } from '@/components/ui';
 import { ScrollReveal, TextReveal } from '@/components/animations';
 import { Timeline } from '@/components/about/Timeline';
@@ -28,6 +29,7 @@ export default async function AboutPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'about' });
+  const tNav = await getTranslations({ locale, namespace: 'nav' });
 
   return (
     <main>
@@ -59,7 +61,8 @@ export default async function AboutPage({ params }: Props) {
               category={t('title')}
               title={t('subtitle')}
               align="center"
-              className="max-w-3xl [&_h2]:text-white [&_span]:text-teal-400"
+              as="h1"
+              className="max-w-3xl [&_h1]:text-white [&_span]:text-teal-400"
             />
           </ScrollReveal>
         </div>
@@ -79,7 +82,7 @@ export default async function AboutPage({ params }: Props) {
                   {t('mission.title')}
                 </h2>
                 <div className="text-2xl font-bold leading-snug tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
-                  <TextReveal text={t('mission.content')} />
+                  <TextReveal text={t('mission.content')} className="justify-center" />
                 </div>
               </div>
             </ScrollReveal>
@@ -121,8 +124,9 @@ export default async function AboutPage({ params }: Props) {
       </section>
 
       {/* Timeline */}
+      {/* overflow-x-clip: 옆에서 밀려 들어오는 연혁 카드가 등장 전 모바일 페이지 폭을 넓히지 않도록 */}
       <section
-        className="bg-slate-50 py-20 sm:py-28"
+        className="overflow-x-clip bg-slate-50 py-20 sm:py-28"
         aria-labelledby="timeline-title"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -154,11 +158,11 @@ export default async function AboutPage({ params }: Props) {
             <p className="mb-8 text-base leading-relaxed text-slate-600 sm:text-lg">
               {t('team.description')}
             </p>
-            <a
+            <Link
               href="/contact"
               className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-8 py-3.5 text-base font-medium text-white transition-colors hover:bg-teal-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2"
             >
-              {t('team.title')}
+              {tNav('contact')}
               <svg
                 className="h-5 w-5"
                 viewBox="0 0 20 20"
@@ -171,7 +175,7 @@ export default async function AboutPage({ params }: Props) {
                   clipRule="evenodd"
                 />
               </svg>
-            </a>
+            </Link>
           </ScrollReveal>
         </div>
       </section>

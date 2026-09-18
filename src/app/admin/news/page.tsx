@@ -249,6 +249,12 @@ export default function AdminNewsPage() {
                 {/* Title + Summary */}
                 <div className="min-w-0">
                   <h3 className="text-sm font-medium text-gray-900 truncate">
+                    {/* 예시 배지는 관리자 화면에서만 보인다 (공개 사이트에는 표시되지 않음) */}
+                    {article.is_sample && (
+                      <span className="mr-1.5 inline-flex items-center rounded bg-amber-100 px-1.5 py-0.5 align-middle text-[11px] font-semibold text-amber-700">
+                        예시
+                      </span>
+                    )}
                     {article.title}
                   </h3>
                   {article.summary && (

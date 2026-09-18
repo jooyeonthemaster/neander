@@ -10,6 +10,8 @@ import { cn } from '@/lib/utils';
 export function Timeline() {
   const t = useTranslations('about.timeline');
   const tEntries = useTranslations('about.timeline.entries');
+  // 팝오버 설명 (문구가 있는 항목만 팝오버가 열린다)
+  const tDetails = useTranslations('about.timeline.details');
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
@@ -103,7 +105,12 @@ export function Timeline() {
                           <div className="lg:pr-12 lg:text-right">
                             <TimelineItem
                               title={tEntries(`${yearKey}.events.${eventIndex}`)}
-                              description=""
+                              description={
+                                tDetails.has(event.titleKey)
+                                  ? tDetails(event.titleKey)
+                                  : ''
+                              }
+                              image={event.image}
                               icon={event.icon}
                               side="left"
                               delay={delay}
@@ -117,7 +124,12 @@ export function Timeline() {
                           <div className="lg:pl-12">
                             <TimelineItem
                               title={tEntries(`${yearKey}.events.${eventIndex}`)}
-                              description=""
+                              description={
+                                tDetails.has(event.titleKey)
+                                  ? tDetails(event.titleKey)
+                                  : ''
+                              }
+                              image={event.image}
                               icon={event.icon}
                               side="right"
                               delay={delay}

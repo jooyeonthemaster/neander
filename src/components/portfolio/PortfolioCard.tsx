@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
-import type { PortfolioProject } from '@/data/portfolio';
+import { portfolioProjects, type PortfolioProject } from '@/data/portfolio';
 
 interface PortfolioCardProps {
   project: PortfolioProject;
@@ -15,6 +15,12 @@ interface PortfolioCardProps {
 export function PortfolioCard({ project, titleOverride }: PortfolioCardProps) {
   const t = useTranslations('portfolio');
   const displayTitle = titleOverride || t(`projects.${project.titleKey}.title`);
+
+  // 기존 프로젝트의 Firestore 태그는 'mediaArt' 같은 내부 키라서, 번역 파일에 표시용 태그가 있으면 그것을 쓴다
+  const legacy = portfolioProjects.find((p) => p.slug === project.slug);
+  const legacyTagsKey = legacy ? `projects.${legacy.titleKey}.tags` : null;
+  const tags =
+    legacyTagsKey && t.has(legacyTagsKey) ? (t.raw(legacyTagsKey) as string[]) : project.tags;
 
   return (
     <motion.div
@@ -37,12 +43,18 @@ export function PortfolioCard({ project, titleOverride }: PortfolioCardProps) {
         {/* Image area */}
         <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
           {/* Project image */}
-          <img
-            src={project.image}
-            alt={displayTitle}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            loading="lazy"
-          />
+          {project.image ? (
+            <img
+              src={project.image}
+              alt={displayTitle}
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-teal-800 via-slate-800 to-slate-900 p-5 text-center transition-transform duration-500 group-hover:scale-105">
+              <span className="text-sm font-semibold text-white/70">{project.client}</span>
+            </div>
+          )}
 
           {/* Hover overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -50,7 +62,7 @@ export function PortfolioCard({ project, titleOverride }: PortfolioCardProps) {
           {/* Overlay content on hover */}
           <div className="absolute inset-x-0 bottom-0 translate-y-4 p-5 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
             <div className="flex flex-wrap gap-1.5">
-              {project.tags.slice(0, 3).map((tag) => (
+              {tags.slice(0, 3).map((tag) => (
                 <Badge key={tag} variant="teal" className="bg-teal-500/20 text-white backdrop-blur-sm">
                   {tag}
                 </Badge>
@@ -69,7 +81,7 @@ export function PortfolioCard({ project, titleOverride }: PortfolioCardProps) {
           {project.featured && (
             <div className="absolute left-3 top-3">
               <span className="rounded-full bg-teal-600/90 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-                Featured
+                {t('featured')}
               </span>
             </div>
           )}
@@ -82,8 +94,12 @@ export function PortfolioCard({ project, titleOverride }: PortfolioCardProps) {
           </h3>
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <span>{project.client}</span>
-            <span aria-hidden="true">--</span>
-            <span>{project.location}</span>
+            {project.location && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>{project.location}</span>
+              </>
+            )}
           </div>
         </div>
       </Link>

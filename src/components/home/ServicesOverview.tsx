@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
 import { Link } from '@/i18n/navigation';
-import { ScrollReveal, StaggerChildren, StaggerItem } from '@/components/animations';
+import { FitToViewport, ScrollReveal, StaggerChildren, StaggerItem } from '@/components/animations';
 import { pillars, getExperiencesByPillar } from '@/data/experiences';
 import { cn } from '@/lib/utils';
 
@@ -68,7 +68,7 @@ export function ServicesOverview() {
   const t = useTranslations('services');
 
   return (
-    <section className="relative overflow-hidden bg-white" id="services">
+    <section className="home-screen relative overflow-hidden bg-white" id="services">
       {/* ── Background layers (light) ──────────────────────── */}
       {/* Subtle grid pattern */}
       <div
@@ -94,18 +94,18 @@ export function ServicesOverview() {
       />
 
       {/* ── Content ──────────────────────────────────────── */}
-      <div className="relative w-full py-16 lg:py-20">
+      <FitToViewport className="py-16 lg:py-0">
         <div className="container-wide">
           {/* Header — compact */}
-          <ScrollReveal className="text-center mb-10 lg:mb-14">
-            <span className="inline-flex items-center gap-2 mb-5 px-4 py-1.5 rounded-full border border-teal-600/20 bg-teal-500/[0.06] text-[11px] font-semibold uppercase tracking-[0.25em] text-teal-600">
+          <ScrollReveal className="text-center mb-10 lg:mb-[3.5vh]">
+            <span className="inline-flex items-center gap-2 mb-5 lg:mb-[1.6vh] px-4 py-1.5 rounded-full border border-teal-600/20 bg-teal-500/[0.06] text-[11px] font-semibold uppercase tracking-[0.25em] text-teal-600">
               <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
               AI EXPERIENCES
             </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-neutral-900 leading-[1.1]">
+            <h2 className="text-3xl sm:text-4xl lg:text-[clamp(2rem,5vh,3.75rem)] font-bold tracking-tight text-neutral-900 leading-[1.1]">
               {t('pillarsTitle')}
             </h2>
-            <p className="mt-4 text-base sm:text-lg text-neutral-500 leading-relaxed max-w-2xl mx-auto">
+            <p className="mt-4 lg:mt-[1.4vh] text-base sm:text-lg text-neutral-500 leading-relaxed max-w-2xl mx-auto">
               {t('pillarsSubtitle')}
             </p>
           </ScrollReveal>
@@ -142,17 +142,17 @@ export function ServicesOverview() {
           </div>
 
           {/* Bottom stat line */}
-          <ScrollReveal className="mt-10 lg:mt-14 flex justify-center">
-            <div className="inline-flex items-center gap-5 sm:gap-7 px-7 py-3.5 rounded-2xl border border-neutral-200 bg-neutral-50/80 backdrop-blur-sm">
-              <StatItem value="42" label="체험 콘텐츠" color="#24ADB5" />
+          <ScrollReveal className="mt-10 lg:mt-[3vh] flex justify-center">
+            <div className="inline-flex items-center gap-3 sm:gap-7 px-4 sm:px-7 py-3.5 lg-short:py-2.5 rounded-2xl border border-neutral-200 bg-neutral-50/80 backdrop-blur-sm">
+              <StatItem value="42" label={t('statExperiences')} color="#24ADB5" />
               <span className="w-px h-4 bg-neutral-200" aria-hidden="true" />
-              <StatItem value="9" label="산업군" color="#24ADB5" />
+              <StatItem value="9" label={t('statIndustries')} color="#24ADB5" />
               <span className="w-px h-4 bg-neutral-200" aria-hidden="true" />
-              <StatItem value="5" label="카테고리" color="#24ADB5" />
+              <StatItem value="5" label={t('statCategories')} color="#24ADB5" />
             </div>
           </ScrollReveal>
         </div>
-      </div>
+      </FitToViewport>
     </section>
   );
 }
@@ -160,14 +160,14 @@ export function ServicesOverview() {
 /* ── Stat Item ────────────────────────────────────────── */
 function StatItem({ value, label, color }: { value: string; label: string; color: string }) {
   return (
-    <span className="flex items-baseline gap-1.5">
+    <span className="flex items-baseline gap-1.5 whitespace-nowrap">
       <span
         className="text-xl sm:text-2xl font-bold tabular-nums"
         style={{ color }}
       >
         {value}
       </span>
-      <span className="text-sm text-neutral-500 font-medium">{label}</span>
+      <span className="text-xs sm:text-sm text-neutral-500 font-medium">{label}</span>
     </span>
   );
 }
@@ -188,7 +188,7 @@ function PillarCardHero({
         whileHover={{ y: -6 }}
         transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
         className={cn(
-          'relative flex flex-col h-full min-h-[380px] rounded-2xl overflow-hidden',
+          'relative flex flex-col h-full min-h-[380px] lg:min-h-0 rounded-2xl overflow-hidden',
           'border border-neutral-200/80',
           'bg-white',
           'shadow-sm',
@@ -212,9 +212,9 @@ function PillarCardHero({
           aria-hidden="true"
         />
 
-        <div className="relative flex flex-col h-full p-7 lg:p-9">
+        <div className="relative flex flex-col h-full p-7 lg:p-9 lg-short:p-7">
           {/* Icon */}
-          <div className="flex items-start justify-between mb-6">
+          <div className="flex items-start justify-between mb-6 lg-short:mb-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-500/[0.08] text-teal-600 ring-1 ring-teal-500/20 transition-all duration-500 group-hover:scale-110 group-hover:bg-teal-500/[0.12]">
               {PILLAR_ICONS[pillar.icon] ?? null}
             </div>
@@ -244,7 +244,7 @@ function PillarCardHero({
               <span className="text-2xl font-bold text-teal-600">
                 {count}
               </span>
-              <span className="text-sm font-medium text-neutral-400">체험 콘텐츠</span>
+              <span className="text-sm font-medium text-neutral-400">{t('statExperiences')}</span>
             </div>
             <div className="flex items-center gap-2 text-sm font-semibold text-teal-600 transition-all duration-300 group-hover:gap-3">
               <span>{t('viewDetail')}</span>
@@ -312,10 +312,10 @@ function PillarCard({
           aria-hidden="true"
         />
 
-        <div className="relative flex flex-col h-full p-5 sm:p-6">
+        <div className="relative flex flex-col h-full p-5 sm:p-6 lg-short:p-4">
           {/* Icon + Number */}
-          <div className="flex items-start justify-between mb-5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-500/[0.08] text-teal-600 ring-1 ring-teal-500/20 transition-all duration-500 group-hover:scale-105 group-hover:bg-teal-500/[0.12]">
+          <div className="flex items-start justify-between mb-5 lg-short:mb-3">
+            <div className="flex h-12 w-12 lg-short:h-10 lg-short:w-10 items-center justify-center rounded-xl bg-teal-500/[0.08] text-teal-600 ring-1 ring-teal-500/20 transition-all duration-500 group-hover:scale-105 group-hover:bg-teal-500/[0.12]">
               {PILLAR_ICONS[pillar.icon] ?? null}
             </div>
             <span className="text-xl font-bold font-mono text-teal-500 opacity-[0.12] group-hover:opacity-[0.20] transition-opacity duration-500">
@@ -334,17 +334,17 @@ function PillarCard({
           </p>
 
           {/* Description */}
-          <p className="text-xs text-neutral-400 leading-relaxed flex-1 line-clamp-2">
+          <p className="text-xs text-neutral-400 leading-relaxed flex-1 line-clamp-2 lg-short:hidden">
             {t(pillar.descriptionKey)}
           </p>
 
           {/* Bottom: count + CTA */}
-          <div className="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between">
+          <div className="mt-4 lg-short:mt-auto pt-3 border-t border-neutral-100 flex items-center justify-between">
             <div className="flex items-baseline gap-1.5">
               <span className="text-lg font-bold text-teal-600">
                 {count}
               </span>
-              <span className="text-xs font-medium text-neutral-400">체험 콘텐츠</span>
+              <span className="text-xs font-medium text-neutral-400">{t('statExperiences')}</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs font-semibold text-teal-600 transition-all duration-300 group-hover:gap-2.5">
               <span>{t('viewDetail')}</span>

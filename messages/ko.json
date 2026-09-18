@@ -13,7 +13,7 @@
     "portfolio": "포트폴리오",
     "about": "회사 소개",
     "contact": "문의하기",
-    "quote": "견적 요청",
+    "quote": "견적 계산",
     "press": "언론 보도",
     "demo": "데모 체험",
     "language": "English",
@@ -76,10 +76,15 @@
     "allPillars": "전체",
     "noExperiences": "이 조합의 체험이 없습니다. 다른 필터를 선택해 보세요.",
     "viewDetail": "자세히 보기",
+    "statExperiences": "체험 콘텐츠",
+    "statIndustries": "산업군",
+    "statCategories": "카테고리",
+    "photoCase": "운영 사례",
     "relatedExperiences": "관련 체험 콘텐츠",
     "inquiryBtn": "이 체험 문의하기",
     "features": "주요 기능",
     "backToServices": "서비스 목록으로",
+    "backToPillar": "{pillar} 목록으로 돌아가기",
     "detailProcessTitle": "체험 프로세스",
     "pillars": {
       "aiPhoto": {
@@ -2478,10 +2483,24 @@
     "filterCategories": {
       "online": "온라인 솔루션",
       "offline": "오프라인 솔루션",
-      "service": "네안데르 서비스"
+      "service": "네안데르 서비스",
+      "ip": "IP 콜라보"
     },
     "viewProject": "프로젝트 보기",
     "viewAll": "전체 프로젝트 보기",
+    "featured": "대표",
+    "detail": {
+      "result": "성과",
+      "gallery": "갤러리",
+      "projectDetails": "프로젝트 정보",
+      "client": "클라이언트",
+      "date": "기간",
+      "location": "장소",
+      "services": "제공 서비스",
+      "ctaTitle": "비슷한 프로젝트를 준비 중이신가요?",
+      "ctaButton": "문의하기",
+      "backToList": "포트폴리오 목록으로"
+    },
     "projects": {
       "crossTheLine": {
         "title": "CROSS THE LINE — 몰입형 전시",
@@ -2508,28 +2527,28 @@
         "result": "월 방문객 1,500명, 재방문율 40%"
       },
       "jecheonMusicFilm": {
-        "title": "제천국제음악영화제 AI 체험관",
-        "description": "음악과 영화가 만나는 곳에 AI 감각을 더하다. 페스티벌 방문객을 위한 AI 포토부스와 인터랙티브 사운드 비주얼 체험관을 운영하여 새로운 축제 경험을 선사했습니다.",
-        "date": "2024.08",
+        "title": "제천국제음악영화제 2025 AI 조향사 부스",
+        "description": "‘AI와 완성하는 나만의 시네마 향수’. 제21회 제천국제음악영화제에서 AI 조향사 부스를 운영했습니다. AI가 관람객의 이미지를 분석해 어울리는 향을 추천하고, 그 자리에서 10ml 시네마 향수로 조향해 드렸습니다. 영화 〈화양연화〉와 〈해리포터〉를 모티프로 한 영화 시향지 2종도 함께 선보였습니다.",
+        "date": "2025.09.04 – 09.07",
         "location": "제천",
         "tags": [
-          "페스티벌",
-          "AI 포토부스",
-          "사운드 비주얼"
+          "영화제",
+          "AI 조향사",
+          "시네마 향수"
         ],
-        "result": "4일간 방문객 3,500명, SNS 공유 2,800건"
+        "result": "4일간 AI 조향사 부스 운영 · 영화 시향지 2종 제작"
       },
       "seoulWritersFestival": {
-        "title": "서울작가축제 인터랙티브 전시",
-        "description": "문학과 기술의 교차점. 작가의 텍스트를 AI가 시각적 언어로 변환하는 인터랙티브 설치 작품을 선보였습니다. 관람자의 음성이 실시간으로 비주얼 아트가 되는 경험을 만들었습니다.",
-        "date": "2024.10",
+        "title": "서울국제작가축제 2025 AI 북퍼퓸 전시",
+        "description": "책을 향으로 읽는 전시. 2025 서울국제작가축제에서 참가 도서 29종을 각각의 향수로 조향하고, 관람객의 이미지를 분석해 어울리는 책과 향을 매칭하는 AI 향 추천 시스템을 개발했습니다. 책 구절을 들려주는 AI 음성 내레이션과 필사 연동 인터랙션까지, 그라운드서울 1~3층의 전시를 연출했습니다.",
+        "date": "2025.09.12 – 09.17",
         "location": "서울",
         "tags": [
           "문학 축제",
-          "AI 아트",
-          "인터랙티브 설치"
+          "북퍼퓸",
+          "AI 향 추천"
         ],
-        "result": "참여 작가 50명, 관람객 만족도 100%"
+        "result": "참가 도서 29종 커스텀 퍼퓸 · 책 시향지 30종 제작"
       },
       "ansanScienceFestival": {
         "title": "안산국제과학영상제 AI 체험존",
@@ -2594,6 +2613,19 @@
     },
     "timeline": {
       "title": "연혁",
+      "details": {
+        "crossTheLine": "관람자가 작품의 일부가 되는 인터랙티브 미디어 아트 전시. 모션 트래킹과 AI 제너러티브 아트로 몰입형 공간을 구현했습니다.",
+        "acscentSinchon": "AC'SCENT 첫 번째 플래그십 매장. 개인 향 프로파일링부터 현장 조합까지 AI 향수 체험의 전 과정을 선보였습니다.",
+        "acscentWau": "홍대 와우산로에 연 두 번째 매장. 지역 특색을 반영한 한정 향수 라인과 업그레이드된 AI 프로파일링 시스템을 도입했습니다.",
+        "hahyunsangElegy": "싱어송라이터 하현상의 EP 〈Elegy〉 수록곡 6곡을 각각의 향으로 옮긴 앨범 향수 컬렉션. AC'SCENT 신촌에서 미디어아트 팝업스토어를 함께 열었습니다.",
+        "acscentId": "세 번째 매장 AC'SCENT ID. 심층 성향 분석과 프리미엄 원료로 나를 정의하는 향을 완성합니다.",
+        "jecheonFestival": "제21회 제천국제음악영화제 AI 조향사 부스. AI가 관람객 이미지를 분석해 향을 추천하고, 그 자리에서 10ml 시네마 향수를 제작했습니다.",
+        "seoulWriters": "2025 서울국제작가축제 AI 북퍼퓸 전시. 참가 도서 29종을 각각의 향으로 조향하고, 관람객에게 어울리는 책과 향을 매칭했습니다.",
+        "ansanScience": "AI 기술의 원리를 직접 체험하는 인터랙티브 콘텐츠를 기획하고 운영했습니다. 과학을 놀이로 경험하는 체험존을 구현했습니다.",
+        "ktoPerfumeClass": "한국관광공사 서울센터(하이커 그라운드)에서 30명 대상 AI 조향 클래스를 진행했습니다. 5단계 30분 체험으로 나만의 10ml 향수를 완성합니다.",
+        "nflyingMd": "FNC엔터테인먼트와 함께 엔플라잉 콘서트 〈into REM〉의 공식 MD를 향으로 제작했습니다. 서울·대구·부산·광주 공연마다 향을 다르게 설계했습니다.",
+        "jimffOstFair": "제22회 제천국제음악영화제 OST페어 관객 체험 프로그램. 터치 키오스크 3대로 어울리는 향을 추천하고 10ml 향수를 제작해 드렸습니다."
+      },
       "entries": {
         "2022": {
           "year": "2022",
@@ -2608,20 +2640,20 @@
           "year": "2023",
           "title": "AC'SCENT 1호점 오픈",
           "events": [
-            "예비창업패키지 선정",
+            "예비창업패키지 선정 · 최우수 졸업",
             "AC'SCENT 신촌점 오픈 (1호점)",
-            "AI 향수 체험 서비스 정식 론칭"
+            "청년 골목창업 경진대회 수상",
+            "서대문구 청년벤처 육성사업 우수벤처기업상"
           ]
         },
         "2024": {
           "year": "2024",
-          "title": "축제 시장 진출",
+          "title": "AC'SCENT 2호점 오픈",
           "events": [
-            "관광벤처기업 선정",
+            "초기관광벤처사업 선정",
+            "중앙대학교 캠퍼스타운 입주기업 선정",
             "AC'SCENT 와우점 오픈 (2호점)",
-            "제천국제음악영화제 AI 체험관 운영",
-            "서울작가축제 인터랙티브 전시 운영",
-            "기업 B2B 서비스 본격 시작"
+            "하현상 〈Elegy〉 앨범 향수 컬렉션 & 팝업"
           ]
         },
         "2025": {
@@ -2630,8 +2662,19 @@
           "events": [
             "청년창업사관학교 선정",
             "AC'SCENT ID 론칭 (3호점)",
-            "안산국제과학영상제 AI 체험존 운영",
-            "AI 콘텐츠 솔루션 고도화"
+            "제천국제음악영화제 AI 조향사 부스 운영",
+            "서울국제작가축제 AI 북퍼퓸 전시",
+            "안산국제과학영상제 AI 체험존 운영"
+          ]
+        },
+        "2026": {
+          "year": "2026",
+          "title": "딥테크 밸류업 선정",
+          "events": [
+            "딥테크 밸류업 지원사업 선정",
+            "한국관광공사 AI 조향 클래스 운영",
+            "엔플라잉 〈into REM〉 콘서트 공식 향 MD 제작",
+            "제22회 제천국제음악영화제 OST페어 체험 프로그램 운영"
           ]
         }
       }
@@ -2683,7 +2726,7 @@
   },
   "quote": {
     "category": "QUOTE",
-    "metaTitle": "견적 요청 | 네안데르",
+    "metaTitle": "견적 요청",
     "metaDescription": "네안데르의 AI 체험 콘텐츠 맞춤 견적을 요청하세요.",
     "title": "견적 요청",
     "subtitle": "프로젝트를 시작해 볼까요?",
@@ -2705,6 +2748,7 @@
     "decrease": "감소",
     "increase": "증가",
     "days": "일",
+    "perDay": "/일",
     "multiplier": "배율",
     "expectedAttendees": "예상 방문자 수",
     "people": "명",
@@ -2719,15 +2763,19 @@
     "preferredDate": "행사 예정일",
     "serviceTitle": "서비스를 선택해주세요",
     "serviceSubtitle": "원하시는 서비스를 골라주세요. 복수 선택이 가능합니다.",
+    "photoCase": "운영 사례",
     "services": {
       "acscent": {
-        "name": "AC'SCENT AI 향수 체험"
+        "name": "AC'SCENT AI 향수 체험",
+        "photoCaption": "남산골한옥마을 〈취향〉 · AI 조향 시향 전시"
       },
       "photoBooth": {
-        "name": "AI 포토부스"
+        "name": "AI 포토부스",
+        "photoCaption": "평택 AI 페스타 2026 · AI 포토부스(닮은 연예인)"
       },
       "mediaArt": {
-        "name": "인터랙티브 미디어 아트"
+        "name": "인터랙티브 미디어 아트",
+        "photoCaption": "CROSS THE LINE · 모션 트래킹 미디어아트 전시"
       },
       "spatialDesign": {
         "name": "공간 디자인"
@@ -2736,10 +2784,11 @@
         "name": "올인원 렌탈"
       },
       "custom": {
-        "name": "커스텀 AI 콘텐츠"
+        "name": "커스텀 AI 콘텐츠",
+        "photoCaption": "서울국제작가축제 2025 · 책을 향으로 옮긴 AI 북퍼퓸"
       }
     },
-    "from": "부터",
+    "from": "{price}부터",
     "added": "추가됨",
     "add": "추가",
     "configure": "옵션 설정",
@@ -2763,9 +2812,9 @@
       "fullCustom": "풀 커스텀",
       "motionSensors": "모션 센서",
       "venueArea": "공간 면적",
-      "areaSmall": "소형 (~100m2)",
-      "areaMedium": "중형 (100-300m2)",
-      "areaLarge": "대형 (300m2+)",
+      "areaSmall": "소형 (~100m²)",
+      "areaMedium": "중형 (100-300m²)",
+      "areaLarge": "대형 (300m²+)",
       "photoZoneDesign": "포토존 디자인",
       "customLighting": "커스텀 조명",
       "aiKiosk": "AI 키오스크",
@@ -2804,6 +2853,7 @@
     "estimatedTotal": "예상 총 비용",
     "manwon": "만원",
     "emptyServices": "서비스를 선택하면 예상 견적이 표시됩니다",
+    "portfolioLink": "포트폴리오 보기",
     "requestQuote": "견적 요청하기",
     "reset": "초기화",
     "steps": {
@@ -2869,7 +2919,8 @@
       "privacyConsent": "개인정보 수집 및 이용에 동의합니다.",
       "marketingConsent": "마케팅 정보 수신에 동의합니다. (선택)",
       "submit": "견적 요청하기",
-      "submitting": "제출 중..."
+      "submitting": "제출 중...",
+      "privacyConsentDetail": "수집 항목: 이름, 이메일, 연락처, 회사명, 문의 내용 · 수집 목적: 견적 상담 및 회신"
     },
     "disclaimer": "견적은 행사 규모, 기간, 장소 등에 따라 달라질 수 있으며, 정확한 금액은 상담 후 안내드립니다. 견적 요청 후 영업일 기준 1~2일 이내에 담당자가 연락드리겠습니다.",
     "success": {
@@ -2887,20 +2938,20 @@
     "title": "데모 체험",
     "subtitle": "네안데르의 AI 콘텐츠를 직접 체험해 보세요",
     "description": "AC'SCENT 향수 추천과 AI 포토부스를 웹에서 미리 경험할 수 있습니다.",
-    "metaTitle": "데모 체험 | 네안데르",
+    "metaTitle": "데모 체험",
     "metaDescription": "AI 향수 추천과 포토부스를 웹에서 직접 체험해 보세요.",
     "category": "DEMO",
     "tryIt": "체험하기",
     "scent-quiz": {
       "title": "AC'SCENT 향 추천 테스트",
       "description": "몇 가지 질문에 답하면 AI가 당신에게 어울리는 향을 추천해 드립니다.",
-      "metaTitle": "AI 향 추천 테스트 | 네안데르",
+      "metaTitle": "AI 향 추천 테스트",
       "metaDescription": "AI가 분석하는 나만의 향기. 간단한 테스트로 시그니처 향을 찾아보세요."
     },
     "photo-booth": {
       "title": "AI 포토부스 미리보기",
       "description": "사진을 업로드하면 AI가 다양한 스타일로 변환합니다.",
-      "metaTitle": "AI 포토부스 미리보기 | 네안데르",
+      "metaTitle": "AI 포토부스 미리보기",
       "metaDescription": "AI가 만드는 나만의 아트워크. 사진을 업로드하고 다양한 스타일을 체험해 보세요."
     },
     "scentQuiz": {
@@ -3048,7 +3099,16 @@
   "contact": {
     "title": "문의하기",
     "subtitle": "프로젝트에 대해 이야기해 볼까요?",
-    "description": "아이디어 단계부터 상담 가능합니다. 편하게 연락주세요.",
+    "description": "간단히 문의를 남기시거나, 행사 정보를 골라 예상 견적을 바로 계산해 보세요.",
+    "tabs": {
+      "label": "문의 방법",
+      "inquiry": "간단 문의",
+      "inquiryDesc": "아이디어 상담 · 제휴 · 취재 · 채용 등 무엇이든",
+      "quote": "견적 계산",
+      "quoteDesc": "행사 정보와 서비스를 고르면 예상 비용이 바로 계산돼요"
+    },
+    "quoteHint": "예상 비용이 궁금하시면 '견적 계산'에서 바로 확인할 수 있어요.",
+    "quoteHintCta": "견적 계산하기",
     "form": {
       "name": "이름",
       "namePlaceholder": "이름을 입력해주세요",
@@ -3074,6 +3134,9 @@
     },
     "info": {
       "title": "연락처 정보",
+      "emailLabel": "이메일",
+      "phoneLabel": "연락처",
+      "addressLabel": "주소",
       "email": "ok@neander.co.kr",
       "phone": "02-336-3368",
       "address": "서울특별시 마포구 와우산로 29라길 22",
@@ -3087,11 +3150,13 @@
     },
     "success": {
       "title": "문의가 접수되었습니다",
-      "description": "빠른 시일 내에 답변 드리겠습니다. 감사합니다."
+      "description": "빠른 시일 내에 답변 드리겠습니다. 감사합니다.",
+      "sendAnother": "다른 문의 남기기"
     },
     "error": {
       "title": "전송에 실패했습니다",
-      "description": "잠시 후 다시 시도해주세요."
+      "description": "잠시 후 다시 시도하거나 ok@neander.co.kr로 메일 주세요.",
+      "retry": "다시 시도하기"
     },
     "social": {
       "title": "소셜 미디어",
@@ -3179,20 +3244,21 @@
         "about": "회사 소개",
         "portfolio": "포트폴리오",
         "careers": "채용",
-        "press": "보도자료",
+        "press": "언론 보도",
         "blog": "블로그"
       },
       "support": {
         "title": "지원",
         "contact": "문의하기",
-        "quote": "견적 요청",
+        "quote": "견적 계산",
         "faq": "자주 묻는 질문",
+        "demo": "데모 체험",
         "terms": "이용약관",
         "privacy": "개인정보처리방침"
       }
     },
     "copyright": "© {year} (주)네안데르. All rights reserved.",
-    "companyInfo": "(주)네안데르 | 대표: 유재영 | 사업자등록번호: 000-00-00000",
+    "companyInfo": "(주)네안데르 | 대표: 유재영 | 사업자등록번호: 683-86-02812",
     "links": {
       "terms": "이용약관",
       "privacy": "개인정보처리방침",
@@ -3265,7 +3331,54 @@
     "terraNoirDesc": "스모키한 깊이를 지닌 대지의 세련된 향",
     "crystalGarden": "크리스탈 가든",
     "crystalGardenDesc": "수정을 통과하는 햇살처럼 맑고 투명한 향",
-    "visitStore": "매장 방문하기"
+    "visitStore": "매장 방문하기",
+    "radarLabel": "향 프로필 레이더 차트",
+    "axes": {
+      "floral": "플로럴",
+      "citrus": "시트러스",
+      "woody": "우디",
+      "oriental": "오리엔탈",
+      "fresh": "프레시",
+      "sweet": "스위트"
+    },
+    "notes": {
+      "bergamot": "베르가못",
+      "pinkPepper": "핑크 페퍼",
+      "iris": "아이리스",
+      "violetLeaf": "바이올렛 리프",
+      "whiteMusk": "화이트 머스크",
+      "cedarwood": "시더우드",
+      "blackPepper": "블랙 페퍼",
+      "cardamom": "카다멈",
+      "oud": "우드(Oud)",
+      "roseAbsolute": "로즈 앱솔루트",
+      "amber": "앰버",
+      "sandalwood": "샌달우드",
+      "yuzu": "유자",
+      "grapefruit": "자몽",
+      "neroli": "네롤리",
+      "greenTea": "그린티",
+      "whiteCedar": "화이트 시더",
+      "seaSalt": "시솔트",
+      "peony": "피오니",
+      "lychee": "리치",
+      "turkishRose": "터키쉬 로즈",
+      "jasmineSambac": "자스민 삼박",
+      "vanilla": "바닐라",
+      "cashmereMusk": "캐시미어 머스크",
+      "saffron": "사프란",
+      "juniperBerry": "주니퍼 베리",
+      "vetiver": "베티버",
+      "patchouli": "패출리",
+      "darkAmber": "다크 앰버",
+      "tobaccoLeaf": "타바코 리프",
+      "whitePeach": "화이트 피치",
+      "freesia": "프리지아",
+      "lilyOfTheValley": "은방울꽃",
+      "magnolia": "매그놀리아",
+      "sheerMusk": "쉬어 머스크",
+      "blondeWood": "블론드 우드"
+    }
   },
   "photoBooth": {
     "category": "AI 포토부스",
@@ -3276,6 +3389,9 @@
     "dropHere": "여기에 놓으세요",
     "upTo": "최대",
     "uploadedImage": "업로드된 이미지",
+    "beforeImage": "변환 전 원본 이미지",
+    "afterImage": "AI 스타일 변환 후 이미지",
+    "compareSlider": "변환 전후 비교 슬라이더",
     "processing": "AI가 이미지를 생성 중입니다...",
     "ctaMessage": "실제 행사에서 더 다양한 스타일을 경험해 보세요",
     "ctaButton": "행사 문의하기",
@@ -3412,6 +3528,13 @@
     "contactButton": "직접 문의하기"
   },
   "demos": {
+    "stage": {
+      "loading": "데모를 불러오는 중이에요",
+      "fullscreen": "전체 화면으로 보기",
+      "exitFullscreen": "전체 화면 끝내기",
+      "scrollHint": "서비스 자세히 보기",
+      "disclaimer": "이 프로그램은 데모용으로 실제 사용되는 프로그램보다 품질이 떨어질 수 있습니다."
+    },
     "sectionTitle": "지금 체험해 보세요",
     "sectionSubtitle": "이 AI 체험의 미니 버전을 직접 경험해 보세요",
     "tryDemo": "데모 체험하기",

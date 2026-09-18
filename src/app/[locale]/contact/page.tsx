@@ -2,11 +2,12 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SectionHeader } from '@/components/ui';
 import { ScrollReveal } from '@/components/animations';
-import { ContactForm } from '@/components/contact/ContactForm';
-import { ContactInfo } from '@/components/contact/ContactInfo';
+import { ContactTabs } from '@/components/contact/ContactTabs';
 
 interface Props {
   params: Promise<{ locale: string }>;
+  /** ?type=quote 로 들어오면 견적 계산 탭을 연다 */
+  searchParams: Promise<{ type?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -23,8 +24,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ContactPage({ params }: Props) {
+export default async function ContactPage({ params, searchParams }: Props) {
   const { locale } = await params;
+  const { type } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'contact' });
 
@@ -59,37 +61,20 @@ export default async function ContactPage({ params }: Props) {
               title={t('subtitle')}
               subtitle={t('description')}
               align="center"
-              className="max-w-3xl [&_h2]:text-white [&_p]:text-slate-400 [&_span]:text-teal-400"
+              as="h1"
+              className="max-w-3xl [&_h1]:text-white [&_p]:text-slate-400 [&_span]:text-teal-400"
             />
           </ScrollReveal>
         </div>
       </section>
 
-      {/* Form + Info two-column layout */}
+      {/* 간단 문의 / 견적 계산 */}
       <section className="py-16 sm:py-24" aria-labelledby="contact-form-title">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 id="contact-form-title" className="sr-only">
             {t('title')}
           </h2>
-
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-5 lg:gap-16">
-            {/* Form (left, wider) */}
-            <div className="lg:col-span-3">
-              <ScrollReveal>
-                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-                  <h3 className="mb-6 text-xl font-bold text-slate-900">
-                    {t('subtitle')}
-                  </h3>
-                  <ContactForm />
-                </div>
-              </ScrollReveal>
-            </div>
-
-            {/* Info (right, narrower) */}
-            <div className="lg:col-span-2">
-              <ContactInfo />
-            </div>
-          </div>
+          <ContactTabs initialTab={type === 'quote' ? 'quote' : 'inquiry'} />
         </div>
       </section>
     </main>

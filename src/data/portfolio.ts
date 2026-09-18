@@ -3,7 +3,7 @@ export interface PortfolioProject {
   titleKey: string;
   descriptionKey: string;
   year: number;
-  category: 'online' | 'offline' | 'service';
+  category: 'online' | 'offline' | 'service' | 'ip';
   tags: string[];
   image: string;
   images: string[];
@@ -56,7 +56,7 @@ export const portfolioProjects: PortfolioProject[] = [
     slug: 'jecheon-music-film-festival',
     titleKey: 'jecheonMusicFilm',
     descriptionKey: 'jecheonFestivalDesc',
-    year: 2024,
+    year: 2025,
     category: 'offline',
     tags: ['ai', 'scent', 'festival', 'film'],
     image: '/images/portfolio/jecheon-festival-1.webp',
@@ -76,7 +76,7 @@ export const portfolioProjects: PortfolioProject[] = [
     slug: 'seoul-writers-festival',
     titleKey: 'seoulWritersFestival',
     descriptionKey: 'seoulWritersDesc',
-    year: 2024,
+    year: 2025,
     category: 'offline',
     tags: ['ai', 'scent', 'literature', 'bookPerfume'],
     image: '/images/portfolio/seoul-writers-1.webp',
@@ -154,6 +154,7 @@ export const portfolioCategories = [
   'online',
   'offline',
   'service',
+  'ip',
 ] as const;
 
 export type PortfolioCategory = (typeof portfolioCategories)[number];

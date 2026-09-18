@@ -7,6 +7,8 @@ import {
   type ConsumerPrediction,
   KEYWORD_EMOTION_MAP,
   EMOTION_INGREDIENT_MAP,
+  LIFESTYLE_EMOTION_MAP,
+  NOTE_TAG_MATCH,
   INGREDIENTS,
   EMOTION_TYPES,
 } from './formula-lab-data';
@@ -23,6 +25,43 @@ function seededRandom(seed: string): () => number {
     h = (h ^ (h >>> 16)) >>> 0;
     return h / 4294967296;
   };
+}
+
+// ─── Percentages ──────────────────────────────────────────────────────
+// 0.1% 단위 반올림. 반올림 오차는 가장 큰 항목에 몰아 합계를 정확히 100.0 으로 맞춘다
+function toPercentages(values: number[]): number[] {
+  const total = values.reduce((a, b) => a + b, 0);
+  if (total <= 0) return values.map(() => 0);
+  const tenths = values.map(v => Math.round((v / total) * 1000));
+  const diff = 1000 - tenths.reduce((a, b) => a + b, 0);
+  if (diff !== 0) tenths[tenths.indexOf(Math.max(...tenths))] += diff;
+  return tenths.map(t => t / 10);
+}
+
+// ─── Note Preferences ─────────────────────────────────────────────────
+// 선호/회피 계열 태그 → 해당 향료 id (INGREDIENTS 순서 유지)
+function ingredientIdsForTags(tags: string[]): Set<string> {
+  const ids = new Set<string>();
+  tags.forEach(tag => {
+    const match = NOTE_TAG_MATCH[tag];
+    if (!match) return;
+    INGREDIENTS.forEach(ing => {
+      if (match.categories.includes(ing.category) || match.ids?.includes(ing.id)) ids.add(ing.id);
+    });
+  });
+  return ids;
+}
+
+// 감성 벡터 기준 친화도 순으로 정렬 (감성 점수 × 친화 목록 내 순위 가중). 동점은 원래 순서
+function rankByAffinity(ids: string[], emotionVector: EmotionScore[]): string[] {
+  const affinity = (id: string) => emotionVector.reduce((sum, em) => {
+    const pos = (EMOTION_INGREDIENT_MAP[em.typeId] || []).indexOf(id);
+    return pos === -1 ? sum : sum + em.score * (6 - pos) / 6;
+  }, 0);
+  return ids
+    .map((id, i) => ({ id, i, score: affinity(id) }))
+    .sort((a, b) => b.score - a.score || a.i - b.i)
+    .map(x => x.id);
 }
 
 // ─── Step 1: OPT-16 Emotion Vector Generation ────────────────────────
@@ -43,6 +82,11 @@ function generateEmotionVector(brief: BrandBrief, rand: () => number): EmotionSc
     travel: [1, 13, 9],
   };
   (contextBoosts[brief.usageContext] || []).forEach(t => { scores[t] += 8 + rand() * 6; });
+
+  // Lifestyle boosts — 타깃 라이프스타일 키워드도 감성 타입에 반영 (컨텍스트보다 약하게)
+  brief.lifestyleKeywords.forEach(kw => {
+    (LIFESTYLE_EMOTION_MAP[kw] || []).forEach(t => { scores[t] += 4 + rand() * 4; });
+  });
 
   // Gender bias
   if (brief.targetGender === 'female') {
@@ -84,13 +128,28 @@ function generateFormulas(
     { id: 'C', suffix: 'Nuanced Layer', suffixKo: '뉘앙스드 레이어', type: 'nuanced' },
   ] as const;
 
+  // 회피 계열 향료는 제외, 선호 계열 향료는 우선 선택 + 가중치. 겹치면 회피가 우선
+  const avoided = ingredientIdsForTags(brief.avoidedNotes);
+  const preferred = ingredientIdsForTags(brief.preferredNotes);
+  avoided.forEach(id => preferred.delete(id));
+  const PREFERRED_BOOST = 1.3;
+
+  // ID 접두어: 공백·기호를 뺀 브랜드명 앞 3글자 ("QA Brand" → "QAB")
+  const brandName = brief.brandName.trim();
+  const brandSlug = brandName.replace(/[^0-9A-Za-z가-힣]/g, '').slice(0, 3).toUpperCase() || 'ONS';
+
   return variants.map(variant => {
     const ingredientIds = new Set<string>();
     const weights: Record<string, number> = {};
 
     // Select ingredients based on dominant emotions
     top3.forEach((em, rank) => {
-      const affinityIds = EMOTION_INGREDIENT_MAP[em.typeId] || [];
+      // 회피 향료를 빼고 선호 향료를 앞으로 (그 외엔 원래 친화도 순서 유지) → 빠진 자리는 다음 친화 향료가 채운다
+      const allowedIds = (EMOTION_INGREDIENT_MAP[em.typeId] || []).filter(id => !avoided.has(id));
+      const affinityIds = [
+        ...allowedIds.filter(id => preferred.has(id)),
+        ...allowedIds.filter(id => !preferred.has(id)),
+      ];
       const count = variant.type === 'bold' && rank === 0 ? 4 : variant.type === 'nuanced' ? 3 : 3;
       affinityIds.slice(0, count).forEach(id => {
         ingredientIds.add(id);
@@ -99,8 +158,18 @@ function generateFormulas(
           : variant.type === 'nuanced'
             ? em.score * (0.8 + rand() * 0.4)
             : em.score;
-        weights[id] = (weights[id] || 0) + w;
+        weights[id] = (weights[id] || 0) + w * (preferred.has(id) ? PREFERRED_BOOST : 1);
       });
+    });
+
+    // 선호 계열이 감성 친화 목록에 없어 하나도 안 들어갔으면, 그 계열에서 친화도가 가장 높은 향료 1개 보강 (최대 3개 계열)
+    brief.preferredNotes.slice(0, 3).forEach(tag => {
+      const tagIds = [...ingredientIdsForTags([tag])].filter(id => !avoided.has(id));
+      if (tagIds.some(id => ingredientIds.has(id))) return;
+      const pick = rankByAffinity(tagIds, emotionVector)[0];
+      if (!pick) return;
+      ingredientIds.add(pick);
+      weights[pick] = top3[2].score * PREFERRED_BOOST;
     });
 
     // Ensure note balance (top/middle/base)
@@ -114,7 +183,13 @@ function generateFormulas(
     // Add missing note types
     (['top', 'middle', 'base'] as const).forEach(nt => {
       if (byNote[nt] === 0) {
-        const candidates = INGREDIENTS.filter(i => i.noteType === nt && !ingredientIds.has(i.id));
+        const layer = INGREDIENTS.filter(i => i.noteType === nt && !ingredientIds.has(i.id));
+        // 회피 향료 제외. 그러면 이 층에 남는 게 없을 때만 회피 조건을 풀어 피라미드를 유지한다
+        const allowed = layer.filter(i => !avoided.has(i.id));
+        const pool = allowed.length ? allowed : layer;
+        // 선호 향료가 이 층에 있으면 그중에서 고른다
+        const preferredPool = pool.filter(i => preferred.has(i.id));
+        const candidates = preferredPool.length ? preferredPool : pool;
         if (candidates.length) {
           const pick = candidates[Math.floor(rand() * candidates.length)];
           ingredientIds.add(pick.id);
@@ -123,11 +198,12 @@ function generateFormulas(
       }
     });
 
-    // Normalize percentages
-    const totalW = Object.values(weights).reduce((a, b) => a + b, 0);
-    const ingredients: FormulaIngredient[] = Array.from(ingredientIds).map(id => ({
+    // Normalize percentages (합계 정확히 100.0)
+    const finalIds = Array.from(ingredientIds);
+    const percentages = toPercentages(finalIds.map(id => weights[id]));
+    const ingredients: FormulaIngredient[] = finalIds.map((id, i) => ({
       ingredientId: id,
-      percentage: Math.round((weights[id] / totalW) * 1000) / 10,
+      percentage: percentages[i],
     })).sort((a, b) => b.percentage - a.percentage);
 
     // Calculate cost
@@ -141,12 +217,10 @@ function generateFormulas(
       : variant.type === 'bold' ? 82 + rand() * 10
       : 79 + rand() * 12;
 
-    const brandSlug = brief.brandName.slice(0, 3).toUpperCase() || 'ONS';
-
     return {
       id: `${brandSlug}-${variant.id}`,
-      name: `${brief.brandName || 'Untitled'} ${variant.suffix}`,
-      nameKo: `${brief.brandName || '미정'} ${variant.suffixKo}`,
+      name: `${brandName || 'Untitled'} ${variant.suffix}`,
+      nameKo: `${brandName || '미정'} ${variant.suffixKo}`,
       concept: generateConcept(top3, variant.type, brief),
       matchScore: Math.round(matchScore * 10) / 10,
       ingredients,
@@ -202,12 +276,11 @@ function generateConsumerPrediction(
   const targetAge = brief.targetAge;
   if (ageMap[targetAge]) ageMap[targetAge] = Math.min(ageMap[targetAge] + 0.15, 0.5);
 
-  // Normalize
-  const totalAge = Object.values(ageMap).reduce((a, b) => a + b, 0);
+  // Normalize (합계 정확히 100.0)
+  const ageKeys = Object.keys(ageMap);
+  const agePercentages = toPercentages(ageKeys.map(k => ageMap[k]));
   const ageBreakdown: Record<string, number> = {};
-  for (const [k, v] of Object.entries(ageMap)) {
-    ageBreakdown[k] = Math.round((v / totalAge) * 1000) / 10;
-  }
+  ageKeys.forEach((k, i) => { ageBreakdown[k] = agePercentages[i]; });
 
   const genderFemale = brief.targetGender === 'female' ? 68 + rand() * 15
     : brief.targetGender === 'male' ? 25 + rand() * 15
@@ -231,7 +304,8 @@ function generateConsumerPrediction(
     repurchaseRate: Math.round((basePref * 0.45 + rand() * 10) * 10) / 10,
     genderBreakdown: {
       female: Math.round(genderFemale * 10) / 10,
-      male: Math.round((100 - genderFemale) * 10) / 10,
+      // 여성 수치에서 빼서 합계가 100.0 을 넘거나 모자라지 않게
+      male: (1000 - Math.round(genderFemale * 10)) / 10,
     },
     ageBreakdown,
     competitiveEdge: Math.round((65 + rand() * 25) * 10) / 10,
