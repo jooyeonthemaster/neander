@@ -7,7 +7,11 @@ service cloud.firestore {
         && request.auth.token.email in [
           'ok@neander.co.kr',
           'admin@neander.co.kr',
-          'nadr110619@gmail.com'
+          'nadr110619@gmail.com',
+          'nadr.jooyeon@gmail.com',
+          'nadr.sunflower@gmail.com',
+          'nadr.okkhoxo@gmail.com',
+          'ldongju33@gmail.com'
         ];
     }
 
