@@ -62,6 +62,7 @@ function toEvent(snapshot: QueryDocumentSnapshot<DocumentData>): AnalyticsEvent 
     os: data.os ?? '기타',
     inapp: data.inapp ?? null,
     country: data.country ?? null,
+    region: data.region ?? null,
     city: data.city ?? null,
     lang: data.lang ?? null,
     dur: typeof data.dur === 'number' ? data.dur : null,

@@ -8,7 +8,7 @@ import TrendChart from './components/TrendChart'
 import PagesTable from './components/PagesTable'
 import SessionLog from './components/SessionLog'
 import { BarList, BarListCard, type BarListItem } from './components/BarList'
-import { cityName, countryName, pageName } from './components/format'
+import { cityName, countryName, pageName, regionName } from './components/format'
 import { useAnalyticsReport } from './useAnalyticsReport'
 import { splitSourceKey, type Counter, type Summary } from '@/lib/analytics/aggregate'
 import { periodOf, shiftAnchor, todayKey, type PeriodMode } from '@/lib/analytics/period'
@@ -317,7 +317,9 @@ export default function AdminAnalyticsPage() {
               <BarList items={items(summary.os)} limit={6} />
             </BarListCard>
             <BarListCard title="지역·언어" description="접속 위치는 IP로 추정한 값입니다 (IP는 저장하지 않음)">
-              <Subheading>도시</Subheading>
+              <Subheading>시·도</Subheading>
+              <BarList items={items(summary.regions, regionName)} limit={6} />
+              <Subheading>시·군·구</Subheading>
               <BarList items={items(summary.cities, cityName)} limit={6} />
               <Subheading>국가</Subheading>
               <BarList items={items(summary.countries, countryName)} limit={5} />

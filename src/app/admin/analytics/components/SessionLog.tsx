@@ -34,7 +34,7 @@ function origin(first: AnalyticsEvent): string {
 }
 
 function place(first: AnalyticsEvent): string | null {
-  if (first.city) return cityName(`${first.country ?? ''}\t${first.city}`)
+  if (first.city) return cityName(`${first.country ?? ''}\t${first.region ?? ''}\t${first.city}`)
   return first.country ? countryName(first.country) : null
 }
 

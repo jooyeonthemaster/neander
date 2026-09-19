@@ -11,7 +11,7 @@ export const EVENTS_COLLECTION = 'analytics_events'
 export const DAILY_COLLECTION = 'analytics_daily'
 
 /** 요약 구조가 바뀌면 올려서 저장된 일별 요약을 다시 계산하게 한다 */
-export const SUMMARY_VERSION = 1
+export const SUMMARY_VERSION = 2
 
 /** 한 페이지만 보고 10초 안에 아무 행동 없이 떠난 세션을 이탈로 본다 */
 export const BOUNCE_MAX_MS = 10_000
@@ -40,6 +40,8 @@ export interface AnalyticsEvent {
   os: string
   inapp: string | null
   country: string | null
+  /** 시·도 코드 (ISO 3166-2, 예: 서울 '11') */
+  region: string | null
   city: string | null
   lang: string | null
   /** 페이지를 보고 있던 시간(ms). 페이지를 떠날 때 채워진다 */
@@ -94,6 +96,9 @@ export interface Summary {
   browsers: Counter
   os: Counter
   countries: Counter
+  /** `${country}\t${region}` */
+  regions: Counter
+  /** `${country}\t${region}\t${city}` */
   cities: Counter
   /** 페이지뷰 기준 */
   locales: Counter
@@ -127,6 +132,7 @@ export function emptySummary(): Summary {
     browsers: {},
     os: {},
     countries: {},
+    regions: {},
     cities: {},
     locales: {},
     events: {},
@@ -254,7 +260,8 @@ export function summarize(events: AnalyticsEvent[]): Summary {
     bump(summary.browsers, first.browser)
     bump(summary.os, first.os)
     bump(summary.countries, first.country)
-    bump(summary.cities, first.city ? `${first.country ?? ''}\t${first.city}` : null)
+    bump(summary.regions, first.region ? `${first.country ?? ''}\t${first.region}` : null)
+    bump(summary.cities, first.city ? `${first.country ?? ''}\t${first.region ?? ''}\t${first.city}` : null)
 
     const entry = session.pageviews[0]
     if (entry) {
@@ -286,6 +293,7 @@ const COUNTER_KEYS = [
   'browsers',
   'os',
   'countries',
+  'regions',
   'cities',
   'locales',
   'events',
