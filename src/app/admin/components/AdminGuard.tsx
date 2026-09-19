@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { LogIn, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react'
+import { excludeAdminBrowser } from '@/lib/analytics/tracker'
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
   const { user, loading, isAdmin, signInWithGoogle, signInWithEmail, signOut } = useAuth()
@@ -11,6 +12,11 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  // 관리자 브라우저의 사이트 방문은 유입 분석에서 뺀다
+  useEffect(() => {
+    if (isAdmin) excludeAdminBrowser()
+  }, [isAdmin])
 
   if (loading) {
     return (

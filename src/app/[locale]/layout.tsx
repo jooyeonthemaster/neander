@@ -12,6 +12,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SmoothScrollProvider from '@/components/layout/SmoothScrollProvider';
 import CustomCursor from '@/components/layout/CustomCursor';
+import AnalyticsTracker from '@/components/analytics/AnalyticsTracker';
 
 /* ─────────────────────────────────────────────────────────
    Locale Layout
@@ -88,6 +89,7 @@ export default async function LocaleLayout({
               {children}
             </main>
             <Footer />
+            <AnalyticsTracker />
           </SmoothScrollProvider>
         </NextIntlClientProvider>
       </body>

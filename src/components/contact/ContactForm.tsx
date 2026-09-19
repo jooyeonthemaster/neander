@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Input, Textarea, Select } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { createInquiry } from '@/lib/firebase/inquiries';
+import { trackEvent } from '@/lib/analytics/tracker';
 
 // 최대 길이는 firestore.rules 의 inquiries 생성 규칙과 맞춘다 (넘으면 저장이 거부된다)
 const MAX_LENGTH = { name: 100, email: 200, message: 5000 } as const;
@@ -85,6 +86,7 @@ export function ContactForm({ onRequestQuote }: ContactFormProps = {}) {
         message: data.message,
         locale,
       });
+      trackEvent('inquiry_submit', 'contact');
       setStatus('success');
       reset();
     } catch (error) {

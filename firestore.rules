@@ -60,5 +60,61 @@ service cloud.firestore {
         && request.resource.data.message.size() <= 5000
         && request.resource.data.created_at is string;
     }
+
+    // 유입 분석 원본 이벤트 (페이지뷰·행동)
+    // - 공개 사이트의 /api/track 이 인증 없이 기록한다: 생성과 체류시간(dur·scroll) 갱신만 허용.
+    // - 기록 시각(ts)은 서버 시각으로만 넣을 수 있어 날짜를 조작할 수 없다.
+    // - 읽기·삭제는 관리자만 가능하다.
+    function optString(data, key, maxLength) {
+      return !(key in data) || data[key] == null
+        || (data[key] is string && data[key].size() <= maxLength);
+    }
+
+    match /analytics_events/{eventId} {
+      allow read, delete: if isAdmin();
+
+      allow create: if request.resource.data.keys().hasOnly([
+            'type', 'name', 'label', 'path', 'locale', 'vid', 'sid', 'new_visitor', 'entry',
+            'channel', 'source', 'medium', 'campaign', 'keyword', 'referrer', 'landing',
+            'device', 'browser', 'os', 'inapp', 'country', 'region', 'city', 'lang', 'ts'
+          ])
+        && request.resource.data.ts == request.time
+        && request.resource.data.type in ['pageview', 'event']
+        && request.resource.data.channel in ['direct', 'search', 'social', 'ai', 'email', 'referral', 'campaign']
+        && request.resource.data.device in ['mobile', 'tablet', 'desktop']
+        && request.resource.data.path is string && request.resource.data.path.size() <= 300
+        && request.resource.data.vid is string && request.resource.data.vid.size() <= 24
+        && request.resource.data.sid is string && request.resource.data.sid.size() <= 24
+        && request.resource.data.source is string && request.resource.data.source.size() <= 100
+        && request.resource.data.new_visitor is bool
+        && request.resource.data.entry is bool
+        && optString(request.resource.data, 'name', 40)
+        && optString(request.resource.data, 'label', 200)
+        && optString(request.resource.data, 'locale', 5)
+        && optString(request.resource.data, 'medium', 100)
+        && optString(request.resource.data, 'campaign', 100)
+        && optString(request.resource.data, 'keyword', 100)
+        && optString(request.resource.data, 'referrer', 200)
+        && optString(request.resource.data, 'landing', 300)
+        && optString(request.resource.data, 'browser', 40)
+        && optString(request.resource.data, 'os', 20)
+        && optString(request.resource.data, 'inapp', 20)
+        && optString(request.resource.data, 'country', 5)
+        && optString(request.resource.data, 'region', 10)
+        && optString(request.resource.data, 'city', 60)
+        && optString(request.resource.data, 'lang', 20);
+
+      allow update: if resource.data.type == 'pageview'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['dur', 'scroll'])
+        && request.resource.data.dur is int
+        && request.resource.data.dur >= 0 && request.resource.data.dur <= 1800000
+        && request.resource.data.scroll is int
+        && request.resource.data.scroll >= 0 && request.resource.data.scroll <= 100;
+    }
+
+    // 유입 분석 일별 요약 (관리자 화면이 지난 날짜를 계산해 저장해 두는 캐시)
+    match /analytics_daily/{day} {
+      allow read, write: if isAdmin();
+    }
   }
 }

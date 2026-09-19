@@ -12,6 +12,7 @@ import { useQuoteStore } from '@/stores/quoteStore';
 import { services as servicesData } from '@/data/services';
 import { addOns } from '@/data/pricing';
 import { createInquiry } from '@/lib/firebase/inquiries';
+import { trackEvent } from '@/lib/analytics/tracker';
 import type { QuoteSnapshot } from '@/types/inquiry';
 
 // 최대 길이는 firestore.rules 의 inquiries 생성 규칙과 맞춘다 (넘으면 저장이 거부된다)
@@ -102,6 +103,7 @@ export function QuoteSubmitForm() {
         locale,
         quote: snapshot,
       });
+      trackEvent('inquiry_submit', 'quote');
       setStatus('success');
       reset();
     } catch (error) {

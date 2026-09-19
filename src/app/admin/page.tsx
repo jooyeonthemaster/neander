@@ -8,6 +8,7 @@ import {
   Megaphone,
   ImageIcon,
   Settings,
+  ChartColumn,
 } from 'lucide-react'
 
 const cards = [
@@ -17,6 +18,13 @@ const cards = [
     label: '문의함',
     description: '홈페이지 문의·견적 폼으로 들어온 요청 확인',
     color: 'bg-teal-500',
+  },
+  {
+    href: '/admin/analytics',
+    icon: ChartColumn,
+    label: '유입 분석',
+    description: '방문자 유입 경로와 활동을 일·월·연 단위로 분석',
+    color: 'bg-indigo-500',
   },
   {
     href: '/admin/portfolio',
