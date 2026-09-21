@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { Bucket } from '../useAnalyticsReport'
-import type { PeriodMode } from '@/lib/analytics/period'
+import type { Bucket, DrillTarget, Granularity } from '../useAnalyticsReport'
 import { formatNumber } from './format'
 
 type Metric = 'uv' | 'ss' | 'pv'
@@ -13,10 +12,11 @@ const METRICS: { value: Metric; label: string }[] = [
   { value: 'pv', label: '페이지뷰' },
 ]
 
-const TITLES: Record<PeriodMode, string> = {
-  day: '시간대별 추이',
-  month: '일별 추이',
-  year: '월별 추이',
+const TITLES: Record<Granularity, string> = {
+  hour: '시간대별 추이',
+  day: '일별 추이',
+  week: '주별 추이',
+  month: '월별 추이',
 }
 
 const SERIES_COLOR = '#2a78d6'
@@ -33,12 +33,12 @@ function niceTicks(max: number): number[] {
 }
 
 interface TrendChartProps {
-  mode: PeriodMode
+  granularity: Granularity
   buckets: Bucket[]
-  onDrill: (target: { mode: PeriodMode; anchor: string }) => void
+  onDrill: (target: DrillTarget) => void
 }
 
-export default function TrendChart({ mode, buckets, onDrill }: TrendChartProps) {
+export default function TrendChart({ granularity, buckets, onDrill }: TrendChartProps) {
   const [metric, setMetric] = useState<Metric>('uv')
   const [hovered, setHovered] = useState<number | null>(null)
   const [showTable, setShowTable] = useState(false)
@@ -57,10 +57,10 @@ export default function TrendChart({ mode, buckets, onDrill }: TrendChartProps) 
     <section className="rounded-xl border border-gray-200 bg-white p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-semibold text-gray-900">{TITLES[mode]}</h2>
+          <h2 className="text-base font-semibold text-gray-900">{TITLES[granularity]}</h2>
           <p className="text-xs text-gray-500">
             {METRICS.find((m) => m.value === metric)?.label}
-            {mode !== 'day' && ' · 막대를 누르면 해당 기간으로 이동합니다'}
+            {granularity !== 'hour' && ' · 막대를 누르면 해당 기간으로 이동합니다'}
           </p>
         </div>
         <div className="flex items-center gap-2">

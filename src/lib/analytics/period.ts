@@ -7,7 +7,7 @@
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000
 export const DAY_MS = 24 * 60 * 60 * 1000
 
-export type PeriodMode = 'day' | 'month' | 'year'
+export type PeriodMode = 'day' | 'month' | 'year' | 'range'
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -68,8 +68,35 @@ export interface Period {
   label: string
 }
 
-export function periodOf(mode: PeriodMode, anchor: string): Period {
+/** 'YYYY-MM-DD' → '9월 19일 (토)' */
+export function shortDayLabel(key: string): string {
+  const [y, m, d] = key.split('-').map(Number)
+  return `${m}월 ${d}일 (${WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]})`
+}
+
+/**
+ * 기간을 만든다.
+ * @param anchor 기간 안의 기준 날짜 (직접 선택 기간에서는 시작 날짜)
+ * @param rangeEnd 직접 선택 기간의 마지막 날짜
+ */
+export function periodOf(mode: PeriodMode, anchor: string, rangeEnd?: string): Period {
   const [y, m, d] = anchor.split('-').map(Number)
+  if (mode === 'range') {
+    const end = rangeEnd && rangeEnd >= anchor ? rangeEnd : anchor
+    const length = daysBetween(anchor, end).length
+    const sameYear = anchor.slice(0, 4) === end.slice(0, 4)
+    const endLabel = sameYear ? shortDayLabel(end).replace(/ \(.\)$/, '') : `${end.slice(0, 4)}년 ${shortDayLabel(end).replace(/ \(.\)$/, '')}`
+    return {
+      mode,
+      anchor,
+      start: anchor,
+      end,
+      label:
+        anchor === end
+          ? `${y}년 ${shortDayLabel(anchor)}`
+          : `${y}년 ${shortDayLabel(anchor).replace(/ \(.\)$/, '')} ~ ${endLabel} (${length}일)`,
+    }
+  }
   if (mode === 'day') {
     const weekday = WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]
     return { mode, anchor, start: anchor, end: anchor, label: `${y}년 ${m}월 ${d}일 (${weekday})` }
@@ -86,7 +113,17 @@ export function periodOf(mode: PeriodMode, anchor: string): Period {
   return { mode, anchor, start: `${y}-01-01`, end: `${y}-12-31`, label: `${y}년` }
 }
 
-/** 이전/다음 기간의 기준 날짜 */
+/** 이전/다음 기간으로 옮긴 기준 날짜와 (직접 선택 기간이면) 마지막 날짜 */
+export function shiftPeriod(period: Period, step: number): { anchor: string; rangeEnd: string } {
+  if (period.mode === 'range') {
+    const length = daysBetween(period.start, period.end).length
+    return { anchor: addDays(period.start, step * length), rangeEnd: addDays(period.end, step * length) }
+  }
+  const anchor = shiftAnchor(period.mode, period.anchor, step)
+  return { anchor, rangeEnd: period.end }
+}
+
+/** 이전/다음 기간의 기준 날짜 (일·월·연) */
 export function shiftAnchor(mode: PeriodMode, anchor: string, step: number): string {
   const [y, m, d] = anchor.split('-').map(Number)
   if (mode === 'day') return addDays(anchor, step)
@@ -121,6 +158,18 @@ export function comparisonOf(period: Period, now: Date = new Date()): Comparison
   const today = dayKeyOf(now)
   const inProgress = period.start <= today && today <= period.end
 
+  if (period.mode === 'range') {
+    // 직접 고른 기간은 바로 앞의 같은 길이 구간과 비교한다
+    const length = daysBetween(period.start, period.end).length
+    const end = addDays(period.start, -1)
+    return {
+      start: addDays(end, -(length - 1)),
+      end,
+      until: null,
+      label: length === 1 ? '전일 대비' : `직전 ${length}일 대비`,
+    }
+  }
+
   if (period.mode === 'day') {
     const prev = addDays(period.start, -1)
     if (!inProgress) return { start: prev, end: prev, until: null, label: '전일 대비' }
@@ -149,6 +198,19 @@ export function comparisonOf(period: Period, now: Date = new Date()): Comparison
     until: null,
     label: period.mode === 'month' ? '전월 같은 기간 대비' : '전년 같은 기간 대비',
   }
+}
+
+/** 기간 직접 선택에서 쓰는 빠른 선택 */
+export function rangePresets(today: string = todayKey()): { label: string; start: string; end: string }[] {
+  const startOfMonth = `${today.slice(0, 7)}-01`
+  return [
+    { label: '최근 7일', start: addDays(today, -6), end: today },
+    { label: '최근 28일', start: addDays(today, -27), end: today },
+    { label: '최근 90일', start: addDays(today, -89), end: today },
+    { label: '이번 달', start: startOfMonth, end: today },
+    { label: '지난 30일(어제까지)', start: addDays(today, -30), end: addDays(today, -1) },
+    { label: '올해', start: `${today.slice(0, 4)}-01-01`, end: today },
+  ]
 }
 
 export function formatDuration(ms: number): string {

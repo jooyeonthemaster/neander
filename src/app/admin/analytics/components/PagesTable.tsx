@@ -5,11 +5,12 @@ import type { Summary } from '@/lib/analytics/aggregate'
 import { formatDuration } from '@/lib/analytics/period'
 import { formatNumber, pageName } from './format'
 
-type SortKey = 'pv' | 'entries' | 'dur' | 'scroll'
+type SortKey = 'pv' | 'entries' | 'exits' | 'dur' | 'scroll'
 
 const COLUMNS: { key: SortKey; label: string; hint: string }[] = [
   { key: 'pv', label: '조회수', hint: '페이지를 연 횟수' },
   { key: 'entries', label: '첫 페이지', hint: '이 페이지로 방문을 시작한 횟수' },
+  { key: 'exits', label: '마지막 페이지', hint: '이 페이지를 끝으로 사이트를 떠난 횟수' },
   { key: 'dur', label: '평균 체류', hint: '이 페이지를 보고 있던 평균 시간' },
   { key: 'scroll', label: '평균 스크롤', hint: '페이지를 얼마나 아래까지 내려봤는지 (100% = 끝까지)' },
 ]
@@ -25,6 +26,7 @@ export default function PagesTable({ summary }: { summary: Summary }) {
     path,
     pv: stat.pv,
     entries: stat.entries,
+    exits: stat.exits,
     dur: stat.durN ? stat.dur / stat.durN : 0,
     scroll: stat.scrollN ? stat.scroll / stat.scrollN : 0,
   }))
@@ -78,6 +80,7 @@ export default function PagesTable({ summary }: { summary: Summary }) {
                   </td>
                   <td className="py-2 pl-4 text-right font-semibold text-gray-900">{formatNumber(row.pv)}</td>
                   <td className="py-2 pl-4 text-right text-gray-700">{formatNumber(row.entries)}</td>
+                  <td className="py-2 pl-4 text-right text-gray-700">{formatNumber(row.exits)}</td>
                   <td className="whitespace-nowrap py-2 pl-4 text-right text-gray-700">
                     {row.dur ? formatDuration(row.dur) : '-'}
                   </td>

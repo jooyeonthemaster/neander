@@ -136,6 +136,20 @@ export function cityName(key: string): string {
   return regionLabel && regionLabel !== name ? `${regionLabel} ${name}` : name
 }
 
+let languageNames: Intl.DisplayNames | null = null
+
+/** 'ko-KR' → '한국어 (KR)' */
+export function langName(tag: string): string {
+  const [language, region] = tag.split('-')
+  try {
+    languageNames ??= new Intl.DisplayNames(['ko'], { type: 'language' })
+    const name = languageNames.of(language) ?? language
+    return region ? `${name} (${region})` : name
+  } catch {
+    return tag
+  }
+}
+
 export function formatNumber(value: number): string {
   return Math.round(value).toLocaleString('ko-KR')
 }

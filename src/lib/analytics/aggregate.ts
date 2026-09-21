@@ -1,6 +1,6 @@
 // ============================================================
 // 유입 분석 - 원본 이벤트 → 요약 집계
-// 하루치 이벤트를 요약(Summary)으로 만들고, 요약끼리 합쳐 월·연 단위를 계산한다.
+// 하루치 이벤트를 요약(Summary)으로 만들고, 요약끼리 합쳐 월·연·임의 기간을 계산한다.
 // 순수 함수만 두어 관리자 화면과 테스트에서 그대로 쓸 수 있게 한다.
 // ============================================================
 
@@ -11,7 +11,7 @@ export const EVENTS_COLLECTION = 'analytics_events'
 export const DAILY_COLLECTION = 'analytics_daily'
 
 /** 요약 구조가 바뀌면 올려서 저장된 일별 요약을 다시 계산하게 한다 */
-export const SUMMARY_VERSION = 2
+export const SUMMARY_VERSION = 3
 
 /** 한 페이지만 보고 10초 안에 아무 행동 없이 떠난 세션을 이탈로 본다 */
 export const BOUNCE_MAX_MS = 10_000
@@ -53,6 +53,22 @@ export interface AnalyticsEvent {
 
 export type Counter = Record<string, number>
 
+/** 한 분류(채널·소스·기기 등)의 방문 성과 */
+export interface Stat {
+  /** 방문(세션) 수 */
+  ss: number
+  /** 페이지뷰 */
+  pv: number
+  /** 이탈한 방문 수 */
+  bounces: number
+  /** 체류시간 합계(ms) */
+  dur: number
+  /** 문의·견적을 접수한 방문 수 */
+  conv: number
+}
+
+export type StatMap = Record<string, Stat>
+
 export interface PageStat {
   /** 조회수 */
   pv: number
@@ -62,8 +78,10 @@ export interface PageStat {
   /** 스크롤 깊이 합계(%)와 표본 수 */
   scroll: number
   scrollN: number
-  /** 이 페이지로 시작한 세션 수 */
+  /** 이 페이지로 시작한 방문 수 */
   entries: number
+  /** 이 페이지를 끝으로 떠난 방문 수 */
+  exits: number
 }
 
 export interface HourStat {
@@ -82,17 +100,21 @@ export interface Summary {
   bounces: number
   /** 페이지 체류시간 합계(ms) */
   engagedMs: number
-  /** 문의·견적을 접수한 세션 수 */
+  /** 문의·견적을 접수한 방문 수 */
   convSessions: number
-  // 아래 카운터는 모두 세션 수 기준 (pages·locales·events 제외)
-  channels: Counter
+  /** 접수까지 본 페이지 수·체류시간 합계 (전환한 방문의 평균을 내기 위해) */
+  convPageviews: number
+  convMs: number
+  // 아래 성과 지표는 방문(세션)의 첫 페이지 기준으로 분류한다
+  channels: StatMap
   /** `${channel}\t${source}` */
-  sources: Counter
-  convByChannel: Counter
-  campaigns: Counter
+  sources: StatMap
+  campaigns: StatMap
+  landings: StatMap
+  devices: StatMap
+  /** 'new' | 'returning' */
+  visitorTypes: StatMap
   keywords: Counter
-  landings: Counter
-  devices: Counter
   browsers: Counter
   os: Counter
   countries: Counter
@@ -100,7 +122,9 @@ export interface Summary {
   regions: Counter
   /** `${country}\t${region}\t${city}` */
   cities: Counter
-  /** 페이지뷰 기준 */
+  /** 브라우저 설정 언어 (방문 기준) */
+  langs: Counter
+  /** 사이트 언어 버전 (페이지뷰 기준) */
   locales: Counter
   /** 이벤트 이름별 발생 수 */
   events: Counter
@@ -113,6 +137,10 @@ export interface Summary {
   hours: HourStat[]
 }
 
+export function emptyStat(): Stat {
+  return { ss: 0, pv: 0, bounces: 0, dur: 0, conv: 0 }
+}
+
 export function emptySummary(): Summary {
   return {
     pageviews: 0,
@@ -122,18 +150,21 @@ export function emptySummary(): Summary {
     bounces: 0,
     engagedMs: 0,
     convSessions: 0,
+    convPageviews: 0,
+    convMs: 0,
     channels: {},
     sources: {},
-    convByChannel: {},
     campaigns: {},
-    keywords: {},
     landings: {},
     devices: {},
+    visitorTypes: {},
+    keywords: {},
     browsers: {},
     os: {},
     countries: {},
     regions: {},
     cities: {},
+    langs: {},
     locales: {},
     events: {},
     inquiries: {},
@@ -148,8 +179,18 @@ function bump(counter: Counter, key: string | null | undefined, amount = 1) {
   counter[key] = (counter[key] ?? 0) + amount
 }
 
+function addStat(map: StatMap, key: string | null | undefined, stat: Stat) {
+  if (!key) return
+  const target = (map[key] ??= emptyStat())
+  target.ss += stat.ss
+  target.pv += stat.pv
+  target.bounces += stat.bounces
+  target.dur += stat.dur
+  target.conv += stat.conv
+}
+
 function page(pages: Record<string, PageStat>, path: string): PageStat {
-  pages[path] ??= { pv: 0, dur: 0, durN: 0, scroll: 0, scrollN: 0, entries: 0 }
+  pages[path] ??= { pv: 0, dur: 0, durN: 0, scroll: 0, scrollN: 0, entries: 0, exits: 0 }
   return pages[path]
 }
 
@@ -244,30 +285,44 @@ export function summarize(events: AnalyticsEvent[]): Summary {
 
   for (const session of groupSessions(events)) {
     const { first } = session
+    const stat: Stat = {
+      ss: 1,
+      pv: session.pageviews.length,
+      bounces: session.bounced ? 1 : 0,
+      dur: session.engagedMs,
+      conv: session.converted ? 1 : 0,
+    }
+
     summary.sessions += 1
     summary.hours[kstHour(session.start)].ss += 1
     if (session.newVisitor) newVids.add(session.vid)
     if (session.bounced) summary.bounces += 1
     if (session.converted) {
       summary.convSessions += 1
-      bump(summary.convByChannel, first.channel)
+      summary.convPageviews += stat.pv
+      summary.convMs += stat.dur
     }
-    bump(summary.channels, first.channel)
-    bump(summary.sources, sourceKey(first.channel, first.source))
-    bump(summary.campaigns, first.campaign)
+
+    addStat(summary.channels, first.channel, stat)
+    addStat(summary.sources, sourceKey(first.channel, first.source), stat)
+    addStat(summary.campaigns, first.campaign, stat)
+    addStat(summary.devices, first.device, stat)
+    addStat(summary.visitorTypes, session.newVisitor ? 'new' : 'returning', stat)
     bump(summary.keywords, first.keyword)
-    bump(summary.devices, first.device)
     bump(summary.browsers, first.browser)
     bump(summary.os, first.os)
     bump(summary.countries, first.country)
     bump(summary.regions, first.region ? `${first.country ?? ''}\t${first.region}` : null)
     bump(summary.cities, first.city ? `${first.country ?? ''}\t${first.region ?? ''}\t${first.city}` : null)
+    bump(summary.langs, first.lang)
 
     const entry = session.pageviews[0]
     if (entry) {
-      bump(summary.landings, entry.path)
+      addStat(summary.landings, entry.path, stat)
       page(summary.pages, entry.path).entries += 1
     }
+    const exit = session.pageviews[session.pageviews.length - 1]
+    if (exit) page(summary.pages, exit.path).exits += 1
   }
 
   summary.vids = [...vids]
@@ -282,19 +337,27 @@ function mergeCounter(target: Counter, source: Counter) {
   for (const [key, value] of Object.entries(source)) target[key] = (target[key] ?? 0) + value
 }
 
-const COUNTER_KEYS = [
+function mergeStatMap(target: StatMap, source: StatMap | undefined) {
+  for (const [key, stat] of Object.entries(source ?? {})) addStat(target, key, stat)
+}
+
+const STAT_KEYS = [
   'channels',
   'sources',
-  'convByChannel',
   'campaigns',
-  'keywords',
   'landings',
   'devices',
+  'visitorTypes',
+] as const satisfies readonly (keyof Summary)[]
+
+const COUNTER_KEYS = [
+  'keywords',
   'browsers',
   'os',
   'countries',
   'regions',
   'cities',
+  'langs',
   'locales',
   'events',
   'inquiries',
@@ -313,8 +376,11 @@ export function mergeSummaries(list: Summary[]): Summary {
     merged.bounces += summary.bounces
     merged.engagedMs += summary.engagedMs
     merged.convSessions += summary.convSessions
+    merged.convPageviews += summary.convPageviews
+    merged.convMs += summary.convMs
     summary.vids.forEach((v) => vids.add(v))
     summary.newVids.forEach((v) => newVids.add(v))
+    for (const key of STAT_KEYS) mergeStatMap(merged[key], summary[key])
     for (const key of COUNTER_KEYS) mergeCounter(merged[key], summary[key])
     for (const [path, stat] of Object.entries(summary.pages)) {
       const target = page(merged.pages, path)
@@ -324,6 +390,7 @@ export function mergeSummaries(list: Summary[]): Summary {
       target.scroll += stat.scroll
       target.scrollN += stat.scrollN
       target.entries += stat.entries
+      target.exits += stat.exits ?? 0
     }
     summary.hours.forEach((hour, i) => {
       merged.hours[i].pv += hour.pv
@@ -340,9 +407,10 @@ export function mergeSummaries(list: Summary[]): Summary {
 export interface Metrics {
   visitors: number
   newVisitors: number
+  returningVisitors: number
   sessions: number
   pageviews: number
-  /** 세션당 평균 체류시간(ms) */
+  /** 방문당 평균 체류시간(ms) */
   avgSessionMs: number
   pagesPerSession: number
   bounceRate: number
@@ -355,6 +423,7 @@ export function metricsOf(summary: Summary): Metrics {
   return {
     visitors: summary.vids.length,
     newVisitors: summary.newVids.length,
+    returningVisitors: Math.max(0, summary.vids.length - summary.newVids.length),
     sessions,
     pageviews: summary.pageviews,
     avgSessionMs: sessions ? summary.engagedMs / sessions : 0,
@@ -371,9 +440,16 @@ function capCounter(counter: Counter, max: number): Counter {
   return Object.fromEntries(entries.sort((a, b) => b[1] - a[1]).slice(0, max))
 }
 
+function capStatMap(map: StatMap, max: number): StatMap {
+  const entries = Object.entries(map)
+  if (entries.length <= max) return map
+  return Object.fromEntries(entries.sort((a, b) => b[1].ss - a[1].ss).slice(0, max))
+}
+
 /** 일별 요약 문서 크기를 제한한다 (긴 꼬리 항목은 잘라낸다) */
 export function compactSummary(summary: Summary): Summary {
   const compact: Summary = { ...summary }
+  for (const key of STAT_KEYS) compact[key] = capStatMap(summary[key], 300)
   for (const key of COUNTER_KEYS) compact[key] = capCounter(summary[key], 300)
   const pages = Object.entries(summary.pages)
   if (pages.length > 500) {

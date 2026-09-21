@@ -15,15 +15,31 @@ import { fetchEvents, loadDailySummaries, subscribeEvents } from '@/lib/analytic
 import {
   comparisonOf,
   dayEnd,
+  dayKeyOf,
   dayStart,
   daysBetween,
   kstHour,
   periodOf,
+  shortDayLabel,
   todayKey,
   type Comparison,
   type Period,
   type PeriodMode,
 } from '@/lib/analytics/period'
+
+/** 이 일수 이하의 기간은 원본을 직접 읽어 방문 기록까지 보여준다 */
+const RAW_LOG_MAX_DAYS = 7
+/** 요일·시간대 분포는 이 일수 이상일 때만 의미가 있다 */
+const HEATMAP_MIN_DAYS = 7
+const ACTIVE_WINDOW_MS = 30 * 60 * 1000
+
+export type Granularity = 'hour' | 'day' | 'week' | 'month'
+
+export interface DrillTarget {
+  mode: PeriodMode
+  anchor: string
+  rangeEnd?: string
+}
 
 export interface Bucket {
   key: string
@@ -34,10 +50,10 @@ export interface Bucket {
   pv: number
   ss: number
   uv: number
-  /** 아직 오지 않은 시간 (막대를 그리지 않는다) */
+  /** 아직 오지 않은 구간 (막대를 그리지 않는다) */
   future: boolean
   /** 막대를 누르면 이동할 기간 */
-  drill: { mode: PeriodMode; anchor: string } | null
+  drill: DrillTarget | null
 }
 
 export interface Report {
@@ -45,17 +61,19 @@ export interface Report {
   comparison: Comparison
   current: Summary
   previous: Summary | null
+  granularity: Granularity
   buckets: Bucket[]
-  /** 일 단위에서만 채운다 (최신 방문이 앞) */
+  /** 날짜별 요약 (CSV 내보내기·요일 분포용, 최신 데이터 포함) */
+  days: Map<string, Summary>
+  /** 요일(0=일) × 시간(0~23) 방문 수. 기간이 짧으면 null */
+  heatmap: number[][] | null
+  /** 기간이 짧을 때만 채운다 (최신 방문이 앞) */
   sessions: SessionRecord[] | null
   /** 오늘이 포함되어 실시간으로 갱신되는 중인지 */
   live: boolean
-  /** 최근 30분 안에 페이지를 본 방문자 수 (오늘을 볼 때만) */
+  /** 최근 30분 안에 페이지를 본 방문자 수 (오늘이 포함될 때만) */
   activeNow: number | null
 }
-
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
-const ACTIVE_WINDOW_MS = 30 * 60 * 1000
 
 function describeError(error: unknown): string {
   if (error instanceof FirebaseError && error.code === 'permission-denied') {
@@ -64,68 +82,136 @@ function describeError(error: unknown): string {
   return '분석 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
 }
 
-function dayTitle(key: string): string {
-  const [y, m, d] = key.split('-').map(Number)
-  return `${m}월 ${d}일 (${WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]})`
+function weekdayOf(day: string): number {
+  const [y, m, d] = day.split('-').map(Number)
+  return new Date(Date.UTC(y, m - 1, d)).getUTCDay()
 }
 
-function hourBuckets(summary: Summary, period: Period): Bucket[] {
-  const today = todayKey()
-  const currentHour = kstHour(new Date())
-  return summary.hours.map((hour, i) => ({
-    key: String(i),
-    label: `${i}시`,
-    title: `${i}시 ~ ${i + 1}시`,
-    pv: hour.pv,
-    ss: hour.ss,
-    uv: hour.uv,
-    future: period.start > today || (period.start === today && i > currentHour),
-    drill: null,
-  }))
+/** 기간 길이에 맞는 막대 단위 */
+function granularityOf(period: Period): Granularity {
+  if (period.mode === 'day') return 'hour'
+  if (period.mode === 'month') return 'day'
+  if (period.mode === 'year') return 'month'
+  const length = daysBetween(period.start, period.end).length
+  if (length <= 1) return 'hour'
+  if (length <= 45) return 'day'
+  if (length <= 400) return 'week'
+  return 'month'
 }
 
-function dayBuckets(period: Period, days: Map<string, Summary>, todaySummary: Summary | null): Bucket[] {
+function summaryOf(days: Map<string, Summary>, keys: string[]): Summary {
+  return mergeSummaries(keys.map((key) => days.get(key)).filter((s): s is Summary => !!s))
+}
+
+function bucketOf(keys: string[], days: Map<string, Summary>, today: string, label: string, title: string, drill: DrillTarget | null): Bucket {
+  const merged = summaryOf(days, keys)
+  return {
+    key: keys[0],
+    label,
+    title,
+    pv: merged.pageviews,
+    ss: merged.sessions,
+    uv: merged.vids.length,
+    future: keys[0] > today,
+    drill: keys[0] > today ? null : drill,
+  }
+}
+
+function buildBuckets(period: Period, granularity: Granularity, days: Map<string, Summary>): Bucket[] {
   const today = todayKey()
-  return daysBetween(period.start, period.end).map((day) => {
-    const summary = day === today ? todaySummary ?? emptySummary() : days.get(day) ?? emptySummary()
-    return {
-      key: day,
-      label: String(Number(day.slice(8))),
-      title: dayTitle(day),
-      pv: summary.pageviews,
-      ss: summary.sessions,
-      uv: summary.vids.length,
-      future: day > today,
-      drill: day > today ? null : { mode: 'day', anchor: day },
+
+  if (granularity === 'hour') {
+    const summary = days.get(period.start) ?? emptySummary()
+    const currentHour = kstHour(new Date())
+    return summary.hours.map((hour, i) => ({
+      key: String(i),
+      label: `${i}시`,
+      title: `${i}시 ~ ${i + 1}시`,
+      pv: hour.pv,
+      ss: hour.ss,
+      uv: hour.uv,
+      future: period.start > today || (period.start === today && i > currentHour),
+      drill: null,
+    }))
+  }
+
+  const keys = daysBetween(period.start, period.end)
+
+  if (granularity === 'day') {
+    return keys.map((day) =>
+      bucketOf([day], days, today, String(Number(day.slice(8))), shortDayLabel(day), { mode: 'day', anchor: day })
+    )
+  }
+
+  if (granularity === 'week') {
+    const weeks: string[][] = []
+    for (const day of keys) {
+      // 월요일에 새 주를 연다
+      if (weeks.length === 0 || weekdayOf(day) === 1) weeks.push([day])
+      else weeks[weeks.length - 1].push(day)
     }
-  })
+    return weeks.map((week) => {
+      const first = week[0]
+      const last = week[week.length - 1]
+      return bucketOf(
+        week,
+        days,
+        today,
+        `${Number(first.slice(5, 7))}/${Number(first.slice(8))}`,
+        `${shortDayLabel(first)} ~ ${shortDayLabel(last)}`,
+        { mode: 'range', anchor: first, rangeEnd: last }
+      )
+    })
+  }
+
+  const months = new Map<string, string[]>()
+  for (const day of keys) {
+    const month = day.slice(0, 7)
+    const list = months.get(month)
+    if (list) list.push(day)
+    else months.set(month, [day])
+  }
+  return [...months.entries()].map(([month, monthDays]) =>
+    bucketOf(
+      monthDays,
+      days,
+      today,
+      `${Number(month.slice(5))}월`,
+      `${month.slice(0, 4)}년 ${Number(month.slice(5))}월`,
+      { mode: 'month', anchor: `${month}-01` }
+    )
+  )
 }
 
-function monthBuckets(period: Period, days: Map<string, Summary>, todaySummary: Summary | null): Bucket[] {
-  const today = todayKey()
-  const year = period.start.slice(0, 4)
-  return Array.from({ length: 12 }, (_, i) => {
-    const month = `${year}-${String(i + 1).padStart(2, '0')}`
-    const parts = [...days.entries()].filter(([day]) => day.startsWith(month)).map(([, s]) => s)
-    if (todaySummary && today.startsWith(month)) parts.push(todaySummary)
-    const merged = mergeSummaries(parts)
-    const future = `${month}-01` > today
-    return {
-      key: month,
-      label: `${i + 1}월`,
-      title: `${year}년 ${i + 1}월`,
-      pv: merged.pageviews,
-      ss: merged.sessions,
-      uv: merged.vids.length,
-      future,
-      drill: future ? null : { mode: 'month', anchor: `${month}-01` },
-    }
-  })
+/** 요일 × 시간대 방문 분포 */
+function buildHeatmap(period: Period, days: Map<string, Summary>): number[][] | null {
+  if (daysBetween(period.start, period.end).length < HEATMAP_MIN_DAYS) return null
+  const grid = Array.from({ length: 7 }, () => Array.from({ length: 24 }, () => 0))
+  for (const [day, summary] of days) {
+    if (day < period.start || day > period.end) continue
+    const weekday = weekdayOf(day)
+    summary.hours.forEach((hour, i) => {
+      grid[weekday][i] += hour.ss
+    })
+  }
+  return grid
 }
 
 function activeVisitors(events: AnalyticsEvent[]): number {
   const since = Date.now() - ACTIVE_WINDOW_MS
   return new Set(events.filter((e) => e.ts.getTime() >= since).map((e) => e.vid)).size
+}
+
+/** 원본 이벤트를 날짜별 요약으로 나눈다 */
+function summarizeByDay(events: AnalyticsEvent[]): Map<string, Summary> {
+  const byDay = new Map<string, AnalyticsEvent[]>()
+  for (const event of events) {
+    const key = dayKeyOf(event.ts)
+    const list = byDay.get(key)
+    if (list) list.push(event)
+    else byDay.set(key, [event])
+  }
+  return new Map([...byDay].map(([day, list]) => [day, summarize(list)]))
 }
 
 async function loadPrevious(comparison: Comparison): Promise<Summary> {
@@ -137,11 +223,12 @@ async function loadPrevious(comparison: Comparison): Promise<Summary> {
 }
 
 /**
- * 선택한 기간(일·월·연)의 분석 데이터를 불러온다.
+ * 선택한 기간(일·월·연·직접 선택)의 분석 데이터를 불러온다.
+ * 기간이 짧으면 원본 이벤트로 방문 기록까지 만들고, 길면 저장된 일별 요약을 합친다.
  * 오늘이 포함된 기간은 오늘 기록을 실시간으로 구독해 계속 갱신한다.
  */
-export function useAnalyticsReport(mode: PeriodMode, anchor: string, reloadKey: number) {
-  const requestKey = `${mode}|${anchor}|${reloadKey}`
+export function useAnalyticsReport(mode: PeriodMode, anchor: string, rangeEnd: string, reloadKey: number) {
+  const requestKey = `${mode}|${anchor}|${rangeEnd}|${reloadKey}`
   // 결과마다 어떤 요청의 것인지 기록해 두고, 새 요청이 끝나기 전에는 이전 화면을 그대로 보여준다
   const [result, setResult] = useState<{ key: string; report: Report | null; error: string | null }>({
     key: '',
@@ -153,12 +240,15 @@ export function useAnalyticsReport(mode: PeriodMode, anchor: string, reloadKey: 
   useEffect(() => {
     let cancelled = false
     let unsubscribe: (() => void) | null = null
-    const period = periodOf(mode, anchor)
+    const period = periodOf(mode, anchor, rangeEnd)
     const comparison = comparisonOf(period)
+    const granularity = granularityOf(period)
     const today = todayKey()
     const live = period.start <= today && today <= period.end
+    const spanDays = daysBetween(period.start, period.end).length
+    const withLog = spanDays <= RAW_LOG_MAX_DAYS
 
-    const setReport = (report: Report) => {
+    const publish = (report: Report) => {
       if (!cancelled) setResult({ key: requestKey, report, error: null })
     }
 
@@ -168,76 +258,72 @@ export function useAnalyticsReport(mode: PeriodMode, anchor: string, reloadKey: 
       setResult((prev) => ({ key: requestKey, report: prev.report, error: describeError(err) }))
     }
 
+    function build(
+      days: Map<string, Summary>,
+      sessions: SessionRecord[] | null,
+      previous: Summary | null,
+      liveEvents: AnalyticsEvent[]
+    ): Report {
+      const keys = daysBetween(period.start, period.end)
+      return {
+        period,
+        comparison,
+        current: summaryOf(days, keys),
+        previous,
+        granularity,
+        buckets: buildBuckets(period, granularity, days),
+        days,
+        heatmap: buildHeatmap(period, days),
+        sessions,
+        live,
+        activeNow: live ? activeVisitors(liveEvents) : null,
+      }
+    }
+
     async function run() {
       const previousPromise = loadPrevious(comparison)
       // 아래에서 await 할 때 오류가 전달된다. 그 전에 실패해도 처리되지 않은 거부로 남지 않게 한다
       previousPromise.catch(() => {})
 
-      if (mode === 'day') {
-        const build = (events: AnalyticsEvent[], previous: Summary | null): Report => {
-          const current = summarize(events)
-          return {
-            period,
-            comparison,
-            current,
-            previous,
-            buckets: hourBuckets(current, period),
-            sessions: groupSessions(events).sort((a, b) => b.start.getTime() - a.start.getTime()),
-            live,
-            activeNow: live ? activeVisitors(events) : null,
-          }
-        }
-
+      if (withLog) {
+        // 짧은 기간: 원본을 직접 읽어 요약과 방문 기록을 함께 만든다
+        const rawEnd = live ? dayStart(today) : dayEnd(period.end)
+        const past = rawEnd > dayStart(period.start) ? await fetchEvents(dayStart(period.start), rawEnd) : []
         const previous = await previousPromise
         if (cancelled) return
+
+        const render = (todayEvents: AnalyticsEvent[]) => {
+          const events = [...past, ...todayEvents]
+          const sessions = groupSessions(events).sort((a, b) => b.start.getTime() - a.start.getTime())
+          publish(build(summarizeByDay(events), sessions, previous, todayEvents))
+        }
+
         if (live) {
-          unsubscribe = subscribeEvents(
-            dayStart(period.start),
-            dayEnd(period.start),
-            (events) => setReport(build(events, previous)),
-            fail
-          )
+          unsubscribe = subscribeEvents(dayStart(today), dayEnd(today), (events) => render(events), fail)
         } else {
-          const events = await fetchEvents(dayStart(period.start), dayEnd(period.start))
-          setReport(build(events, previous))
+          render([])
         }
         return
       }
 
       const days = await loadDailySummaries(period.start, period.end, (done, total) => {
-        if (!cancelled && total > 3) setProgress({ key: requestKey, text: `지난 기록을 정리하는 중 (${done}/${total}일)` })
+        if (!cancelled && total > 3) {
+          setProgress({ key: requestKey, text: `지난 기록을 정리하는 중 (${done}/${total}일)` })
+        }
       })
       const previous = await previousPromise
       if (cancelled) return
       setProgress(null)
 
-      const build = (todaySummary: Summary | null, todayEvents: AnalyticsEvent[]): Report => {
-        const parts = [...days.values()]
-        if (todaySummary) parts.push(todaySummary)
-        return {
-          period,
-          comparison,
-          current: mergeSummaries(parts),
-          previous,
-          buckets:
-            mode === 'month'
-              ? dayBuckets(period, days, todaySummary)
-              : monthBuckets(period, days, todaySummary),
-          sessions: null,
-          live,
-          activeNow: live ? activeVisitors(todayEvents) : null,
-        }
-      }
-
       if (live) {
         unsubscribe = subscribeEvents(
           dayStart(today),
           dayEnd(today),
-          (events) => setReport(build(summarize(events), events)),
+          (events) => publish(build(new Map(days).set(today, summarize(events)), null, previous, events)),
           fail
         )
       } else {
-        setReport(build(null, []))
+        publish(build(days, null, previous, []))
       }
     }
 
@@ -247,7 +333,7 @@ export function useAnalyticsReport(mode: PeriodMode, anchor: string, reloadKey: 
       cancelled = true
       unsubscribe?.()
     }
-  }, [mode, anchor, requestKey])
+  }, [mode, anchor, rangeEnd, requestKey])
 
   return {
     report: result.report,
@@ -255,4 +341,11 @@ export function useAnalyticsReport(mode: PeriodMode, anchor: string, reloadKey: 
     error: result.key === requestKey ? result.error : null,
     progress: progress?.key === requestKey ? progress.text : null,
   }
+}
+
+/** 기간 안에서 오늘까지의 날짜만 (CSV에서 빈 미래 날짜를 빼기 위해) */
+export function pastDays(period: Period): string[] {
+  const today = todayKey()
+  const end = period.end < today ? period.end : today
+  return period.start > end ? [] : daysBetween(period.start, end)
 }
