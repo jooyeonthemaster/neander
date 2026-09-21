@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronLeft, ChevronRight, Download, Loader2, RefreshCw } from 'lucide-react'
+import { Check, ChevronLeft, ChevronRight, Copy, Download, Loader2, RefreshCw } from 'lucide-react'
 import AdminHeader from '../components/AdminHeader'
 import KpiGrid from './components/KpiGrid'
 import TrendChart from './components/TrendChart'
@@ -12,7 +12,7 @@ import Heatmap from './components/Heatmap'
 import { BarList, BarListCard, type BarListItem } from './components/BarList'
 import { cityName, countryName, formatNumber, formatPercent, langName, pageName, regionName } from './components/format'
 import { downloadCsv } from './components/csv'
-import { useAnalyticsReport, type DrillTarget } from './useAnalyticsReport'
+import { useAnalyticsReport, VISITOR_FILTERS, type DrillTarget, type VisitorFilter } from './useAnalyticsReport'
 import { splitSourceKey, type Counter, type StatMap, type Summary } from '@/lib/analytics/aggregate'
 import {
   addDays,
@@ -34,7 +34,8 @@ import {
   type Channel,
   type DeviceType,
 } from '@/lib/analytics/sources'
-import { isAnalyticsOptedOut, setAnalyticsOptOut } from '@/lib/analytics/tracker'
+import { isAnalyticsOptedOut, isInternalBrowser, setAnalyticsOptOut, setInternalBrowser } from '@/lib/analytics/tracker'
+import { SITE_URL } from '@/lib/constants'
 
 const MODES: { value: PeriodMode; label: string }[] = [
   { value: 'day', label: '일' },
@@ -154,6 +155,55 @@ function ConversionProfile({ summary }: { summary: Summary }) {
   )
 }
 
+/** 팀원 기기를 내부로 표시하는 링크 안내 */
+function InternalDeviceCard() {
+  const link = `${SITE_URL}/?nd_internal=1`
+  const [copied, setCopied] = useState(false)
+  const [internal, setInternal] = useState(isInternalBrowser)
+
+  return (
+    <div className="text-sm">
+      <p className="font-medium text-gray-900">내부(팀) 기기 표시</p>
+      <p className="mt-0.5 text-xs leading-relaxed text-gray-500">
+        아래 링크를 팀원 휴대폰·PC에서 한 번 열면 그 기기의 방문이 &apos;내부&apos;로 표시됩니다. 기록은 남지만 기본
+        화면에서는 빠지며, 위 &apos;전체/내부만&apos;으로 언제든 확인할 수 있습니다.
+      </p>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <code className="rounded-lg bg-gray-100 px-2.5 py-1.5 text-xs text-gray-700">{link}</code>
+        <button
+          type="button"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(link)
+              setCopied(true)
+              setTimeout(() => setCopied(false), 2000)
+            } catch {
+              // 클립보드를 쓸 수 없으면 사용자가 직접 복사한다
+            }
+          }}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+        >
+          {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+          {copied ? '복사됨' : '링크 복사'}
+        </button>
+        <span className="text-xs text-gray-500">
+          이 브라우저: <strong className="text-gray-700">{internal ? '내부로 표시됨' : '일반 방문자'}</strong>
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            setInternalBrowser(!internal)
+            setInternal(!internal)
+          }}
+          className="text-xs font-medium text-blue-600 hover:text-blue-800"
+        >
+          {internal ? '해제' : '내부로 표시'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function OptOutToggle() {
   // 관리자 화면은 로그인 확인 뒤 브라우저에서만 그려지므로 바로 localStorage를 읽어도 된다
   const [optedOut, setOptedOut] = useState(isAnalyticsOptedOut)
@@ -183,8 +233,9 @@ export default function AdminAnalyticsPage() {
   const [mode, setMode] = useState<PeriodMode>('day')
   const [anchor, setAnchor] = useState(todayKey)
   const [rangeEnd, setRangeEnd] = useState(todayKey)
+  const [visitorFilter, setVisitorFilter] = useState<VisitorFilter>('external')
   const [reloadKey, setReloadKey] = useState(0)
-  const { report, loading, error, progress } = useAnalyticsReport(mode, anchor, rangeEnd, reloadKey)
+  const { report, loading, error, progress } = useAnalyticsReport(mode, anchor, rangeEnd, visitorFilter, reloadKey)
 
   const today = todayKey()
   const period = periodOf(mode, anchor, rangeEnd)
@@ -388,7 +439,27 @@ export default function AdminAnalyticsPage() {
         {(mode === 'day' || mode === 'range') && (
           <span className="text-sm font-medium text-gray-900">{period.label}</span>
         )}
+        <div className="flex items-center gap-1 rounded-lg bg-gray-100 p-1" role="group" aria-label="내부 방문 처리">
+          {VISITOR_FILTERS.map((item) => (
+            <button
+              key={item.value}
+              type="button"
+              onClick={() => setVisitorFilter(item.value)}
+              aria-pressed={visitorFilter === item.value}
+              title={item.hint}
+              className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                visitorFilter === item.value ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
         {report && <span className="text-xs text-gray-400">증감: {report.comparison.label}</span>}
+        {report && visitorFilter === 'external' && report.internalSessions > 0 && (
+          <span className="text-xs text-gray-400">내부 방문 {report.internalSessions}회 제외됨</span>
+        )}
         {progress && (
           <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -514,7 +585,9 @@ export default function AdminAnalyticsPage() {
         </div>
       )}
 
-      <footer className="mt-10 grid gap-6 border-t border-gray-200 pt-6 lg:grid-cols-2">
+      <footer className="mt-10 space-y-6 border-t border-gray-200 pt-6">
+        <InternalDeviceCard />
+        <div className="grid gap-6 lg:grid-cols-2">
         <OptOutToggle />
         <details className="text-sm text-gray-600">
           <summary className="cursor-pointer font-medium text-gray-900">지표와 수집 방식</summary>
@@ -527,8 +600,10 @@ export default function AdminAnalyticsPage() {
             <li>이탈은 한 페이지만 10초 미만 보고 아무 행동 없이 떠난 방문입니다.</li>
             <li>방문 기록(개별 여정)은 7일 이하 기간을 볼 때만 표시됩니다. 더 긴 기간은 저장된 일별 요약으로 계산합니다.</li>
             <li>검색 로봇·크롤러로 보이는 방문은 기록하지 않습니다.</li>
+            <li>내부(팀) 기기로 표시된 방문은 기본 화면에서 빠지며, 위 전환 버튼으로 포함해서 볼 수 있습니다.</li>
           </ul>
         </details>
+        </div>
       </footer>
     </div>
   )

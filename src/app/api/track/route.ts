@@ -38,6 +38,8 @@ const hit = {
   s: origin,
   lang: z.string().max(20),
   tp: z.number().int().min(0).max(20),
+  /** 내부(팀) 기기로 표시된 브라우저인지 */
+  int: z.boolean().optional(),
 }
 
 const payloadSchema = z.discriminatedUnion('t', [
@@ -137,6 +139,7 @@ export async function POST(request: NextRequest) {
       sid: payload.sid,
       new_visitor: payload.nv,
       entry: payload.entry,
+      internal: payload.int === true,
       channel: source.channel,
       source: source.source.slice(0, 100),
       medium: source.medium,

@@ -10,7 +10,11 @@ const ENDPOINT = '/api/track'
 const VISITOR_KEY = 'neander:analytics-vid'
 const SESSION_KEY = 'neander:analytics-session'
 const OPT_OUT_KEY = 'neander:analytics-optout'
+const INTERNAL_KEY = 'neander:analytics-internal'
+const MIGRATED_KEY = 'neander:analytics-internal-migrated'
 const DEBUG_KEY = 'neander:analytics-debug'
+/** 이 값이 붙은 주소로 한 번 들어오면 그 기기를 내부 방문으로 표시한다 */
+const INTERNAL_PARAM = 'nd_internal'
 
 /** 30분 동안 활동이 없으면 새 방문(세션)으로 센다 */
 const SESSION_IDLE_MS = 30 * 60 * 1000
@@ -73,6 +77,24 @@ export function isAnalyticsOptedOut(): boolean {
   }
 }
 
+/** 이 브라우저가 내부(팀) 기기로 표시돼 있는지 */
+export function isInternalBrowser(): boolean {
+  try {
+    return local()?.getItem(INTERNAL_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+/** 내부 기기 표시를 켜거나 끈다 */
+export function setInternalBrowser(internal: boolean) {
+  try {
+    local()?.setItem(INTERNAL_KEY, internal ? '1' : '0')
+  } catch {
+    // 저장소를 쓸 수 없으면 무시한다
+  }
+}
+
 /** 이 브라우저의 방문을 기록에서 빼거나(1) 다시 넣는다(0) */
 export function setAnalyticsOptOut(optOut: boolean) {
   try {
@@ -83,15 +105,47 @@ export function setAnalyticsOptOut(optOut: boolean) {
 }
 
 /**
- * 관리자로 로그인한 브라우저는 팀원 방문이 통계에 섞이지 않도록 기본으로 제외한다.
- * 유입 분석 화면에서 직접 다시 켠 경우(0)는 그대로 둔다.
+ * 관리자로 로그인한 브라우저는 내부 기기로 표시한다.
+ * 기록은 남기되 '내부' 꼬리표를 달아 대시보드에서 빼고 보는 것이 기본이다.
+ * (예전에는 아예 기록하지 않았기 때문에, 그때 자동으로 켜진 제외 설정은 한 번만 풀어준다)
  */
-export function excludeAdminBrowser() {
+export function markAdminBrowserInternal() {
   try {
-    if (local()?.getItem(OPT_OUT_KEY) == null) local()?.setItem(OPT_OUT_KEY, '1')
+    const storage = local()
+    if (!storage) return
+    if (storage.getItem(INTERNAL_KEY) == null) storage.setItem(INTERNAL_KEY, '1')
+    if (storage.getItem(MIGRATED_KEY) == null) {
+      if (storage.getItem(OPT_OUT_KEY) === '1') storage.setItem(OPT_OUT_KEY, '0')
+      storage.setItem(MIGRATED_KEY, '1')
+    }
   } catch {
     // 무시
   }
+}
+
+/**
+ * ?nd_internal=1 로 들어오면 이 기기를 내부로 표시하고 짧게 알려준다.
+ * (팀원이 휴대폰에서 링크 한 번만 누르면 되도록)
+ */
+function applyInternalParam() {
+  const value = new URLSearchParams(window.location.search).get(INTERNAL_PARAM)
+  if (value == null) return
+  const internal = value !== '0' && value !== 'false'
+  setInternalBrowser(internal)
+  showNotice(internal ? '이 기기의 방문은 내부 방문으로 표시됩니다.' : '이 기기의 내부 방문 표시를 해제했습니다.')
+}
+
+function showNotice(message: string) {
+  const box = document.createElement('div')
+  box.textContent = message
+  box.setAttribute('role', 'status')
+  box.style.cssText =
+    'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:2147483647;' +
+    'max-width:calc(100vw - 32px);padding:12px 18px;border-radius:9999px;' +
+    'background:#111827;color:#fff;font-size:14px;line-height:1.4;text-align:center;' +
+    'box-shadow:0 8px 24px rgba(0,0,0,.25)'
+  document.body.appendChild(box)
+  setTimeout(() => box.remove(), 4000)
 }
 
 function isEnabled(): boolean {
@@ -232,7 +286,14 @@ function scrollDepth(): number {
 
 function context(session: StoredSession) {
   const visitor = readVisitor()
-  return { vid: visitor.id, sid: session.id, nv: session.nv, s: session.origin, ...clientHints() }
+  return {
+    vid: visitor.id,
+    sid: session.id,
+    nv: session.nv,
+    s: session.origin,
+    int: isInternalBrowser(),
+    ...clientHints(),
+  }
 }
 
 /** 보던 페이지의 체류시간·스크롤 깊이를 보낸다 (탭을 숨기거나 다른 페이지로 갈 때) */
@@ -341,6 +402,7 @@ let listening = false
 export function startListeners(): () => void {
   if (listening || typeof window === 'undefined') return () => {}
   listening = true
+  applyInternalParam()
   let ticking = false
   const onScroll = () => {
     if (ticking) return

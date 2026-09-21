@@ -11,7 +11,7 @@ export const EVENTS_COLLECTION = 'analytics_events'
 export const DAILY_COLLECTION = 'analytics_daily'
 
 /** 요약 구조가 바뀌면 올려서 저장된 일별 요약을 다시 계산하게 한다 */
-export const SUMMARY_VERSION = 3
+export const SUMMARY_VERSION = 4
 
 /** 한 페이지만 보고 10초 안에 아무 행동 없이 떠난 세션을 이탈로 본다 */
 export const BOUNCE_MAX_MS = 10_000
@@ -28,6 +28,8 @@ export interface AnalyticsEvent {
   sid: string
   new_visitor: boolean
   entry: boolean
+  /** 내부(팀) 기기로 표시된 브라우저의 방문 */
+  internal: boolean
   channel: Channel
   source: string
   medium: string | null
@@ -203,6 +205,14 @@ export function splitSourceKey(key: string): { channel: Channel; source: string 
   return { channel: channel as Channel, source: source ?? '' }
 }
 
+/** 내부(팀) 방문과 외부(실제 방문자) 기록을 나눈다 */
+export function splitInternal(events: AnalyticsEvent[]): { external: AnalyticsEvent[]; internal: AnalyticsEvent[] } {
+  const external: AnalyticsEvent[] = []
+  const internal: AnalyticsEvent[] = []
+  for (const event of events) (event.internal ? internal : external).push(event)
+  return { external, internal }
+}
+
 /** 세션 단위로 묶은 방문 기록 (방문 로그 화면용) */
 export interface SessionRecord {
   sid: string
@@ -211,6 +221,7 @@ export interface SessionRecord {
   start: Date
   end: Date
   newVisitor: boolean
+  internal: boolean
   pageviews: AnalyticsEvent[]
   actions: AnalyticsEvent[]
   timeline: AnalyticsEvent[]
@@ -240,6 +251,7 @@ export function groupSessions(events: AnalyticsEvent[]): SessionRecord[] {
       start: timeline[0].ts,
       end: timeline[timeline.length - 1].ts,
       newVisitor: timeline.some((e) => e.new_visitor),
+      internal: timeline.some((e) => e.internal),
       pageviews,
       actions,
       timeline,

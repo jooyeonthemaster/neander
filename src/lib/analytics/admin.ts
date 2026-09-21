@@ -25,10 +25,27 @@ import {
   SUMMARY_VERSION,
   compactSummary,
   emptySummary,
+  splitInternal,
   summarize,
   type AnalyticsEvent,
   type Summary,
 } from './aggregate'
+
+/** 하루치 요약 - 외부(실제 방문자)와 내부(팀) 기록을 따로 보관한다 */
+export interface DaySummaries {
+  external: Summary
+  internal: Summary
+}
+
+export function emptyDaySummaries(): DaySummaries {
+  return { external: emptySummary(), internal: emptySummary() }
+}
+
+/** 원본 이벤트를 외부·내부로 나눠 요약한다 */
+export function summarizeDay(events: AnalyticsEvent[]): DaySummaries {
+  const { external, internal } = splitInternal(events)
+  return { external: summarize(external), internal: summarize(internal) }
+}
 import { dayEnd, dayKeyOf, dayStart, daysBetween, todayKey } from './period'
 
 /** 하루가 끝난 뒤에도 체류시간 갱신이 늦게 도착할 수 있어 이만큼 지난 뒤 요약을 확정한다 */
@@ -50,6 +67,7 @@ function toEvent(snapshot: QueryDocumentSnapshot<DocumentData>): AnalyticsEvent 
     sid: data.sid ?? snapshot.id,
     new_visitor: data.new_visitor === true,
     entry: data.entry === true,
+    internal: data.internal === true,
     channel: data.channel ?? 'direct',
     source: data.source ?? 'direct',
     medium: data.medium ?? null,
@@ -118,7 +136,10 @@ interface DailyDoc {
   date: string
   v: number
   final: boolean
+  /** 외부 방문자 요약 (JSON) */
   data: string
+  /** 내부(팀) 방문 요약 (JSON) */
+  internalData?: string
 }
 
 function isFinal(day: string, now: number): boolean {
@@ -145,8 +166,8 @@ export async function loadDailySummaries(
   startKey: string,
   endKey: string,
   onProgress?: (done: number, total: number) => void
-): Promise<Map<string, Summary>> {
-  const result = new Map<string, Summary>()
+): Promise<Map<string, DaySummaries>> {
+  const result = new Map<string, DaySummaries>()
   const today = todayKey()
   const lastPast = endKey < today ? endKey : dayKeyOf(new Date(dayStart(today).getTime() - 1))
   const firstDay = await getFirstEventDay()
@@ -161,7 +182,10 @@ export async function loadDailySummaries(
     const data = snapshot.data() as DailyDoc
     if (data.v !== SUMMARY_VERSION || !data.final) continue
     try {
-      result.set(data.date, JSON.parse(data.data) as Summary)
+      result.set(data.date, {
+        external: JSON.parse(data.data) as Summary,
+        internal: data.internalData ? (JSON.parse(data.internalData) as Summary) : emptySummary(),
+      })
     } catch {
       // 손상된 요약은 다시 계산한다
     }
@@ -185,15 +209,18 @@ export async function loadDailySummaries(
     const batch = writeBatch(db)
     for (const day of run) {
       const dayEvents = byDay.get(day) ?? []
-      const summary = dayEvents.length ? compactSummary(summarize(dayEvents)) : emptySummary()
-      result.set(day, summary)
+      const summaries = dayEvents.length ? summarizeDay(dayEvents) : emptyDaySummaries()
+      const external = compactSummary(summaries.external)
+      const internal = compactSummary(summaries.internal)
+      result.set(day, { external, internal })
       batch.set(doc(db, DAILY_COLLECTION, day), {
         date: day,
         v: SUMMARY_VERSION,
         final: isFinal(day, now),
         events: dayEvents.length,
         computed_at: new Date(now).toISOString(),
-        data: JSON.stringify(summary),
+        data: JSON.stringify(external),
+        internalData: JSON.stringify(internal),
       })
     }
     try {

@@ -74,7 +74,7 @@ service cloud.firestore {
       allow read, delete: if isAdmin();
 
       allow create: if request.resource.data.keys().hasOnly([
-            'type', 'name', 'label', 'path', 'locale', 'vid', 'sid', 'new_visitor', 'entry',
+            'type', 'name', 'label', 'path', 'locale', 'vid', 'sid', 'new_visitor', 'entry', 'internal',
             'channel', 'source', 'medium', 'campaign', 'keyword', 'referrer', 'landing',
             'device', 'browser', 'os', 'inapp', 'country', 'region', 'city', 'lang', 'ts'
           ])
@@ -88,6 +88,7 @@ service cloud.firestore {
         && request.resource.data.source is string && request.resource.data.source.size() <= 100
         && request.resource.data.new_visitor is bool
         && request.resource.data.entry is bool
+        && (!('internal' in request.resource.data) || request.resource.data.internal is bool)
         && optString(request.resource.data, 'name', 40)
         && optString(request.resource.data, 'label', 200)
         && optString(request.resource.data, 'locale', 5)

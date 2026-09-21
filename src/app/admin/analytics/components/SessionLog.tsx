@@ -73,6 +73,9 @@ function SessionRow({ session }: { session: SessionRecord }) {
         ) : (
           <span className="rounded-full bg-gray-50 px-2 py-0.5 text-xs text-gray-500">재방문</span>
         )}
+        {session.internal && (
+          <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">내부</span>
+        )}
         {session.converted && (
           <span className="rounded-full bg-teal-50 px-2 py-0.5 text-xs font-semibold text-teal-700">문의 접수</span>
         )}

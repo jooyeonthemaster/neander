@@ -6,12 +6,19 @@ import {
   emptySummary,
   groupSessions,
   mergeSummaries,
+  splitInternal,
   summarize,
   type AnalyticsEvent,
   type SessionRecord,
   type Summary,
 } from '@/lib/analytics/aggregate'
-import { fetchEvents, loadDailySummaries, subscribeEvents } from '@/lib/analytics/admin'
+import {
+  fetchEvents,
+  loadDailySummaries,
+  subscribeEvents,
+  summarizeDay,
+  type DaySummaries,
+} from '@/lib/analytics/admin'
 import {
   comparisonOf,
   dayEnd,
@@ -34,6 +41,26 @@ const HEATMAP_MIN_DAYS = 7
 const ACTIVE_WINDOW_MS = 30 * 60 * 1000
 
 export type Granularity = 'hour' | 'day' | 'week' | 'month'
+
+/** 내부(팀) 방문을 어떻게 다룰지 */
+export type VisitorFilter = 'external' | 'all' | 'internal'
+
+export const VISITOR_FILTERS: { value: VisitorFilter; label: string; hint: string }[] = [
+  { value: 'external', label: '내부 제외', hint: '내부 기기로 표시된 방문을 뺀 수치 (기본)' },
+  { value: 'all', label: '전체', hint: '내부 방문까지 모두 포함한 수치' },
+  { value: 'internal', label: '내부만', hint: '내부 기기로 표시된 방문만' },
+]
+
+/** 하루치 요약에서 보고 싶은 쪽을 고른다 */
+function pickSummary(day: DaySummaries, filter: VisitorFilter): Summary {
+  if (filter === 'external') return day.external
+  if (filter === 'internal') return day.internal
+  return mergeSummaries([day.external, day.internal])
+}
+
+function pickDays(days: Map<string, DaySummaries>, filter: VisitorFilter): Map<string, Summary> {
+  return new Map([...days].map(([key, value]) => [key, pickSummary(value, filter)]))
+}
 
 export interface DrillTarget {
   mode: PeriodMode
@@ -69,6 +96,8 @@ export interface Report {
   heatmap: number[][] | null
   /** 기간이 짧을 때만 채운다 (최신 방문이 앞) */
   sessions: SessionRecord[] | null
+  /** 내부(팀) 방문 수 - 기본 화면에서 빠진 양을 알려주기 위해 따로 센다 */
+  internalSessions: number
   /** 오늘이 포함되어 실시간으로 갱신되는 중인지 */
   live: boolean
   /** 최근 30분 안에 페이지를 본 방문자 수 (오늘이 포함될 때만) */
@@ -202,8 +231,8 @@ function activeVisitors(events: AnalyticsEvent[]): number {
   return new Set(events.filter((e) => e.ts.getTime() >= since).map((e) => e.vid)).size
 }
 
-/** 원본 이벤트를 날짜별 요약으로 나눈다 */
-function summarizeByDay(events: AnalyticsEvent[]): Map<string, Summary> {
+/** 원본 이벤트를 날짜별 요약(외부·내부)으로 나눈다 */
+function summarizeByDay(events: AnalyticsEvent[]): Map<string, DaySummaries> {
   const byDay = new Map<string, AnalyticsEvent[]>()
   for (const event of events) {
     const key = dayKeyOf(event.ts)
@@ -211,15 +240,16 @@ function summarizeByDay(events: AnalyticsEvent[]): Map<string, Summary> {
     if (list) list.push(event)
     else byDay.set(key, [event])
   }
-  return new Map([...byDay].map(([day, list]) => [day, summarize(list)]))
+  return new Map([...byDay].map(([day, list]) => [day, summarizeDay(list)]))
 }
 
-async function loadPrevious(comparison: Comparison): Promise<Summary> {
+async function loadPrevious(comparison: Comparison, filter: VisitorFilter): Promise<Summary> {
   if (comparison.until) {
-    return summarize(await fetchEvents(dayStart(comparison.start), comparison.until))
+    const { external, internal } = splitInternal(await fetchEvents(dayStart(comparison.start), comparison.until))
+    return summarize(filter === 'internal' ? internal : filter === 'all' ? [...external, ...internal] : external)
   }
   const days = await loadDailySummaries(comparison.start, comparison.end)
-  return mergeSummaries([...days.values()])
+  return mergeSummaries([...days.values()].map((day) => pickSummary(day, filter)))
 }
 
 /**
@@ -227,8 +257,14 @@ async function loadPrevious(comparison: Comparison): Promise<Summary> {
  * 기간이 짧으면 원본 이벤트로 방문 기록까지 만들고, 길면 저장된 일별 요약을 합친다.
  * 오늘이 포함된 기간은 오늘 기록을 실시간으로 구독해 계속 갱신한다.
  */
-export function useAnalyticsReport(mode: PeriodMode, anchor: string, rangeEnd: string, reloadKey: number) {
-  const requestKey = `${mode}|${anchor}|${rangeEnd}|${reloadKey}`
+export function useAnalyticsReport(
+  mode: PeriodMode,
+  anchor: string,
+  rangeEnd: string,
+  visitorFilter: VisitorFilter,
+  reloadKey: number
+) {
+  const requestKey = `${mode}|${anchor}|${rangeEnd}|${visitorFilter}|${reloadKey}`
   // 결과마다 어떤 요청의 것인지 기록해 두고, 새 요청이 끝나기 전에는 이전 화면을 그대로 보여준다
   const [result, setResult] = useState<{ key: string; report: Report | null; error: string | null }>({
     key: '',
@@ -259,12 +295,14 @@ export function useAnalyticsReport(mode: PeriodMode, anchor: string, rangeEnd: s
     }
 
     function build(
-      days: Map<string, Summary>,
+      dayMap: Map<string, DaySummaries>,
       sessions: SessionRecord[] | null,
       previous: Summary | null,
       liveEvents: AnalyticsEvent[]
     ): Report {
       const keys = daysBetween(period.start, period.end)
+      const days = pickDays(dayMap, visitorFilter)
+      const internalSessions = keys.reduce((sum, key) => sum + (dayMap.get(key)?.internal.sessions ?? 0), 0)
       return {
         period,
         comparison,
@@ -275,13 +313,14 @@ export function useAnalyticsReport(mode: PeriodMode, anchor: string, rangeEnd: s
         days,
         heatmap: buildHeatmap(period, days),
         sessions,
+        internalSessions,
         live,
         activeNow: live ? activeVisitors(liveEvents) : null,
       }
     }
 
     async function run() {
-      const previousPromise = loadPrevious(comparison)
+      const previousPromise = loadPrevious(comparison, visitorFilter)
       // 아래에서 await 할 때 오류가 전달된다. 그 전에 실패해도 처리되지 않은 거부로 남지 않게 한다
       previousPromise.catch(() => {})
 
@@ -294,7 +333,9 @@ export function useAnalyticsReport(mode: PeriodMode, anchor: string, rangeEnd: s
 
         const render = (todayEvents: AnalyticsEvent[]) => {
           const events = [...past, ...todayEvents]
-          const sessions = groupSessions(events).sort((a, b) => b.start.getTime() - a.start.getTime())
+          const shown =
+            visitorFilter === 'all' ? events : events.filter((e) => e.internal === (visitorFilter === 'internal'))
+          const sessions = groupSessions(shown).sort((a, b) => b.start.getTime() - a.start.getTime())
           publish(build(summarizeByDay(events), sessions, previous, todayEvents))
         }
 
@@ -319,7 +360,7 @@ export function useAnalyticsReport(mode: PeriodMode, anchor: string, rangeEnd: s
         unsubscribe = subscribeEvents(
           dayStart(today),
           dayEnd(today),
-          (events) => publish(build(new Map(days).set(today, summarize(events)), null, previous, events)),
+          (events) => publish(build(new Map(days).set(today, summarizeDay(events)), null, previous, events)),
           fail
         )
       } else {
@@ -333,7 +374,7 @@ export function useAnalyticsReport(mode: PeriodMode, anchor: string, rangeEnd: s
       cancelled = true
       unsubscribe?.()
     }
-  }, [mode, anchor, rangeEnd, requestKey])
+  }, [mode, anchor, rangeEnd, visitorFilter, requestKey])
 
   return {
     report: result.report,
