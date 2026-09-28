@@ -2,6 +2,8 @@ export { Button, type ButtonProps, type ButtonVariant, type ButtonSize } from '.
 export { Card } from './Card';
 export { Badge, type BadgeProps, type BadgeVariant } from './Badge';
 export { Input, type InputProps } from './Input';
+export { DatePicker, type DatePickerProps } from './DatePicker';
+export { Checkbox, type CheckboxProps } from './Checkbox';
 export { Textarea, type TextareaProps } from './Textarea';
 export { Select, type SelectProps, type SelectOption } from './Select';
 export { Modal } from './Modal';

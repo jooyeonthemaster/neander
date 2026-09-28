@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { Select } from '@/components/ui/Select'
 import AdminHeader from '../components/AdminHeader'
 import { db } from '@/lib/firebase/config'
 import { setInquiryStatus, deleteInquiry } from '@/lib/firebase/inquiries'
-import type { Inquiry, InquiryStatus } from '@/types/inquiry'
+import type { Inquiry, InquiryStatus, QuoteSnapshot } from '@/types/inquiry'
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore'
 import { Inbox, Loader2, Mail, Phone, Trash2, Search, Building2, X } from 'lucide-react'
 
@@ -231,18 +232,15 @@ export default function AdminInquiriesPage() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <select
+                    <Select
                       value={status}
-                      onChange={(e) => handleStatusChange(item.id, e.target.value as InquiryStatus)}
+                      onValueChange={(value) => handleStatusChange(item.id, value as InquiryStatus)}
                       disabled={busyId === item.id}
-                      className="rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-50"
-                    >
-                      {(Object.keys(STATUS_LABELS) as InquiryStatus[]).map((value) => (
-                        <option key={value} value={value}>
-                          {STATUS_LABELS[value]}
-                        </option>
-                      ))}
-                    </select>
+                      aria-label={`${item.name} 문의 처리 상태`}
+                      className="w-28"
+                      triggerClassName="rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-50"
+                      options={(Object.keys(STATUS_LABELS) as InquiryStatus[]).map((value) => ({ value, label: STATUS_LABELS[value] }))}
+                    />
                     <button
                       type="button"
                       onClick={() => handleDelete(item.id, item.name)}
@@ -259,48 +257,7 @@ export default function AdminInquiriesPage() {
                   {item.message}
                 </p>
 
-                {item.quote && (
-                  <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg bg-gray-50 p-4 text-sm sm:grid-cols-3">
-                    {item.quote.eventType && (
-                      <div>
-                        <dt className="text-xs text-gray-400">행사 유형</dt>
-                        <dd className="text-gray-800">{item.quote.eventType}</dd>
-                      </div>
-                    )}
-                    {item.quote.eventDate && (
-                      <div>
-                        <dt className="text-xs text-gray-400">희망 일자</dt>
-                        <dd className="text-gray-800">{item.quote.eventDate}</dd>
-                      </div>
-                    )}
-                    {item.quote.location && (
-                      <div>
-                        <dt className="text-xs text-gray-400">장소</dt>
-                        <dd className="text-gray-800">{item.quote.location}</dd>
-                      </div>
-                    )}
-                    {item.quote.services.length > 0 && (
-                      <div className="col-span-2 sm:col-span-3">
-                        <dt className="text-xs text-gray-400">선택 서비스</dt>
-                        <dd className="text-gray-800">{item.quote.services.join(', ')}</dd>
-                      </div>
-                    )}
-                    {item.quote.addOns.length > 0 && (
-                      <div className="col-span-2 sm:col-span-3">
-                        <dt className="text-xs text-gray-400">추가 옵션</dt>
-                        <dd className="text-gray-800">{item.quote.addOns.join(', ')}</dd>
-                      </div>
-                    )}
-                    {item.quote.estimatedTotal > 0 && (
-                      <div>
-                        <dt className="text-xs text-gray-400">예상 견적</dt>
-                        <dd className="font-semibold text-gray-900">
-                          {item.quote.estimatedTotal.toLocaleString('ko-KR')}원
-                        </dd>
-                      </div>
-                    )}
-                  </dl>
-                )}
+                {item.quote && <QuoteDetail quote={item.quote} />}
               </article>
             )
           })}
@@ -319,6 +276,112 @@ export default function AdminInquiriesPage() {
           <button onClick={() => setToast(null)} aria-label="알림 닫기">
             <X className="w-4 h-4" />
           </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+const won = (n: number) => `${n.toLocaleString('ko-KR')}원`
+
+/** 온라인 견적 상세 — 행사 조건, 체험별 옵션, 품목별 수량·단가, 합계 */
+function QuoteDetail({ quote }: { quote: QuoteSnapshot }) {
+  const conditions: [string, string | undefined][] = [
+    ['행사 유형', quote.eventType],
+    ['행사 일자', quote.eventDate || '미정'],
+    ['운영 기간', quote.duration ? `${quote.duration}일${quote.hoursPerDay ? ` · 1일 ${quote.hoursPerDay}시간` : ''}` : undefined],
+    ['예상 인원', quote.expectedAttendees ? `${quote.expectedAttendees.toLocaleString('ko-KR')}명` : undefined],
+    ['지역', quote.location],
+    ['전날 설치', quote.setupDayBefore === undefined ? undefined : quote.setupDayBefore ? '예' : '아니오'],
+    ['추가 인력', quote.extraStaff ? `${quote.extraStaff}명` : undefined],
+  ]
+  return (
+    <div className="mt-4 space-y-4 rounded-lg bg-gray-50 p-4 text-sm">
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-4">
+        {conditions.filter(([, v]) => v).map(([k, v]) => (
+          <div key={k}>
+            <dt className="text-xs text-gray-400">{k}</dt>
+            <dd className="text-gray-800">{v}</dd>
+          </div>
+        ))}
+      </dl>
+
+      {quote.items && quote.items.length > 0 && (
+        <div>
+          <p className="mb-1.5 text-xs text-gray-400">선택한 체험과 옵션</p>
+          <ul className="space-y-1">
+            {quote.items.map((it) => (
+              <li key={it.name} className="text-gray-800">
+                <span className="font-semibold">{it.name}</span>
+                <span className="text-gray-600"> — {it.options.join(' · ')}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {quote.lines && quote.lines.length > 0 ? (
+        <div>
+          <p className="mb-1.5 text-xs text-gray-400">견적 내역</p>
+          <table className="w-full text-left">
+            <tbody className="divide-y divide-gray-200">
+              {quote.lines.map((l, i) => (
+                <tr key={i} className="align-top">
+                  <td className="py-1.5 pr-3 font-medium whitespace-nowrap text-gray-800">{l.label}</td>
+                  <td className="py-1.5 pr-3 text-xs leading-relaxed text-gray-500">{l.detail}</td>
+                  <td className="py-1.5 text-right whitespace-nowrap tabular-nums text-gray-900">{l.tbd ? '상담 후 산정' : won(l.amount)}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot className="border-t border-gray-300 tabular-nums">
+              {quote.supply !== undefined && <tr><td colSpan={2} className="pt-2 text-right text-xs text-gray-500">공급가액</td><td className="pt-2 text-right text-gray-700">{won(quote.supply)}</td></tr>}
+              {quote.vat !== undefined && <tr><td colSpan={2} className="text-right text-xs text-gray-500">부가세</td><td className="text-right text-gray-700">{won(quote.vat)}</td></tr>}
+              <tr><td colSpan={2} className="pt-1 text-right text-xs font-semibold text-gray-700">합계 (VAT 포함)</td><td className="pt-1 text-right font-semibold text-gray-900">{won(quote.estimatedTotal)}</td></tr>
+            </tfoot>
+          </table>
+        </div>
+      ) : (
+        <>
+          {quote.services.length > 0 && (
+            <div>
+              <p className="text-xs text-gray-400">선택 서비스</p>
+              <p className="text-gray-800">{quote.services.join(', ')}</p>
+            </div>
+          )}
+          {quote.addOns.length > 0 && (
+            <div>
+              <p className="text-xs text-gray-400">추가 옵션</p>
+              <p className="text-gray-800">{quote.addOns.join(', ')}</p>
+            </div>
+          )}
+          {quote.estimatedTotal > 0 && (
+            <div>
+              <p className="text-xs text-gray-400">예상 견적</p>
+              <p className="font-semibold text-gray-900">{won(quote.estimatedTotal)}</p>
+            </div>
+          )}
+        </>
+      )}
+
+      {quote.estimateToken && (
+        <div className="flex flex-wrap items-center gap-2">
+          {quote.estimateNo && <span className="mr-1 text-xs text-gray-500">견적번호 {quote.estimateNo}</span>}
+          <a
+            href={`/quote/estimate?t=${encodeURIComponent(quote.estimateToken)}`}
+            target="_blank"
+            rel="noopener"
+            className="inline-flex h-8 items-center rounded-md bg-teal-600 px-3 text-xs font-semibold text-white hover:bg-teal-500"
+          >
+            가견적서 다시 보기
+          </a>
+          <a
+            href={`/api/quote-pdf?t=${encodeURIComponent(quote.estimateToken)}`}
+            target="_blank"
+            rel="noopener"
+            className="inline-flex h-8 items-center rounded-md border border-gray-300 px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+          >
+            PDF
+          </a>
         </div>
       )}
     </div>

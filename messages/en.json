@@ -4,7 +4,7 @@
     "description": "We transform offline spaces with AI-driven experiential content. Pop-ups, festivals, exhibitions, concerts — NEANDERco.ltd designs unforgettable experiences.",
     "keywords": "AI content, experiential content, pop-up store, interactive media, AI fragrance, photo booth, spatial design, NEANDERco",
     "ogTitle": "NEANDERco — Design the Experience",
-    "ogDescription": "190+ events. 10,000+ visitors. Setting a new standard in AI experiential content.",
+    "ogDescription": "AI experiences guests take part in and take home — for events, pop-ups and exhibitions, plus AC'SCENT AI perfume blending.",
     "ogSiteName": "NEANDERco.ltd"
   },
 
@@ -14,7 +14,7 @@
     "portfolio": "Portfolio",
     "about": "About",
     "contact": "Contact",
-    "quote": "Get an Estimate",
+    "quote": "Online Estimate",
     "press": "Press",
     "demo": "Try Demo",
     "language": "한국어",
@@ -68,7 +68,7 @@
     "description": "We plan experiential AI content that makes your brand shine. We create AI experiences that visitors can participate in and enjoy in physical spaces.",
     "heroTagline": "What experience shall we create for you?",
     "pillarsTitle": "AI Experiences by NEANDER",
-    "pillarsSubtitle": "We design brand-tailored experiences across 5 AI experience categories",
+    "pillarsSubtitle": "Six AI experience products for your event. Check the starting price and add them to an estimate.",
     "industryTitle": "Which brands can use this?",
     "industrySubtitle": "Explore AI experience concepts designed for your industry",
     "processTitle": "From Planning to On-site Operations",
@@ -80,10 +80,15 @@
     "allPillars": "All",
     "noExperiences": "No experiences for this combination. Try a different filter.",
     "viewDetail": "Learn More",
+    "addToQuote": "Add to estimate",
+    "priceFrom": "from",
+    "statProducts": "Products",
+    "viewAllExperiences": "See all 41 experiences",
     "statExperiences": "Experiences",
     "statIndustries": "Industries",
     "statCategories": "Categories",
     "photoCase": "On site",
+    "photoConcept": "AI-generated concept",
     "relatedExperiences": "Related Experiences",
     "inquiryBtn": "Inquire About This Experience",
     "features": "Key Features",
@@ -91,6 +96,34 @@
     "backToPillar": "Back to {pillar}",
     "detailProcessTitle": "Experience Process",
     "useCasesTitle": "Use Cases",
+    "spec": {
+      "title": "Operating specs",
+      "input": "Input",
+      "output": "Delivery",
+      "power": "Power",
+      "internet": "Internet",
+      "minutes": "Time per guest",
+      "throughput": "Guests per hour (per unit)",
+      "footprint": "Space",
+      "staff": "On-site staff",
+      "startingPrice": "Starting price",
+      "onRequest": "On request",
+      "powerValue": "Standard outlet (220V)",
+      "internetValue": "Required (cloud AI)",
+      "minutesValue": "About {n} min",
+      "countValue": "{n}",
+      "inputs": {
+        "camera": "Camera",
+        "mic": "Microphone",
+        "touch": "Touchscreen"
+      },
+      "outputs": {
+        "print": "On-site print",
+        "qr": "QR download",
+        "screen": "On-screen"
+      },
+      "note": "Based on the standard setup; we adjust it to your venue and event size."
+    },
     "ctaInquiryTitle": "Interested in this experience?",
     "ctaInquirySubtitle": "NEANDER designs tailored experiences for your brand",
 
@@ -153,7 +186,7 @@
           { "title": "Results & Recommendations", "description": "Receive diagnosis results and personalized color product recommendations" }
         ],
         "highlights": [
-          { "value": "99.2%", "label": "Color Analysis Accuracy" },
+          { "value": "Custom", "label": "Recommended Palette" },
           { "value": "30s", "label": "Average Diagnosis Time" },
           { "value": "4 Types", "label": "Personal Color Categories" }
         ],
@@ -175,7 +208,7 @@
         ],
         "highlights": [
           { "value": "5", "label": "Skin Analysis Indicators" },
-          { "value": "94%", "label": "Customer Satisfaction" },
+          { "value": "Custom", "label": "Skincare Routine" },
           { "value": "Instant", "label": "Report Output" }
         ],
         "useCases": [
@@ -197,7 +230,7 @@
         "highlights": [
           { "value": "Real-time", "label": "AR Makeup Application" },
           { "value": "50+", "label": "Makeup Presets" },
-          { "value": "88%", "label": "SNS Share Rate" }
+          { "value": "QR", "label": "Save Your Look" }
         ],
         "useCases": [
           { "title": "Cosmetic Stores", "description": "Virtual try-on without testers — hygienic and engaging" },
@@ -217,7 +250,7 @@
         ],
         "highlights": [
           { "value": "200+", "label": "Fragrance Database" },
-          { "value": "92%", "label": "Match Satisfaction" },
+          { "value": "Custom", "label": "Scent Profile Report" },
           { "value": "Real", "label": "Scent Sampling" }
         ],
         "useCases": [
@@ -259,7 +292,7 @@
         ],
         "highlights": [
           { "value": "500+", "label": "Beverage Database" },
-          { "value": "95%", "label": "Recommendation Accuracy" },
+          { "value": "Custom", "label": "Taste-based Picks" },
           { "value": "1 min", "label": "Analysis Time" }
         ],
         "useCases": [
@@ -281,7 +314,7 @@
         "highlights": [
           { "value": "\u221e", "label": "Cocktail Combinations" },
           { "value": "Real", "label": "Cocktail Making" },
-          { "value": "97%", "label": "SNS Share Rate" }
+          { "value": "Personal", "label": "Recipe Card" }
         ],
         "useCases": [
           { "title": "Bars / Lounges", "description": "Serve signature cocktails personalized to each customer" },
@@ -365,7 +398,7 @@
         "highlights": [
           { "value": "30+", "label": "Brand Outfits" },
           { "value": "HD", "label": "High-quality Print" },
-          { "value": "90%", "label": "Share Rate" }
+          { "value": "QR", "label": "Instant Download" }
         ],
         "useCases": [
           { "title": "Fashion Brand Pop-ups", "description": "Boost brand awareness with runway experiences at collection launches" },
@@ -428,7 +461,7 @@
         "highlights": [
           { "value": "100+", "label": "Idol Styles" },
           { "value": "Instant", "label": "Photocard Print" },
-          { "value": "95%", "label": "Fan Satisfaction" }
+          { "value": "Custom", "label": "Artist IP Frame" }
         ],
         "useCases": [
           { "title": "K-POP Concerts", "description": "Offer idol transformation experiences at concert venues" },
@@ -491,7 +524,7 @@
         "highlights": [
           { "value": "17", "label": "Facial Analysis Points" },
           { "value": "TOP 3", "label": "Lookalike Matches" },
-          { "value": "96%", "label": "Viral Conversion" }
+          { "value": "QR", "label": "Result Sharing" }
         ],
         "useCases": [
           { "title": "Entertainment Events", "description": "Most popular experience content at entertainment events" },
@@ -626,17 +659,17 @@
         ]
       },
       "fest01": {
-        "name": "AI Fortune Robot",
-        "oneLiner": "Fun fortune telling by AI",
-        "description": "An entertainment experience where AI analyzes your birthdate to provide fun fortune readings",
-        "features": ["Birthdate input interface", "AI fortune analysis (yearly fortune, love, wealth, health)", "Fun elements (humorous expressions)", "Fortune card instant printing", "Seasonal themes (New Year, Summer, etc.)"],
+        "name": "AI Element Fortune",
+        "oneLiner": "A little encouragement inspired by seasons and elements",
+        "description": "Choose your birth month and a symbolic element for a fictional fortune, a lucky item and a small action for today. This is entertainment, not a birth-chart analysis or a prediction.",
+        "features": ["Birth month and element selection", "A fictional fortune and an encouraging thought", "Fun elements (humorous expressions)", "Fortune card instant printing", "Seasonal themes (New Year, Summer, etc.)"],
         "processSteps": [
-          { "title": "Enter Birth Details", "description": "Enter birth date and time on touch screen" },
-          { "title": "AI Fortune Analysis", "description": "AI analyzes fortune and generates entertaining readings" },
+          { "title": "Choose a Season and Element", "description": "Choose a birth month, symbolic element and topic" },
+          { "title": "Create an Encouraging Story", "description": "Your choices inspire a fictional fortune and a small action" },
           { "title": "Fortune Card Print", "description": "Print fortune card on the spot" }
         ],
         "highlights": [
-          { "value": "4 Fortunes", "label": "Love/Wealth/Health/Year" },
+          { "value": "5 Topics", "label": "Love/Career/Health/Wealth/Creativity" },
           { "value": "Humor", "label": "Fun Elements" },
           { "value": "Seasonal", "label": "Theme Changes" }
         ],
@@ -1022,7 +1055,7 @@
         "shortTitle": "AI Photo Booth",
         "description": "AI-generated art. 100+ style filters and brand-tailored designs create keepsake images for visitors.",
         "features": ["100+ AI style filters", "Brand-customized frame design", "Real-time generation and instant print", "Social media-optimized formats"],
-        "stat": "88% Social Sharing Rate",
+        "stat": "Instant QR Sharing",
         "tag": "Popular"
       },
       "mediaArt": {
@@ -1042,9 +1075,9 @@
         "tag": "All-in-One"
       },
       "rental": {
-        "title": "All-in-One Rental",
-        "shortTitle": "All-in-One Rental",
-        "description": "Everything you need for AI content operations in one package.",
+        "title": "AI Kiosk",
+        "shortTitle": "AI Kiosk",
+        "description": "Rent AI experience kiosks for your event, with optional camera setup and instant printer.",
         "features": ["AI kiosk and display rental", "Installation and teardown crews", "On-site operations manager", "Equipment insurance and tech support"],
         "stat": "One-Stop Service",
         "tag": "Convenient"
@@ -1106,6 +1139,9 @@
     "viewAll": "View All Projects",
     "featured": "Featured",
     "detail": {
+      "objective": "Objective",
+      "execution": "What we did",
+      "outcome": "Outcome",
       "result": "Result",
       "gallery": "Gallery",
       "projectDetails": "Project Details",
@@ -1355,11 +1391,11 @@
     "serviceSubtitle": "Select the services you need. You can choose more than one.",
     "photoCase": "On site",
     "services": {
-      "acscent": { "name": "AC'SCENT AI Fragrance", "photoCaption": "Namsangol Hanok Village 〈Chwihyang〉 · AI perfume display" },
+      "acscent": { "name": "AI Perfume Experience", "photoCaption": "Namsangol Hanok Village 〈Chwihyang〉 · AI perfume display" },
       "photoBooth": { "name": "AI Photo Booth", "photoCaption": "Pyeongtaek AI Festa 2026 · AI photo booth (celebrity look-alike)" },
       "mediaArt": { "name": "Interactive Media Art", "photoCaption": "CROSS THE LINE · motion-tracking media art exhibition" },
       "spatialDesign": { "name": "Spatial Design" },
-      "rental": { "name": "All-in-One Rental" },
+      "rental": { "name": "AI Kiosk" },
       "custom": { "name": "Custom AI Content", "photoCaption": "Seoul Int'l Writers' Festival 2025 · AI book perfume" }
     },
     "from": "From {price}",
@@ -1454,7 +1490,7 @@
       "photobooth": "AI Photo Booth",
       "mediaArt": "Interactive Media Art",
       "spatialDesign": "Spatial Design",
-      "rental": "All-in-One Rental",
+      "rental": "AI Kiosk",
       "custom": "Custom Interactive Content"
     },
     "form": {
@@ -1712,15 +1748,18 @@
       "title": "Contact Information",
       "emailLabel": "Email",
       "phoneLabel": "Phone",
+      "mobileLabel": "Mobile",
       "addressLabel": "Address",
       "email": "ok@neander.co.kr",
       "phone": "+82 2-336-3368",
+      "mobile": "+82 10-8507-5121",
+      "phoneNote": "If we miss your call, please reach us on our mobile (+82 10-8507-5121).",
       "address": "22, Wausan-ro 29ra-gil, Mapo-gu, Seoul",
       "addressDetail": "Accent ID / Accent Wow"
     },
     "businessHours": {
       "title": "Business Hours",
-      "weekday": "Mon – Fri: 10:00 AM – 7:00 PM (KST)",
+      "weekday": "Mon – Fri: 1:00 PM – 10:00 PM (KST)",
       "weekend": "Closed on weekends and public holidays",
       "note": "Email inquiries are accepted around the clock."
     },
@@ -1813,13 +1852,14 @@
         "photobooth": "AI Photo Booth",
         "mediaArt": "Interactive Media Art",
         "spatialDesign": "Spatial Design",
-        "rental": "All-in-One Rental",
+        "rental": "AI Kiosk",
         "custom": "Custom Content"
       },
       "company": {
         "title": "Company",
         "about": "About Us",
         "portfolio": "Portfolio",
+        "insights": "Insights",
         "careers": "Careers",
         "press": "Press",
         "blog": "Blog"
@@ -1827,14 +1867,17 @@
       "support": {
         "title": "Support",
         "contact": "Contact",
-        "quote": "Get an Estimate",
+        "quote": "Online Estimate",
         "faq": "FAQ",
         "demo": "Try Demo",
+        "brochure": "Company Profile",
         "terms": "Terms of Service",
         "privacy": "Privacy Policy"
       }
     },
     "copyright": "© {year} NEANDERco.ltd. All rights reserved.",
+    "businessInfo": { "address": "Address", "phone": "Tel", "email": "Email", "privacyOfficer": "Privacy Officer", "privacyOfficerName": "Yoo Jae-young" },
+    "privacyLink": "Privacy Policy",
     "companyInfo": "NEANDERco.ltd | CEO: Yoo Jae-young | Business Registration No.: 683-86-02812",
     "links": {
       "terms": "Terms of Service",
@@ -2115,6 +2158,7 @@
   "demos": {
     "stage": {
       "loading": "Loading the demo",
+      "close": "Close",
       "fullscreen": "Full screen",
       "exitFullscreen": "Exit full screen",
       "scrollHint": "Learn more about this service",
@@ -2142,5 +2186,75 @@
     "readMore": "Read article",
     "source": "Source",
     "noArticles": "No press articles available."
+  },
+  "pricingGuide": {
+    "eyebrow": "PRICING & OPERATION",
+    "title": "Pricing & operation",
+    "subtitle": "See rough costs before you start internal approval. Prices match our online estimate; all exclude VAT and assume the Seoul metro area.",
+    "startingTitle": "Starting prices",
+    "from": "from",
+    "startingNote": "Prices with minimum options (VAT excluded, Seoul metro), based on 6 operating hours per day.",
+    "serviceDesc": {
+      "acscent": "AI analyzes each guest's taste and image to recommend a scent, and a perfumer blends it on site. Starting price assumes 2 perfumers and about 20 guests per hour.",
+      "photoBooth": "A photo booth where AI turns guest photos into images in a chosen style. Starting price assumes 1 booth, 1 AI style and QR delivery; prints and photocards are options.",
+      "mediaArt": "Interactive media art that reacts to guests' movement, sound and touch. Starting price is for standard content; motion sensors and premium content are options.",
+      "spatialDesign": "Design, build and teardown of the space that hosts the experience. Starting price is for a small space (up to ~100㎡); photo zones and lighting are options.",
+      "rental": "Rental of one AI experience kiosk. Camera setup, an instant printer and extra kiosks are options.",
+      "custom": "AI interactive content planned and built for your brand or event. Starting price is for brand content; planning consultation and aftercare are options."
+    },
+    "hoverHint": "Hover for details",
+    "basis": {
+      "acscent": "Minimum charge · up to 32 guests with 10ml · perfumer team travel (Seoul metro) included",
+      "photoBooth": "1 day · 1 booth · 2 AI styles · 700 prints · delivery & setup · staff not included",
+      "rental": "1 day · 1 kiosk · 1 existing experience as-is (no customization) · camera · delivery & setup · staff not included",
+      "spatialDesign": "3×3m booth · design, build & teardown",
+      "mediaArt": "Standard production KRW 5M + 1 day equipment & operation KRW 800K",
+      "custom": "New web / media content · one-time (photo booth and kiosk customization are options of each product)"
+    },
+    "factorsTitle": "What sets the price",
+    "factors": {
+      "duration": {
+        "name": "Duration",
+        "desc": "Equipment and operation add up per day; content production and build are charged once. 6 hours per day included, KRW 50,000 per extra hour."
+      },
+      "scale": {
+        "name": "Units & guest volume",
+        "desc": "We size the number of units and guests per hour to your expected attendance."
+      },
+      "custom": {
+        "name": "Customization",
+        "desc": "Branded frames and bespoke content or scents change the price."
+      },
+      "output": {
+        "name": "Take-home output",
+        "desc": "QR delivery only, or physical prints, photocards or perfume."
+      },
+      "staff": {
+        "name": "On-site staff",
+        "desc": "Extra on-site staff KRW 300,000 per person per day. AI Perfume includes one perfumer team (2 people)."
+      },
+      "venue": {
+        "name": "Location & installation",
+        "desc": "Seoul metro base (transport included). Truck-delivered products: +KRW 100,000 for Chungcheong/West Gangwon, +KRW 300,000 for Jeolla/Gyeongsang/East Gangwon; AI Kiosk only: +KRW 100,000 / +KRW 200,000. Perfumer team travel varies by region. We do not operate on Jeju or other islands."
+      }
+    },
+    "scaleTitle": "Sizing guide",
+    "scaleAcscent": "AC'SCENT perfume blending: about 20 guests per hour with the standard 2-perfumer setup; 40 or 60 per hour with more staff and equipment.",
+    "scaleKiosk": "AI experience kiosks: we set the number of units and hours with you in the quote, based on expected attendance and time per guest.",
+    "modelsTitle": "How we operate",
+    "models": {
+      "rental": {
+        "name": "Event rental",
+        "tag": "Short-term",
+        "desc": "We install and run it for the event, then tear down. Suits pop-ups, festivals, exhibitions and corporate events."
+      },
+      "monthly": {
+        "name": "Ongoing operation",
+        "tag": "Monthly",
+        "desc": "For long-running spaces like tourist sites, universities and permanent exhibitions: installed monthly, with content refreshed regularly."
+      }
+    },
+    "cta": "Get an online estimate",
+    "ctaSecondary": "Get our company profile"
   }
 }

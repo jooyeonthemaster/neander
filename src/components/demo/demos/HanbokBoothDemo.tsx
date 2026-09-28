@@ -15,9 +15,11 @@ import {
   defineDemo,
   getCapture,
   getChoice,
+  requestDemoAi,
   seededInt,
   type PhotoLook,
 } from '../kit';
+import { isAiBoothPhoto, type AiBoothPhoto } from '@/data/demo-ai/photo-booth';
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -581,33 +583,40 @@ function HanbokSealMark() {
   );
 }
 
-/** 출력물용 정적 합성 — 배경 · 한복 · 낙관 (300×400) */
-function HanbokPrintOverlay({ styleId, backdrop }: { styleId: StyleId; backdrop: BackdropId }) {
+/** 출력물용 정적 합성 — 배경 · 한복 · 낙관 (300×400). AI 사진이면 한복·배경이 이미 그려져 있어 낙관만 */
+function HanbokPrintOverlay({ styleId, backdrop, ai }: { styleId: StyleId; backdrop: BackdropId; ai: boolean }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400">
-      <BackdropOverlay backdrop={backdrop} uid="hbprint" />
-      <HanbokOverlay styleId={styleId} uid="hbprint" />
+      {!ai && <BackdropOverlay backdrop={backdrop} uid="hbprint" />}
+      {!ai && <HanbokOverlay styleId={styleId} uid="hbprint" />}
       <HanbokSealMark />
     </svg>
   );
 }
 
+/** AI가 새로 그린 사진이 있으면 그것(보정 없이), 없으면 원본 사진 + 따뜻한 보정 + 한복·배경 오버레이 */
+function photoView(capture: { image: string } | undefined, generated: unknown) {
+  if (isAiBoothPhoto(generated)) return { src: generated.image, look: {} as PhotoLook, ai: true };
+  return capture ? { src: capture.image, look: WARM_LOOK, ai: false } : null;
+}
+
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
   const uid = useId().replace(/:/g, '');
   const { capture, styleId, backdrop, s, b, serial } = boothOf(answers);
+  const photo = photoView(capture, generated);
 
   return (
     <ResultShell
       eyebrow="AI 한복 포토부스"
       title={`${s.name} 포토 완성!`}
-      description={`${b.label}을 배경으로 ${s.label} 한복을 입혀드렸어요. 전통 프레임으로 바로 인화돼요.`}
+      description={`${b.label} 배경과 ${s.name} 스타일로 구성했어요. ${photo?.ai ? 'AI가 만든 사진' : '사진에 필터와 프레임을 더한 예시'}를 전통 프레임으로 저장할 수 있어요.`}
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다른 한복 입어보기"
     >
-      {capture && (
+      {photo && (
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -615,9 +624,9 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           style={{ background: DANCHEONG_BORDER, outline: '4px solid #14532d', outlineOffset: '-2px' }}
         >
           <div className="relative border-[3px] border-[#fde68a] bg-[#fef3c7]">
-            <ProcessedPhoto src={capture.image} look={WARM_LOOK} className="aspect-[3/4] w-full" alt={`${s.name} 한복 합성 사진`} delayMs={1100}>
-              <BackdropOverlay backdrop={backdrop} uid={uid} />
-              <HanbokOverlay styleId={styleId} uid={uid} />
+            <ProcessedPhoto src={photo.src} look={photo.look} className="aspect-[3/4] w-full" alt={`${s.name} 스타일 사진`} delayMs={0}>
+              {!photo.ai && <BackdropOverlay backdrop={backdrop} uid={uid} />}
+              {!photo.ai && <HanbokOverlay styleId={styleId} uid={uid} />}
               <div className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-[3px] border border-red-200/60 bg-red-700/90 text-[11px] font-bold leading-tight text-red-50 shadow">
                 <span className="text-center">
                   韓
@@ -641,6 +650,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           <CornerKnot className="-bottom-3 -right-3" />
         </motion.div>
       )}
+      {photo?.ai && <p className="-mt-2 text-xs text-slate-500">AI가 사진 속 모습 그대로 한복을 입혀 새로 그렸어요</p>}
 
       <InfoGrid
         items={[
@@ -668,9 +678,18 @@ export default defineDemo({
     targetSlug: 'ai-hanbok-booth',
     industryId: 'tourism',
     analyzeEmoji: '👘',
+    // AI 사진 합성은 10~20초 — 문구를 넉넉히 두고 마지막 문구는 오래 머물러도 자연스럽게
     analyzeDurationMs: 3600,
     analyzeImageStepId: 'photo',
-    analyzeMessages: ['어깨선에 맞춰 한복 재단 중', '깃·동정 핏 맞추는 중', '전통 배경 합성 중', '단청 프레임 입히는 중'],
+    analyzeMessages: [
+      '한복 원단 고르는 중',
+      '어깨선에 맞춰 한복 재단 중',
+      '깃·동정 핏 맞추는 중',
+      '전통 배경 불러오는 중',
+      '사진 합성 중',
+      '단청 프레임 입히는 중',
+      '마지막 디테일 다듬는 중 · 조금만 기다려 주세요',
+    ],
   },
   steps: [
     choiceStep({
@@ -705,24 +724,41 @@ export default defineDemo({
       mode: 'portrait',
       subject: '상반신',
       countdown: true,
-      scanLabels: ['인물 영역 분리', '어깨·목선 추적', '한복 핏 맞춤 계산', '전통 배경 합성 준비'],
+      scanLabels: ['촬영 컷 준비', '한복의 선과 배색 준비', '선택한 기념사진 구도 준비', '전통 배경 연출 준비'],
       readouts: (c) => [
-        { label: '어깨선', value: '정렬 완료' },
-        { label: '조명 톤', value: c.stats.warmth > 52 ? '따뜻한 톤' : '차분한 톤' },
+        { label: '구도 안내', value: '어깨와 목선이 보이게' },
+        { label: '사진의 색감', value: c.stats.warmth > 52 ? '따뜻한 톤' : '차분한 톤' },
       ],
     }),
   ],
   computeResult,
   Result,
-  print: (answers) => {
+  generate: (answers) => {
+    const { capture, styleId, backdrop } = boothOf(answers);
+    if (!capture) return Promise.resolve(null);
+    return requestDemoAi<AiBoothPhoto>(
+      'hanbok-booth',
+      { experienceProfile: answers.experienceProfile, photo: capture.image, style: styleId, backdrop },
+      { timeoutMs: 60_000, validate: isAiBoothPhoto }
+    );
+  },
+  print: (answers, _resultKey, generated) => {
     const { capture, styleId, backdrop, s, b, serial } = boothOf(answers);
+    const photo = photoView(capture, generated);
     return {
       kind: 'photo',
-      photos: capture
-        ? [{ src: capture.image, look: WARM_LOOK, label: `${b.label} ${b.hanja}`, overlay: <HanbokPrintOverlay styleId={styleId} backdrop={backdrop} /> }]
+      photos: photo
+        ? [
+            {
+              src: photo.src,
+              look: photo.ai ? undefined : photo.look,
+              label: `${b.label} ${b.hanja}`,
+              overlay: <HanbokPrintOverlay styleId={styleId} backdrop={backdrop} ai={photo.ai} />,
+            },
+          ]
         : [],
       title: `${s.name} ${s.hanja}`,
-      caption: `${s.label} 한복 · ${b.label} ${b.hanja} · ${b.en} · No.${serial}`,
+      caption: `${s.name} · ${b.label} ${b.hanja} · ${b.en} · No.${serial}`,
       paper: 'cream',
     };
   },

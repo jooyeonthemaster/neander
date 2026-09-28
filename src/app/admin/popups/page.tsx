@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { Select } from '@/components/ui/Select'
+import { DatePicker } from '@/components/ui/DatePicker'
 import AdminHeader from '../components/AdminHeader'
 import ImageUploader from '../components/ImageUploader'
 import { db } from '@/lib/firebase/config'
@@ -515,26 +517,22 @@ export default function PopupsPage() {
 
               {/* Aspect ratio select */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label htmlFor="popup-image-aspect-ratio" className="block text-sm font-medium text-gray-700 mb-1.5">
                   이미지 비율
                 </label>
-                <select
+                <Select
+                  id="popup-image-aspect-ratio"
+                  aria-label="이미지 비율"
                   value={form.image_aspect_ratio}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     setForm((prev) => ({
                       ...prev,
-                      image_aspect_ratio: e.target
-                        .value as Popup['image_aspect_ratio'],
+                      image_aspect_ratio: value as Popup['image_aspect_ratio'],
                     }))
                   }
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-gray-900 focus:border-gray-900 outline-none transition-all bg-white"
-                >
-                  {ASPECT_RATIO_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                  triggerClassName="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-gray-900 focus:border-gray-900 outline-none transition-all bg-white"
+                  options={ASPECT_RATIO_OPTIONS}
+                />
               </div>
 
               {/* Image uploader */}
@@ -627,32 +625,34 @@ export default function PopupsPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     시작일 <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="datetime-local"
+                  <DatePicker
+                    mode="datetime-local"
+                    aria-label="시작일"
                     value={form.start_date}
-                    onChange={(e) =>
+                    onChange={(value) =>
                       setForm((prev) => ({
                         ...prev,
-                        start_date: e.target.value,
+                        start_date: value,
                       }))
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-gray-900 focus:border-gray-900 outline-none transition-all"
+                    inputClassName="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     종료일
                   </label>
-                  <input
-                    type="datetime-local"
+                  <DatePicker
+                    mode="datetime-local"
+                    aria-label="종료일"
                     value={form.end_date}
-                    onChange={(e) =>
+                    onChange={(value) =>
                       setForm((prev) => ({
                         ...prev,
-                        end_date: e.target.value,
+                        end_date: value,
                       }))
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-gray-900 focus:border-gray-900 outline-none transition-all"
+                    inputClassName="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm"
                   />
                 </div>
               </div>

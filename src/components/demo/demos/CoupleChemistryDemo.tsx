@@ -3,35 +3,19 @@
 import { motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { QUOTE_HREF } from '@/lib/constants';
+import { getServiceContactHref } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type { DemoModule, DemoConfig, DemoAnswers, DemoStepProps, DemoResultProps } from '@/types/demo';
-import type { PrintSpec } from '../kit';
+import { requestDemoAi, type PrintSpec } from '../kit';
+import { COUPLE_COLORS, COUPLE_CONFLICTS, COUPLE_DREAMS, COUPLE_EMOJIS, COUPLE_LOVE_LANGS } from '@/data/demo-ai/couple';
+import type { AiCouple, CoupleColor } from '@/data/demo-ai/couple';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-const LOVE_LANGS = [
-  { id: 'words', label: '칭찬의 말', emoji: '💬' },
-  { id: 'touch', label: '스킨십', emoji: '🤗' },
-  { id: 'gifts', label: '선물', emoji: '🎁' },
-  { id: 'acts', label: '행동으로 표현', emoji: '🛠️' },
-  { id: 'time', label: '함께하는 시간', emoji: '⏰' },
-] as const;
-
-const CONFLICTS = [
-  { id: 'talk', emoji: '💬', label: '대화로 해결', desc: '마주 앉아 솔직하게 이야기한다' },
-  { id: 'space', emoji: '🌙', label: '시간을 두고', desc: '각자 시간을 가진 후 대화한다' },
-  { id: 'compromise', emoji: '🤝', label: '타협', desc: '서로 한 발씩 양보한다' },
-  { id: 'humor', emoji: '😄', label: '유머로', desc: '웃음으로 분위기를 풀어낸다' },
-] as const;
-
-const DREAMS = [
-  { id: 'adventure', emoji: '✈️', label: '모험과 여행' },
-  { id: 'stability', emoji: '🏠', label: '안정과 평화' },
-  { id: 'growth', emoji: '📈', label: '성장과 도전' },
-  { id: 'romance', emoji: '💕', label: '로맨스와 설렘' },
-] as const;
+const LOVE_LANGS = COUPLE_LOVE_LANGS;
+const CONFLICTS = COUPLE_CONFLICTS;
+const DREAMS = COUPLE_DREAMS;
 
 type ResultKey = 'soulmate' | 'affection-duo' | 'action-couple' | 'together-forever'
   | 'passionate-pair' | 'comedy-couple' | 'steady-partners' | 'balanced-harmony';
@@ -40,12 +24,12 @@ const RESULTS: Record<ResultKey, {
   name: string; emoji: string; score: number; strengths: string[];
   advice: string; color: string;
 }> = {
-  'soulmate': { name: '소울메이트', emoji: '👫', score: 98, strengths: ['완벽한 공감 능력', '말하지 않아도 통하는 사이', '깊은 정서적 유대감'], advice: '서로를 비추는 거울 같은 관계. 같은 언어로 사랑하는 행운을 가진 커플입니다.', color: 'from-rose-400 to-pink-500' },
+  'soulmate': { name: '소울메이트', emoji: '👫', score: 98, strengths: ['공감의 표현 나누기', '서로의 마음 물어보기', '대화로 연결하기'], advice: '서로를 비추는 거울 같은 관계. 같은 언어로 사랑하는 행운을 가진 커플입니다.', color: 'from-rose-400 to-pink-500' },
   'affection-duo': { name: '애정 듀오', emoji: '💑', score: 92, strengths: ['풍부한 애정 표현', '따뜻한 일상의 순간들', '감정적 안정감'], advice: '말과 스킨십으로 사랑을 확인하는 다정한 커플. 매일의 작은 표현이 관계를 빛나게 합니다.', color: 'from-amber-400 to-rose-400' },
   'action-couple': { name: '액션 커플', emoji: '🤝', score: 88, strengths: ['실질적인 사랑 표현', '서로를 위한 행동력', '깊은 배려심'], advice: '말보다 행동으로 증명하는 사랑. 서로를 위한 작은 실천이 큰 사랑이 됩니다.', color: 'from-blue-400 to-teal-400' },
   'together-forever': { name: '투게더 포에버', emoji: '🫶', score: 90, strengths: ['함께하는 시간의 가치', '깊은 유대감', '공유하는 추억의 힘'], advice: '함께 있는 것만으로도 행복한 커플. 양질의 시간이 관계의 뿌리를 깊게 합니다.', color: 'from-teal-400 to-cyan-400' },
   'passionate-pair': { name: '패셔닛 페어', emoji: '🔥', score: 91, strengths: ['뜨거운 감정 교류', '솔직한 소통 능력', '설렘을 유지하는 힘'], advice: '대화와 로맨스로 불꽃을 지피는 열정적인 커플. 그 열정이 관계를 항상 새롭게 만듭니다.', color: 'from-red-400 to-orange-400' },
-  'comedy-couple': { name: '코미디 커플', emoji: '😂', score: 93, strengths: ['유머 감각의 궁합', '스트레스를 녹이는 웃음', '밝은 가정 분위기'], advice: '웃음이 끊이지 않는 관계가 가장 오래갑니다. 유머는 최고의 사랑 언어예요.', color: 'from-yellow-400 to-amber-400' },
+  'comedy-couple': { name: '코미디 커플', emoji: '😂', score: 93, strengths: ['유머 감각의 궁합', '스트레스를 녹이는 웃음', '밝은 가정 분위기'], advice: '함께 웃었던 최근 순간을 하나씩 말해 보세요. 서로에게 편한 유머와 피하고 싶은 농담을 이야기해도 좋아요.', color: 'from-yellow-400 to-amber-400' },
   'steady-partners': { name: '스테디 파트너', emoji: '🏡', score: 89, strengths: ['안정적인 파트너십', '성숙한 갈등 해결', '함께 만드는 미래 설계'], advice: '흔들리지 않는 반석 위에 세운 관계. 서로를 향한 신뢰가 가장 큰 자산입니다.', color: 'from-emerald-400 to-teal-400' },
   'balanced-harmony': { name: '밸런스드 하모니', emoji: '☯️', score: 86, strengths: ['서로를 보완하는 균형', '다양한 시각의 풍요', '함께 성장하는 관계'], advice: '서로 다르기에 더 풍요로운 관계. 차이를 인정하고 존중하는 것이 사랑의 완성입니다.', color: 'from-purple-400 to-indigo-400' },
 };
@@ -60,12 +44,21 @@ const config: DemoConfig = {
   analyzeDurationMs: 3000,
   steps: [
     {
-      id: 'loveLanguage',
-      titleKey: '우리의 사랑의 언어는?',
-      subtitleKey: '파트너 A와 B 각각 하나씩 골라주세요',
+      id: 'loveLanguageA',
+      titleKey: '파트너 A는 어떤 표현이 좋아요?',
+      subtitleKey: '사랑받는다고 느끼는 순간을 골라주세요',
       canProceed: (a) => {
         const v = a['loveLanguage'] as { a?: string; b?: string } | undefined;
-        return !!v?.a && !!v?.b;
+        return !!v?.a;
+      },
+    },
+    {
+      id: 'loveLanguageB',
+      titleKey: '파트너 B는 어떤 표현이 좋아요?',
+      subtitleKey: '이번에는 다른 한 분의 이야기를 들어볼게요',
+      canProceed: (a) => {
+        const v = a['loveLanguage'] as { a?: string; b?: string } | undefined;
+        return !!v?.b;
       },
     },
     {
@@ -130,7 +123,7 @@ function LoveLanguageColumn({ partner, label, heart, selected, onSelect }: {
   );
 }
 
-function StepLoveLanguage({ answers, onUpdate }: DemoStepProps) {
+function StepLoveLanguage({ answers, onUpdate, partner }: DemoStepProps & { partner: Partner }) {
   const val = (answers['loveLanguage'] as { a?: string; b?: string }) ?? {};
 
   const select = (partner: Partner, id: string) => {
@@ -138,21 +131,12 @@ function StepLoveLanguage({ answers, onUpdate }: DemoStepProps) {
   };
 
   return (
-    <div className="flex gap-4">
-      <LoveLanguageColumn partner="a" label="파트너 A" heart="💜" selected={val.a} onSelect={select} />
-      <div className="flex items-center px-1">
-        <motion.span
-          className="text-2xl text-purple-400"
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          💕
-        </motion.span>
-      </div>
-      <LoveLanguageColumn partner="b" label="파트너 B" heart="💛" selected={val.b} onSelect={select} />
-    </div>
+    <LoveLanguageColumn partner={partner} label={partner === 'a' ? '파트너 A' : '파트너 B'} heart={partner === 'a' ? '💜' : '💛'} selected={val[partner]} onSelect={select} />
   );
 }
+
+function StepLoveA(props: DemoStepProps) { return <StepLoveLanguage {...props} partner="a" />; }
+function StepLoveB(props: DemoStepProps) { return <StepLoveLanguage {...props} partner="b" />; }
 
 /* ── Step 2 : Conflict Style ─────────────────────────────── */
 
@@ -306,7 +290,7 @@ function ScoreRing({ score }: { score: number }) {
         >
           {score}%
         </motion.span>
-        <span className="text-xs font-medium text-slate-400">케미 점수</span>
+        <span className="text-xs font-medium text-slate-400">대화 놀이 지수</span>
       </div>
     </div>
   );
@@ -318,9 +302,39 @@ function coupleFor(resultKey: string) {
   return RESULTS[resultKey as ResultKey] ?? RESULTS['balanced-harmony'];
 }
 
-function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps) {
+/** AI가 고른 색 → 이름 그라데이션 */
+const COLOR_GRADIENT: Record<CoupleColor, string> = {
+  rose: 'from-rose-400 to-pink-500',
+  amber: 'from-amber-400 to-rose-400',
+  blue: 'from-blue-400 to-teal-400',
+  teal: 'from-teal-400 to-cyan-400',
+  red: 'from-red-400 to-orange-400',
+  yellow: 'from-yellow-400 to-amber-400',
+  emerald: 'from-emerald-400 to-teal-400',
+  purple: 'from-purple-400 to-indigo-400',
+};
+
+function isAiCouple(v: unknown): v is AiCouple {
+  const o = v as AiCouple | null;
+  return !!o && typeof o.name === 'string' && typeof o.advice === 'string' && typeof o.score === 'number'
+    && (COUPLE_EMOJIS as readonly string[]).includes(o.emoji) && (COUPLE_COLORS as readonly string[]).includes(o.color)
+    && Array.isArray(o.strengths) && o.strengths.every((t) => typeof t === 'string');
+}
+
+/** 화면·출력물이 그리는 커플 결과 — AI 결과가 있으면 그것, 없으면 고정 결과 */
+function coupleView(resultKey: string, generated: unknown) {
+  if (isAiCouple(generated)) {
+    return {
+      name: generated.name, emoji: generated.emoji, score: generated.score, strengths: generated.strengths,
+      advice: generated.advice, color: COLOR_GRADIENT[generated.color], ai: true,
+    };
+  }
+  return { ...coupleFor(resultKey), ai: false };
+}
+
+function ResultComponent({ resultKey, onRestart, pillarColor, generated }: DemoResultProps) {
   const tCommon = useTranslations('demos.common');
-  const data = coupleFor(resultKey);
+  const data = coupleView(resultKey, generated);
 
   return (
     <motion.div
@@ -334,6 +348,7 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
       </p>
 
       <ScoreRing score={data.score} />
+      <p className="max-w-sm text-xs leading-relaxed text-slate-400">수치는 대화를 시작하기 위한 놀이 연출이에요. 관계의 성공 가능성이나 심리 상태를 측정하지 않아요.</p>
 
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
@@ -357,7 +372,7 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
         <div className="grid gap-2">
           {data.strengths.map((s, i) => (
             <motion.div
-              key={s}
+              key={`${i}-${s}`}
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 + i * 0.12 }}
@@ -377,23 +392,27 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
         transition={{ delay: 0.9 }}
         className="max-w-sm rounded-2xl border border-purple-800/40 bg-purple-950/40 px-6 py-4"
       >
-        <p className="mb-1 text-xs font-semibold text-purple-400">사랑의 조언</p>
+        <p className="mb-1 text-xs font-semibold text-purple-400">대화의 출발점</p>
         <p className="text-sm leading-relaxed text-purple-200/90">{data.advice}</p>
       </motion.div>
 
+      {data.ai && (
+        <p className="text-xs text-slate-500">두 사람의 선호 답변으로 만든 창작 대화 카드예요</p>
+      )}
+
       {/* Actions */}
-      <div className="flex gap-3 pt-2">
+      <div className="demo-legacy-result-cta flex gap-3 pt-2">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onRestart}
           className="rounded-xl border border-slate-700 px-6 py-3 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500"
         >
-          다시 분석하기
+          다시 이야기하기
         </motion.button>
         <Link
-          href={QUOTE_HREF}
-          className="rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
+          href={getServiceContactHref('ai-couple-chemistry')}
+          className="demo-accent-surface rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
           style={{ backgroundColor: pillarColor }}
         >
           {tCommon('ctaButton')}
@@ -411,8 +430,8 @@ function labelOf(options: readonly { id: string; label: string }[], id: string |
   return options.find((o) => o.id === id)?.label ?? '-';
 }
 
-function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
-  const data = coupleFor(resultKey);
+function getPrint(answers: DemoAnswers, resultKey: string, generated?: unknown): PrintSpec {
+  const data = coupleView(resultKey, generated);
   const ll = (answers['loveLanguage'] as { a?: string; b?: string } | undefined) ?? {};
   const dream = (answers['dreamLife'] as { first?: string; second?: string } | undefined) ?? {};
   return {
@@ -420,7 +439,7 @@ function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
     eyebrow: '커플 케미스트리 결과',
     title: data.name,
     sections: [
-      { type: 'big', title: '케미 점수', text: `${data.score}%` },
+      { type: 'big', title: '대화 놀이 지수', text: `${data.score}%` },
       {
         type: 'rows',
         title: '두 사람의 케미 데이터',
@@ -433,18 +452,31 @@ function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
         ],
       },
       { type: 'list', title: '커플 강점', items: data.strengths },
-      { type: 'text', title: '사랑의 조언', text: data.advice },
+      { type: 'text', title: '대화의 출발점', text: data.advice },
     ],
-    footer: '오늘의 케미를 오래오래 간직하세요',
+    footer: '수치는 대화 놀이 연출이며 관계의 성공을 예측하지 않아요',
   };
+}
+
+/* ── AI 생성 ──────────────────────────────────────────── */
+
+function generate(answers: DemoAnswers): Promise<AiCouple | null> {
+  const ll = (answers['loveLanguage'] as { a?: string; b?: string } | undefined) ?? {};
+  const dream = (answers['dreamLife'] as { first?: string; second?: string } | undefined) ?? {};
+  return requestDemoAi<AiCouple>(
+    config.id,
+    { experienceProfile: answers.experienceProfile, loveA: ll.a, loveB: ll.b, conflict: answers['conflict'], dreamFirst: dream.first, dreamSecond: dream.second },
+    { validate: isAiCouple }
+  );
 }
 
 const CoupleChemistryDemo: DemoModule = {
   config,
-  StepComponents: [StepLoveLanguage, StepConflict, StepDreamLife],
+  StepComponents: [StepLoveA, StepLoveB, StepConflict, StepDreamLife],
   ResultComponent,
   computeResult,
   getPrint,
+  generate,
 };
 
 export default CoupleChemistryDemo;

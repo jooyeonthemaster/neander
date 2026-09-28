@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { PhotoBoothPreview } from '@/components/demo/PhotoBoothPreview';
+import { localeAlternates } from '@/lib/seo';
 
 export async function generateMetadata({
   params,
@@ -10,6 +11,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'demo' });
 
   return {
+    alternates: localeAlternates('/demo/photo-booth', locale),
     title: t('photo-booth.metaTitle'),
     description: t('photo-booth.metaDescription'),
   };

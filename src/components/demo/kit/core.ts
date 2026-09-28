@@ -15,7 +15,7 @@ export interface CaptureStats {
 
 /** 카메라 스텝이 answers[stepId]에 저장하는 값 */
 export interface CaptureData {
-  /** 3:4 JPEG data URL — 브라우저 메모리에만 존재하고 어디에도 전송하지 않는다 */
+  /** 3:4 JPEG data URL — 결과 생성을 위해 /api/demo-ai 로만 보내고, 서버에 저장하지 않는다 */
   image: string;
   stats: CaptureStats;
   /** 픽셀 기반 해시 — 같은 사진이면 같은 결과가 나오도록 결과 연출에 쓴다 */

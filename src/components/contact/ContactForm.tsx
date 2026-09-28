@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLocale, useTranslations } from 'next-intl';
@@ -10,6 +10,7 @@ import { Input, Textarea, Select } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { createInquiry } from '@/lib/firebase/inquiries';
 import { trackEvent } from '@/lib/analytics/tracker';
+import { getExperienceBySlug } from '@/data/experiences';
 
 // 최대 길이는 firestore.rules 의 inquiries 생성 규칙과 맞춘다 (넘으면 저장이 거부된다)
 const MAX_LENGTH = { name: 100, email: 200, message: 5000 } as const;
@@ -30,20 +31,23 @@ type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 interface ContactFormProps {
   /** '견적 문의'를 고르면 견적 계산 탭으로 안내한다 */
   onRequestQuote?: () => void;
+  serviceSlug?: string;
 }
 
-export function ContactForm({ onRequestQuote }: ContactFormProps = {}) {
+export function ContactForm({ onRequestQuote, serviceSlug }: ContactFormProps = {}) {
   const t = useTranslations('contact');
+  const tService = useTranslations('services');
+  const experience = serviceSlug ? getExperienceBySlug(serviceSlug) : undefined;
   const tValidation = useTranslations('validation');
   const locale = useLocale();
   const [status, setStatus] = useState<FormStatus>('idle');
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
   } = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
     defaultValues: {
@@ -56,7 +60,7 @@ export function ContactForm({ onRequestQuote }: ContactFormProps = {}) {
     },
   });
 
-  const subjectValue = watch('subject');
+  const subjectValue = useWatch({ control, name: 'subject' });
 
   function getErrorMessage(field: keyof ContactFormValues): string | undefined {
     const err = errors[field];
@@ -82,7 +86,7 @@ export function ContactForm({ onRequestQuote }: ContactFormProps = {}) {
         email: data.email,
         phone: data.phone,
         company: data.company,
-        subject: data.subject,
+        subject: experience ? `${data.subject} · ${tService(experience.nameKey)} [${experience.slug}]` : data.subject,
         message: data.message,
         locale,
       });
@@ -207,13 +211,22 @@ export function ContactForm({ onRequestQuote }: ContactFormProps = {}) {
             </div>
 
             {/* Subject select */}
-            <Select
-              label={t('form.subject')}
-              options={subjectOptions}
-              placeholder={t('form.subject')}
-              error={getErrorMessage('subject')}
-              value={subjectValue}
-              {...register('subject')}
+            <Controller
+              name="subject"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  label={t('form.subject')}
+                  options={subjectOptions}
+                  placeholder={t('form.subject')}
+                  error={getErrorMessage('subject')}
+                  name={field.name}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                />
+              )}
             />
 
             {/* 견적 문의라면 예상 비용을 바로 볼 수 있는 견적 계산으로 안내 */}

@@ -20,6 +20,19 @@
   font-display: swap;
 }
 
+/* 헤더 로고 옆 한글 사명 '네안데르' 전용 — G마켓 산스 Medium에서 네 글자만 뽑은 파일 (772B) */
+@font-face {
+  font-family: 'GmarketSansLogo';
+  src: url('/fonts/GmarketSans-Medium-neander.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-logo-ko {
+  font-family: 'GmarketSansLogo', var(--font-body);
+}
+
 /* ─────────────────────────────────────────────────────────
    NEANDERco.ltd  |  Design Tokens & Theme
    White base + Teal/Cyan accent, tech-forward premium
@@ -451,4 +464,10 @@ body {
 
 .animate-slide-up {
   animation: slide-up 0.25s ease-out;
+}
+
+/* 온라인 견적 옵션 설명 팝오버 */
+@keyframes quote-info-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }

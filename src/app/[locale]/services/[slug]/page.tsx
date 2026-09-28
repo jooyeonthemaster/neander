@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
-import { QUOTE_HREF } from '@/lib/constants';
+import { getServiceContactHref } from '@/lib/constants';
 import { ScrollReveal } from '@/components/animations';
 import {
   experiences,
@@ -16,6 +16,12 @@ import {
 import { ExperienceDetailClient } from './ExperienceDetailClient';
 import { hasDemoForSlug } from '@/data/demo-registry';
 import { DemoSection } from '@/components/demo/DemoSection';
+import { ExperienceImage } from '@/components/services/ExperienceImage';
+import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
+import { getExperienceSpec } from '@/data/experience-specs';
+import { AcscentTrust } from '@/components/services/AcscentTrust';
+import { serviceForExperience, startingPrice as quoteStartingPrice } from '@/lib/quote/engine';
+import { formatPrice } from '@/lib/quote/format';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -33,11 +39,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'services' });
 
   return {
+    alternates: localeAlternates(`/services/${slug}`, locale),
     title: t(exp.nameKey),
     description: t(exp.oneLinerKey),
     openGraph: {
       title: t(exp.nameKey),
       description: t(exp.oneLinerKey),
+      images: [DEFAULT_OG_IMAGE],
     },
   };
 }
@@ -106,6 +114,28 @@ export default async function ExperienceDetailPage({ params }: Props) {
 
   /* -- Demo section labels -------------------------------- */
   const hasDemo = hasDemoForSlug(slug);
+
+  // 운영 스펙 카드. 확인되지 않은 수치는 "상담 시 안내"로 둔다
+  const spec = getExperienceSpec(slug);
+  const tPricing = await getTranslations({ locale, namespace: 'pricingGuide' });
+  const onRequest = t('spec.onRequest');
+  const quoteService = serviceForExperience(slug, exp.pillar);
+  const startingPrice = quoteService ? quoteStartingPrice(quoteService) : 0;
+  const specRows = spec
+    ? [
+        ...(startingPrice
+          ? [{ label: t('spec.startingPrice'), value: locale === 'ko' ? `${formatPrice(startingPrice, locale)}${tPricing('from')}` : `${tPricing('from')} ${formatPrice(startingPrice, locale)}` }]
+          : []),
+        { label: t('spec.input'), value: spec.input.map((k) => t(`spec.inputs.${k}`)).join(' · ') },
+        { label: t('spec.output'), value: spec.output.map((k) => t(`spec.outputs.${k}`)).join(' · ') },
+        { label: t('spec.power'), value: t('spec.powerValue') },
+        { label: t('spec.internet'), value: t('spec.internetValue') },
+        { label: t('spec.minutes'), value: spec.minutesPerGuest ? t('spec.minutesValue', { n: spec.minutesPerGuest }) : onRequest },
+        { label: t('spec.throughput'), value: spec.guestsPerHour ? t('spec.countValue', { n: spec.guestsPerHour }) : onRequest },
+        { label: t('spec.footprint'), value: spec.footprint ?? onRequest },
+        { label: t('spec.staff'), value: spec.staff ? t('spec.countValue', { n: spec.staff }) : onRequest },
+      ]
+    : [];
   const tDemo = await getTranslations({ locale, namespace: 'demos' });
   const demoLabels = {
     back: tDemo('common.back'),
@@ -120,7 +150,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
     scrollHint: tDemo('stage.scrollHint'),
     disclaimer: tDemo('stage.disclaimer'),
   };
-  const backHref = `/services?pillar=${exp.pillar}&industry=${exp.industry}`;
+  const backHref = `/services?pillar=${exp.pillar}`;
 
   const relatedData = related.map((r) => {
     const rPillar = getPillarById(r.pillar);
@@ -288,7 +318,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
                 {/* CTA Buttons */}
                 <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
                   <Link
-                    href="/contact"
+                    href={getServiceContactHref(slug, false)}
                     className="group inline-flex items-center gap-2.5 rounded-xl px-8 py-4 text-base font-bold text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
                     style={{
                       backgroundColor: pillarColor,
@@ -310,7 +340,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
                     </svg>
                   </Link>
                   <Link
-                    href={QUOTE_HREF}
+                    href={getServiceContactHref(slug)}
                     className="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-8 py-4 text-base font-semibold text-slate-300 transition-all duration-300 hover:border-slate-500 hover:text-white hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
                     style={{ borderColor: `${pillarColor}30` }}
                   >
@@ -353,6 +383,12 @@ export default async function ExperienceDetailPage({ params }: Props) {
             {/* Description */}
             <div className="lg:col-span-3">
               <ScrollReveal>
+                <ExperienceImage
+                  slug={slug}
+                  name={name}
+                  sizes="(max-width: 1024px) 100vw, 660px"
+                  className="mb-8 rounded-2xl"
+                />
                 <div
                   className="mb-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest"
                   style={{ color: pillarColor }}
@@ -403,10 +439,41 @@ export default async function ExperienceDetailPage({ params }: Props) {
                   ))}
                 </div>
               </ScrollReveal>
+
+              {/* Operating spec card */}
+              {specRows.length > 0 && (
+                <ScrollReveal delay={0.2}>
+                  <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-6">
+                    <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-900">
+                      {t('spec.title')}
+                    </h2>
+                    <dl className="mt-4 divide-y divide-slate-100 text-sm">
+                      {specRows.map((row) => (
+                        <div key={row.label} className="flex justify-between gap-4 py-2.5">
+                          <dt className="shrink-0 text-slate-500">{row.label}</dt>
+                          <dd
+                            className={
+                              row.value === onRequest
+                                ? 'text-right text-slate-400'
+                                : 'text-right font-medium text-slate-800'
+                            }
+                          >
+                            {row.value}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                    <p className="mt-3 text-xs leading-relaxed text-slate-400">{t('spec.note')}</p>
+                  </div>
+                </ScrollReveal>
+              )}
             </div>
           </div>
         </div>
       </section>
+
+      {/* AC'SCENT 체험은 인허가·실적을 함께 보여준다 */}
+      {slug === 'ai-scent-soulmate' && <AcscentTrust locale={locale} />}
 
       {/* ══════════════════════════════════════════════════════
           3. PROCESS STEPS
@@ -632,7 +699,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
 
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <Link
-                href="/contact"
+                href={getServiceContactHref(slug, false)}
                 className="group inline-flex items-center gap-2.5 rounded-xl px-10 py-4 text-base font-bold text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
                 style={{
                   backgroundColor: pillarColor,
@@ -645,7 +712,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
                 </svg>
               </Link>
               <Link
-                href={QUOTE_HREF}
+                href={getServiceContactHref(slug)}
                 className="inline-flex items-center gap-2 rounded-xl border px-10 py-4 text-base font-semibold text-slate-300 transition-all duration-300 hover:text-white hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
                 style={{ borderColor: `${pillarColor}30` }}
               >

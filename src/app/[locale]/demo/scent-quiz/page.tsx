@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ScentQuiz } from '@/components/demo/ScentQuiz';
+import { localeAlternates } from '@/lib/seo';
 
 export async function generateMetadata({
   params,
@@ -10,6 +11,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'demo' });
 
   return {
+    alternates: localeAlternates('/demo/scent-quiz', locale),
     title: t('scent-quiz.metaTitle'),
     description: t('scent-quiz.metaDescription'),
   };

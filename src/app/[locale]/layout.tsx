@@ -3,7 +3,8 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
-import { SITE_URL } from '@/lib/constants';
+import { DEFAULT_OG_IMAGE } from '@/lib/seo';
+import { COMPANY_NAME_EN, COMPANY_NAME_KO, CONTACT, SITE_URL, SOCIAL_LINKS } from '@/lib/constants';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -44,11 +45,45 @@ export async function generateMetadata({
       siteName: t('ogSiteName'),
       locale: locale === 'ko' ? 'ko_KR' : 'en_US',
       type: 'website',
+      images: [DEFAULT_OG_IMAGE],
+    },
+    twitter: {
+      card: 'summary_large_image',
     },
     robots: {
       index: true,
       follow: true,
     },
+    // 서치어드바이저·서치 콘솔에서 받은 HTML 태그 인증값을 Vercel 환경변수로 넣는다
+    verification: {
+      google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+      other: process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION
+        ? { 'naver-site-verification': process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION }
+        : undefined,
+    },
+  };
+}
+
+// 검색엔진용 회사 정보 (schema.org Organization)
+function organizationJsonLd(locale: string) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: locale === 'en' ? 'NEANDER' : '네안데르',
+    legalName: locale === 'en' ? COMPANY_NAME_EN : COMPANY_NAME_KO,
+    alternateName: ['NEANDER', 'NEANDERco.', '네안데르'],
+    url: SITE_URL,
+    logo: `${SITE_URL}/icon.png`,
+    email: CONTACT.email,
+    telephone: CONTACT.phoneInternational,
+    foundingDate: '2022',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: locale === 'en' ? '1F, 10-6, Dongmak-ro 36-gil' : '독막로36길 10-6 1층',
+      addressLocality: locale === 'en' ? 'Mapo-gu, Seoul' : '서울특별시 마포구',
+      addressCountry: 'KR',
+    },
+    sameAs: Object.values(SOCIAL_LINKS).filter(Boolean),
   };
 }
 
@@ -76,6 +111,13 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen overflow-x-hidden bg-white font-body text-neutral-900 antialiased">
+        <script
+          type="application/ld+json"
+          // JSON.stringify 결과의 '<'를 이스케이프해 스크립트 태그가 닫히지 않게 한다
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd(locale)).replace(/</g, '\\u003c'),
+          }}
+        />
         <NextIntlClientProvider messages={messages}>
           <SmoothScrollProvider>
             <CustomCursor />

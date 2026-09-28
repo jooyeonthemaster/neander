@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { withParticle } from '@/lib/korean';
 import type { DemoAnswers, DemoResultProps } from '@/types/demo';
 import {
   InfoGrid,
@@ -13,166 +14,35 @@ import {
   defineDemo,
   getChoice,
   getChoices,
+  requestDemoAi,
   seededInt,
 } from '../kit';
+import {
+  SCENT_AXES,
+  SCENT_COLORS,
+  SCENT_PERFUMES,
+  SCENT_PERSONA,
+  SCENT_PLACES,
+  SCENT_SEASONS,
+  SCENT_TYPES,
+  type AiScentSoulmate,
+  type ScentAxis,
+  type ScentOption,
+  type ScentPerfume,
+} from '@/data/demo-ai/scent';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-type Axis = 'floral' | 'citrus' | 'fresh' | 'woody' | 'musk' | 'amber';
-type Weights = Partial<Record<Axis, number>>;
+type Axis = ScentAxis;
+type Option = ScentOption;
+type Perfume = ScentPerfume;
 
-const AXES: { id: Axis; label: string }[] = [
-  { id: 'floral', label: '플로럴' },
-  { id: 'citrus', label: '시트러스' },
-  { id: 'fresh', label: '프레시' },
-  { id: 'woody', label: '우디' },
-  { id: 'musk', label: '머스크' },
-  { id: 'amber', label: '앰버' },
-];
-
-const SCENT_TYPES: Record<Axis, string> = {
-  floral: '꽃잎 같은 로맨티스트',
-  citrus: '햇살 같은 에너자이저',
-  fresh: '바람 같은 자유 여행자',
-  woody: '숲을 닮은 사색가',
-  musk: '포근한 코튼 힐러',
-  amber: '촛불 같은 매혹가',
-};
-
-interface Option {
-  id: string;
-  label: string;
-  desc?: string;
-  emoji?: string;
-  swatch?: string;
-  w: Weights;
-}
-
-const PERSONA: Option[] = [
-  { id: 'calm', emoji: '🌙', label: '차분한', desc: '혼자만의 시간이 좋아요', w: { musk: 2, woody: 1 } },
-  { id: 'passion', emoji: '🔥', label: '열정적인', desc: '하고 싶은 건 바로 해요', w: { amber: 2, citrus: 1 } },
-  { id: 'kind', emoji: '🤍', label: '다정한', desc: '주변을 잘 챙겨요', w: { floral: 2, musk: 1 } },
-  { id: 'free', emoji: '🍃', label: '자유로운', desc: '즉흥 여행 환영이에요', w: { fresh: 2, citrus: 1 } },
-  { id: 'smart', emoji: '📚', label: '지적인', desc: '생각이 깊은 편이에요', w: { woody: 2, amber: 1 } },
-  { id: 'playful', emoji: '🎈', label: '장난스러운', desc: '분위기 메이커예요', w: { citrus: 2, floral: 1 } },
-];
-
-const PLACES: Option[] = [
-  { id: 'forest', emoji: '🌲', label: '비 갠 숲길', desc: '젖은 흙과 초록 잎', w: { fresh: 2, woody: 2 } },
-  { id: 'beach', emoji: '🏖️', label: '햇살 가득한 해변', desc: '바닷바람과 레몬에이드', w: { citrus: 2, fresh: 2 } },
-  { id: 'library', emoji: '🕰️', label: '오래된 서재', desc: '책장과 가죽 소파', w: { woody: 3, amber: 1 } },
-  { id: 'garden', emoji: '🌷', label: '꽃이 핀 정원', desc: '장미와 작약 사이', w: { floral: 3, fresh: 1 } },
-  { id: 'jazz', emoji: '🎷', label: '한밤의 재즈 바', desc: '촛불과 위스키', w: { amber: 3, woody: 1 } },
-  { id: 'bed', emoji: '🛏️', label: '포근한 이불 속', desc: '갓 세탁한 코튼', w: { musk: 3, floral: 1 } },
-];
-
-const SEASONS: Option[] = [
-  { id: 'spring', emoji: '🌸', label: '봄', w: { floral: 2, fresh: 1 } },
-  { id: 'summer', emoji: '🌊', label: '여름', w: { citrus: 2, fresh: 2 } },
-  { id: 'autumn', emoji: '🍂', label: '가을', w: { woody: 2, amber: 1 } },
-  { id: 'winter', emoji: '❄️', label: '겨울', w: { amber: 2, musk: 2 } },
-];
-
-const COLORS: Option[] = [
-  { id: 'pink', label: '파우더 핑크', swatch: 'linear-gradient(135deg, #fde2e8, #f4a7bb)', w: { floral: 2, musk: 1 } },
-  { id: 'yellow', label: '시트러스 옐로', swatch: 'linear-gradient(135deg, #fef9c3, #facc15)', w: { citrus: 3 } },
-  { id: 'sage', label: '세이지 그린', swatch: 'linear-gradient(135deg, #e3ecd6, #8fae7a)', w: { fresh: 2, woody: 1 } },
-  { id: 'ocean', label: '오션 블루', swatch: 'linear-gradient(135deg, #e0f2fe, #38bdf8)', w: { fresh: 2, citrus: 1 } },
-  { id: 'burgundy', label: '딥 버건디', swatch: 'linear-gradient(135deg, #b4536a, #4c0519)', w: { amber: 3, floral: 1 } },
-  { id: 'beige', label: '샌달우드 베이지', swatch: 'linear-gradient(135deg, #f1e7d8, #b89b77)', w: { woody: 2, musk: 2 } },
-];
-
-interface Perfume {
-  name: string;
-  en: string;
-  family: string;
-  emoji: string;
-  profile: Record<Axis, number>;
-  notes: { top: string[]; middle: string[]; base: string[] };
-  mood: string;
-  keywords: string[];
-  colors: [string, string];
-}
-
-const PERFUMES: Record<string, Perfume> = {
-  petal: {
-    name: '페탈 레터',
-    en: 'Petal Letter',
-    family: '파우더리 플로럴',
-    emoji: '🌸',
-    profile: { floral: 92, citrus: 30, fresh: 28, woody: 30, musk: 70, amber: 32 },
-    notes: { top: ['핑크 페퍼', '리치'], middle: ['불가리안 로즈', '피오니'], base: ['화이트 머스크', '캐시미어 우드'] },
-    mood: '손편지에 스민 꽃잎처럼 다정하고 포근한 향이에요.',
-    keywords: ['다정한', '로맨틱', '포근한'],
-    colors: ['#fbcfe8', '#db2777'],
-  },
-  sunshine: {
-    name: '선샤인 포스트카드',
-    en: 'Sunshine Postcard',
-    family: '시트러스 콜로뉴',
-    emoji: '🍊',
-    profile: { floral: 42, citrus: 95, fresh: 55, woody: 30, musk: 28, amber: 18 },
-    notes: { top: ['유자', '베르가못', '만다린'], middle: ['네롤리', '오렌지 블라썸'], base: ['베티버', '앰버그리스'] },
-    mood: '여름 오후의 햇살을 엽서에 담은 듯 밝고 경쾌한 향이에요.',
-    keywords: ['경쾌한', '에너지', '산뜻한'],
-    colors: ['#fef08a', '#ea580c'],
-  },
-  forest: {
-    name: '포레스트 애프터 레인',
-    en: 'Forest After Rain',
-    family: '그린 우디',
-    emoji: '🌿',
-    profile: { floral: 20, citrus: 35, fresh: 90, woody: 72, musk: 30, amber: 15 },
-    notes: { top: ['갈바넘', '바이올렛 잎'], middle: ['무화과 잎', '이끼'], base: ['시더우드', '베티버'] },
-    mood: '비 갠 숲길의 젖은 흙과 초록 잎사귀처럼 맑고 차분한 향이에요.',
-    keywords: ['차분한', '내추럴', '맑은'],
-    colors: ['#bbf7d0', '#15803d'],
-  },
-  library: {
-    name: '라이브러리 누아',
-    en: 'Library Noir',
-    family: '스모키 우디',
-    emoji: '📖',
-    profile: { floral: 15, citrus: 18, fresh: 20, woody: 94, musk: 45, amber: 62 },
-    notes: { top: ['카다멈', '핑크 페퍼'], middle: ['파피루스', '레더'], base: ['샌달우드', '통카빈'] },
-    mood: '오래된 책장과 가죽 소파가 있는 서재처럼 지적이고 깊은 향이에요.',
-    keywords: ['지적인', '깊은', '클래식'],
-    colors: ['#e7d3b0', '#78350f'],
-  },
-  bluehour: {
-    name: '블루 아워',
-    en: 'Blue Hour',
-    family: '아쿠아 머스크',
-    emoji: '🌊',
-    profile: { floral: 35, citrus: 55, fresh: 88, woody: 38, musk: 60, amber: 12 },
-    notes: { top: ['씨솔트', '라임'], middle: ['워터 릴리', '로즈마리'], base: ['앰브레트', '드리프트우드'] },
-    mood: '해 질 녘 바닷바람처럼 시원하면서도 여운이 긴 향이에요.',
-    keywords: ['자유로운', '시원한', '청량한'],
-    colors: ['#bae6fd', '#1d4ed8'],
-  },
-  velvet: {
-    name: '벨벳 미드나잇',
-    en: 'Velvet Midnight',
-    family: '앰버 구르망',
-    emoji: '🕯️',
-    profile: { floral: 40, citrus: 15, fresh: 10, woody: 52, musk: 55, amber: 96 },
-    notes: { top: ['블랙커런트', '사프란'], middle: ['튜베로즈', '자스민'], base: ['바닐라', '앰버', '통카빈'] },
-    mood: '재즈 바의 촛불처럼 관능적이고 달콤한 밤의 향이에요.',
-    keywords: ['관능적인', '달콤한', '매혹적인'],
-    colors: ['#fda4af', '#7f1d1d'],
-  },
-  cotton: {
-    name: '코튼 클라우드',
-    en: 'Cotton Cloud',
-    family: '클린 머스크',
-    emoji: '☁️',
-    profile: { floral: 50, citrus: 30, fresh: 48, woody: 22, musk: 95, amber: 28 },
-    notes: { top: ['알데하이드', '배'], middle: ['코튼 플라워', '아이리스'], base: ['화이트 머스크', '앰브레트'] },
-    mood: '갓 세탁한 이불처럼 깨끗하고 포근한 살냄새 향이에요.',
-    keywords: ['깨끗한', '포근한', '편안한'],
-    colors: ['#e2e8f0', '#6366f1'],
-  },
-};
+const AXES = SCENT_AXES;
+const PERSONA = SCENT_PERSONA;
+const PLACES = SCENT_PLACES;
+const SEASONS = SCENT_SEASONS;
+const COLORS = SCENT_COLORS;
+const PERFUMES = SCENT_PERFUMES;
 
 const SEASON_LABEL: Record<string, string> = { spring: '봄', summer: '여름', autumn: '가을', winter: '겨울' };
 
@@ -188,6 +58,12 @@ function preference(answers: DemoAnswers): Record<Axis, number> {
   add(PLACES.find((o) => o.id === getChoice(answers, 'place')));
   add(SEASONS.find((o) => o.id === getChoice(answers, 'season')));
   add(COLORS.find((o) => o.id === getChoice(answers, 'color')));
+  const profile = (answers.experienceProfile ?? {}) as Record<string, string>;
+  if (profile.avoidNote === 'floral') { raw.floral = 0; raw.fresh += 3; }
+  if (profile.avoidNote === 'sweet') { raw.amber = 0; raw.woody += 3; }
+  if (profile.avoidNote === 'smoky') { raw.woody = 0; raw.citrus += 3; }
+  if (profile.scentUse === 'shared') raw.fresh += 3;
+  if (profile.projection === 'close') raw.musk += 3;
   return raw;
 }
 
@@ -221,21 +97,58 @@ function match(answers: DemoAnswers) {
   return { best: best.id, bestRate, second: second.id, secondRate, radar, topAxis, cardNo: seededInt(seed, 'card', 1, 999) };
 }
 
-/** 결과 화면 · 출력물 공용 — 매칭 결과를 카드에 쓰는 값으로 */
-function soulmate(answers: DemoAnswers) {
+const HEX = /^#[0-9A-Fa-f]{6}$/;
+const isNoteList = (v: unknown) => Array.isArray(v) && v.length > 0 && v.every((n) => typeof n === 'string');
+
+function isAiScent(v: unknown): v is AiScentSoulmate {
+  const o = v as AiScentSoulmate | null;
+  return !!o && typeof o.name === 'string' && typeof o.en === 'string' && typeof o.family === 'string' && typeof o.mood === 'string'
+    && !!o.notes && isNoteList(o.notes.top) && isNoteList(o.notes.middle) && isNoteList(o.notes.base)
+    && Array.isArray(o.keywords) && Array.isArray(o.colors) && o.colors.length === 2 && o.colors.every((c) => HEX.test(c))
+    && typeof o.matchRate === 'number' && typeof o.layering === 'string' && o.layering in PERFUMES && typeof o.layeringRate === 'number';
+}
+
+/** 결과 화면 · 출력물 공용 — 매칭 결과를 카드에 쓰는 값으로 (AI 결과가 있으면 AI가 조향한 향수) */
+function soulmate(answers: DemoAnswers, generated?: unknown) {
   const m = match(answers);
-  const perfume = PERFUMES[m.best] ?? PERFUMES.petal!;
   const persona = getChoices(answers, 'persona')
     .map((id) => PERSONA.find((o) => o.id === id)?.label)
     .filter(Boolean) as string[];
+  const season = SEASON_LABEL[getChoice(answers, 'season') ?? ''] ?? '사계절';
+  const cardNo = `No.${String(m.cardNo).padStart(3, '0')}`;
+  if (isAiScent(generated)) {
+    const perfume: Perfume = {
+      name: generated.name,
+      en: generated.en,
+      family: generated.family,
+      emoji: generated.emoji,
+      profile: PERFUMES[m.best]!.profile,
+      notes: generated.notes,
+      mood: generated.mood,
+      keywords: generated.keywords,
+      colors: generated.colors,
+    };
+    return {
+      m: { ...m, bestRate: generated.matchRate, secondRate: generated.layeringRate },
+      perfume,
+      runner: PERFUMES[generated.layering]!,
+      season,
+      keywords: [...new Set([...persona, ...perfume.keywords])].slice(0, 5),
+      cardNo,
+      scentType: generated.scentType,
+      ai: true,
+    };
+  }
+  const perfume = PERFUMES[m.best] ?? PERFUMES.petal!;
   return {
     m,
     perfume,
     runner: PERFUMES[m.second] ?? PERFUMES.cotton!,
-    season: SEASON_LABEL[getChoice(answers, 'season') ?? ''] ?? '사계절',
+    season,
     keywords: [...new Set([...persona, ...perfume.keywords])].slice(0, 5),
-    cardNo: `No.${String(m.cardNo).padStart(3, '0')}`,
+    cardNo,
     scentType: SCENT_TYPES[m.topAxis],
+    ai: false,
   };
 }
 
@@ -282,8 +195,8 @@ const TIERS = [
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
-  const { m, perfume, runner, season, keywords, cardNo, scentType } = soulmate(answers);
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
+  const { m, perfume, runner, season, keywords, cardNo, scentType, ai } = soulmate(answers, generated);
   const [light, deep] = perfume.colors;
 
   return (
@@ -326,7 +239,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
                 {m.bestRate}
                 <span className="text-lg">%</span>
               </p>
-              <p className="mt-1 text-[10px] font-semibold tracking-[0.2em] text-white/60">SOULMATE MATCH</p>
+              <p className="mt-1 text-[10px] font-semibold tracking-[0.2em] text-white/60">DEMO STYLE MATCH</p>
             </div>
           </div>
           <div className="mt-5 rounded-2xl bg-white/10 p-3 backdrop-blur-sm">
@@ -391,7 +304,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
             `${perfume.notes.base[0]} 잔향은 두세 시간 뒤 옷깃에서 확인해 보세요.`,
           ].map((tip, i) => (
             <li key={tip} className="flex gap-3 [word-break:keep-all]">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-slate-950" style={{ backgroundColor: pillarColor }}>
+              <span className="demo-accent-surface flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-slate-950" style={{ backgroundColor: pillarColor }}>
                 {i + 1}
               </span>
               {tip}
@@ -399,9 +312,13 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           ))}
         </ol>
         <p className="mt-4 rounded-xl bg-slate-950/60 p-3 text-xs leading-relaxed text-slate-400 [word-break:keep-all]">
-          💨 현장에서는 매칭된 향이 디퓨저로 분사돼 바로 시향할 수 있어요. {runner.name}을(를) 한 번 겹쳐 뿌리면 나만의 레이어링 향이 완성돼요.
+          {ai
+            ? `💨 현장에서는 이 향과 가장 가까운 부스 향수가 디퓨저로 분사돼 바로 시향할 수 있어요. ${withParticle(runner.name, '을/를')} 한 번 겹쳐 뿌리면 나만의 레이어링 향이 완성돼요.`
+            : `💨 현장에서는 매칭된 향이 디퓨저로 분사돼 바로 시향할 수 있어요. ${withParticle(runner.name, '을/를')} 한 번 겹쳐 뿌리면 나만의 레이어링 향이 완성돼요.`}
         </p>
       </Panel>
+
+      {ai && <p className="text-xs text-slate-500">AI 조향사가 당신의 답변으로 설계한 향수예요</p>}
     </ResultShell>
   );
 }
@@ -410,14 +327,16 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
 
 const toChoice = ({ id, label, desc, emoji, swatch }: Option) => ({ id, label, desc, emoji, swatch });
 
+const DEMO_ID = 'scent-soulmate';
+
 export default defineDemo({
   config: {
-    id: 'scent-soulmate',
+    id: DEMO_ID,
     targetSlug: 'ai-scent-soulmate',
     industryId: 'beauty',
     analyzeEmoji: '🌸',
     analyzeDurationMs: 3400,
-    analyzeMessages: ['취향 키워드를 향료로 번역하는 중', '향수 데이터베이스 200종 비교 중', '노트 피라미드 구성 중', '프로필 카드 인쇄 중'],
+    analyzeMessages: ['선택한 장면과 향 선호 정리', '회피 노트를 반영해 향 계열 조합', '시향 순서와 프로필 카드 준비'],
   },
   steps: [
     choiceStep({
@@ -451,8 +370,19 @@ export default defineDemo({
   ],
   computeResult: (answers) => match(answers).best,
   Result,
-  print: (answers) => {
-    const { m, perfume, runner, season, keywords, cardNo, scentType } = soulmate(answers);
+  generate: (answers) =>
+    requestDemoAi<AiScentSoulmate>(
+      DEMO_ID,
+      { experienceProfile: answers.experienceProfile,
+        persona: getChoices(answers, 'persona'),
+        place: getChoice(answers, 'place'),
+        season: getChoice(answers, 'season'),
+        color: getChoice(answers, 'color'),
+      },
+      { validate: isAiScent }
+    ),
+  print: (answers, _resultKey, generated) => {
+    const { m, perfume, runner, season, keywords, cardNo, scentType } = soulmate(answers, generated);
     return {
       kind: 'receipt',
       eyebrow: `SCENT PROFILE CARD · ${cardNo}`,

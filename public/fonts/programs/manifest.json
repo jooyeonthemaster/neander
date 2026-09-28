@@ -1,0 +1,130 @@
+[
+  {
+    "family": "Gowun Batang",
+    "file": "GowunBatang-Regular.woff2",
+    "weight": "400",
+    "bytes": 535504,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/gowunbatang/GowunBatang-Regular.ttf",
+    "license": "gowunbatang-OFL.txt"
+  },
+  {
+    "family": "Gowun Batang",
+    "file": "GowunBatang-Bold.woff2",
+    "weight": "700",
+    "bytes": 491736,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/gowunbatang/GowunBatang-Bold.ttf",
+    "license": "gowunbatang-OFL.txt"
+  },
+  {
+    "family": "Gowun Dodum",
+    "file": "GowunDodum-Regular.woff2",
+    "weight": "400",
+    "bytes": 445880,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/gowundodum/GowunDodum-Regular.ttf",
+    "license": "gowundodum-OFL.txt"
+  },
+  {
+    "family": "Jua",
+    "file": "Jua-Regular.woff2",
+    "weight": "400",
+    "bytes": 369284,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/jua/Jua-Regular.ttf",
+    "license": "jua-OFL.txt"
+  },
+  {
+    "family": "Do Hyeon",
+    "file": "DoHyeon-Regular.woff2",
+    "weight": "400",
+    "bytes": 204560,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/dohyeon/DoHyeon-Regular.ttf",
+    "license": "dohyeon-OFL.txt"
+  },
+  {
+    "family": "Black Han Sans",
+    "file": "BlackHanSans-Regular.woff2",
+    "weight": "400",
+    "bytes": 190520,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/blackhansans/BlackHanSans-Regular.ttf",
+    "license": "blackhansans-OFL.txt"
+  },
+  {
+    "family": "Gugi",
+    "file": "Gugi-Regular.woff2",
+    "weight": "400",
+    "bytes": 180912,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/gugi/Gugi-Regular.ttf",
+    "license": "gugi-OFL.txt"
+  },
+  {
+    "family": "Song Myung",
+    "file": "SongMyung-Regular.woff2",
+    "weight": "400",
+    "bytes": 316108,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/songmyung/SongMyung-Regular.ttf",
+    "license": "songmyung-OFL.txt"
+  },
+  {
+    "family": "Gaegu",
+    "file": "Gaegu-Regular.woff2",
+    "weight": "400",
+    "bytes": 290776,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/gaegu/Gaegu-Regular.ttf",
+    "license": "gaegu-OFL.txt"
+  },
+  {
+    "family": "Gaegu",
+    "file": "Gaegu-Bold.woff2",
+    "weight": "700",
+    "bytes": 485020,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/gaegu/Gaegu-Bold.ttf",
+    "license": "gaegu-OFL.txt"
+  },
+  {
+    "family": "Sunflower",
+    "file": "Sunflower-Medium.woff2",
+    "weight": "500",
+    "bytes": 123744,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/sunflower/Sunflower-Medium.ttf",
+    "license": "sunflower-OFL.txt"
+  },
+  {
+    "family": "Nanum Myeongjo",
+    "file": "NanumMyeongjo-Regular.woff2",
+    "weight": "400",
+    "bytes": 536220,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/nanummyeongjo/NanumMyeongjo-Regular.ttf",
+    "license": "nanummyeongjo-OFL.txt"
+  },
+  {
+    "family": "Nanum Myeongjo",
+    "file": "NanumMyeongjo-Bold.woff2",
+    "weight": "700",
+    "bytes": 609472,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/nanummyeongjo/NanumMyeongjo-Bold.ttf",
+    "license": "nanummyeongjo-OFL.txt"
+  },
+  {
+    "family": "IBM Plex Sans KR",
+    "file": "IBMPlexSansKR-Regular.woff2",
+    "weight": "400",
+    "bytes": 561532,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/ibmplexsanskr/IBMPlexSansKR-Regular.ttf",
+    "license": "ibmplexsanskr-OFL.txt"
+  },
+  {
+    "family": "IBM Plex Sans KR",
+    "file": "IBMPlexSansKR-SemiBold.woff2",
+    "weight": "600",
+    "bytes": 600812,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/ibmplexsanskr/IBMPlexSansKR-SemiBold.ttf",
+    "license": "ibmplexsanskr-OFL.txt"
+  },
+  {
+    "family": "Hahmlet",
+    "file": "Hahmlet-Variable.woff2",
+    "weight": "100 900",
+    "bytes": 697936,
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/hahmlet/Hahmlet%5Bwght%5D.ttf",
+    "license": "hahmlet-OFL.txt"
+  }
+]

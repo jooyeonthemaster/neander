@@ -1,0 +1,519 @@
+/* Service signatures. Composition, readable type sizes and colors come from the program renderer. */
+
+/* A clothbound yearbook: double rules, a seal and a mounted photograph. */
+.experience-venue[data-program='ai-graduation-booth'] .venue-welcome {
+  border-top: 5px double #738d77;
+  padding-top: 24px;
+}
+.experience-venue[data-program='ai-graduation-booth'] .venue-welcome h2 {
+  text-wrap: balance;
+}
+.experience-venue[data-program='ai-graduation-booth'] .venue-program-name {
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 6px;
+}
+.experience-venue[data-program='ai-graduation-booth'] .venue-signature-mark {
+  border: 3px double var(--venue-accent);
+  border-radius: 50%;
+  padding: 14px;
+  transform: rotate(-8deg);
+}
+.experience-venue[data-program='ai-graduation-booth'] .venue-image {
+  border: 10px solid var(--venue-paper);
+  border-bottom-width: 28px;
+  border-radius: 2px;
+  box-shadow: 0 2px 0 #c9c4b5, 0 14px 30px #344b3516;
+}
+.experience-venue[data-program='ai-graduation-booth'] .venue-brief {
+  border-left: 3px solid #7b403f45;
+  padding-left: clamp(16px, 2vw, 28px);
+}
+.experience-venue[data-program='ai-graduation-booth'] .venue-option {
+  border-radius: 2px;
+  box-shadow: 0 2px 0 #d8d7c8;
+}
+.experience-venue[data-program='ai-graduation-booth'] .venue-navigation {
+  border-top: 3px double #7b403f45;
+}
+
+/* A field notebook with an index tab and soft pencil-color highlights. */
+.experience-venue[data-program='ai-future-career'] .venue-welcome h2 {
+  text-decoration: underline;
+  text-decoration-color: #dcc979;
+  text-decoration-thickness: .17em;
+  text-underline-offset: -.04em;
+  text-decoration-skip-ink: none;
+}
+.experience-venue[data-program='ai-future-career'] .venue-brief {
+  border-radius: 4px 22px 22px 4px;
+  border-left: 8px solid #2e684f;
+  box-shadow: 7px 7px 0 #d9dec0;
+}
+.experience-venue[data-program='ai-future-career'] .venue-question {
+  border-bottom: 1px dashed #2e684f50;
+  padding-bottom: 22px;
+}
+.experience-venue[data-program='ai-future-career'] .venue-option {
+  border-radius: 4px 14px 14px 4px;
+}
+.experience-venue[data-program='ai-future-career'] .venue-option[aria-pressed='true'] {
+  box-shadow: inset 5px 0 var(--venue-accent);
+}
+.experience-venue[data-program='ai-future-career'] .venue-signature-mark {
+  background: #dcc979;
+  color: #293c37;
+  border-radius: 50% 50% 8px 50%;
+  padding: 12px 20px;
+}
+.experience-venue[data-program='ai-future-career'] .venue-image {
+  border-radius: 6px 32px 6px 6px;
+  box-shadow: 0 10px 25px #293c3717;
+}
+
+/* A physical control console, with signal lamps rather than a background grid. */
+.experience-venue[data-program='ai-science-kiosk'] .venue-welcome {
+  border-left: 5px solid #fbab6b;
+  padding-left: clamp(16px, 2vw, 28px);
+}
+.experience-venue[data-program='ai-science-kiosk'] .venue-program-name {
+  border: 1px solid #a8eed17a;
+  border-radius: 2px;
+  padding: 8px 12px;
+}
+.experience-venue[data-program='ai-science-kiosk'] .venue-brief {
+  border: 1px solid #a8eed150;
+  border-top: 8px solid #294654;
+  box-shadow: 0 16px 0 -8px #040f18, inset 0 1px #e8fff324;
+  background-image: radial-gradient(circle at 96% 18px, #fbab6b 0 3px, transparent 4px);
+}
+.experience-venue[data-program='ai-science-kiosk'] .venue-question {
+  border-left: 2px solid #a8eed13d;
+  padding-left: 14px;
+}
+.experience-venue[data-program='ai-science-kiosk'] .venue-option {
+  border-radius: 3px;
+  box-shadow: inset 0 -4px #020b103b;
+}
+.experience-venue[data-program='ai-science-kiosk'] .venue-option[aria-pressed='true'] {
+  box-shadow: inset 0 -4px var(--venue-accent), 0 0 18px #a8eed10a;
+}
+.experience-venue[data-program='ai-science-kiosk'] .venue-image {
+  border: 4px solid #36525c;
+  border-radius: 18px;
+}
+.experience-venue[data-program='ai-science-kiosk'] .venue-signature-mark {
+  color: #fbab6b;
+  border: 1px solid #fbab6b80;
+  border-radius: 50%;
+  padding: 15px;
+}
+
+/* Museum catalogue typography, stone mounts and a terracotta accession mark. */
+.experience-venue[data-program='ai-history-travel'] .venue-welcome {
+  border-block: 1px solid #8a46344a;
+  padding-block: 26px;
+}
+.experience-venue[data-program='ai-history-travel'] .venue-program-name {
+  letter-spacing: .16em;
+}
+.experience-venue[data-program='ai-history-travel'] .venue-signature-mark {
+  border: 2px solid #8a4634;
+  color: #8a4634;
+  padding: 8px 12px;
+  box-shadow: inset 0 0 0 3px #e9e3d7;
+}
+.experience-venue[data-program='ai-history-travel'] .venue-image {
+  border: 12px solid #fffcf7;
+  border-radius: 0;
+  box-shadow: 0 0 0 1px #bcb2a2, 0 16px 20px #3c2c2026;
+}
+.experience-venue[data-program='ai-history-travel'] .venue-brief {
+  border-radius: 0;
+  border-top: 2px solid #8a4634;
+}
+.experience-venue[data-program='ai-history-travel'] .venue-option {
+  border-radius: 0;
+  border-left-width: 4px;
+}
+.experience-venue[data-program='ai-history-travel'] .venue-guide {
+  border-top: 3px solid #8a4634;
+  padding-top: 18px;
+}
+
+/* Postcard stationery: a postmark, scalloped image edge and a perforated fold. */
+.experience-venue[data-program='ai-timecapsule-photo'] .venue-program-name {
+  border-bottom: 2px dashed #6a477969;
+  padding-bottom: 10px;
+}
+.experience-venue[data-program='ai-timecapsule-photo'] .venue-signature-mark {
+  border: 2px solid #6a4779;
+  border-radius: 50%;
+  padding: 14px 10px;
+  transform: rotate(-12deg);
+}
+.experience-venue[data-program='ai-timecapsule-photo'] .venue-image {
+  border: 8px dashed #fffafd;
+  border-radius: 2px;
+  box-shadow: 6px 8px 0 #c5b7d13d;
+}
+.experience-venue[data-program='ai-timecapsule-photo'] .venue-brief {
+  border: 1px solid #6a47792f;
+  box-shadow: inset 8px 0 #bf95a745;
+}
+.experience-venue[data-program='ai-timecapsule-photo'] .venue-question + .venue-question {
+  border-top: 1px dashed #6a477959;
+  padding-top: 24px;
+}
+.experience-venue[data-program='ai-timecapsule-photo'] .venue-option {
+  border-radius: 12px 12px 2px 12px;
+}
+.experience-venue[data-program='ai-timecapsule-photo'] .venue-navigation {
+  border-top-style: dashed;
+  border-top-color: #6a477969;
+}
+
+/* A velvet story theatre; no clinical or scientific visual language. */
+.experience-venue[data-program='ai-fortune-robot'] .venue-welcome {
+  background: radial-gradient(ellipse at 50% 0, #c892a825, transparent 68%);
+  border-top: 1px solid #f8cf864d;
+  padding-top: 28px;
+}
+.experience-venue[data-program='ai-fortune-robot'] .venue-welcome h2 {
+  text-shadow: 0 3px 25px #d38d4033;
+}
+.experience-venue[data-program='ai-fortune-robot'] .venue-signature-mark {
+  color: #f8cf86;
+  text-shadow: 0 0 30px #f8cf864a;
+}
+.experience-venue[data-program='ai-fortune-robot'] .venue-image {
+  border: 2px solid #bca06a;
+  border-radius: 48% 48% 10px 10px;
+  box-shadow: 0 0 0 8px #f8cf8607, 0 22px 36px #0d071944;
+}
+.experience-venue[data-program='ai-fortune-robot'] .venue-brief {
+  border-radius: 26px 26px 8px 8px;
+  border: 1px solid #f8cf8636;
+  background-image: radial-gradient(ellipse at 50% 100%, #6d3c6352, transparent 72%);
+}
+.experience-venue[data-program='ai-fortune-robot'] .venue-option {
+  border-radius: 22px 22px 6px 6px;
+  border-color: #f8cf8638;
+}
+.experience-venue[data-program='ai-fortune-robot'] .venue-option[aria-pressed='true'] {
+  box-shadow: inset 0 0 0 2px #f8cf863d;
+}
+.experience-venue[data-program='ai-fortune-robot'] .venue-navigation {
+  border-top: 3px double #f8cf8652;
+}
+
+/* A portrait salon with an oval mount, apricot walls and jade jewelry-like details. */
+.experience-venue[data-program='ai-face-reading'] .venue-welcome h2 {
+  text-wrap: balance;
+}
+.experience-venue[data-program='ai-face-reading'] .venue-program-name {
+  border: 1px solid #38645a;
+  border-radius: 50%;
+  padding: 12px 22px;
+}
+.experience-venue[data-program='ai-face-reading'] .venue-signature-mark {
+  border: 3px double #38645a;
+  border-radius: 48% 48% 40% 40%;
+  padding: 12px 18px;
+}
+.experience-venue[data-program='ai-face-reading'] .venue-image {
+  border: 8px solid #fff5ed;
+  border-radius: 48% 48% 45% 45%;
+  box-shadow: 0 0 0 2px #be886e8c;
+}
+.experience-venue[data-program='ai-face-reading'] .venue-brief {
+  border-radius: 38px 38px 12px 12px;
+  border-top: 2px solid #be886e;
+}
+.experience-venue[data-program='ai-face-reading'] .venue-option {
+  border-radius: 22px 6px 22px 6px;
+}
+.experience-venue[data-program='ai-face-reading'] .venue-option[aria-pressed='true'] {
+  box-shadow: inset 0 -3px #38645a80;
+}
+
+/* An artisan's line notebook: ink, one sweeping curve and an open binding. */
+.experience-venue[data-program='ai-palm-reading'] .venue-welcome {
+  border-bottom: 2px solid #346259;
+  padding-bottom: 24px;
+}
+.experience-venue[data-program='ai-palm-reading'] .venue-signature-mark {
+  color: #346259;
+  transform: rotate(-18deg);
+  border-bottom: 2px solid #b29360;
+  border-radius: 50%;
+}
+.experience-venue[data-program='ai-palm-reading'] .venue-image {
+  border-radius: 90px 8px 90px 8px;
+  border: 6px solid #fff9e8;
+  box-shadow: 0 0 0 1px #b2936080;
+}
+.experience-venue[data-program='ai-palm-reading'] .venue-brief {
+  border-left: 2px solid #b2936073;
+  border-radius: 0 20px 20px 0;
+  box-shadow: -5px 0 0 #fff9e8, -6px 0 0 #b293604a;
+}
+.experience-venue[data-program='ai-palm-reading'] .venue-question {
+  border-bottom: 1px solid #3462592e;
+  padding-bottom: 22px;
+}
+.experience-venue[data-program='ai-palm-reading'] .venue-option {
+  border-radius: 20px 3px 20px 3px;
+}
+.experience-venue[data-program='ai-palm-reading'] .venue-option[aria-pressed='true'] {
+  box-shadow: inset 4px 0 #346259;
+}
+
+/* A hand-lettered caricature poster, with ink outlines and pasted paper shadows. */
+.experience-venue[data-program='ai-caricature-artist'] .venue-welcome h2 {
+  text-decoration: underline;
+  text-decoration-color: #ea7d54;
+  text-decoration-thickness: .13em;
+  text-underline-offset: .08em;
+}
+.experience-venue[data-program='ai-caricature-artist'] .venue-program-name {
+  border: 2px solid #25252d;
+  background: #fffbee;
+  padding: 8px 12px;
+  box-shadow: 3px 3px 0 #25252d;
+  transform: rotate(-2deg);
+}
+.experience-venue[data-program='ai-caricature-artist'] .venue-signature-mark {
+  background: #ea7d54;
+  color: #25252d;
+  border: 2px solid #25252d;
+  border-radius: 50%;
+  padding: 12px 18px;
+  transform: rotate(9deg);
+}
+.experience-venue[data-program='ai-caricature-artist'] .venue-image {
+  border: 8px solid #fffbee;
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px #25252d, 8px 8px 0 #25252d;
+}
+.experience-venue[data-program='ai-caricature-artist'] .venue-brief {
+  border: 2px solid #25252d;
+  box-shadow: 6px 6px 0 #284fac;
+  border-radius: 4px 26px 4px 4px;
+}
+.experience-venue[data-program='ai-caricature-artist'] .venue-option {
+  border: 2px solid #25252d5e;
+  border-radius: 12px 3px 12px 3px;
+}
+.experience-venue[data-program='ai-caricature-artist'] .venue-option[aria-pressed='true'] {
+  border-color: #284fac;
+  box-shadow: 3px 3px 0 #284fac;
+}
+
+/* A light-art chamber, distinguished by diffusion instead of a clinical scanner. */
+.experience-venue[data-program='ai-aura-reading'] .venue-welcome {
+  background: radial-gradient(ellipse at 25% 20%, #b9a3ff24, transparent 70%);
+}
+.experience-venue[data-program='ai-aura-reading'] .venue-welcome h2 {
+  text-shadow: 0 0 28px #ffbdc735;
+}
+.experience-venue[data-program='ai-aura-reading'] .venue-signature-mark {
+  color: #ffbdc7;
+  border: 1px solid #b9a3ff70;
+  border-radius: 50%;
+  padding: 14px;
+  box-shadow: 0 0 0 9px #b9a3ff09, 0 0 32px #ffbdc72b;
+}
+.experience-venue[data-program='ai-aura-reading'] .venue-image {
+  border-radius: 44% 44% 24px 24px;
+  border: 1px solid #ffbdc787;
+  box-shadow: 0 0 35px #b9a3ff24;
+}
+.experience-venue[data-program='ai-aura-reading'] .venue-brief {
+  border-radius: 40px;
+  background-image: radial-gradient(ellipse at 0 100%, #ffbdc710, transparent 70%);
+  border: 1px solid #b9a3ff40;
+}
+.experience-venue[data-program='ai-aura-reading'] .venue-option {
+  border-radius: 22px;
+  backdrop-filter: blur(8px);
+}
+.experience-venue[data-program='ai-aura-reading'] .venue-option[aria-pressed='true'] {
+  box-shadow: inset 0 0 22px #ffbdc715, 0 0 0 1px #ffbdc744;
+}
+
+/* A brand fabrication studio: offset plates, lime brackets and sharp corners. */
+.experience-venue[data-program='ai-brand-avatar'] .venue-welcome {
+  border-top: 12px solid #d6ff65;
+  padding-top: 22px;
+}
+.experience-venue[data-program='ai-brand-avatar'] .venue-program-name {
+  background: #d6ff65;
+  color: #152c47;
+  padding: 9px 14px;
+}
+.experience-venue[data-program='ai-brand-avatar'] .venue-signature-mark {
+  border: 3px solid #d6ff65;
+  padding: 10px 16px;
+  box-shadow: 6px 6px 0 #94b5ff;
+}
+.experience-venue[data-program='ai-brand-avatar'] .venue-image {
+  border-radius: 0;
+  border: 1px solid #94b5ff;
+  box-shadow: 10px 10px 0 #0b1d42;
+}
+.experience-venue[data-program='ai-brand-avatar'] .venue-brief {
+  border: 1px solid #94b5ff50;
+  border-left: 6px solid #d6ff65;
+  border-radius: 0;
+}
+.experience-venue[data-program='ai-brand-avatar'] .venue-option {
+  border-radius: 0;
+}
+.experience-venue[data-program='ai-brand-avatar'] .venue-option[aria-pressed='true'] {
+  box-shadow: inset 0 -5px #d6ff65;
+}
+.experience-venue[data-program='ai-brand-avatar'] .venue-navigation {
+  border-top: 3px solid #94b5ff70;
+}
+
+/* A quiet product catalogue with a leather-colored index and generous paper. */
+.experience-venue[data-program='ai-product-experience'] .venue-program-name {
+  border-block: 1px solid #8e442e6b;
+  padding-block: 8px;
+  letter-spacing: .12em;
+}
+.experience-venue[data-program='ai-product-experience'] .venue-signature-mark {
+  color: #8e442e;
+  border-left: 3px solid #8e442e;
+  padding-left: 12px;
+}
+.experience-venue[data-program='ai-product-experience'] .venue-image {
+  border-radius: 0;
+  border: 8px solid #faf9f5;
+  box-shadow: 0 2px 0 #d0cec5, 0 12px 28px #383a3514;
+}
+.experience-venue[data-program='ai-product-experience'] .venue-brief {
+  border-top: 3px solid #8e442e;
+  border-radius: 0;
+}
+.experience-venue[data-program='ai-product-experience'] .venue-question {
+  border-bottom: 1px solid #8e442e2f;
+  padding-bottom: 24px;
+}
+.experience-venue[data-program='ai-product-experience'] .venue-option {
+  border-radius: 0;
+  border-left: 3px solid #a5ab8d;
+}
+.experience-venue[data-program='ai-product-experience'] .venue-option[aria-pressed='true'] {
+  border-left-color: #8e442e;
+  box-shadow: inset 0 -2px #8e442e;
+}
+
+/* A collaborative workshop: interlocking corners and conversational blocks. */
+.experience-venue[data-program='ai-team-chemistry'] .venue-program-name {
+  background: #cb8e6a;
+  color: #263f40;
+  padding: 10px 16px;
+  border-radius: 20px 20px 20px 3px;
+}
+.experience-venue[data-program='ai-team-chemistry'] .venue-signature-mark {
+  color: #f8fbeb;
+  background: #275861;
+  border-radius: 30% 50% 30% 50%;
+  padding: 10px 16px;
+  box-shadow: 8px 5px 0 #cb8e6a;
+}
+.experience-venue[data-program='ai-team-chemistry'] .venue-image {
+  border: 6px solid #f8fbeb;
+  border-radius: 48px 8px 48px 8px;
+  box-shadow: 8px 8px 0 #27586120;
+}
+.experience-venue[data-program='ai-team-chemistry'] .venue-brief {
+  border-radius: 32px 8px 32px 8px;
+  border: 1px solid #2758613f;
+}
+.experience-venue[data-program='ai-team-chemistry'] .venue-option {
+  border-radius: 18px 18px 18px 4px;
+}
+.experience-venue[data-program='ai-team-chemistry'] .venue-option:nth-child(even) {
+  border-radius: 18px 18px 4px 18px;
+}
+.experience-venue[data-program='ai-team-chemistry'] .venue-option[aria-pressed='true'] {
+  box-shadow: inset 0 -4px #275861;
+}
+
+/* A participatory event wall of bold headlines and colored pasted notes. */
+.experience-venue[data-program='ai-vision-wall'] .venue-welcome h2 {
+  text-shadow: 3px 3px 0 #0000004d;
+}
+.experience-venue[data-program='ai-vision-wall'] .venue-program-name {
+  background: #ffb18d;
+  color: #422821;
+  padding: 10px 15px;
+  transform: rotate(-2deg);
+  box-shadow: 4px 4px 0 #00000038;
+}
+.experience-venue[data-program='ai-vision-wall'] .venue-signature-mark {
+  background: #d4db7a;
+  color: #292a2c;
+  padding: 10px 22px;
+  border-radius: 4px;
+  transform: rotate(7deg);
+}
+.experience-venue[data-program='ai-vision-wall'] .venue-image {
+  border: 6px solid #fff2d9;
+  border-radius: 2px;
+  box-shadow: 0 10px 24px #00000047;
+}
+.experience-venue[data-program='ai-vision-wall'] .venue-brief {
+  border-top: 8px solid #ffb18d;
+  border-radius: 3px 3px 24px 3px;
+  box-shadow: 6px 7px 0 #161819;
+}
+.experience-venue[data-program='ai-vision-wall'] .venue-option {
+  border-radius: 3px 3px 14px 3px;
+  border-bottom: 4px solid #ffb18d3d;
+}
+.experience-venue[data-program='ai-vision-wall'] .venue-option[aria-pressed='true'] {
+  box-shadow: inset 0 -4px #ffb18d;
+}
+
+/* A small letterpress shop: trimmed paper, blue ink and an offset second plate. */
+.experience-venue[data-program='ai-business-card'] .venue-welcome {
+  border-block: 1px solid #224c9c;
+  padding-block: 24px;
+}
+.experience-venue[data-program='ai-business-card'] .venue-program-name {
+  border-left: 4px solid #224c9c;
+  padding-left: 14px;
+}
+.experience-venue[data-program='ai-business-card'] .venue-signature-mark {
+  border: 1px solid #224c9c;
+  border-radius: 0;
+  padding: 9px 15px;
+  box-shadow: 4px 4px 0 #8ca8ce;
+}
+.experience-venue[data-program='ai-business-card'] .venue-image {
+  border: 9px solid #ffffff;
+  border-radius: 0;
+  box-shadow: 0 0 0 1px #8ca8ce, 7px 7px 0 #8ca8ce42;
+}
+.experience-venue[data-program='ai-business-card'] .venue-brief {
+  border: 1px solid #224c9c;
+  border-radius: 0;
+  box-shadow: 5px 5px 0 #c3d0e1;
+}
+.experience-venue[data-program='ai-business-card'] .venue-question {
+  border-bottom: 1px dashed #224c9c54;
+  padding-bottom: 22px;
+}
+.experience-venue[data-program='ai-business-card'] .venue-option {
+  border-radius: 1px;
+  border-color: #224c9c55;
+}
+.experience-venue[data-program='ai-business-card'] .venue-option[aria-pressed='true'] {
+  box-shadow: inset 0 -3px #224c9c;
+}
+.experience-venue[data-program='ai-business-card'] .venue-navigation {
+  border-top: 2px solid #224c9c;
+}

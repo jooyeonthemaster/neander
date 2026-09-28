@@ -14,9 +14,11 @@ import {
   getCapture,
   getChoice,
   getFields,
+  requestDemoAi,
   textStep,
   type PhotoLook,
 } from '../kit';
+import { isAiBoothPhoto, type AiBoothPhoto } from '@/data/demo-ai/photo-booth';
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -191,7 +193,18 @@ function PassportStamp({ date }: { date: string }) {
 /* ── Frames ────────────────────────────────────────────── */
 
 function Photo({ src, look }: { src: string; look: PhotoLook }) {
-  return <ProcessedPhoto src={src} look={look} className="aspect-[3/4] w-full" alt="테마로 변환된 커플 사진" delayMs={1000} />;
+  return <ProcessedPhoto src={src} look={look} className="aspect-[3/4] w-full" alt="테마로 변환된 커플 사진" delayMs={600} />;
+}
+
+/**
+ * 프레임에 넣을 사진 — AI가 고른 테마로 새로 그린 웨딩 사진이 있으면 그것.
+ * 고른 테마는 보정 없이, 다른 테마 미리보기는 그 테마의 색 보정만 얹는다. AI 사진이 없으면 원본 + 테마 보정.
+ */
+function photoFor(answers: DemoAnswers, themeId: ThemeId, generated: unknown): { src: string; look: PhotoLook; ai: boolean } | null {
+  const look = THEMES[themeId].look;
+  if (isAiBoothPhoto(generated)) return { src: generated.image, look: themeId === themeOf(answers) ? {} : look, ai: true };
+  const capture = getCapture(answers, 'couple');
+  return capture ? { src: capture.image, look, ai: false } : null;
 }
 
 function FairytaleFrame({ src, look, couple }: { src: string; look: PhotoLook; couple: Couple }) {
@@ -228,7 +241,7 @@ function FilmHoles() {
 
 function MovieFrame({ src, look, couple }: { src: string; look: PhotoLook; couple: Couple }) {
   return (
-    <div className="flex w-80 max-w-full gap-1 rounded-md bg-[#0c0a09] px-1 shadow-2xl shadow-black/70">
+    <div className="demo-dark-surface flex w-80 max-w-full gap-1 rounded-md bg-[#0c0a09] px-1 shadow-2xl shadow-black/70">
       <FilmHoles />
       <div className="relative flex-1 overflow-hidden">
         <Photo src={src} look={look} />
@@ -286,7 +299,7 @@ function TravelFrame({ src, look, couple }: { src: string; look: PhotoLook; coup
   return (
     <div className="relative w-72 rounded-md p-2 shadow-2xl shadow-black/60" style={{ background: AIRMAIL }}>
       <div className="rounded-sm bg-[#fffdf7] p-3">
-        <div className="relative overflow-hidden rounded-sm">
+        <div className="demo-dark-surface relative overflow-hidden rounded-sm">
           <Photo src={src} look={look} />
           <p className="absolute bottom-2 left-3 text-2xl font-extrabold italic text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" style={{ fontFamily: SERIF }}>
             Bon Voyage!
@@ -478,13 +491,13 @@ function WeddingPrintOverlay({ themeId, couple }: { themeId: ThemeId; couple: Co
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
-  const capture = getCapture(answers, 'couple');
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
   const [themeId, setThemeId] = useState<ThemeId>(() => themeOf(answers));
   const theme = THEMES[themeId] ?? THEMES.fairytale;
   const couple = getCouple(answers);
+  const photo = photoFor(answers, themeId, generated);
 
-  const frameProps = capture ? { src: capture.image, look: theme.look, couple } : null;
+  const frameProps = photo ? { src: photo.src, look: photo.look, couple } : null;
 
   return (
     <ResultShell
@@ -508,6 +521,11 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           {themeId === 'period' && <PeriodFrame {...frameProps} />}
           {themeId === 'travel' && <TravelFrame {...frameProps} />}
         </motion.div>
+      )}
+      {photo?.ai && (
+        <p className="-mt-2 text-xs text-slate-500">
+          AI가 두 분의 모습 그대로 {THEMES[themeOf(answers)].label} 테마 웨딩 사진을 새로 그렸어요
+        </p>
       )}
 
       <div className="w-full max-w-md">
@@ -561,9 +579,18 @@ export default defineDemo({
     targetSlug: 'ai-wedding-booth',
     industryId: 'wedding',
     analyzeEmoji: '💍',
+    // AI 사진 합성은 10~20초 — 문구를 넉넉히 두고 마지막 문구는 오래 머물러도 자연스럽게
     analyzeDurationMs: 3500,
     analyzeImageStepId: 'couple',
-    analyzeMessages: ['두 분의 얼굴 톤 맞추는 중', '로맨틱 테마 조명 입히는 중', '커플 프레임 디자인 중', '고급 용지 인화 준비 중'],
+    analyzeMessages: [
+      '두 분의 얼굴 톤 맞추는 중',
+      '웨딩드레스·턱시도 고르는 중',
+      '테마 배경 세팅 중',
+      '로맨틱 조명 입히는 중',
+      '웨딩 사진 합성 중',
+      '커플 프레임 디자인 중',
+      '마지막 디테일 다듬는 중 · 조금만 기다려 주세요',
+    ],
   },
   steps: [
     choiceStep({
@@ -582,14 +609,14 @@ export default defineDemo({
     cameraStep({
       id: 'couple',
       title: '두 분이 함께 화면에 들어와 주세요',
-      subtitle: '어깨를 살짝 기대면 더 로맨틱하게 나와요',
+      subtitle: '두 사람 모두 편한 거리로 서서 얼굴이 가려지지 않게 촬영해 주세요',
       mode: 'portrait',
       subject: '두 분',
       countdown: true,
-      scanLabels: ['인물 2명 감지', '얼굴 톤 맞춤 보정', '테마 조명 계산', '로맨틱 무드 적용'],
+      scanLabels: ['두 사람의 촬영 컷 준비', '선택한 포즈 확인', '테마 조명 준비', '기념 프레임 준비'],
       readouts: (c) => [
-        { label: '케미 지수', value: `${82 + (c.seed % 17)}%` },
-        { label: '조명', value: c.stats.brightness > 45 ? '화사함' : '분위기 있음' },
+        { label: '기념사진', value: c.source === 'sample' ? '샘플 사진' : '촬영 준비 완료' },
+        { label: '사진 밝기', value: c.stats.brightness > 45 ? '밝은 편' : '차분한 편' },
       ],
     }),
     textStep({
@@ -605,14 +632,25 @@ export default defineDemo({
   ],
   computeResult,
   Result,
-  print: (answers) => {
+  generate: (answers) => {
     const capture = getCapture(answers, 'couple');
+    if (!capture) return Promise.resolve(null);
+    return requestDemoAi<AiBoothPhoto>(
+      'wedding-booth',
+      { experienceProfile: answers.experienceProfile, photo: capture.image, theme: themeOf(answers) },
+      { timeoutMs: 60_000, validate: isAiBoothPhoto }
+    );
+  },
+  print: (answers, _resultKey, generated) => {
     const themeId = themeOf(answers);
     const theme = THEMES[themeId];
     const couple = getCouple(answers);
+    const photo = photoFor(answers, themeId, generated);
     return {
       kind: 'photo',
-      photos: capture ? [{ src: capture.image, look: theme.look, overlay: <WeddingPrintOverlay themeId={themeId} couple={couple} /> }] : [],
+      photos: photo
+        ? [{ src: photo.src, look: photo.ai ? undefined : photo.look, overlay: <WeddingPrintOverlay themeId={themeId} couple={couple} /> }]
+        : [],
       title: couple.names,
       caption: couple.date ? `${couple.date} · ${theme.tagline}` : theme.tagline,
       paper: 'cream',

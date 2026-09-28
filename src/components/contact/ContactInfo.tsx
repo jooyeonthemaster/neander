@@ -97,6 +97,31 @@ export function ContactInfo() {
                   >
                     {t('info.phone')}
                   </a>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {t('info.phoneNote')}
+                  </p>
+                </dd>
+              </div>
+            </div>
+
+            {/* Mobile */}
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-600">
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+                </svg>
+              </div>
+              <div>
+                <dt className="text-xs font-medium uppercase tracking-wider text-slate-400">
+                  {t('info.mobileLabel')}
+                </dt>
+                <dd className="mt-1">
+                  <a
+                    href={`tel:${t('info.mobile').replace(/[^0-9+]/g, '')}`}
+                    className="text-sm font-medium text-slate-900 transition-colors hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 rounded-sm"
+                  >
+                    {t('info.mobile')}
+                  </a>
                 </dd>
               </div>
             </div>

@@ -10,8 +10,17 @@ import {
   defineDemo,
   getChoice,
   getFields,
+  requestDemoAi,
   sliderStep,
 } from '../kit';
+import {
+  SOMMELIER_KINDS,
+  SOMMELIER_OCCASIONS,
+  SOMMELIER_PAIRINGS,
+  SOMMELIER_STYLES,
+  SOMMELIER_TASTE_SLIDERS,
+  type AiSommelier,
+} from '@/data/demo-ai/sommelier';
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -143,6 +152,7 @@ function match(answers: DemoAnswers) {
   const taste = getFields<number>(answers, 'taste');
   const occasion = getChoice(answers, 'occasion');
   const style = getChoice(answers, 'style');
+  const profile = (answers.experienceProfile ?? {}) as Record<string, string>;
   const user = { sweet: taste.sweet ?? 50, acid: taste.acid ?? 50, body: taste.body ?? 50, bitter: taste.bitter ?? 50 };
 
   let bestKey = 'pinot';
@@ -153,6 +163,11 @@ function match(answers: DemoAnswers) {
     if (style === 'wine' && drink.kind !== 'wine') distance += 35;
     if (style === 'korean' && drink.kind !== 'korean') distance += 35;
     if (occasion === 'gift' && drink.premium) distance -= 12;
+    if (profile.tannin === 'soft' && (key === 'cabernet' || key === 'andong')) distance += 24;
+    if (profile.tannin === 'firm' && key === 'cabernet') distance -= 18;
+    if (profile.sauce === 'spicy' && (key === 'andong' || key === 'cabernet')) distance += 28;
+    if (profile.sauce === 'sweet' && p.sweet < 40) distance += 20;
+    if (profile.sauce === 'rich' && p.acid >= 65) distance -= 10;
     if (occasion === 'party' && drink.profile.body < 40) distance -= 8;
     if (distance < bestScore) {
       bestScore = distance;
@@ -163,22 +178,57 @@ function match(answers: DemoAnswers) {
   return { key: bestKey, matchRate };
 }
 
+function userTaste(answers: DemoAnswers) {
+  const t = getFields<number>(answers, 'taste');
+  return { sweet: t.sweet ?? 50, acid: t.acid ?? 50, body: t.body ?? 50, bitter: t.bitter ?? 50 };
+}
+
+/* ── AI 결과 ──────────────────────────────────────────── */
+
+const isPct = (n: unknown) => typeof n === 'number' && n >= 0 && n <= 100;
+
+function isAiSommelier(v: unknown): v is AiSommelier {
+  const o = v as AiSommelier | null;
+  return !!o && typeof o.name === 'string' && typeof o.origin === 'string' && (SOMMELIER_KINDS as readonly string[]).includes(o.kind)
+    && !!o.profile && isPct(o.profile.sweet) && isPct(o.profile.acid) && isPct(o.profile.body) && isPct(o.profile.bitter)
+    && typeof o.nose === 'string' && typeof o.palate === 'string' && typeof o.finish === 'string' && typeof o.temp === 'string'
+    && typeof o.matchRate === 'number' && !!o.pairing && typeof o.pairing.dish === 'string' && typeof o.pairing.tip === 'string';
+}
+
+/** 화면·출력물이 그리는 추천 — AI 결과가 있으면 그것, 없으면 고정 목록 매칭 */
+function sommelierView(answers: DemoAnswers, resultKey: string, generated: unknown) {
+  const pairingOpt = PAIRINGS[getChoice(answers, 'pairing') ?? 'meat'] ?? PAIRINGS.meat!;
+  if (isAiSommelier(generated)) {
+    const { matchRate, reason, pairing, ...drink } = generated;
+    return { drink, matchRate, reason, pairing: { label: pairingOpt.label, dish: pairing.dish, tip: pairing.tip }, ai: true };
+  }
+  const drink = DRINKS[resultKey] ?? DRINKS.pinot!;
+  return {
+    drink,
+    matchRate: match(answers).matchRate,
+    reason: undefined as string | undefined,
+    pairing: { label: pairingOpt.label, dish: undefined as string | undefined, tip: pairingOpt.tip },
+    ai: false,
+  };
+}
+
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ resultKey, answers, onRestart, pillarColor }: DemoResultProps) {
-  const drink = DRINKS[resultKey] ?? DRINKS.pinot!;
-  const { matchRate } = match(answers);
-  const pairing = PAIRINGS[getChoice(answers, 'pairing') ?? 'meat'] ?? PAIRINGS.meat!;
+function Result({ resultKey, answers, onRestart, pillarColor, generated }: DemoResultProps) {
+  const { drink, matchRate, reason, pairing, ai } = sommelierView(answers, resultKey, generated);
 
   return (
     <ResultShell
-      eyebrow="AI 소믈리에의 추천"
+      coreCount={2}
+      eyebrow={ai ? 'AI 소믈리에의 추천' : '답변으로 매칭한 테이스팅 예시'}
       title={drink.name}
-      description={`${drink.origin} · 당신의 미각과 ${matchRate}% 일치해요`}
+      description={`${drink.origin} · 데모 취향 비교 ${matchRate}/100`}
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다시 테이스팅"
     >
+      {reason && <p className="max-w-md text-sm leading-relaxed text-slate-300 [word-break:keep-all]">{reason}</p>}
+
       <RadarChart
         color={pillarColor}
         axes={[
@@ -207,81 +257,76 @@ function Result({ resultKey, answers, onRestart, pillarColor }: DemoResultProps)
       <InfoGrid
         items={[
           { emoji: '🌡️', label: '서빙 온도', value: drink.temp },
-          { emoji: '🍽️', label: `페어링 · ${pairing.label}`, value: '추천 조합', desc: pairing.tip },
+          { emoji: '🍽️', label: `페어링 · ${pairing.label}`, value: pairing.dish ?? '추천 조합', desc: pairing.tip },
         ]}
       />
+
+      {ai && <p className="text-xs text-slate-500">AI 소믈리에가 당신의 답변으로 고른 한 잔이에요 · 천천히 음미하며 즐겨 주세요</p>}
     </ResultShell>
   );
 }
 
 /* ── Export ─────────────────────────────────────────────── */
 
+const DEMO_ID = 'sommelier';
+
 export default defineDemo({
   config: {
-    id: 'sommelier',
+    id: DEMO_ID,
     targetSlug: 'ai-sommelier',
     industryId: 'fnb',
     analyzeEmoji: '🍷',
     analyzeDurationMs: 3000,
-    analyzeMessages: ['미각 프로필 벡터화 중', '주류 데이터베이스 2,400종 비교 중', '페어링 조합 계산 중'],
+    analyzeMessages: ['단맛·산미·떫은 느낌 선호 확인', '음식과 소스의 맛에 맞춰 후보 비교', '서빙과 테이스팅 노트 정리'],
   },
   steps: [
     sliderStep({
       id: 'taste',
       title: '평소 좋아하는 맛을 알려주세요',
       subtitle: '슬라이더를 움직여 취향을 표시해 주세요',
-      sliders: [
-        { id: 'sweet', emoji: '🍯', label: '단맛', left: '드라이하게', right: '달콤하게' },
-        { id: 'acid', emoji: '🍋', label: '산미', left: '부드럽게', right: '상큼하게' },
-        { id: 'body', emoji: '🥛', label: '바디감', left: '가볍게', right: '묵직하게' },
-        { id: 'bitter', emoji: '☕', label: '쌉쌀함·떫은맛', left: '없이', right: '진하게' },
-      ],
+      sliders: SOMMELIER_TASTE_SLIDERS.map((o) => ({ ...o })),
     }),
     choiceStep({
       id: 'style',
       title: '어떤 술이 더 끌리나요?',
       columns: 3,
-      options: [
-        { id: 'wine', emoji: '🍷', label: '와인', desc: '세계의 와인' },
-        { id: 'korean', emoji: '🍶', label: '전통주', desc: '우리 술' },
-        { id: 'any', emoji: '🎲', label: '상관없어요', desc: 'AI에게 맡기기' },
-      ],
+      options: SOMMELIER_STYLES.map((o) => ({ ...o })),
     }),
     choiceStep({
       id: 'occasion',
       title: '언제 마실 술인가요?',
       columns: 2,
-      options: [
-        { id: 'alone', emoji: '🛋️', label: '혼술', desc: '나를 위한 한 잔' },
-        { id: 'date', emoji: '🕯️', label: '데이트', desc: '분위기 있는 저녁' },
-        { id: 'party', emoji: '🎉', label: '파티', desc: '여럿이 즐기는 자리' },
-        { id: 'gift', emoji: '🎁', label: '선물', desc: '소중한 사람에게' },
-      ],
+      options: SOMMELIER_OCCASIONS.map((o) => ({ ...o })),
     }),
     choiceStep({
       id: 'pairing',
       title: '함께할 음식은?',
       columns: 3,
-      options: [
-        { id: 'meat', emoji: '🥩', label: '고기' },
-        { id: 'seafood', emoji: '🦐', label: '해산물' },
-        { id: 'cheese', emoji: '🧀', label: '치즈' },
-        { id: 'korean', emoji: '🥘', label: '한식' },
-        { id: 'dessert', emoji: '🍰', label: '디저트' },
-      ],
+      options: SOMMELIER_PAIRINGS.map((o) => ({ ...o })),
     }),
   ],
   computeResult: (answers) => match(answers).key,
   Result,
-  print: (answers, resultKey) => {
-    const drink = DRINKS[resultKey] ?? DRINKS.pinot!;
-    const pairing = PAIRINGS[getChoice(answers, 'pairing') ?? 'meat'] ?? PAIRINGS.meat!;
+  generate: (answers) =>
+    requestDemoAi<AiSommelier>(
+      DEMO_ID,
+      { experienceProfile: answers.experienceProfile,
+        taste: userTaste(answers),
+        style: getChoice(answers, 'style'),
+        occasion: getChoice(answers, 'occasion'),
+        pairing: getChoice(answers, 'pairing'),
+      },
+      { validate: isAiSommelier }
+    ),
+  print: (answers, resultKey, generated) => {
+    const { drink, matchRate, reason, pairing, ai } = sommelierView(answers, resultKey, generated);
     return {
       kind: 'receipt',
-      eyebrow: 'AI 소믈리에 추천',
+      eyebrow: ai ? 'AI 소믈리에 추천' : '답변으로 매칭한 테이스팅 예시',
       title: drink.name,
       sections: [
-        { type: 'big', text: `${match(answers).matchRate}% MATCH` },
+        { type: 'big', title: '데모 취향 비교 지표', text: `${matchRate}/100` },
+        ...(reason ? [{ type: 'text' as const, text: reason }] : []),
         {
           type: 'bars',
           title: '맛 프로필',
@@ -303,7 +348,7 @@ export default defineDemo({
             { label: '온도', value: drink.temp },
           ],
         },
-        { type: 'text', title: `페어링 · ${pairing.label}`, text: pairing.tip },
+        { type: 'text', title: pairing.dish ? `페어링 · ${pairing.dish}` : `페어링 · ${pairing.label}`, text: pairing.tip },
       ],
       footer: '행사 현장에서는 추천 주류를 바로 시음할 수 있어요',
     };

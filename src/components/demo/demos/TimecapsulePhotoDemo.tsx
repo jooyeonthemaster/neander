@@ -16,10 +16,12 @@ import {
   getCapture,
   getChoice,
   getFields,
+  requestDemoAi,
   textStep,
   type PhotoLook,
   type PhotoPaint,
 } from '../kit';
+import { isAiTimecapsule, type AiTimecapsule } from '@/data/demo-ai/timecapsule';
 
 /* ── Aging looks ───────────────────────────────────────── */
 
@@ -148,14 +150,21 @@ const CAPTION_CHARS = 34;
 
 /* ── Compare slider ───────────────────────────────────── */
 
-function AgeCompare({ image, years, nowYear }: { image: string; years: Years; nowYear: number }) {
+/** AI가 그린 미래 사진은 보정 없이 그대로 */
+const AI_LOOK: PhotoLook = {};
+
+function AgeCompare({ image, years, nowYear, aiImage }: { image: string; years: Years; nowYear: number; aiImage?: string }) {
   const [pos, setPos] = useState(50);
   const age = AGING[years];
   return (
     <div className="relative aspect-[3/4] w-64 overflow-hidden rounded-2xl border border-slate-700 shadow-2xl shadow-black/50 sm:w-72">
-      <ProcessedPhoto key={years} src={image} look={age.look} className="absolute inset-0 h-full w-full" alt={`AI가 예측한 ${age.label}의 모습`} delayMs={900}>
-        <WrinkleLines k={age.k} />
-      </ProcessedPhoto>
+      {aiImage ? (
+        <ProcessedPhoto key="ai" src={aiImage} look={AI_LOOK} className="absolute inset-0 h-full w-full" alt={`AI가 그린 ${age.label}의 모습`} delayMs={300} />
+      ) : (
+        <ProcessedPhoto key={years} src={image} look={age.look} className="absolute inset-0 h-full w-full" alt={`${age.label} 에이징 필터 예시`} delayMs={0}>
+          <WrinkleLines k={age.k} />
+        </ProcessedPhoto>
+      )}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={image}
@@ -290,7 +299,7 @@ function Envelope({
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.96 }}
             onClick={() => setSealed(true)}
-            className="rounded-xl px-6 py-3 text-sm font-bold text-white shadow-lg"
+            className="demo-accent-surface rounded-xl px-6 py-3 text-sm font-bold text-white shadow-lg"
             style={{ backgroundColor: color }}
           >
             🔒 타임캡슐 봉인하기
@@ -312,8 +321,10 @@ function formatDate(d: Date): string {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
   const capture = getCapture(answers, 'face');
+  // AI 결과는 고른 시점 한 장 — 있으면 그 사진과 미래의 나의 답장을 보여주고, 없으면 10·20·30년 필터 3컷
+  const ai = isAiTimecapsule(generated) ? generated : null;
   const years = parseYears(answers);
   const { message, from } = letterOf(answers);
   const [selected, setSelected] = useState<Years>(years);
@@ -334,42 +345,54 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
     <ResultShell
       eyebrow="AI 타임캡슐 포토"
       title={`${years}년 뒤의 나에게 보내는 편지`}
-      description="AI가 지금의 얼굴에서 10·20·30년 뒤의 모습을 예측하고, 편지와 함께 타임캡슐에 담았어요."
+      description={
+        ai
+          ? `AI가 지금의 얼굴로 ${years}년 뒤의 모습을 그리고, 편지와 함께 타임캡슐에 담았어요. 미래의 내가 보낸 답장도 확인해 보세요.`
+          : '원본 사진에 10·20·30년 후를 표현하는 에이징 필터를 더한 예시예요. 실제 노화 예측은 아닙니다.'
+      }
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="새 타임캡슐 만들기"
     >
       {capture && (
         <div className="flex w-full max-w-md flex-col items-center gap-4">
-          <AgeCompare image={capture.image} years={selected} nowYear={dates.nowYear} />
+          <AgeCompare image={capture.image} years={ai ? years : selected} nowYear={dates.nowYear} aiImage={ai?.image} />
           <p className="text-[11px] text-slate-500">사진을 좌우로 밀어 지금과 비교해 보세요</p>
 
-          <div className="grid w-full grid-cols-3 gap-2.5">
-            {YEARS.map((y) => (
-              <button
-                key={y}
-                type="button"
-                onClick={() => setSelected(y)}
-                aria-pressed={selected === y}
-                className={cn(
-                  'rounded-2xl border p-1.5 text-center transition-colors',
-                  selected === y ? 'bg-slate-900' : 'border-slate-800 bg-slate-900/50 hover:border-slate-600'
-                )}
-                style={selected === y ? { borderColor: pillarColor } : undefined}
-              >
-                <ProcessedPhoto src={capture.image} look={AGING[y].look} className="aspect-[3/4] w-full rounded-xl" alt={`${AGING[y].label} 모습`} delayMs={600 + y * 30}>
-                  <WrinkleLines k={AGING[y].k} />
-                </ProcessedPhoto>
-                <p className="mt-1.5 text-xs font-bold text-white">
-                  +{y}년 {y === years && '💌'}
-                </p>
-                <p className="text-[10px] text-slate-500">{dates.nowYear + y}년</p>
-              </button>
-            ))}
-          </div>
-          <p className="text-center text-xs text-slate-400 [word-break:keep-all]">
-            <span className="font-semibold text-slate-200">{AGING[selected].label}</span> · {AGING[selected].note}
-          </p>
+          {ai ? (
+            <p className="text-center text-xs text-slate-400 [word-break:keep-all]">
+              <span className="font-semibold text-slate-200">{AGING[years].label}</span> · AI가 내 사진으로 직접 그린 {dates.nowYear + years}년의 나
+            </p>
+          ) : (
+            <>
+              <div className="grid w-full grid-cols-3 gap-2.5">
+                {YEARS.map((y) => (
+                  <button
+                    key={y}
+                    type="button"
+                    onClick={() => setSelected(y)}
+                    aria-pressed={selected === y}
+                    className={cn(
+                      'rounded-2xl border p-1.5 text-center transition-colors',
+                      selected === y ? 'bg-slate-900' : 'border-slate-800 bg-slate-900/50 hover:border-slate-600'
+                    )}
+                    style={selected === y ? { borderColor: pillarColor } : undefined}
+                  >
+                    <ProcessedPhoto src={capture.image} look={AGING[y].look} className="aspect-[3/4] w-full rounded-xl" alt={`${AGING[y].label} 모습`} delayMs={600 + y * 30}>
+                      <WrinkleLines k={AGING[y].k} />
+                    </ProcessedPhoto>
+                    <p className="mt-1.5 text-xs font-bold text-white">
+                      +{y}년 {y === years && '💌'}
+                    </p>
+                    <p className="text-[10px] text-slate-500">{dates.nowYear + y}년</p>
+                  </button>
+                ))}
+              </div>
+              <p className="text-center text-xs text-slate-400 [word-break:keep-all]">
+                <span className="font-semibold text-slate-200">{AGING[selected].label}</span> · {AGING[selected].note}
+              </p>
+            </>
+          )}
         </div>
       )}
 
@@ -379,10 +402,19 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         </div>
       </Panel>
 
+      {ai && (
+        <Panel title={`${dates.nowYear + years}년의 내가 보낸 답장`}>
+          <p className="whitespace-pre-line font-serif text-sm italic leading-relaxed text-slate-200 [word-break:keep-all]">{ai.reply}</p>
+          <p className="mt-2 text-right font-serif text-xs text-slate-500">From. {dates.nowYear + years}년의 나</p>
+        </Panel>
+      )}
+
       <InfoGrid
         items={[
           { emoji: '📆', label: '개봉일', value: dates.open, desc: `${years}년 뒤 오늘` },
-          { emoji: '🖼️', label: '사진 구성', value: '지금 + 미래 3컷', desc: '10·20·30년 후 에이징' },
+          ai
+            ? { emoji: '🖼️', label: '사진 구성', value: '지금 + 미래 1컷', desc: `AI가 그린 ${years}년 후 모습` }
+            : { emoji: '🖼️', label: '사진 구성', value: '지금 + 미래 3컷', desc: '10·20·30년 후 에이징' },
           { emoji: '✉️', label: '패키징', value: '타임캡슐 봉투', desc: '사진과 편지를 함께 봉인' },
           { emoji: '📲', label: '디지털 보관', value: 'QR 코드 저장', desc: '실제 부스에서 사본을 받아요' },
         ]}
@@ -401,7 +433,8 @@ export default defineDemo({
     analyzeEmoji: '⏳',
     analyzeDurationMs: 3600,
     analyzeImageStepId: 'face',
-    analyzeMessages: ['얼굴 골격 구조 분석 중', '10년 후 모습 예측 중', '20·30년 후 에이징 계산 중', '타임캡슐 봉투에 담는 중'],
+    // AI 사진 변환은 10~20초 — 마지막 문구가 남은 시간을 채운다
+    analyzeMessages: ['현재 사진과 편지 확인 중', '상상 속 미래 초상화 구성 중', '직접 보관할 타임캡슐 카드 준비 중'],
   },
   steps: [
     cameraStep({
@@ -411,11 +444,8 @@ export default defineDemo({
       mode: 'face',
       subject: '얼굴',
       countdown: true,
-      scanLabels: ['얼굴 영역 감지', '골격 구조 추정', '피부 결·탄력 분석', '에이징 기준점 설정'],
-      readouts: (c) => [
-        { label: '피부 톤', value: c.stats.warmth > 52 ? '웜' : '쿨' },
-        { label: '기준점', value: '128개' },
-      ],
+      scanLabels: ["현재 사진 준비","상상할 시점 확인","창작 초상화 구도 준비","편지와 사진 구성"],
+      readouts: () => [{"label":"현재 사진","value":"준비 완료"},{"label":"미래 모습","value":"예측이 아닌 창작 이미지"}],
     }),
     textStep({
       id: 'letter',
@@ -440,13 +470,29 @@ export default defineDemo({
   ],
   computeResult: (answers) => `open-${parseYears(answers)}`,
   Result,
-  print: (answers) => {
+  generate: (answers) => {
     const capture = getCapture(answers, 'face');
+    if (!capture) return Promise.resolve(null);
+    const { message, from } = letterOf(answers);
+    return requestDemoAi<AiTimecapsule>(
+      'timecapsule-photo',
+      { experienceProfile: answers.experienceProfile, photo: capture.image, years: String(parseYears(answers)), message, from },
+      { timeoutMs: 60_000, validate: isAiTimecapsule }
+    );
+  },
+  print: (answers, _resultKey, generated) => {
+    const capture = getCapture(answers, 'face');
+    const ai = isAiTimecapsule(generated) ? generated : null;
     const years = parseYears(answers);
     const { message, from } = letterOf(answers);
     return {
       kind: 'photo',
-      photos: capture
+      photos: capture && ai
+        ? [
+            { src: capture.image, label: '지금' },
+            { src: ai.image, label: `💌 ${AGING[years].label}` },
+          ]
+        : capture
         ? [
             { src: capture.image, label: '지금' },
             ...YEARS.map((y) => ({

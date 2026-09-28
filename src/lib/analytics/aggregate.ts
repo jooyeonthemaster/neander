@@ -11,7 +11,7 @@ export const EVENTS_COLLECTION = 'analytics_events'
 export const DAILY_COLLECTION = 'analytics_daily'
 
 /** 요약 구조가 바뀌면 올려서 저장된 일별 요약을 다시 계산하게 한다 */
-export const SUMMARY_VERSION = 4
+export const SUMMARY_VERSION = 5
 
 /** 한 페이지만 보고 10초 안에 아무 행동 없이 떠난 세션을 이탈로 본다 */
 export const BOUNCE_MAX_MS = 10_000
@@ -92,6 +92,26 @@ export interface HourStat {
   uv: number
 }
 
+/** 온라인 견적(/quote) 이용 — 모두 방문(세션) 기준 */
+export interface QuoteStats {
+  /** 단계별 도달 방문 수. 뒤 단계에 간 방문은 앞 단계도 지난 것으로 센다 */
+  funnel: { visit: number; conditions: number; experiences: number; form: number; pdf: number; request: number }
+  /** 고른 대표 시나리오 (preset id, 'blank' = 직접 구성) */
+  presets: Counter
+  /** 견적에 담은 상품 (ServiceKey) */
+  items: Counter
+  /** 어떻게 들어왔는지: preset | item(상품 카드) | service(체험 페이지·데모) | direct */
+  entries: Counter
+  /** 견적 직전에 보던 페이지 ('(첫 페이지)' = 견적으로 바로 들어옴) */
+  from: Counter
+}
+
+export const QUOTE_STEPS = ['visit', 'conditions', 'experiences', 'form', 'pdf', 'request'] as const
+
+export function emptyQuoteStats(): QuoteStats {
+  return { funnel: { visit: 0, conditions: 0, experiences: 0, form: 0, pdf: 0, request: 0 }, presets: {}, items: {}, entries: {}, from: {} }
+}
+
 export interface Summary {
   pageviews: number
   sessions: number
@@ -137,6 +157,8 @@ export interface Summary {
   pages: Record<string, PageStat>
   /** KST 0~23시 */
   hours: HourStat[]
+  /** 온라인 견적 이용 */
+  quote: QuoteStats
 }
 
 export function emptyStat(): Stat {
@@ -173,6 +195,7 @@ export function emptySummary(): Summary {
     outbound: {},
     pages: {},
     hours: Array.from({ length: 24 }, () => ({ pv: 0, ss: 0, uv: 0 })),
+    quote: emptyQuoteStats(),
   }
 }
 
@@ -335,6 +358,7 @@ export function summarize(events: AnalyticsEvent[]): Summary {
     }
     const exit = session.pageviews[session.pageviews.length - 1]
     if (exit) page(summary.pages, exit.path).exits += 1
+    addQuoteSession(summary.quote, session)
   }
 
   summary.vids = [...vids]
@@ -343,6 +367,59 @@ export function summarize(events: AnalyticsEvent[]): Summary {
     hour.uv = hourVisitors[i].size
   })
   return summary
+}
+
+/** 한 방문의 온라인 견적 이용을 더한다 */
+function addQuoteSession(stats: QuoteStats, session: SessionRecord) {
+  const quoteIndex = session.pageviews.findIndex((pv) => pv.path === '/quote')
+  const acts = session.actions.filter((a) => a.name?.startsWith('quote_'))
+  if (quoteIndex < 0 && acts.length === 0) return
+
+  // 도달한 가장 뒤 단계 (0 = 방문)
+  let reached = 0
+  const stepOf: Record<string, number> = { conditions: 1, experiences: 2, form: 3 }
+  const items = new Set<string>()
+  const presets = new Set<string>()
+  let entry = 'direct'
+  for (const a of acts) {
+    if (a.name === 'quote_step' && a.label) {
+      if (a.label in stepOf) reached = Math.max(reached, stepOf[a.label])
+      else if (a.label.startsWith('add_')) { items.add(a.label.slice(4)); reached = Math.max(reached, 2) }
+    }
+    if (a.name === 'quote_preset' && a.label) { presets.add(a.label); reached = Math.max(reached, 1) }
+    if (a.name === 'quote_pdf') reached = Math.max(reached, 4)
+    if (a.name === 'quote_request') reached = Math.max(reached, 5)
+    if (a.name === 'quote_view' && a.label) {
+      const [kind, value] = a.label.split(':')
+      if (kind === 'preset' || kind === 'item' || kind === 'service') entry = kind
+      if (kind === 'preset' && value) presets.add(value)
+      if (kind === 'item' && value) items.add(value)
+      // 시나리오·상품·체험을 들고 오면 행사 조건 단계에서 시작한다
+      if (kind === 'preset' || kind === 'item' || kind === 'service') reached = Math.max(reached, 1)
+    }
+  }
+  // PDF와 확정 요청은 따로 센다 (둘 다 한 방문도 있다)
+  const f = stats.funnel
+  f.visit += 1
+  if (reached >= 1) f.conditions += 1
+  if (reached >= 2) f.experiences += 1
+  if (reached >= 3) f.form += 1
+  if (acts.some((a) => a.name === 'quote_pdf')) f.pdf += 1
+  if (acts.some((a) => a.name === 'quote_request')) f.request += 1
+
+  presets.forEach((p) => bump(stats.presets, p))
+  items.forEach((i) => bump(stats.items, i))
+  bump(stats.entries, entry)
+  bump(stats.from, quoteIndex > 0 ? session.pageviews[quoteIndex - 1].path : '(첫 페이지)')
+}
+
+function mergeQuote(target: QuoteStats, source: QuoteStats | undefined) {
+  if (!source) return
+  for (const key of QUOTE_STEPS) target.funnel[key] += source.funnel[key] ?? 0
+  mergeCounter(target.presets, source.presets ?? {})
+  mergeCounter(target.items, source.items ?? {})
+  mergeCounter(target.entries, source.entries ?? {})
+  mergeCounter(target.from, source.from ?? {})
 }
 
 function mergeCounter(target: Counter, source: Counter) {
@@ -409,6 +486,7 @@ export function mergeSummaries(list: Summary[]): Summary {
       merged.hours[i].ss += hour.ss
       merged.hours[i].uv += hour.uv
     })
+    mergeQuote(merged.quote, summary.quote)
   }
 
   merged.vids = [...vids]
@@ -463,6 +541,7 @@ export function compactSummary(summary: Summary): Summary {
   const compact: Summary = { ...summary }
   for (const key of STAT_KEYS) compact[key] = capStatMap(summary[key], 300)
   for (const key of COUNTER_KEYS) compact[key] = capCounter(summary[key], 300)
+  compact.quote = { ...summary.quote, from: capCounter(summary.quote.from, 100) }
   const pages = Object.entries(summary.pages)
   if (pages.length > 500) {
     compact.pages = Object.fromEntries(pages.sort((a, b) => b[1].pv - a[1].pv).slice(0, 500))

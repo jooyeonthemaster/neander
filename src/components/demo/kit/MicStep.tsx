@@ -3,7 +3,7 @@
 /* ─────────────────────────────────────────────────────────
    NEANDERco.  |  Demo Kit — microphone capture step
    마이크 권한 요청 → 실시간 파형 → 녹음 → 음높이·성량·억양 측정.
-   녹음은 브라우저 메모리(object URL)에만 두고 전송하지 않는다.
+   녹음은 브라우저 메모리(object URL)에 두고, 결과 생성을 위해 /api/demo-ai 로만 전송한다(저장하지 않음).
    ───────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -113,13 +113,14 @@ function MicCapture({ opts, answers, onUpdate }: { opts: MicStepOptions } & Demo
     if (!analyser || !canvas || !ctx) return;
 
     const buffer = new Float32Array(analyser.fftSize);
+    const accent = getComputedStyle(canvas).getPropertyValue('--venue-accent').trim() || '#2dd4bf';
     let frame = 0;
     const render = () => {
       analyser.getFloatTimeDomainData(buffer);
       const { width, height } = canvas;
       ctx.clearRect(0, 0, width, height);
       ctx.lineWidth = 2.5;
-      ctx.strokeStyle = recordingRef.current ? '#f87171' : '#2dd4bf';
+      ctx.strokeStyle = recordingRef.current ? '#f87171' : accent;
       ctx.beginPath();
       const step = buffer.length / width;
       for (let x = 0; x < width; x++) {
@@ -310,16 +311,16 @@ function MicCapture({ opts, answers, onUpdate }: { opts: MicStepOptions } & Demo
   }, [onUpdate, opts.id, startMic, voice?.audioUrl]);
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col items-center lg:max-w-lg">
-      <div className="relative w-full overflow-hidden rounded-3xl border border-slate-700 bg-slate-900 p-6">
+    <div className="demo-mic-step mx-auto flex w-full max-w-md flex-col items-center lg:max-w-lg" data-mic-phase={phase}>
+      <div className="demo-mic-console relative w-full overflow-hidden rounded-3xl border border-slate-700 bg-slate-900 p-6">
         {/* 읽을 문장 */}
-        <div className="mb-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-center">
+        <div className="demo-mic-script mb-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-center">
           <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">Script</p>
           <p className="text-base font-medium leading-relaxed text-white">“{opts.script}”</p>
         </div>
 
         {/* 파형 영역 */}
-        <div className="relative flex h-28 items-center justify-center">
+        <div data-demo-page-atomic className="demo-mic-waveform relative flex h-28 items-center justify-center">
           {(phase === 'ready' || phase === 'recording') && (
             <canvas ref={canvasRef} width={560} height={140} className="h-full w-full" aria-hidden="true" />
           )}
@@ -337,7 +338,7 @@ function MicCapture({ opts, answers, onUpdate }: { opts: MicStepOptions } & Demo
             </div>
           )}
           {(phase === 'idle' || phase === 'starting' || phase === 'error') && (
-            <div className="flex flex-col items-center gap-2 text-center">
+            <div className="demo-mic-status flex flex-col items-center gap-2 text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-500/15 text-teal-300">
                 {phase === 'starting' ? (
                   <motion.div
@@ -375,7 +376,7 @@ function MicCapture({ opts, answers, onUpdate }: { opts: MicStepOptions } & Demo
         )}
 
         {phase === 'analyzing' && (
-          <ul className="mt-4 space-y-1.5">
+          <ul className="demo-capture-readouts mt-4 space-y-1.5">
             {scanLabels.map((label, i) => (
               <li key={label} className="flex items-center justify-between text-xs">
                 <span className={i < scanIndex ? 'text-slate-200' : i === scanIndex ? 'text-teal-300' : 'text-slate-600'}>
@@ -390,7 +391,7 @@ function MicCapture({ opts, answers, onUpdate }: { opts: MicStepOptions } & Demo
         )}
 
         {phase === 'done' && voice && (
-          <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="demo-capture-readouts mt-4 grid grid-cols-3 gap-2">
             {[
               { label: '평균 음높이', value: `${voice.pitchHz}Hz` },
               { label: '성량', value: `${voice.volume}` },
@@ -406,7 +407,7 @@ function MicCapture({ opts, answers, onUpdate }: { opts: MicStepOptions } & Demo
       </div>
 
       {/* Controls */}
-      <div className="mt-6 flex flex-col items-center gap-3">
+      <div className="demo-capture-controls mt-6 flex flex-col items-center gap-3">
         {(phase === 'idle' || phase === 'error' || phase === 'starting') && (
           <>
             {phase === 'starting' ? (
@@ -417,7 +418,7 @@ function MicCapture({ opts, answers, onUpdate }: { opts: MicStepOptions } & Demo
                   cleanup();
                   setPhase('idle');
                 }}
-                className="rounded-xl border border-slate-600 px-6 py-3 text-sm font-semibold text-slate-200 transition-colors hover:border-slate-400 hover:text-white"
+                className="demo-secondary-action rounded-xl border border-slate-600 px-6 py-3 text-sm font-semibold text-slate-200 transition-colors hover:border-slate-400 hover:text-white"
               >
                 취소
               </button>
@@ -427,7 +428,7 @@ function MicCapture({ opts, answers, onUpdate }: { opts: MicStepOptions } & Demo
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={startMic}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-500/20"
+                className="demo-primary-action inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-500/20"
               >
                 {phase === 'error' ? '다시 시도' : '마이크 켜기'}
               </motion.button>
@@ -447,7 +448,7 @@ function MicCapture({ opts, answers, onUpdate }: { opts: MicStepOptions } & Demo
               type="button"
               whileTap={{ scale: 0.95 }}
               onClick={startRecording}
-              className="inline-flex items-center gap-2 rounded-xl bg-red-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-500/20"
+              className="demo-record-action inline-flex items-center gap-2 rounded-xl bg-red-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-500/20"
             >
               <span className="h-2.5 w-2.5 rounded-full bg-white" />
               녹음 시작 ({duration}초)
@@ -470,7 +471,7 @@ function MicCapture({ opts, answers, onUpdate }: { opts: MicStepOptions } & Demo
             다시 녹음하기
           </button>
         )}
-        <p className="text-[11px] text-slate-500">녹음은 이 브라우저 안에서만 쓰이고 저장·전송되지 않아요</p>
+        <p className="demo-capture-privacy text-[11px] text-slate-500">녹음은 AI 결과를 만드는 데만 쓰이고, 네안데르는 저장하지 않아요</p>
       </div>
     </div>
   );

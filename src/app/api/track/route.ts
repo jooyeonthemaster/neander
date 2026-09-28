@@ -47,7 +47,11 @@ const payloadSchema = z.discriminatedUnion('t', [
   z.object({
     t: z.literal('ev'),
     ...hit,
-    name: z.enum(['inquiry_submit', 'click_tel', 'click_email', 'click_outbound']),
+    name: z.enum([
+      'inquiry_submit', 'click_tel', 'click_email', 'click_outbound', 'brochure_request',
+      // 온라인 견적(/quote) 단계별 이용
+      'quote_view', 'quote_preset', 'quote_step', 'quote_pdf', 'quote_request',
+    ]),
     label: z.string().max(200).nullable(),
   }),
   z.object({

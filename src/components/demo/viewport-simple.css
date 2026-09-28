@@ -1,0 +1,191 @@
+/* Arrival and each choice have their own screen, with one image and one message. */
+.experience-venue[data-fit-viewport] :is(.venue-simple-welcome, .venue-simple-question) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  gap: clamp(24px, 4vw, 64px);
+  margin-inline: auto;
+  color: var(--venue-ink);
+}
+
+.experience-venue[data-fit-viewport] .venue-simple-photo {
+  align-self: stretch;
+  min-width: 0;
+  min-height: 0;
+}
+
+.experience-venue[data-fit-viewport] .venue-simple-photo .venue-image {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: auto;
+  margin: 0;
+  border-radius: var(--venue-radius);
+  transform: none;
+}
+
+.experience-venue[data-fit-viewport] .venue-simple-photo .venue-image-shade {
+  background: linear-gradient(transparent 72%, #0008);
+}
+
+.experience-venue[data-fit-viewport] .venue-simple-copy {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 20px 16px 20px 0;
+  text-align: left;
+}
+
+.experience-venue[data-fit-viewport] .venue-simple-signature {
+  margin-bottom: 18px;
+  color: var(--venue-accent);
+  font: 600 15px/1.5 var(--venue-body-font);
+  letter-spacing: .1em;
+}
+
+.experience-venue[data-fit-viewport] .venue-simple-copy h2 {
+  margin: 0;
+  color: var(--venue-ink);
+  font-family: var(--venue-heading-font);
+  font-size: clamp(32px, 3.4vw, 50px);
+  font-weight: var(--venue-title-weight);
+  line-height: 1.4;
+  letter-spacing: var(--venue-title-tracking);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.experience-venue[data-fit-viewport] .venue-simple-invitation {
+  margin: 24px 0 0;
+  color: var(--venue-muted);
+  font-size: 19px;
+  line-height: 1.7;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.experience-venue[data-fit-viewport] .venue-simple-question .venue-question {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.experience-venue[data-fit-viewport] .venue-simple-question .venue-question legend {
+  display: block;
+  width: 100%;
+  margin: 0 0 24px;
+  color: var(--venue-ink);
+  font-family: var(--venue-heading-font);
+  font-size: clamp(24px, 2.4vw, 34px);
+  line-height: 1.5;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.experience-venue[data-fit-viewport] .venue-simple-question .venue-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+}
+
+.experience-venue[data-fit-viewport] .venue-simple-question .venue-option {
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  min-height: 62px;
+  padding: 13px 18px;
+  border: 1px solid var(--venue-line);
+  border-radius: var(--venue-radius);
+  text-align: left;
+}
+
+.experience-venue[data-fit-viewport] .venue-simple-question .venue-option-label {
+  font-size: 19px;
+  line-height: 1.4;
+}
+
+.experience-venue[data-fit-viewport] .venue-simple-question .venue-option-swatch {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  border-radius: 50%;
+}
+
+.experience-venue[data-fit-viewport] .venue-simple-question .venue-current-choice-detail {
+  margin: 20px 0 0;
+  color: var(--venue-muted);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.experience-venue[data-fit-viewport] .venue-station-photo {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.experience-venue[data-fit-viewport] .venue-station-photo .venue-image {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  aspect-ratio: auto;
+  margin: 0;
+  transform: none;
+}
+
+@media (max-width: 900px) {
+  .experience-venue[data-fit-viewport] :is(.venue-simple-welcome, .venue-simple-question) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: clamp(140px, 22dvh, 180px) minmax(0, 1fr);
+    align-items: start;
+    gap: 20px;
+  }
+
+  .experience-venue[data-fit-viewport] .venue-simple-photo .venue-image {
+    border-width: 0;
+    outline: none;
+  }
+
+  .experience-venue[data-fit-viewport] .venue-simple-copy { padding: 0 4px; }
+  .experience-venue[data-fit-viewport] .venue-simple-signature { margin-bottom: 10px; font-size: 14px; }
+  .experience-venue[data-fit-viewport] .venue-simple-copy h2 { font-size: clamp(28px, 6.5vw, 36px); line-height: 1.45; }
+  .experience-venue[data-fit-viewport] .venue-simple-invitation { margin-top: 16px; font-size: 17px; line-height: 1.65; }
+  .experience-venue[data-fit-viewport] .venue-simple-question .venue-question legend { margin-bottom: 16px; font-size: 21px; line-height: 1.5; }
+  .experience-venue[data-fit-viewport] .venue-simple-question .venue-options { gap: 8px; }
+  .experience-venue[data-fit-viewport] .venue-simple-question .venue-option { min-height: 52px; padding: 10px 12px; gap: 8px; }
+  .experience-venue[data-fit-viewport] .venue-simple-question .venue-option-label { font-size: 17px; line-height: 1.4; }
+  .experience-venue[data-fit-viewport] .venue-simple-question .venue-option-swatch { width: 22px; height: 22px; }
+  .experience-venue[data-fit-viewport] .venue-simple-question .venue-current-choice-detail { margin-top: 12px; font-size: 17px; line-height: 1.5; }
+}
+
+@media (max-width: 900px) and (max-height: 650px) {
+  .experience-venue[data-fit-viewport] :is(.venue-simple-welcome, .venue-simple-question) { grid-template-rows: 140px minmax(0, 1fr); gap: 12px; }
+  .experience-venue[data-fit-viewport] .venue-simple-question .venue-question legend { font-size: 19px; margin-bottom: 12px; }
+  .experience-venue[data-fit-viewport] .venue-simple-question .venue-option { min-height: 48px; padding: 9px 10px; }
+}
+
+@media (max-height: 500px) and (min-width: 600px) {
+  .experience-venue[data-fit-viewport] :is(.venue-simple-welcome, .venue-simple-question) {
+    grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: center;
+    gap: 24px;
+  }
+  .experience-venue[data-fit-viewport] .venue-simple-copy h2 { font-size: 28px; }
+  .experience-venue[data-fit-viewport] .venue-simple-signature { margin-bottom: 8px; }
+  .experience-venue[data-fit-viewport] .venue-simple-invitation { margin-top: 12px; }
+}

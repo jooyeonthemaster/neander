@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import type { DemoAnswers, DemoResultProps, DemoStepProps } from '@/types/demo';
@@ -14,6 +14,7 @@ import {
   defineDemo,
   getChoice,
   getFields,
+  requestDemoAi,
   seededInt,
   seededRandom,
   textStep,
@@ -21,11 +22,18 @@ import {
   type DemoStepDef,
   type PhotoLook,
 } from '../kit';
+import {
+  MOVIE_MAX_PHOTOS,
+  MOVIE_MIN_PHOTOS,
+  MOVIE_MOTIONS,
+  type AiMemoryMovie,
+  type MovieMotion,
+} from '@/data/demo-ai/memory-movie';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-const MIN_PHOTOS = 3;
-const MAX_PHOTOS = 6;
+const MIN_PHOTOS = MOVIE_MIN_PHOTOS;
+const MAX_PHOTOS = MOVIE_MAX_PHOTOS;
 const TITLE_SEC = 3;
 const PHOTO_SEC = 3.2;
 const END_SEC = 3.6;
@@ -694,7 +702,7 @@ function PhotoCollector({ answers, onUpdate }: DemoStepProps) {
           e.target.value = '';
         }}
       />
-      <p className="mt-4 text-center text-[11px] text-slate-500">사진은 이 브라우저 안에서만 쓰이고 저장·전송되지 않아요</p>
+      <p className="mt-4 text-center text-[11px] text-slate-500">사진은 AI 결과를 만드는 데만 쓰이고, 네안데르는 저장하지 않아요</p>
     </div>
   );
 }
@@ -733,7 +741,10 @@ function formatTime(sec: number) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
-const PANS: [number, number, number, number][] = [
+type Pan = [number, number, number, number];
+
+/** 켄 번즈 프리셋 — AI가 고르는 MOVIE_MOTIONS와 같은 순서 (zoom-in · zoom-out · push-in · drift) */
+const PANS: Pan[] = [
   // [시작 y%, 끝 y%, 시작 배율, 끝 배율]
   [25, 60, 1.05, 1.18],
   [65, 30, 1.18, 1.06],
@@ -741,8 +752,15 @@ const PANS: [number, number, number, number][] = [
   [60, 35, 1.04, 1.16],
 ];
 
-function MoviePlayer({ photos, mood, title, message, color }: { photos: CaptureData[]; mood: Mood; title: string; message: string; color: string }) {
-  const n = photos.length;
+/** 상영할 장면 하나 — 사진 · 자막 · 카메라 무빙 */
+interface Scene {
+  image: string;
+  caption: string;
+  pan: Pan;
+}
+
+function MoviePlayer({ scenes, mood, title, ending, color }: { scenes: Scene[]; mood: Mood; title: string; ending: string; color: string }) {
+  const n = scenes.length;
   const total = runtimeOf(n);
   const [elapsed, setElapsed] = useState(0);
   const [playing, setPlaying] = useState(true);
@@ -833,9 +851,10 @@ function MoviePlayer({ photos, mood, title, message, color }: { photos: CaptureD
   } else scene = { kind: 'end', index: n, local: elapsed - TITLE_SEC - n * PHOTO_SEC, duration: END_SEC };
   const p = Math.min(1, scene.local / scene.duration);
 
-  const caption = scene.kind === 'photo' ? sceneCaption(mood, message, scene.index, n) : null;
-  const pan = PANS[Math.max(0, scene.index) % PANS.length]!;
-  const segments = [{ label: '타이틀', start: 0, dur: TITLE_SEC }, ...photos.map((_, i) => ({ label: `장면 ${i + 1}`, start: TITLE_SEC + i * PHOTO_SEC, dur: PHOTO_SEC })), { label: '엔딩', start: TITLE_SEC + n * PHOTO_SEC, dur: END_SEC }];
+  const current = scene.kind === 'photo' ? scenes[scene.index] : undefined;
+  const caption = current?.caption ?? null;
+  const pan = current?.pan ?? PANS[0]!;
+  const segments = [{ label: '타이틀', start: 0, dur: TITLE_SEC }, ...scenes.map((_, i) => ({ label: `장면 ${i + 1}`, start: TITLE_SEC + i * PHOTO_SEC, dur: PHOTO_SEC })), { label: '엔딩', start: TITLE_SEC + n * PHOTO_SEC, dur: END_SEC }];
 
   const bars = Array.from({ length: 28 }, (_, i) => {
     if (!isPlaying) return 0.12 + ((i * 7) % 5) * 0.03;
@@ -854,7 +873,7 @@ function MoviePlayer({ photos, mood, title, message, color }: { photos: CaptureD
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.8 }}
-              className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
+              className="demo-dark-surface absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
               style={{ background: `radial-gradient(circle at 50% 40%, ${mood.colors[0]}66, #0b0b12 72%)` }}
             >
               <p className="text-[9px] font-semibold tracking-[0.5em] text-white/60">A NEANDER MEMORY FILM</p>
@@ -866,11 +885,11 @@ function MoviePlayer({ photos, mood, title, message, color }: { photos: CaptureD
               </p>
             </motion.div>
           )}
-          {scene.kind === 'photo' && (
+          {current && (
             <motion.div key={`photo-${scene.index}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.9 }} className="absolute inset-0">
               {/* 배경: 같은 사진을 흐리게 깔고 반대 방향으로 흐른다 */}
               <motion.img
-                src={photos[scene.index]!.image}
+                src={current.image}
                 alt=""
                 aria-hidden="true"
                 className="absolute inset-0 h-full w-full object-cover"
@@ -883,7 +902,7 @@ function MoviePlayer({ photos, mood, title, message, color }: { photos: CaptureD
               {/* 전경: 사진 전체가 보이도록 세로로 꽉 채우고 켄 번즈 줌·팬 */}
               <div className={cn('absolute inset-x-0 flex justify-center', mood.letterbox ? 'inset-y-[10%]' : 'inset-y-0')}>
                 <motion.img
-                  src={photos[scene.index]!.image}
+                  src={current.image}
                   alt={`장면 ${scene.index + 1}`}
                   className="h-full w-auto max-w-none shadow-[0_0_40px_rgba(0,0,0,0.6)]"
                   style={{
@@ -903,13 +922,13 @@ function MoviePlayer({ photos, mood, title, message, color }: { photos: CaptureD
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.8 }}
-              className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden bg-[#0b0b12] px-6 text-center"
+              className="demo-dark-surface absolute inset-0 flex flex-col items-center justify-center overflow-hidden bg-[#0b0b12] px-6 text-center"
             >
               <div style={{ transform: `translateY(${20 - p * 30}%)` }}>
                 <p className="text-xl font-bold tracking-[0.3em] text-white" style={{ fontFamily: SERIF }}>
                   THE END
                 </p>
-                {message && <p className="mt-2 text-sm text-white/85 [word-break:keep-all]">“{message}”</p>}
+                {ending && <p className="mt-2 text-sm text-white/85 [word-break:keep-all]">“{ending}”</p>}
                 <p className="mt-3 text-[9px] tracking-[0.3em] text-white/50">DIRECTED BY AI NEANDER</p>
                 <p className="text-[9px] tracking-[0.3em] text-white/50">MUSIC · {mood.track.toUpperCase()}</p>
               </div>
@@ -971,7 +990,7 @@ function MoviePlayer({ photos, mood, title, message, color }: { photos: CaptureD
           type="button"
           onClick={togglePlay}
           aria-label={isPlaying ? '일시정지' : ended ? '다시 재생' : '재생'}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+          className="demo-accent-surface flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
           style={{ backgroundColor: color }}
         >
           {isPlaying ? '❚❚' : ended ? '↻' : '▶'}
@@ -1075,17 +1094,133 @@ function FakeQr({ seed }: { seed: number }) {
 
 /* ── Result ────────────────────────────────────────────── */
 
-/** 결과 화면과 출력물이 함께 쓰는 무비 정보 */
-function movieOf(answers: DemoAnswers) {
+function isAiMovie(v: unknown): v is AiMemoryMovie {
+  const o = v as AiMemoryMovie | null;
+  return (
+    !!o &&
+    typeof o.title === 'string' &&
+    typeof o.logline === 'string' &&
+    typeof o.closing === 'string' &&
+    Array.isArray(o.photos) &&
+    o.photos.every((p) => typeof p?.caption === 'string' && typeof p.note === 'string' && (MOVIE_MOTIONS as readonly string[]).includes(p.motion)) &&
+    Array.isArray(o.order) &&
+    o.order.every((i) => Number.isInteger(i)) &&
+    !!o.music &&
+    typeof o.music.track === 'string' &&
+    typeof o.music.bpm === 'number' &&
+    typeof o.music.key === 'number'
+  );
+}
+
+/** 결과 화면과 출력물이 함께 쓰는 무비 — AI 연출이 있으면 그것, 없으면 무드 프리셋 그대로 */
+interface MovieView {
+  mood: Mood;
+  title: string;
+  scenes: Scene[];
+  /** 엔딩 크레딧 문장 (없으면 빈 문자열) */
+  ending: string;
+  /** 장면 순서대로 AI가 사진에서 본 것 */
+  notes: string[];
+  logline?: string;
+  ai: boolean;
+}
+
+function movieView(answers: DemoAnswers, generated?: unknown): MovieView {
   const picked = getChoice(answers, 'mood') as MoodId | undefined;
   const mood = (picked && MOODS[picked]) || MOODS.flutter;
   const text = getFields<string>(answers, 'text');
-  return {
-    photos: getPhotos(answers),
-    mood,
-    title: (text.title ?? '').trim() || mood.fallbackTitle,
-    message: (text.message ?? '').trim(),
+  const photos = getPhotos(answers);
+  const typedTitle = (text.title ?? '').trim();
+  const message = (text.message ?? '').trim();
+  const n = photos.length;
+  const profile = getFields<string>(answers, 'experienceProfile');
+
+  // AI 결과는 보낸 사진 수와 맞고, 순서가 모든 사진을 한 번씩 담을 때만 쓴다
+  const ai =
+    isAiMovie(generated) &&
+    generated.photos.length === n &&
+    generated.order.length === n &&
+    new Set(generated.order.filter((i) => i >= 0 && i < n)).size === n
+      ? generated
+      : null;
+
+  if (!ai) {
+    return {
+      mood,
+      title: typedTitle || mood.fallbackTitle,
+      scenes: photos.map((p, i) => ({ image: p.image, caption: sceneCaption(mood, message, i, n), pan: PANS[i % PANS.length]! })),
+      ending: message,
+      notes: [],
+      ai: false,
+    };
+  }
+
+  // A participant's locked chronology takes precedence over an AI reorder.
+  const order = profile.narrative === 'chronological'
+    ? photos.map((_, i) => i)
+    : profile.narrative === 'highlight'
+      ? [0, ...ai.order.filter((index) => index !== 0)]
+      : ai.order;
+
+  // 선택 화면의 BPM은 유지하고, AI는 조옮김·곡 제목만 제안한다.
+  const music: Mood = {
+    ...mood,
+    track: ai.music.track,
+    bpm: mood.bpm,
+    chords: mood.chords.map((chord) => chord.map((m) => m + ai.music.key)),
   };
+  return {
+    mood: music,
+    title: typedTitle || ai.title,
+    scenes: order.map((photoIndex, i) => ({
+      image: photos[photoIndex]!.image,
+      // 직접 쓴 마지막 자막은 그대로 마지막 장면에
+      caption: i === n - 1 && message ? message : ai.photos[photoIndex]!.caption,
+      pan: PANS[MOVIE_MOTIONS.indexOf(ai.photos[photoIndex]!.motion as MovieMotion)] ?? PANS[0]!,
+    })),
+    ending: message || ai.closing,
+    notes: order.map((photoIndex) => ai.photos[photoIndex]!.note),
+    logline: ai.logline,
+    ai: true,
+  };
+}
+
+/** 브라우저에서 사진을 384×512 JPEG로 줄인다 — 요청 본문을 작게 (6장이어도 수백 KB) */
+function downscale(src: string, maxSide = 512): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.naturalWidth * scale);
+        canvas.height = Math.round(img.naturalHeight * scale);
+        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      } catch {
+        resolve(src);
+      }
+    };
+    img.onerror = () => resolve(src);
+    img.src = src;
+  });
+}
+
+async function generate(answers: DemoAnswers): Promise<AiMemoryMovie | null> {
+  const photos = getPhotos(answers);
+  if (photos.length < MIN_PHOTOS) return null;
+  const text = getFields<string>(answers, 'text');
+  return requestDemoAi<AiMemoryMovie>(
+    'memory-movie',
+    {
+      experienceProfile: answers.experienceProfile,
+      photos: await Promise.all(photos.map((p) => downscale(p.image))),
+      mood: getChoice(answers, 'mood') ?? 'flutter',
+      title: (text.title ?? '').trim(),
+      message: (text.message ?? '').trim(),
+    },
+    { validate: isAiMovie }
+  );
 }
 
 /* ── Print (필름 스틸 4컷) ─────────────────────────────── */
@@ -1171,39 +1306,44 @@ function StillOverlay({ mood, caption, index, count }: { mood: Mood; caption: st
   );
 }
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
-  const { photos, mood, title, message } = movieOf(answers);
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
+  // BGM 스케줄러가 mood 객체에 반응하므로 같은 입력이면 같은 객체를 쓴다
+  const { scenes, mood, title, ending, notes, logline, ai } = useMemo(() => movieView(answers, generated), [answers, generated]);
   const seed = answersSeed(answers);
   const code = `NDR-${seededInt(seed, 'code', 0x10000, 0xfffff).toString(16).toUpperCase()}`;
-  const total = runtimeOf(photos.length);
+  const total = runtimeOf(scenes.length);
 
   return (
     <ResultShell
       eyebrow={`AI 추억 무비 메이커 · ${mood.label}`}
       title={`🎞️ ${title}`}
-      description={`사진 ${photos.length}장을 ${mood.label} 무드로 편집하고, 어울리는 BGM과 자막을 입혔어요.`}
+      description={logline ?? `사진 ${scenes.length}장을 ${mood.label} 무드로 편집하고, 어울리는 BGM과 자막을 입혔어요.`}
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="새 무비 만들기"
     >
-      {photos.length > 0 && <MoviePlayer photos={photos} mood={mood} title={title} message={message} color={pillarColor} />}
+      {scenes.length > 0 && <MoviePlayer scenes={scenes} mood={mood} title={title} ending={ending} color={pillarColor} />}
 
       <InfoGrid
         columns={3}
         items={[
           { label: '러닝타임', value: formatTime(total) },
-          { label: '장면 수', value: `${photos.length}컷` },
+          { label: '장면 수', value: `${scenes.length}컷` },
           { label: '화질', value: '16:9 FHD' },
         ]}
       />
 
-      <TraitChips title="AI 편집 노트" items={['켄 번즈 줌·팬', '크로스페이드 전환', `${mood.label} 컬러 그레이딩`, '자막 자동 배치', `BGM ${mood.bpm} BPM 비트 싱크`]} />
+      {notes.length > 0 && <TraitChips title="AI가 본 장면" items={notes.map((note, i) => `${String(i + 1).padStart(2, '0')} ${note}`)} />}
+
+      <TraitChips title={ai ? 'AI 편집 노트' : '예시 편집 노트'} items={['켄 번즈 줌·팬', '크로스페이드 전환', `${mood.label} 컬러 그레이딩`, '자막 자동 배치', `BGM ${mood.bpm} BPM 비트 싱크`]} />
+
+      {ai && <p className="text-xs text-slate-500">AI가 사진을 보고 제목·자막·장면 순서를 연출했어요</p>}
 
       <div className="flex w-full max-w-md items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-left">
         <FakeQr seed={seed} />
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">QR 다운로드</p>
-          <p className="mt-1 text-sm font-semibold text-white [word-break:keep-all]">스캔하면 폰으로 바로 받아요</p>
+          <p className="mt-1 text-sm font-semibold text-white [word-break:keep-all]">현장에서는 스캔해 폰으로 받아요</p>
           <p className="mt-1 font-mono text-xs" style={{ color: pillarColor }}>
             {code}
           </p>
@@ -1227,7 +1367,7 @@ export default defineDemo({
     industryId: 'wedding',
     analyzeEmoji: '🎞️',
     analyzeDurationMs: 3800,
-    analyzeMessages: ['사진 속 표정·장면 분석 중', '감성 컷 순서 편집 중', '분위기에 맞는 BGM 매칭 중', '자막 입히고 렌더링 중'],
+    analyzeMessages: ['AI가 사진을 한 장씩 보는 중', '사진 속 표정·장면 분석 중', '감성 컷 순서 편집 중', '분위기에 맞는 BGM 매칭 중', '자막 입히고 렌더링 중'],
   },
   steps: [
     photosStep,
@@ -1256,15 +1396,16 @@ export default defineDemo({
   ],
   computeResult,
   Result,
-  print: (answers) => {
-    const { photos, mood, title, message } = movieOf(answers);
-    const n = photos.length;
+  generate,
+  print: (answers, _resultKey, generated) => {
+    const { scenes, mood, title } = movieView(answers, generated);
+    const n = scenes.length;
     return {
       kind: 'photo',
       photos: stillIndexes(n).map((i) => ({
-        src: photos[i]!.image,
+        src: scenes[i]!.image,
         look: { adjust: mood.grade },
-        overlay: <StillOverlay mood={mood} caption={sceneCaption(mood, message, i, n)} index={i} count={n} />,
+        overlay: <StillOverlay mood={mood} caption={scenes[i]!.caption} index={i} count={n} />,
       })),
       title,
       caption: `${mood.label} 무드 · ♪ ${mood.track} · ${n}컷 · 러닝타임 ${formatTime(runtimeOf(n))}`,

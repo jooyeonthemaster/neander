@@ -1,6 +1,6 @@
 /* ─────────────────────────────────────────────────────────
    NEANDERco.  |  Experiential AI Content Data
-   42 unique AI experience concepts across 9 industries
+   41 unique AI experience concepts across 9 industries
    ───────────────────────────────────────────────────────── */
 
 export type PillarId = 'ai-photo' | 'ai-diagnosis' | 'ai-fortune' | 'ai-creative' | 'ai-immersive';

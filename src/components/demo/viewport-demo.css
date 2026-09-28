@@ -1,0 +1,169 @@
+/* A fixed stage: larger content is read in pages, never through a hidden scrollbar. */
+.experience-venue[data-fit-viewport] { min-height: 0; overflow: hidden; }
+.experience-venue[data-fit-viewport] .venue-topbar { flex-shrink: 0; }
+.experience-venue[data-fit-viewport] .venue-topbar-inner { min-height: 64px; padding-block: 10px; }
+.experience-venue[data-fit-viewport] .venue-service-title { font-size: clamp(20px, 1.9vw, 28px); }
+.experience-venue[data-fit-viewport] .venue-topbar-badges,
+.experience-venue[data-fit-viewport] .venue-service-subtitle { display: none; }
+.experience-venue[data-fit-viewport] .venue-disclaimer { flex-shrink: 0; margin-top: 8px; font-size: 14px; }
+.experience-venue[data-fit-viewport] .venue-demo-loaded,
+.experience-venue[data-fit-viewport] .venue-shell { display: flex; flex: 1; flex-direction: column; width: 100%; height: 100%; min-height: 0; }
+.experience-venue[data-fit-viewport] .venue-shell { padding: 16px 30px; }
+.experience-venue[data-fit-viewport] .venue-wayfinding { flex-shrink: 0; margin: 0 0 14px; padding-bottom: 12px; }
+.experience-venue[data-fit-viewport] .venue-view,
+.experience-venue[data-fit-viewport] .venue-view-panel { flex: 1; height: 100%; min-height: 0; }
+.experience-venue[data-fit-viewport] .venue-view { position: relative; }
+.experience-venue[data-fit-viewport] .venue-view-panel { position: absolute; inset: 0; }
+.experience-venue[data-fit-viewport] .venue-navigation { flex-shrink: 0; margin-top: 12px; padding-top: 10px; }
+.experience-venue[data-fit-viewport] .venue-navigation button { min-height: 48px; padding: 9px 20px; font-size: 18px; }
+.experience-venue[data-fit-viewport] .venue-detail-dock { position: relative; flex-shrink: 0; padding: 10px 24px; }
+.experience-venue[data-fit-viewport] .venue-detail-link { min-height: 58px; padding: 8px 22px; }
+.experience-venue[data-fit-viewport] .venue-detail-link strong { font-size: 21px; }
+.experience-venue[data-fit-viewport] .venue-detail-link small { font-size: 14px; }
+
+/* Intro: one question per step, with a distinct visual identity alongside it. */
+.experience-venue[data-fit-viewport] .venue-briefing { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); height: 100%; min-height: 0; gap: 28px; }
+.experience-venue[data-fit-viewport] .venue-welcome { display: flex; flex-direction: column; padding: 16px; height: 100%; min-height: 0; min-width: 0; overflow: hidden; }
+.experience-venue[data-fit-viewport] .venue-welcome > :not(.venue-scene) { max-width: 100%; flex-shrink: 0; }
+.experience-venue[data-fit-viewport] .venue-program-name { margin-bottom: 12px; padding-block: 6px; font-size: clamp(23px, 2.3vw, 34px); }
+.experience-venue[data-fit-viewport] .venue-welcome h2 { margin-top: 10px; font-size: clamp(28px, 2.7vw, 40px); line-height: 1.25; }
+.experience-venue[data-fit-viewport] .venue-invitation { margin: 12px 0 16px; font-size: 17px; line-height: 1.7; }
+.experience-venue[data-fit-viewport] .venue-scene { position: relative; inset: auto; order: 0; flex: 1; min-height: 60px; margin: 0; }
+.experience-venue[data-fit-viewport] .venue-welcome .venue-image { height: 100%; width: 100%; min-height: 0; aspect-ratio: auto; }
+.experience-venue[data-fit-viewport] .venue-object { display: none; }
+.experience-venue[data-fit-viewport] .venue-scene-label { top: 14px; left: 14px; }
+.experience-venue[data-fit-viewport] .venue-arrival { margin-top: 12px; gap: 8px 16px; font-size: 14px; }
+.experience-venue[data-fit-viewport] .venue-brief { display: flex; flex-direction: column; height: 100%; min-height: 0; padding: 22px; }
+.experience-venue[data-fit-viewport] .venue-brief-heading { flex-shrink: 0; padding-bottom: 12px; margin-bottom: 12px; font-size: 17px; }
+.experience-venue[data-fit-viewport] .venue-question-list { display: block; }
+.experience-venue[data-fit-viewport] .venue-question { margin-top: 0; }
+.experience-venue[data-fit-viewport] .venue-question legend { font-size: 21px; }
+.experience-venue[data-fit-viewport] .venue-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.experience-venue[data-fit-viewport] .venue-option { min-height: 76px; padding: 12px; }
+.experience-venue[data-fit-viewport] .venue-question--scale .venue-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.experience-venue[data-fit-viewport] .venue-question--chips .venue-options { display: flex; }
+.experience-venue[data-fit-viewport] .venue-question--chips .venue-option { min-height: 48px; }
+.experience-venue[data-fit-viewport] .venue-brief-footer { margin-top: 18px; padding: 12px; }
+
+/* Live workspaces retain component state across content pages. */
+.experience-venue[data-fit-viewport] .venue-station-grid { height: 100%; min-height: 0; grid-template-columns: 215px minmax(0, 1fr); gap: 24px; }
+.experience-venue[data-fit-viewport] .venue-guide { height: 100%; min-height: 0; overflow: hidden; padding: 18px; }
+.experience-venue[data-fit-viewport] .venue-guide h3 { margin: 10px 0 14px; font-size: 21px; }
+.experience-venue[data-fit-viewport] .venue-guide .venue-image { max-height: 155px; }
+.experience-venue[data-fit-viewport] .venue-guide-now { margin-block: 12px; }
+.experience-venue[data-fit-viewport] .venue-preparation { display: none; }
+.experience-venue[data-fit-viewport] .venue-guide-choices { margin: 12px 0; }
+.experience-venue[data-fit-viewport] .venue-guide-output { padding-top: 12px; }
+.experience-venue[data-fit-viewport] .venue-workspace { display: flex; flex-direction: column; height: 100%; min-height: 0; padding: 20px; }
+.experience-venue[data-fit-viewport] .demo-step-heading { flex-shrink: 0; padding-bottom: 12px; margin-bottom: 14px; }
+.experience-venue[data-fit-viewport] .demo-step-heading h2 { font-size: 27px; line-height: 1.4; }
+.experience-venue[data-fit-viewport] .demo-step-heading p { font-size: 17px; line-height: 1.6; }
+.experience-venue[data-fit-viewport] .demo-choice { padding: 12px; }
+.experience-venue[data-fit-viewport] .demo-page-content > div > svg[role='img'] { max-height: calc(var(--demo-available-height) * .6); }
+.experience-venue[data-fit-viewport][data-program='ai-memory-movie'] .venue-workspace [class~='aspect-[3/4]']:has(video) { width: auto; height: min(210px, calc(var(--demo-available-height) * .55)); }
+.experience-venue[data-fit-viewport][data-program='ai-nail-designer'] svg[aria-label='네일 미리보기'] { max-height: 120px; }
+
+/* The paged window has no wheel/drag scrolling; all controls stay mounted. */
+.demo-paged-viewport { display: flex; flex: 1; flex-direction: column; height: 100%; min-height: 0; min-width: 0; }
+.demo-page-window { flex-shrink: 0; min-width: 0; overflow: hidden; }
+.demo-page-clip { width: 100%; overflow: hidden; }
+.demo-page-content { display: flow-root; width: 100%; padding: 5px; }
+.demo-page-pagination { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; gap: 8px; height: var(--demo-page-controls-height, 44px); border-top: 1px solid var(--venue-line); color: var(--venue-ink); font-size: 15px; }
+.demo-page-pagination button { display: inline-flex; align-items: center; justify-content: center; gap: 3px; min-height: 40px; padding: 4px 8px; border-radius: 8px; color: var(--venue-accent); }
+.demo-page-pagination button:hover { background: color-mix(in srgb, var(--venue-accent) 10%, var(--venue-paper)); }
+.demo-page-pagination button:disabled { color: var(--venue-muted); opacity: .45; }
+
+/* Results: the report, personal guide, and full-resolution output have their own views. */
+.experience-venue[data-fit-viewport] .venue-result-panel { display: flex; flex-direction: column; }
+.venue-result-tabs { display: flex; flex-shrink: 0; gap: 8px; margin-bottom: 12px; }
+.venue-result-tabs button { flex: 1; min-height: 44px; padding: 7px 10px; border-radius: var(--venue-radius); border: 1px solid var(--venue-line); background: var(--venue-paper); font-size: 17px; color: var(--venue-ink); }
+.venue-result-tabs [aria-selected='true'] { background: var(--venue-accent); color: var(--venue-accent-ink); }
+.venue-result-tab-panel { flex: 1; min-height: 0; }
+.venue-result-tab-panel[hidden] { display: none; }
+.experience-venue[data-fit-viewport] .venue-result-content { padding: 18px; }
+.experience-venue[data-fit-viewport] .venue-summary { margin: 0; padding: 20px; }
+.experience-venue[data-fit-viewport] .venue-summary-grid { grid-template-columns: 1fr; gap: 20px; }
+.experience-venue[data-fit-viewport] .venue-processing { padding: 24px; }
+.experience-venue[data-fit-viewport] .venue-processing-object { height: 60px; margin-bottom: 10px; }
+.experience-venue[data-fit-viewport] .venue-processing h2 { font-size: 30px; margin-top: 12px; }
+.experience-venue[data-fit-viewport] .venue-processing ol { margin-block: 20px; }
+.experience-venue[data-fit-viewport] .venue-processing li { padding: 12px; }
+.experience-venue[data-fit-viewport] .venue-cancel { margin-top: 16px; }
+
+@media (max-height: 850px) {
+  .experience-venue[data-fit-viewport] .venue-welcome h2 { font-size: 30px; }
+  .experience-venue[data-fit-viewport] .venue-invitation { display: none; }
+  .experience-venue[data-fit-viewport] .venue-welcome .venue-scene { margin-top: 16px; }
+  .experience-venue[data-fit-viewport] .venue-guide-now, .experience-venue[data-fit-viewport] .venue-guide-output { display: none; }
+  .experience-venue[data-fit-viewport] .venue-processing li:not(.is-active) { display: none; }
+}
+@media (max-width: 900px) {
+  .experience-venue[data-fit-viewport] .venue-topbar-inner { min-height: 56px; gap: 8px; padding-block: 7px; }
+  .experience-venue[data-fit-viewport] .venue-topbar button { min-width: 40px; min-height: 40px; width: 40px; height: 40px; }
+  .experience-venue[data-fit-viewport] .venue-service-title { font-size: 20px; line-height: 1.3; }
+  .experience-venue[data-fit-viewport] .venue-disclaimer { font-size: 12px; line-height: 1.5; margin-top: 5px; }
+  .experience-venue[data-fit-viewport] .venue-shell { padding: 10px 12px; }
+  .experience-venue[data-fit-viewport] .venue-wayfinding { gap: 10px; padding-bottom: 8px; margin-bottom: 10px; }
+  .experience-venue[data-fit-viewport] .venue-wayfinding-label { display: none; }
+  .experience-venue[data-fit-viewport] .venue-wayfinding small { font-size: 14px; }
+  .experience-venue[data-fit-viewport] .venue-briefing { display: flex; flex-direction: column; gap: 8px; }
+  .experience-venue[data-fit-viewport] .venue-welcome { flex-shrink: 0; height: auto; padding: 0; background: none; box-shadow: none; border: 0; text-align: left; }
+  .experience-venue[data-fit-viewport] .venue-welcome > :not(.venue-program-name) { display: none; }
+  .experience-venue[data-fit-viewport] .venue-program-name { font-size: 23px; margin: 0; padding: 3px 0; border: 0; transform: none; }
+  .experience-venue[data-fit-viewport] .venue-brief { flex: 1; padding: 14px; border-radius: min(20px, var(--venue-radius)); }
+  .experience-venue[data-fit-viewport] .venue-brief-heading { font-size: 15px; margin-bottom: 10px; padding-bottom: 10px; }
+  .experience-venue[data-fit-viewport] .venue-question legend { font-size: 19px; line-height: 1.5; }
+  .experience-venue[data-fit-viewport] .venue-question-why { font-size: 15px; margin: 8px 0 12px; }
+  .experience-venue[data-fit-viewport] .venue-option-label { font-size: 17px; }
+  .experience-venue[data-fit-viewport] .venue-option-detail { font-size: 14px; }
+  .experience-venue[data-fit-viewport] .venue-station-grid { display: block; }
+  .experience-venue[data-fit-viewport] .venue-guide { display: none; }
+  .experience-venue[data-fit-viewport] .venue-workspace { padding: 14px; }
+  .experience-venue[data-fit-viewport] .demo-step-heading h2 { font-size: 23px; }
+  .experience-venue[data-fit-viewport] .demo-step-heading p { font-size: 15px; }
+  .experience-venue[data-fit-viewport] .venue-navigation { margin-top: 8px; padding-top: 8px; }
+  .experience-venue[data-fit-viewport] .venue-navigation button { min-height: 44px; padding: 7px 12px; font-size: 17px; }
+  .experience-venue[data-fit-viewport] .venue-detail-dock { padding: 8px 12px; }
+  .experience-venue[data-fit-viewport] .venue-detail-link { min-height: 50px; padding: 6px 14px; }
+  .experience-venue[data-fit-viewport] .venue-detail-link strong { font-size: 20px; }
+  .experience-venue[data-fit-viewport] .venue-detail-link small { display: none; }
+  .venue-result-tabs { gap: 5px; margin-bottom: 8px; }
+  .venue-result-tabs button { font-size: 15px; padding-inline: 4px; }
+  .experience-venue[data-fit-viewport] .venue-result-content { padding: 14px; }
+  .experience-venue[data-fit-viewport] .venue-processing { padding: 16px; }
+  .experience-venue[data-fit-viewport] .venue-processing h2 { font-size: 25px; }
+}
+@media (max-height: 600px) {
+  .experience-venue[data-fit-viewport] .venue-disclaimer { display: none; }
+  .experience-venue[data-fit-viewport] .venue-topbar-inner { min-height: 50px; padding-block: 4px; }
+  .experience-venue[data-fit-viewport] .venue-topbar button { min-height: 36px; min-width: 36px; height: 36px; width: 36px; }
+  .experience-venue[data-fit-viewport] .venue-wayfinding { margin-bottom: 6px; padding-bottom: 6px; }
+  .experience-venue[data-fit-viewport] .venue-shell { padding-block: 7px; }
+  .experience-venue[data-fit-viewport] .venue-program-name { font-size: 20px; }
+  .experience-venue[data-fit-viewport] .venue-detail-dock { padding-block: 5px; }
+  .experience-venue[data-fit-viewport] .venue-detail-link { min-height: 42px; padding-block: 4px; }
+  .experience-venue[data-fit-viewport] .venue-detail-link small { display: none; }
+  .experience-venue[data-fit-viewport] .demo-step-heading { padding-bottom: 6px; margin-bottom: 8px; }
+  .experience-venue[data-fit-viewport] .demo-step-heading h2 { font-size: 21px; }
+  .experience-venue[data-fit-viewport] .demo-step-heading p { margin-top: 4px; }
+}
+
+/* Keep only the current task visible in short landscape windows. */
+@media (max-height: 500px) {
+  .experience-venue[data-fit-viewport] { --demo-page-controls-height: 32px; }
+  .experience-venue[data-fit-viewport] .venue-wayfinding { display: none; }
+  .experience-venue[data-fit-viewport] .venue-topbar-inner { min-height: 44px; padding-block: 3px; }
+  .experience-venue[data-fit-viewport] .venue-service-title { font-size: 18px; }
+  .experience-venue[data-fit-viewport] .venue-topbar button { min-width: 32px; min-height: 32px; width: 32px; height: 32px; }
+  .experience-venue[data-fit-viewport] .venue-shell { padding-block: 6px; }
+  .experience-venue[data-fit-viewport] .venue-navigation { margin-top: 4px; padding-top: 4px; }
+  .experience-venue[data-fit-viewport] .venue-navigation button { min-height: 36px; padding-block: 4px; }
+  .experience-venue[data-fit-viewport] .venue-detail-dock { padding-block: 2px; }
+  .experience-venue[data-fit-viewport] .venue-detail-link { min-height: 40px; padding-block: 3px; }
+  .experience-venue[data-fit-viewport] .venue-detail-link strong { font-size: 18px; }
+  .experience-venue[data-fit-viewport] .demo-step-heading h2 { font-size: 21px; line-height: 1.3; }
+  .experience-venue[data-fit-viewport] .demo-step-heading p { display: none; }
+  .experience-venue[data-fit-viewport] .venue-workspace { padding: 10px 12px; }
+  .experience-venue[data-fit-viewport] .demo-page-pagination button { min-height: 32px; }
+}
+.experience-venue[data-fit-viewport]:not(:has([data-demo-scene='welcome'])) .venue-disclaimer { display: none; }

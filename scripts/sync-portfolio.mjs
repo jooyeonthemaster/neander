@@ -19,6 +19,7 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
+import { isDeepStrictEqual } from 'node:util'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const data = JSON.parse(readFileSync(join(here, 'portfolio-sync.data.json'), 'utf8'))
@@ -84,7 +85,8 @@ async function openAdmin() {
 
 // ── 변경 계획 ───────────────────────────────────────────────
 
-const same = (a, b) => JSON.stringify(a) === JSON.stringify(b)
+// Firestore may return map keys in a different order (for example image captions).
+const same = isDeepStrictEqual
 
 function buildPlan(docs) {
   const bySlug = new Map(docs.map((d) => [d.data.slug, d]))

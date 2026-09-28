@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { withParticle } from '@/lib/korean';
 import type { DemoAnswers, DemoResultProps, DemoStepProps } from '@/types/demo';
 import {
   Panel,
@@ -13,125 +14,16 @@ import {
   defineDemo,
   getChoice,
   getFields,
+  requestDemoAi,
   seededInt,
   textStep,
   type DemoStepDef,
 } from '../kit';
+import { LEVELS, TOPICS, PROJECTILE_TARGET_M, PROJECTILE_HIT_TOLERANCE_M, projectileRange, isProjectileHit, projectileOutcome, type AiScienceNote, type LevelId, type Topic, type TopicId } from '@/data/demo-ai/science-kiosk';
+import '../viewport-science.css';
+import '../demo-review-learning.css';
 
 /* ── Data ──────────────────────────────────────────────── */
-
-type TopicId = 'physics' | 'chemistry' | 'biology' | 'earth';
-type LevelId = 'elem' | 'middle' | 'high';
-
-interface Topic {
-  label: string;
-  emoji: string;
-  desc: string;
-  experiment: string;
-  code: string;
-  color: string;
-  mission: Record<LevelId, string>;
-  concept: Record<LevelId, string>;
-  links: Record<LevelId, string>;
-  terms: string[];
-}
-
-const TOPICS: Record<TopicId, Topic> = {
-  physics: {
-    label: '물리',
-    emoji: '🚀',
-    desc: '포물선 운동',
-    experiment: '발사각과 포물선 운동',
-    code: 'PHY',
-    color: '#38bdf8',
-    mission: {
-      elem: '발사 각도를 바꿔서 30m 깃발을 맞혀 보세요!',
-      middle: '발사 각도와 속력에 따라 날아가는 거리가 어떻게 달라지는지 비교해 보세요.',
-      high: '수평 도달 거리 R = v²·sin2θ / g 가 언제 최대가 되는지 확인해 보세요.',
-    },
-    concept: {
-      elem: '공을 너무 낮게 던지면 금방 떨어지고, 너무 높게 던지면 위로만 올라가요. 비스듬히 45° 근처로 던질 때 가장 멀리 날아가요!',
-      middle:
-        '던진 물체는 앞으로 나아가면서 중력 때문에 아래로 끌려 포물선을 그려요. 공기 저항이 없다면 45°에서 가장 멀리 날아가고, 30°와 60°처럼 합이 90°인 두 각도는 같은 거리를 날아가요.',
-      high:
-        '수평 방향은 등속 운동(v·cosθ), 연직 방향은 중력 가속도 g = 9.8 m/s²의 등가속도 운동이에요. 체공 시간 t = 2v·sinθ/g, 수평 도달 거리 R = v²·sin2θ/g 이므로 sin2θ가 최대인 45°에서 R이 가장 커요.',
-    },
-    links: { elem: '물체의 운동', middle: '운동과 에너지', high: '역학 · 포물선 운동' },
-    terms: ['포물선', '중력', '발사각', '수평 도달 거리'],
-  },
-  chemistry: {
-    label: '화학',
-    emoji: '🧪',
-    desc: '산과 염기',
-    experiment: '지시약으로 알아보는 pH',
-    code: 'CHM',
-    color: '#a3e635',
-    mission: {
-      elem: '여러 가지 용액을 넣어 보고 색깔이 어떻게 변하는지 관찰해요.',
-      middle: 'pH에 따라 만능 지시약의 색이 어떻게 달라지는지 알아봐요.',
-      high: '수소 이온 농도 [H⁺]와 pH의 관계(pH = −log[H⁺])를 확인해 보세요.',
-    },
-    concept: {
-      elem: '레몬즙처럼 신맛이 나는 용액은 산성, 비눗물처럼 미끌미끌한 용액은 염기성이에요. 지시약은 용액의 성질에 따라 색깔이 바뀌는 "색깔 탐정"이에요.',
-      middle:
-        'pH는 0~14 사이의 숫자로 산성과 염기성의 정도를 나타내요. 7은 중성, 7보다 작으면 산성, 크면 염기성이에요. 만능 지시약은 산성에서 붉은색, 중성에서 초록색, 염기성에서 푸른색~보라색을 띠어요.',
-      high:
-        'pH = −log[H⁺] 이므로 pH가 1 작아지면 수소 이온 농도는 10배 커져요. 지시약은 약산(또는 약염기) 분자로, H⁺와 결합한 형태와 떨어진 형태의 색이 달라서 용액의 pH에 따라 색이 변해요.',
-    },
-    links: { elem: '산과 염기', middle: '산과 염기의 성질', high: '산·염기와 중화 반응' },
-    terms: ['산성', '염기성', '중성', '지시약'],
-  },
-  biology: {
-    label: '생물',
-    emoji: '🌱',
-    desc: '광합성',
-    experiment: '빛의 세기와 광합성',
-    code: 'BIO',
-    color: '#4ade80',
-    mission: {
-      elem: '불빛을 밝게 하면 물풀에서 무슨 일이 생길까요? 조명을 조절해 보세요.',
-      middle: '빛의 세기와 광합성 속도(산소 기포 수)의 관계를 알아봐요.',
-      high: '광포화점을 찾아보세요 — 빛이 세져도 광합성 속도가 거의 늘지 않는 지점이에요.',
-    },
-    concept: {
-      elem: '식물은 햇빛을 받아 스스로 양분을 만들어요. 이때 산소가 나오는데, 물속 식물에서는 작은 기포로 보여요. 빛이 밝을수록 기포가 더 많이 생겨요!',
-      middle:
-        '광합성은 빛에너지를 이용해 이산화 탄소와 물로 포도당을 만들고 산소를 내놓는 과정이에요. 빛이 셀수록 광합성 속도가 빨라져 산소 기포가 많아지지만, 어느 정도 이상이면 더 늘지 않아요.',
-      high:
-        '6CO₂ + 12H₂O → C₆H₁₂O₆ + 6O₂ + 6H₂O. 빛이 약할 때는 빛의 세기가 제한 요인이지만, 광포화점을 넘으면 CO₂ 농도나 온도가 제한 요인이 되어 광합성 속도가 더 이상 증가하지 않아요.',
-    },
-    links: { elem: '식물의 구조와 기능', middle: '식물과 에너지', high: '생명 활동과 에너지' },
-    terms: ['광합성', '엽록체', '산소', '광포화점'],
-  },
-  earth: {
-    label: '지구과학',
-    emoji: '🌋',
-    desc: '판 구조론',
-    experiment: '움직이는 판과 지형 변화',
-    code: 'EAR',
-    color: '#fb923c',
-    mission: {
-      elem: '땅덩어리(판)를 밀고 당겨 보세요. 어떤 일이 일어날까요?',
-      middle: '판의 경계에서 어떤 지형과 지각 변동이 생기는지 관찰해요.',
-      high: '발산형·수렴형 경계에서 일어나는 지각 변동을 비교해 보세요.',
-    },
-    concept: {
-      elem: '지구의 겉은 여러 조각(판)으로 나뉘어 아주 천천히 움직여요. 판끼리 부딪히면 산이 솟고 지진이 나고, 멀어지면 그 틈으로 마그마가 올라와요.',
-      middle:
-        '지구 표면은 10여 개의 판으로 이루어져 있고, 맨틀 대류 때문에 1년에 수 cm씩 움직여요. 판의 경계에서는 지진과 화산 활동이 활발해요. 판이 멀어지면 해령, 부딪히면 해구와 습곡 산맥이 생겨요.',
-      high:
-        '발산형 경계에서는 맨틀 물질이 상승해 새 해양 지각이 만들어지고(해령·열곡대), 수렴형 경계에서는 밀도가 큰 해양판이 섭입하며 해구와 화산대가 생겨요. 대륙판끼리 충돌하면 거대한 습곡 산맥이 형성돼요.',
-    },
-    links: { elem: '화산과 지진', middle: '지권의 변화', high: '판 구조론' },
-    terms: ['판', '맨틀 대류', '해령', '해구'],
-  },
-};
-
-const LEVELS: Record<LevelId, { label: string; emoji: string; desc: string }> = {
-  elem: { label: '초등', emoji: '🐣', desc: '그림과 놀이로 쉽게' },
-  middle: { label: '중등', emoji: '📘', desc: '교과 개념까지' },
-  high: { label: '고등', emoji: '🎓', desc: '공식과 그래프로 깊게' },
-};
 
 /** 실험 스텝이 answers.experiment 에 저장하는 값 */
 interface ExperimentData {
@@ -143,6 +35,8 @@ interface ExperimentData {
   value2?: number;
   headline: string;
   summary: string;
+  /** First recorded condition, retained for a real before/after comparison. */
+  baseline?: { value: number; value2?: number; headline: string; summary: string };
 }
 
 function getExperiment(answers: DemoAnswers): ExperimentData | undefined {
@@ -158,12 +52,12 @@ const G = 9.8;
 const SCALE = 5.5;
 const OX = 20;
 const OY = 160;
-const TARGET = 30;
+const TARGET = PROJECTILE_TARGET_M;
 /** 깃발 명중으로 치는 거리 오차 (m) */
-const HIT_RANGE = 2.5;
+const HIT_RANGE = PROJECTILE_HIT_TOLERANCE_M;
 
 function hitsTarget(range: number): boolean {
-  return Math.abs(range - TARGET) <= HIT_RANGE;
+  return isProjectileHit(range);
 }
 
 function flight(angle: number, speed: number) {
@@ -176,10 +70,10 @@ function flight(angle: number, speed: number) {
     const t = (T * i) / 30;
     pts.push([OX + vx * t * SCALE, OY - (vy * t - 0.5 * G * t * t) * SCALE]);
   }
-  return { pts, T, R: (speed * speed * Math.sin(2 * rad)) / G, H: (vy * vy) / (2 * G) };
+  return { pts, T, R: projectileRange(angle, speed), H: (vy * vy) / (2 * G) };
 }
 
-function ProjectileSim({ level, saved, onRecord }: { level: LevelId; saved?: ExperimentData; onRecord: Record_ }) {
+function ProjectileSim({ level, saved, onRecord, progress }: { level: LevelId; saved?: ExperimentData; onRecord: Record_; progress: ReactNode }) {
   const [angle, setAngle] = useState(saved?.value ?? 30);
   const [speed, setSpeed] = useState(saved?.value2 ?? 18);
   const [shots, setShots] = useState<{ id: number; angle: number; speed: number }[]>([]);
@@ -201,7 +95,8 @@ function ProjectileSim({ level, saved, onRecord }: { level: LevelId; saved?: Exp
 
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-b from-sky-950/60 to-slate-950">
+      <section className="demo-science-bench demo-science-bench--physics" data-demo-page-atomic>
+      <div className="demo-science-diagram overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-b from-sky-950/60 to-slate-950">
         <svg viewBox="0 20 320 160" className="w-full" role="img" aria-label="포물선 발사 시뮬레이션">
           {/* 지면 & 눈금 */}
           <rect x="0" y={OY} width="320" height="20" fill="#14532d" opacity="0.6" />
@@ -215,7 +110,7 @@ function ProjectileSim({ level, saved, onRecord }: { level: LevelId; saved?: Exp
           ))}
           {/* 목표 깃발 */}
           <g transform={`translate(${OX + TARGET * SCALE}, ${OY})`}>
-            <rect x={-2.5 * SCALE} y="-2" width={5 * SCALE} height="2" fill="#facc15" opacity="0.5" />
+            <rect x={-HIT_RANGE * SCALE} y="-2" width={2 * HIT_RANGE * SCALE} height="2" fill="#facc15" opacity="0.5" />
             <line x1="0" y1="0" x2="0" y2="-26" stroke="#e2e8f0" strokeWidth="1.2" />
             <path d="M0 -26 L14 -21 L0 -16 Z" fill="#f43f5e" />
           </g>
@@ -266,12 +161,11 @@ function ProjectileSim({ level, saved, onRecord }: { level: LevelId; saved?: Exp
                 transition={{ duration: Math.min(2.2, Math.max(0.9, f.T * 0.45)), ease: 'linear' }}
                 onAnimationComplete={() => {
                   setLanded((l) => [...l, active.id]);
-                  const ok = hitsTarget(f.R);
                   onRecord({
                     value: active.angle,
                     value2: active.speed,
                     headline: `${f.R.toFixed(1)}m 비행`,
-                    summary: `발사각 ${active.angle}°, 속력 ${active.speed}m/s로 쏜 공이 ${f.R.toFixed(1)}m 날아갔어요 (최고 높이 ${f.H.toFixed(1)}m)${ok ? ' — 30m 깃발 명중!' : ''}`,
+                    summary: `발사각 ${active.angle}°, 속력 ${active.speed}m/s로 쏜 공이 ${f.R.toFixed(1)}m 날아갔어요 — ${projectileOutcome(f.R)} (명중 기준 ±${HIT_RANGE}m).`,
                   });
                 }}
               />
@@ -280,7 +174,8 @@ function ProjectileSim({ level, saved, onRecord }: { level: LevelId; saved?: Exp
         </svg>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+      <div className="demo-science-launch-controls grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+        {progress}
         <div className="space-y-3">
           <label className="block">
             <span className="mb-1 flex justify-between text-xs text-slate-400">
@@ -309,9 +204,10 @@ function ProjectileSim({ level, saved, onRecord }: { level: LevelId; saved?: Exp
           🚀 발사!
         </motion.button>
       </div>
+      </section>
 
       {lastFlight && (
-        <div className="grid grid-cols-3 gap-2 text-center">
+        <div className="demo-science-readings grid grid-cols-3 gap-2 text-center" data-demo-page-atomic>
           {[
             { label: '비행 거리', value: `${lastFlight.R.toFixed(1)}m` },
             { label: '최고 높이', value: `${lastFlight.H.toFixed(1)}m` },
@@ -333,7 +229,7 @@ function ProjectileSim({ level, saved, onRecord }: { level: LevelId; saved?: Exp
             exit={{ opacity: 0 }}
             className="text-center text-sm font-bold text-amber-300"
           >
-            🎯 30m 깃발 명중!
+            🎯 30m 깃발 명중! (허용 오차 ±{HIT_RANGE}m)
           </motion.p>
         )}
       </AnimatePresence>
@@ -407,7 +303,7 @@ function hConcentration(ph: number): string {
 
 const PH_GRADIENT = `linear-gradient(90deg, ${PH_STOPS.map((s) => `${s.color} ${(s.ph / 14) * 100}%`).join(', ')})`;
 
-function PhSim({ level, saved, onRecord }: { level: LevelId; saved?: ExperimentData; onRecord: Record_ }) {
+function PhSim({ level, saved, onRecord, progress }: { level: LevelId; saved?: ExperimentData; onRecord: Record_; progress: ReactNode }) {
   const [ph, setPh] = useState(saved?.value ?? 7);
   const [drops, setDrops] = useState(0);
   const ind = indicator(ph);
@@ -421,13 +317,15 @@ function PhSim({ level, saved, onRecord }: { level: LevelId; saved?: ExperimentD
     onRecord({
       value: next,
       headline: `pH ${next} · ${phClass(next)}`,
-      summary: `${sub ? `${sub.name}(pH ${next})` : `pH ${next} 용액`}을 넣었더니 지시약이 ${i.name}으로 변했어요 — ${phClass(next)}`,
+      summary: `${sub ? `${withParticle(sub.name, '을/를')}(pH ${next})` : `pH ${next} 용액을`} 넣었더니 지시약이 ${withParticle(i.name, '으로/로')} 변했어요 — ${phClass(next)}`,
     });
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-3">
+      <section className="demo-science-bench demo-science-bench--chemistry" data-demo-page-atomic>
+      {progress}
+      <div className="demo-science-beaker grid grid-cols-[10rem_minmax(0,1fr)] items-center gap-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-3 sm:grid-cols-[12rem_minmax(0,1fr)]">
         <svg viewBox="0 0 200 180" className="w-40 shrink-0 sm:w-48" role="img" aria-label={`비커 속 지시약 색: ${ind.name}`}>
           <defs>
             <clipPath id="beaker-inside">
@@ -467,19 +365,19 @@ function PhSim({ level, saved, onRecord }: { level: LevelId; saved?: ExperimentD
           ))}
           <rect x="60" y="36" width="5" height="100" rx="2.5" fill="#ffffff" opacity="0.15" />
         </svg>
-        <div className="min-w-0 flex-1 space-y-2 text-left">
+        <div className="demo-science-solution min-w-0 flex-1 space-y-2 text-left">
           <p className="text-xs text-slate-500">현재 용액</p>
           <p className="whitespace-nowrap font-display text-2xl font-extrabold text-white sm:text-3xl">pH {ph}</p>
           <p className="text-sm font-semibold" style={{ color: ind.color }}>
             {phClass(ph)} · {ind.name}
           </p>
           {substance && <p className="text-xs text-slate-400">≈ {substance.name}</p>}
-          {level === 'high' && (
-            <p className="font-mono text-[11px] text-slate-400">
-              [H⁺] = {hConcentration(ph)} mol/L
-            </p>
-          )}
         </div>
+        {level === 'high' && (
+          <p className="demo-science-concentration col-span-2 font-mono text-[11px] text-slate-400">
+            [H⁺] = {hConcentration(ph)} mol/L
+          </p>
+        )}
       </div>
 
       <div>
@@ -500,8 +398,9 @@ function PhSim({ level, saved, onRecord }: { level: LevelId; saved?: ExperimentD
           <span>염기성 · 14</span>
         </div>
       </div>
+      </section>
 
-      <div className="flex flex-wrap justify-center gap-2">
+      <div className="demo-science-substances flex flex-wrap justify-center gap-2" data-demo-page-atomic>
         {SUBSTANCES.map((s) => (
           <button
             key={s.name}
@@ -529,7 +428,7 @@ function o2Rate(light: number): number {
   return Math.round(40 * (1 - Math.exp(-light / 28)));
 }
 
-function PhotosynthesisSim({ level, saved, onRecord }: { level: LevelId; saved?: ExperimentData; onRecord: Record_ }) {
+function PhotosynthesisSim({ level, saved, onRecord, progress }: { level: LevelId; saved?: ExperimentData; onRecord: Record_; progress: ReactNode }) {
   const [light, setLight] = useState(saved?.value ?? 20);
   const rate = o2Rate(light);
   const count = Math.min(10, Math.round(rate / 4));
@@ -557,7 +456,9 @@ function PhotosynthesisSim({ level, saved, onRecord }: { level: LevelId; saved?:
 
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/70">
+      <section className="demo-science-bench demo-science-bench--biology" data-demo-page-atomic>
+      {progress}
+      <div className="demo-science-diagram overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/70">
         <svg viewBox="0 0 320 190" className="w-full" role="img" aria-label={`빛의 세기 ${light}%, 산소 기포 1분에 ${rate}개`}>
           <defs>
             <linearGradient id="bio-beam" x1="0" y1="0" x2="1" y2="1">
@@ -622,9 +523,10 @@ function PhotosynthesisSim({ level, saved, onRecord }: { level: LevelId; saved?:
         </span>
         <input type="range" min={0} max={100} step={5} value={light} onChange={(e) => change(Number(e.target.value))} className="w-full accent-green-400" />
       </label>
+      </section>
 
       {level !== 'elem' && (
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+        <div className="demo-science-readings rounded-xl border border-slate-800 bg-slate-900/60 p-3" data-demo-page-atomic>
           <p className="mb-1 text-[11px] text-slate-400">빛의 세기에 따른 광합성 속도</p>
           <svg viewBox="0 0 320 70" className="w-full" aria-hidden="true">
             <line x1="20" y1="58" x2="305" y2="58" stroke="#334155" />
@@ -669,7 +571,7 @@ function plateInfo(v: number) {
       type: '수렴형 경계',
       feature: big ? '해구 · 화산 · 습곡 산맥' : '해구 · 지진대',
       example: '페루–칠레 해구, 안데스 산맥',
-      summary: `두 판이 1년에 ${speed}cm씩 부딪히자 해양판이 섭입하며 해구와 ${big ? '화산·습곡 산맥' : '지진대'}가 만들어졌어요`,
+      summary: `두 판이 1년에 ${speed}cm씩 부딪히자 해양판이 섭입하며 해구와 ${withParticle(big ? '화산·습곡 산맥' : '지진대', '이/가')} 만들어졌어요`,
     };
   }
   return { type: '거의 정지', feature: '변화 없음', example: '', summary: '' };
@@ -683,7 +585,7 @@ const QUAKES = [
   [170, 140],
 ] as const;
 
-function PlateSim({ saved, onRecord }: { level: LevelId; saved?: ExperimentData; onRecord: Record_ }) {
+function PlateSim({ saved, onRecord, progress }: { level: LevelId; saved?: ExperimentData; onRecord: Record_; progress: ReactNode }) {
   const [v, setV] = useState(saved?.value ?? 0);
   const info = plateInfo(v);
   const diverge = v <= -15;
@@ -707,7 +609,9 @@ function PlateSim({ saved, onRecord }: { level: LevelId; saved?: ExperimentData;
 
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/70">
+      <section className="demo-science-bench demo-science-bench--earth" data-demo-page-atomic>
+      {progress}
+      <div className="demo-science-diagram overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/70">
         <svg viewBox="0 0 320 190" className="w-full" role="img" aria-label={`판의 이동: ${info.type}`}>
           <defs>
             <linearGradient id="earth-sky" x1="0" y1="0" x2="0" y2="1">
@@ -837,8 +741,9 @@ function PlateSim({ saved, onRecord }: { level: LevelId; saved?: ExperimentData;
         </span>
         <input type="range" min={-100} max={100} step={5} value={v} onChange={(e) => change(Number(e.target.value))} className="w-full accent-orange-400" />
       </label>
+      </section>
 
-      <div className="rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-left">
+      <div className="demo-science-readings rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-left" data-demo-page-atomic>
         <p className="text-sm font-semibold text-white">
           {info.type}
           {info.feature !== '변화 없음' && <span className="ml-2 text-orange-300">→ {info.feature}</span>}
@@ -858,10 +763,26 @@ function ExperimentStep({ answers, onUpdate }: DemoStepProps) {
   const current = getExperiment(answers);
   const saved = current?.topic === topicId ? current : undefined;
 
-  const record: Record_ = (d) => onUpdate('experiment', { ...d, topic: topicId, runs: (saved?.runs ?? 0) + 1 } satisfies ExperimentData);
+  const mission = (answers.experienceProfile as Record<string, string> | undefined)?.mission;
+  const required = mission === 'compare' ? 2 : 1;
+  const distinct = !!saved?.baseline && (saved.value !== saved.baseline.value || saved.value2 !== saved.baseline.value2);
+  const completed = saved ? (required === 2 && distinct ? 2 : 1) : 0;
+  const progress = <div className="demo-science-progress" role="status" aria-live="polite">
+    <strong>{completed >= required ? '✓ ' : ''}실험 {completed}/{required}회 완료</strong>
+    <span>{completed >= required ? '관찰이 끝났어요. 다음으로 진행해 주세요.' : completed === 1 ? '변수 하나를 바꾸어 다시 실행해 주세요.' : topicId === 'physics' ? '각도·속력을 고르고 발사 버튼을 눌러 주세요.' : '아래 조건을 조절해 첫 결과를 기록해 주세요.'}</span>
+    {topicId === 'physics' && <small>깃발 명중 기준: {TARGET}m ±{HIT_RANGE}m · 공기 저항이 없는 같은 높이 모형</small>}
+  </div>;
+  const record: Record_ = (d) => onUpdate('experiment', {
+    ...d,
+    topic: topicId,
+    runs: (saved?.runs ?? 0) + 1,
+    baseline: saved?.baseline ?? (saved ? { value: saved.value, value2: saved.value2, headline: saved.headline, summary: saved.summary } : undefined),
+  } satisfies ExperimentData);
 
   return (
-    <div className="mx-auto max-w-lg space-y-4 text-left">
+    <div className="demo-science-experiment mx-auto max-w-lg space-y-4 text-left">
+      <details className="demo-science-briefing">
+      <summary>{topic.label} · {LEVELS[levelId].label} 과정 — 실험 안내</summary>
       <div className="flex items-start gap-3 rounded-2xl border p-4" style={{ borderColor: `${topic.color}55`, backgroundColor: `${topic.color}12` }}>
         <span className="text-3xl leading-none">{topic.emoji}</span>
         <div>
@@ -872,11 +793,18 @@ function ExperimentStep({ answers, onUpdate }: DemoStepProps) {
         </div>
       </div>
 
-      {topicId === 'physics' && <ProjectileSim level={levelId} saved={saved} onRecord={record} />}
-      {topicId === 'chemistry' && <PhSim level={levelId} saved={saved} onRecord={record} />}
-      {topicId === 'biology' && <PhotosynthesisSim level={levelId} saved={saved} onRecord={record} />}
-      {topicId === 'earth' && <PlateSim level={levelId} saved={saved} onRecord={record} />}
+      <p className="rounded-xl border border-slate-700 px-4 py-3 text-xs leading-relaxed text-slate-300">
+        {mission === 'compare' ? '첫 조건을 기록한 뒤 변수 하나만 바꾸어 다시 실행해 주세요. 두 조건의 결과를 나란히 남깁니다.' : mission === 'target' ? '첫 결과를 확인한 뒤 조건을 조금씩 바꾸어 목표에 가까워지는지 관찰해 주세요.' : '예상한 변화와 실제 관찰을 비교해 보세요. 다른 조건은 유지하고 변수 하나씩 바꾸면 이유를 설명하기 쉬워집니다.'}
+        {topicId === 'physics' && ' 이 모형은 공기 저항을 제외하고 출발 높이와 도착 높이를 같게 둡니다.'}
+      </p>
+      </details>
 
+      {topicId === 'physics' && <ProjectileSim level={levelId} saved={saved} onRecord={record} progress={progress} />}
+      {topicId === 'chemistry' && <PhSim level={levelId} saved={saved} onRecord={record} progress={progress} />}
+      {topicId === 'biology' && <PhotosynthesisSim level={levelId} saved={saved} onRecord={record} progress={progress} />}
+      {topicId === 'earth' && <PlateSim level={levelId} saved={saved} onRecord={record} progress={progress} />}
+
+      <section className="demo-science-observation" data-demo-page-start>
       <AnimatePresence mode="wait">
         {saved ? (
           <motion.p
@@ -893,6 +821,7 @@ function ExperimentStep({ answers, onUpdate }: DemoStepProps) {
           </motion.p>
         )}
       </AnimatePresence>
+      </section>
     </div>
   );
 }
@@ -902,9 +831,16 @@ const experimentStep: DemoStepDef = {
     id: 'experiment',
     titleKey: '터치로 직접 실험해 보세요',
     subtitleKey: '조작하고 관찰하면 AI 선생님이 원리를 설명해 줘요',
+    getBlockedReason: (a) => {
+      const d = getExperiment(a);
+      if (!d || d.topic !== (getChoice(a, 'topic') ?? 'physics')) return '조건을 조절해 첫 실험을 완료해 주세요.';
+      return '실험 1/2회 완료 · 변수 하나를 바꾸어 한 번 더 실행해 주세요.';
+    },
     canProceed: (a) => {
       const d = getExperiment(a);
-      return !!d && d.topic === ((getChoice(a, 'topic') as TopicId | undefined) ?? 'physics') && d.runs > 0;
+      const compare = (a.experienceProfile as Record<string, string> | undefined)?.mission === 'compare';
+      return !!d && d.topic === ((getChoice(a, 'topic') as TopicId | undefined) ?? 'physics') && d.runs > 0
+        && (!compare || (!!d.baseline && (d.value !== d.baseline.value || d.value2 !== d.baseline.value2)));
     },
   },
   Component: ExperimentStep,
@@ -1018,7 +954,7 @@ function experimentReadout(topicId: TopicId, levelId: LevelId, data: ExperimentD
         { label: '처음 속력', value: `${speed} m/s` },
         { label: '최고 높이', value: `${f.H.toFixed(1)}m` },
         { label: '체공 시간', value: `${f.T.toFixed(1)}초` },
-        { label: `${TARGET}m 깃발`, value: hitsTarget(f.R) ? '명중!' : `${Math.abs(f.R - TARGET).toFixed(1)}m 차이` },
+        { label: `${TARGET}m 깃발 (±${HIT_RANGE}m)`, value: projectileOutcome(f.R) },
       ],
     };
   }
@@ -1057,8 +993,46 @@ function experimentReadout(topicId: TopicId, levelId: LevelId, data: ExperimentD
   };
 }
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
+/* ── AI 선생님 설명 ────────────────────────────────────── */
+
+function isAiScienceNote(v: unknown): v is AiScienceNote {
+  const o = v as AiScienceNote | null;
+  return (
+    !!o &&
+    typeof o.concept === 'string' &&
+    typeof o.nextChallenge === 'string' &&
+    Array.isArray(o.terms) &&
+    o.terms.length > 0 &&
+    o.terms.every((t) => typeof t === 'string')
+  );
+}
+
+/** 개념 설명·용어 — AI 결과가 있으면 그것, 없으면 주제·난이도별 고정 설명 */
+function lessonView(topic: Topic, levelId: LevelId, generated: unknown) {
+  if (isAiScienceNote(generated)) {
+    return { concept: generated.concept, terms: generated.terms, nextChallenge: generated.nextChallenge, ai: true };
+  }
+  return { concept: topic.concept[levelId], terms: topic.terms, nextChallenge: undefined, ai: false };
+}
+
+function generate(answers: DemoAnswers): Promise<AiScienceNote | null> {
+  const { topicId, levelId, data, name } = certInfo(answers);
+  if (!data) return Promise.resolve(null);
+  return requestDemoAi<AiScienceNote>(
+    'science-kiosk',
+    { experienceProfile: answers.experienceProfile,
+      topic: topicId,
+      level: levelId,
+      experiment: { value: data.value, value2: data.value2, runs: data.runs, headline: data.headline, summary: data.baseline ? `처음: ${data.baseline.summary.slice(0, 90)} / 마지막: ${data.summary.slice(0, 90)}` : data.summary },
+      name: name === '탐험가' ? undefined : name,
+    },
+    { validate: isAiScienceNote }
+  );
+}
+
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
   const { topicId, levelId, topic, level, data, name, school, serial } = certInfo(answers);
+  const lesson = lessonView(topic, levelId, generated);
   const [today] = useState(() => {
     const d = new Date();
     return { y: d.getFullYear(), m: d.getMonth() + 1, d: d.getDate() };
@@ -1066,19 +1040,32 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
 
   return (
     <ResultShell
+      coreCount={2}
       eyebrow={`${topic.label} · ${level.label} 과정 체험 완료`}
-      title={`${name}님, 실험 성공!`}
+      title={`${name}님, ${topicId === 'physics' && data ? projectileOutcome(flight(data.value, data.value2 ?? 18).R) : '탐구 완료'}!`}
       description={data?.summary}
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다른 실험 하기"
     >
+      {data?.baseline && (
+        <section className="demo-science-result-section" data-demo-page-start>
+        <Panel title="두 조건의 관찰 기록">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl bg-slate-800/70 p-3" data-demo-page-atomic><p className="text-xs text-slate-400">첫 조건</p><p className="mt-1 text-sm text-white">{data.baseline.summary}</p></div>
+            <div className="rounded-xl bg-teal-500/10 p-3" data-demo-page-atomic><p className="text-xs text-teal-300">마지막 조건</p><p className="mt-1 text-sm text-white">{data.summary}</p></div>
+          </div>
+          <p className="mt-3 text-xs text-slate-400">무엇을 바꾸었고 무엇은 같게 두었나요? 차이를 설명한 뒤 다른 조건에서도 확인해 보세요.</p>
+        </Panel>
+        </section>
+      )}
       {/* 인증서 */}
       <motion.div
         initial={{ opacity: 0, y: 24, rotate: 1.5 }}
         animate={{ opacity: 1, y: 0, rotate: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative w-full max-w-md bg-[#fffdf7] p-2.5 text-slate-800 shadow-2xl shadow-black/50"
+        className="demo-science-certificate relative w-full max-w-md bg-[#fffdf7] p-2.5 text-slate-800 shadow-2xl shadow-black/50"
+        data-demo-page-start
       >
         <div className="relative border-[3px] border-double p-5 sm:p-6" style={{ borderColor: pillarColor }}>
           {['left-1 top-1', 'right-1 top-1 rotate-90', 'bottom-1 right-1 rotate-180', 'bottom-1 left-1 -rotate-90'].map((pos) => (
@@ -1087,34 +1074,36 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
               <circle cx="6" cy="6" r="2" fill={pillarColor} />
             </svg>
           ))}
+          <div data-demo-page-atomic>
           <p className="text-center text-[10px] font-semibold tracking-[0.35em] text-slate-500">NEANDER SCIENCE LAB</p>
           <h3 className="mt-1 text-center font-serif text-3xl font-bold tracking-[0.2em] text-slate-900">체험 인증서</h3>
           <p className="text-center font-serif text-[10px] italic tracking-widest text-slate-500">Certificate of Discovery</p>
           <p className="mt-3 text-center font-mono text-[10px] text-slate-400">
             제 {today.y}-{topic.code}-{serial} 호
           </p>
+          </div>
 
-          <dl className="mt-4 space-y-1.5 text-sm">
+          <dl className="mt-4 space-y-1.5 text-sm" data-demo-page-start>
             {[
               { k: '성명', v: name },
               ...(school ? [{ k: '소속', v: school }] : []),
               { k: '과정', v: `${topic.emoji} ${topic.label} · ${level.label} (${topic.experiment})` },
             ].map((row) => (
-              <div key={row.k} className="flex gap-3 border-b border-dashed border-slate-300 pb-1.5">
+              <div key={row.k} className="flex gap-3 border-b border-dashed border-slate-300 pb-1.5" data-demo-page-atomic>
                 <dt className="w-10 shrink-0 text-slate-500">{row.k}</dt>
                 <dd className="font-semibold text-slate-900 [word-break:keep-all]">{row.v}</dd>
               </div>
             ))}
           </dl>
 
-          <div className="mt-4 rounded-lg px-3 py-2.5" style={{ backgroundColor: `${pillarColor}14` }}>
+          <div className="mt-4 rounded-lg px-3 py-2.5" style={{ backgroundColor: `${pillarColor}14` }} data-demo-page-start>
             <p className="text-[11px] font-bold" style={{ color: pillarColor }}>
               실험 결과 · {data?.headline}
             </p>
             <p className="mt-1 text-xs leading-relaxed text-slate-700 [word-break:keep-all]">{data?.summary}</p>
           </div>
 
-          <p className="mt-4 text-center text-xs leading-relaxed text-slate-600 [word-break:keep-all]">{certStatement(topic)}</p>
+          <p className="mt-4 text-center text-xs leading-relaxed text-slate-600 [word-break:keep-all]" data-demo-page-start>{certStatement(topic)}</p>
 
           <div className="mt-5 flex items-end justify-between">
             <div className="text-left">
@@ -1148,13 +1137,22 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
       </motion.div>
 
       {data && (
+        <section className="demo-science-result-section" data-demo-page-start>
         <Panel title="나의 실험 데이터">
           <ResultGraph topicId={topicId} data={data} color={topic.color} />
         </Panel>
+        </section>
       )}
 
+      <section className="demo-science-result-section" data-demo-page-start>
       <Panel title={`AI 선생님의 개념 설명 · ${level.label}`}>
-        <p className="text-sm leading-relaxed text-slate-200 [word-break:keep-all]">{topic.concept[levelId]}</p>
+        <p className="text-sm leading-relaxed text-slate-200 [word-break:keep-all]">{lesson.concept}</p>
+        {lesson.nextChallenge && (
+          <p className="mt-3 text-sm leading-relaxed text-slate-300 [word-break:keep-all]" data-demo-page-start>
+            <span className="mr-1.5 font-semibold" style={{ color: pillarColor }}>다음 탐구</span>
+            {lesson.nextChallenge}
+          </p>
+        )}
         <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-800 pt-4">
           <span className="text-xs text-slate-500">연계 주제</span>
           <span className="rounded-full px-2.5 py-0.5 text-xs font-medium" style={{ backgroundColor: `${pillarColor}25`, color: pillarColor }}>
@@ -1162,8 +1160,12 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           </span>
         </div>
       </Panel>
+      </section>
 
-      <TraitChips title="오늘 배운 핵심 용어" items={topic.terms} />
+      <section className="demo-science-result-section" data-demo-page-start>
+      <TraitChips title="오늘 배운 핵심 용어" items={lesson.terms} />
+      {lesson.ai && <p className="text-xs text-slate-500">AI 선생님이 당신의 실험 결과를 보고 쓴 설명이에요</p>}
+      </section>
     </ResultShell>
   );
 }
@@ -1177,7 +1179,7 @@ export default defineDemo({
     industryId: 'education',
     analyzeEmoji: '🔬',
     analyzeDurationMs: 3200,
-    analyzeMessages: ['실험 데이터 정리 중', '과학 원리 설명 생성 중', '난이도별 해설 맞추는 중', '체험 인증서 발급 중'],
+    analyzeMessages: ['실험 데이터 정리 중', 'AI 선생님이 원리 설명 쓰는 중', '난이도별 해설 맞추는 중', '체험 인증서 발급 중'],
   },
   steps: [
     choiceStep({
@@ -1217,9 +1219,11 @@ export default defineDemo({
   ],
   computeResult: (answers) => `${getChoice(answers, 'topic') ?? 'physics'}-${getChoice(answers, 'level') ?? 'middle'}`,
   Result,
-  print: (answers) => {
+  generate,
+  print: (answers, _resultKey, generated) => {
     const { topicId, levelId, topic, level, data, name, school, serial } = certInfo(answers);
     const readout = data ? experimentReadout(topicId, levelId, data) : null;
+    const lesson = lessonView(topic, levelId, generated);
     return {
       kind: 'receipt',
       eyebrow: 'NEANDER SCIENCE LAB',
@@ -1241,8 +1245,10 @@ export default defineDemo({
               { type: 'rows' as const, title: '측정 기록', rows: readout.rows },
             ]
           : []),
+        ...(data?.baseline ? [{ type: 'rows' as const, title: '조건 비교', rows: [{ label: '처음', value: data.baseline.summary }, { label: '마지막', value: data.summary }] }] : []),
         { type: 'text', title: '인증', text: `${certStatement(topic)}\n— AI 과학 선생님 N-BOT` },
-        { type: 'list', title: '오늘 배운 용어', items: topic.terms },
+        { type: 'list', title: '오늘 배운 용어', items: lesson.terms },
+        ...(lesson.nextChallenge ? [{ type: 'text' as const, title: '다음 탐구', text: lesson.nextChallenge }] : []),
       ],
       footer: '오늘 발견한 원리, 오래 기억해요!',
     };

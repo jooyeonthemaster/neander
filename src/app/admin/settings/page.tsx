@@ -50,7 +50,7 @@ const SECTIONS: SectionDef[] = [
     title: '회사 기본 정보',
     icon: <Building2 className="w-5 h-5" />,
     fields: [
-      { key: 'company_name_ko', label: '회사명 (한글)', placeholder: '예: 네안더' },
+      { key: 'company_name_ko', label: '회사명 (한글)', placeholder: '예: (주)네안데르' },
       { key: 'company_name_en', label: '회사명 (영문)', placeholder: 'e.g. NEANDERco.' },
       { key: 'ceo_name_ko', label: '대표자명 (한글)', placeholder: '예: 홍길동' },
       { key: 'ceo_name_en', label: '대표자명 (영문)', placeholder: 'e.g. Gil-dong Hong' },

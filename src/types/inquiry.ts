@@ -30,6 +30,20 @@ export interface QuoteSnapshot {
   services: string[]
   addOns: string[]
   estimatedTotal: number
+  /** 온라인 견적 견적번호 (NQ-…) */
+  estimateNo?: string
+  /** 가견적서 다시 보기 토큰 — /quote/estimate?t= , /api/quote-pdf?t= */
+  estimateToken?: string
+  /** 온라인 견적 상세 (관리자 수신함 표시용) */
+  hoursPerDay?: number
+  setupDayBefore?: boolean
+  extraStaff?: number
+  /** 체험별로 고른 옵션 요약 */
+  items?: { name: string; options: string[] }[]
+  /** 견적 품목 (수량·단가 계산식 포함) */
+  lines?: { label: string; detail: string; amount: number; tbd?: boolean }[]
+  supply?: number
+  vat?: number
 }
 
 /** Firestore에 저장된 문의 */

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, type MotionValue } from 'motion/react';
 import type { DemoAnswers, DemoResultProps } from '@/types/demo';
 import {
@@ -17,16 +17,19 @@ import {
   getCapture,
   getChoice,
   getFields,
+  requestDemoAi,
   seededInt,
   seededRandom,
   textStep,
   type PhotoLook,
   type PhotoPaint,
 } from '../kit';
+import { PHOTOCARD_CONCEPT_IDS, type AiPhotocard, type PhotocardConceptId } from '@/data/demo-ai/photocard';
+import { MediaFit } from '../MediaFit';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-type ConceptId = 'season' | 'tour' | 'debut' | 'holo';
+type ConceptId = PhotocardConceptId;
 type Rarity = 'common' | 'rare' | 'secret';
 
 const BLUSH: PhotoPaint[] = [
@@ -136,6 +139,22 @@ function dropRates(concept: ConceptId): Record<Rarity, number> {
   return concept === 'holo' ? { common: 50, rare: 30, secret: 20 } : { common: 60, rare: 30, secret: 10 };
 }
 
+/* ── AI 결과 ───────────────────────────────────────────── */
+
+function isAiPhotocard(v: unknown): v is AiPhotocard {
+  const o = v as AiPhotocard | null;
+  return !!o && typeof o.image === 'string' && o.image.startsWith('data:image/');
+}
+
+/** 카드 뒷면 프로필 — 글 생성이 실패했으면 null (프로필 패널을 그리지 않는다) */
+function aiProfile(ai: AiPhotocard | null) {
+  if (!ai) return null;
+  const { position, charm, message, tags } = ai;
+  const str = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
+  if (!str(position) || !str(charm) || !str(message) || !Array.isArray(tags) || !tags.every(str)) return null;
+  return { position, charm, message, tags: tags.slice(0, 3).map((t) => t.replace(/^#/, '')) };
+}
+
 /* ── Roll ─────────────────────────────────────────────── */
 
 function roll(answers: DemoAnswers) {
@@ -153,7 +172,7 @@ function roll(answers: DemoAnswers) {
 function CardBack({ concept }: { concept: Concept }) {
   return (
     <div
-      className="absolute inset-0 overflow-hidden rounded-[14px] border-[6px] border-white/80"
+      className="demo-dark-surface absolute inset-0 overflow-hidden rounded-[14px] border-[6px] border-white/80"
       style={{ background: concept.pack, transform: 'rotateY(180deg)', backfaceVisibility: 'hidden' }}
     >
       <div
@@ -167,7 +186,7 @@ function CardBack({ concept }: { concept: Concept }) {
           N
         </div>
         <p className="font-display text-sm font-extrabold tracking-[0.35em] drop-shadow">NEANDER</p>
-        <p className="text-[9px] font-semibold tracking-[0.25em] opacity-90">OFFICIAL PHOTOCARD</p>
+        <p className="text-[9px] font-semibold tracking-[0.25em] opacity-90">CREATIVE PHOTOCARD</p>
       </div>
     </div>
   );
@@ -182,6 +201,7 @@ function CardFront({
   serial,
   rarity,
   shine,
+  art,
 }: {
   concept: Concept;
   conceptId: ConceptId;
@@ -191,6 +211,8 @@ function CardFront({
   serial: number;
   rarity: Rarity;
   shine: MotionValue<string>;
+  /** AI가 새로 찍은 사진 — 콘셉트 보정이 이미 들어가 있어 필터를 쓰지 않는다 */
+  art: boolean;
 }) {
   const isHolo = conceptId === 'holo';
   const r = RARITY[rarity];
@@ -207,8 +229,8 @@ function CardFront({
         animate={isHolo ? { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] } : undefined}
         transition={isHolo ? { duration: 4, repeat: Infinity, ease: 'linear' } : undefined}
       />
-      <div className="absolute inset-[6px] overflow-hidden rounded-[10px] bg-slate-900">
-        <ProcessedPhoto src={image} look={concept.look} className="absolute inset-0 h-full w-full" alt={`${stageName} 포토카드`} delayMs={300} />
+      <div className="demo-dark-surface absolute inset-[6px] overflow-hidden rounded-[10px] bg-slate-900">
+        <ProcessedPhoto src={image} look={art ? {} : concept.look} className="absolute inset-0 h-full w-full" alt={`${stageName} 포토카드`} delayMs={300} />
 
         {/* 홀로 무지개 반사 */}
         {isHolo && (
@@ -422,6 +444,7 @@ function PackStage({
   group,
   serial,
   rarity,
+  art,
   onRevealed,
 }: {
   conceptId: ConceptId;
@@ -430,6 +453,7 @@ function PackStage({
   group: string;
   serial: number;
   rarity: Rarity;
+  art: boolean;
   onRevealed: () => void;
 }) {
   const concept = CONCEPTS[conceptId];
@@ -454,7 +478,8 @@ function PackStage({
   const r = RARITY[rarity];
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="demo-photocard-pack flex flex-col items-center" data-demo-page-atomic>
+      <MediaFit width={270} height={420} reserve={88} overflowTop={96}>
       <div className="relative h-[420px] w-[270px]" style={{ perspective: 1100 }}>
         {/* 레어도 후광 */}
         <AnimatePresence>
@@ -511,6 +536,7 @@ function PackStage({
               serial={serial}
               rarity={rarity}
               shine={shine}
+              art={art}
             />
             <CardBack concept={concept} />
           </motion.div>
@@ -526,7 +552,7 @@ function PackStage({
             >
               {/* 뜯는 부분 */}
               <motion.div
-                className="absolute inset-x-0 top-0 h-[44px] overflow-hidden rounded-t-2xl"
+                className="demo-dark-surface absolute inset-x-0 top-0 h-[44px] overflow-hidden rounded-t-2xl"
                 style={{ background: concept.pack }}
                 animate={phase === 'opening' ? { y: -70, x: -50, rotate: -22, opacity: 0 } : { y: 0, x: 0, rotate: 0, opacity: 1 }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -598,7 +624,9 @@ function PackStage({
           })}
       </div>
 
-      <div className="mt-2 h-14">
+      </MediaFit>
+
+      <div className="demo-photocard-controls mt-2 h-14">
         {phase === 'sealed' && (
           <motion.button
             type="button"
@@ -607,7 +635,7 @@ function PackStage({
             whileTap={{ scale: 0.95 }}
             animate={{ y: [0, -3, 0] }}
             transition={{ duration: 1.2, repeat: Infinity }}
-            className="rounded-xl bg-gradient-to-r from-rose-500 to-fuchsia-500 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-rose-500/30"
+            className="demo-dark-surface rounded-xl bg-gradient-to-r from-rose-500 to-fuchsia-500 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-rose-500/30"
           >
             ✂️ 팩 뜯기
           </motion.button>
@@ -620,7 +648,7 @@ function PackStage({
             transition={{ type: 'spring', stiffness: 220, damping: 12, delay: 0.3 }}
             className="text-center"
           >
-            <p className="font-display text-lg font-black tracking-[0.15em] sm:text-xl" style={{ color: r.color, textShadow: `0 0 18px ${r.glow}` }}>
+            <p className="demo-rarity-label font-display text-lg font-black tracking-[0.15em] sm:text-xl" style={{ '--rarity-color': r.color } as CSSProperties}>
               ✦ {r.label} CARD ✦
             </p>
             <p className="text-[11px] text-slate-500">카드에 마우스를 올리거나 터치해 기울여 보세요</p>
@@ -633,8 +661,10 @@ function PackStage({
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor, onReveal }: DemoResultProps) {
+function Result({ answers, onRestart, pillarColor, onReveal, generated }: DemoResultProps) {
   const capture = getCapture(answers, 'face');
+  const ai = isAiPhotocard(generated) ? generated : null;
+  const profile = aiProfile(ai);
   const { stageName, group } = namesOf(answers);
   const { concept: conceptId, rarity, serial } = roll(answers);
   const concept = CONCEPTS[conceptId];
@@ -653,7 +683,8 @@ function Result({ answers, onRestart, pillarColor, onReveal }: DemoResultProps) 
       {capture && (
         <PackStage
           conceptId={conceptId}
-          image={capture.image}
+          image={ai ? ai.image : capture.image}
+          art={!!ai}
           stageName={stageName}
           group={group}
           serial={serial}
@@ -677,7 +708,7 @@ function Result({ answers, onRestart, pillarColor, onReveal }: DemoResultProps) 
               items={[
                 { emoji: concept.emoji, label: '앨범 콘셉트', value: concept.label, desc: concept.desc },
                 { emoji: '🔢', label: '컬렉션 넘버', value: serialLabel(serial), desc: '같은 번호는 한 장뿐이에요' },
-                { emoji: '🎴', label: '출력 규격', value: '55 × 85mm 트레카', desc: '공식 포토카드 사이즈' },
+                { emoji: '🎴', label: '출력 규격', value: '55 × 85mm 트레카', desc: '개인 소장용 포토카드 사이즈' },
                 { emoji: '🎁', label: '패키징', value: '랜덤 팩 포장', desc: '포토카드 + 스티커 + 넘버 카드' },
               ]}
             />
@@ -695,7 +726,7 @@ function Result({ answers, onRestart, pillarColor, onReveal }: DemoResultProps) 
                         backgroundColor: mine ? `${RARITY[tier].color}18` : 'transparent',
                       }}
                     >
-                      <span className="w-[4.5rem] shrink-0 text-xs font-black tracking-wider" style={{ color: RARITY[tier].color }}>
+                      <span className="demo-rarity-label w-[4.5rem] shrink-0 text-xs font-black tracking-wider" style={{ '--rarity-color': RARITY[tier].color } as CSSProperties}>
                         {RARITY[tier].label}
                       </span>
                       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-800">
@@ -715,7 +746,37 @@ function Result({ answers, onRestart, pillarColor, onReveal }: DemoResultProps) 
               </div>
             </Panel>
 
-            <TraitChips title="적용된 AI 보정" items={['피부 결 리터칭', '아이돌 조명 보정', ...concept.edits]} />
+            {profile && (
+              <Panel title={`${stageName} 프로필 · 카드 뒷면`}>
+                <dl className="space-y-2.5 text-sm">
+                  {[
+                    { term: '🎤 포지션', detail: profile.position },
+                    { term: '✨ 매력 포인트', detail: profile.charm },
+                  ].map((row) => (
+                    <div key={row.term} className="flex gap-4">
+                      <dt className="w-24 shrink-0 text-slate-500">{row.term}</dt>
+                      <dd className="text-slate-200 [word-break:keep-all]">{row.detail}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="mt-4 rounded-xl bg-slate-950/60 p-3 text-sm leading-relaxed text-slate-200 [word-break:keep-all]">
+                  💌 &ldquo;{profile.message}&rdquo;
+                </p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {profile.tags.map((tag) => (
+                    <span key={tag} className="rounded-full border border-slate-700 bg-slate-800/60 px-2.5 py-0.5 text-xs text-slate-300">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </Panel>
+            )}
+
+            <TraitChips
+              title={ai ? 'AI 화보 구성' : '예시 카드 구성'}
+              items={ai ? ['AI 아이돌 화보 촬영', '콘셉트 의상·조명', ...concept.edits] : ['원본 사진 색 보정', '콘셉트 프레임', '레어도 장식']}
+            />
+            {ai && <p className="text-xs text-slate-500">AI가 방금 찍은 사진으로 새로 촬영한 포토카드예요</p>}
           </motion.div>
         )}
       </AnimatePresence>
@@ -734,7 +795,8 @@ export default defineDemo({
     analyzeDurationMs: 3400,
     analyzeImageStepId: 'face',
     printAfterReveal: '팩을 뜯으면 포토카드가 출력돼요',
-    analyzeMessages: ['아이돌 조명으로 보정 중', '공식 포토카드 프레임 적용 중', '레어도 추첨 중', '랜덤 팩 포장 중'],
+    // AI 화보 사진은 10~20초 — 마지막 문구가 기다리는 동안 남는다
+    analyzeMessages: ['아이돌 조명으로 보정 중', '창작 포토카드 프레임 적용 중', '레어도 추첨 중', '랜덤 팩 포장 중', 'AI 포토그래퍼가 화보를 촬영 중이에요 (10~20초)'],
   },
   steps: [
     cameraStep({
@@ -743,16 +805,16 @@ export default defineDemo({
       subtitle: '아이돌처럼 포즈! 셔터를 누르면 3초 뒤에 찍혀요',
       mode: 'face',
       countdown: true,
-      scanLabels: ['얼굴 영역 감지', '피부 톤·결 분석', '아이돌 조명 매칭', '포토카드 비율 크롭'],
+      scanLabels: ['촬영 컷 준비', '사진 밝기 확인', '콘셉트 조명 준비', '포토카드 구도 준비'],
       readouts: (c) => [
-        { label: '비주얼 에너지', value: `${72 + (c.seed % 27)}%` },
-        { label: '조명 무드', value: c.stats.warmth > 52 ? '웜 스포트' : '쿨 스포트' },
+        { label: '사진 준비', value: c.source === 'sample' ? '샘플 사진' : '촬영 완료' },
+        { label: '사진 밝기', value: c.stats.brightness > 55 ? '밝은 편' : '차분한 편' },
       ],
     }),
     choiceStep({
       id: 'concept',
       title: '어떤 앨범 콘셉트로 만들까요?',
-      subtitle: '콘셉트에 따라 보정 톤과 공식 프레임이 달라져요',
+      subtitle: '콘셉트에 따라 보정 톤과 창작 프레임이 달라져요',
       columns: 2,
       options: (Object.keys(CONCEPTS) as ConceptId[]).map((id) => ({
         id,
@@ -777,27 +839,41 @@ export default defineDemo({
     return `${concept}-${rarity}`;
   },
   Result,
-  print: (answers) => {
+  print: (answers, _resultKey, generated) => {
     const capture = getCapture(answers, 'face');
     const { stageName, group } = namesOf(answers);
     const { concept: conceptId, serial } = roll(answers);
     const concept = CONCEPTS[conceptId];
+    const overlay = <CardPrint concept={concept} conceptId={conceptId} stageName={stageName} group={group} serial={serial} />;
     return {
       kind: 'photo',
-      photos: capture
-        ? [
-            {
-              src: capture.image,
-              look: concept.look,
-              overlay: <CardPrint concept={concept} conceptId={conceptId} stageName={stageName} group={group} serial={serial} />,
-            },
-          ]
-        : [],
+      photos: isAiPhotocard(generated)
+        ? [{ src: generated.image, overlay }]
+        : capture
+          ? [{ src: capture.image, look: concept.look, overlay }]
+          : [],
       title: `${stageName}의 포토카드`,
       caption: `${concept.label} · ${concept.album} · 55 × 85mm 트레카`,
       // 레어도는 화면에서 팩을 뜯어 확인하도록 남겨 두고, 컬렉션 넘버를 배지로 찍는다
       badge: serialLabel(serial),
       paper: PAPER[conceptId],
     };
+  },
+  generate: (answers) => {
+    const capture = getCapture(answers, 'face');
+    if (!capture) return Promise.resolve(null);
+    const fields = getFields<string>(answers, 'profile');
+    const { concept } = roll(answers);
+    return requestDemoAi<AiPhotocard>(
+      'fan-photocard',
+      {
+        experienceProfile: answers.experienceProfile,
+        photo: capture.image,
+        concept: (PHOTOCARD_CONCEPT_IDS as readonly string[]).includes(concept) ? concept : 'season',
+        stageName: (fields.stageName ?? '').trim().slice(0, 10),
+        group: (fields.group ?? '').trim().slice(0, 12),
+      },
+      { timeoutMs: 60_000, validate: isAiPhotocard }
+    );
   },
 });

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { withParticle } from '@/lib/korean';
 import type { DemoAnswers, DemoResultProps } from '@/types/demo';
 import {
   Panel,
@@ -15,14 +16,16 @@ import {
   getChoice,
   getFields,
   renderLook,
+  requestDemoAi,
   seededInt,
   textStep,
   type PhotoLook,
 } from '../kit';
+import { BRAND_STYLE_IDS, type AiBrandAvatar, type BrandStyleId } from '@/data/demo-ai/brand-avatar';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-type StyleId = 'mono' | 'pop' | 'corporate' | 'pastel';
+type StyleId = BrandStyleId;
 
 interface BrandStyle {
   label: string;
@@ -106,11 +109,23 @@ const TEAMMATES = [
 
 function profileOf(answers: DemoAnswers) {
   const fields = getFields<string>(answers, 'profile');
-  const name = (fields.name ?? '').trim() || '네안더';
+  const name = (fields.name ?? '').trim() || '네안데르';
   const title = (fields.title ?? '').trim() || '브랜드 매니저';
   const style = (getChoice(answers, 'brand') as StyleId | undefined) ?? 'corporate';
   const seed = answersSeed(answers);
   return { name, title, style: STYLES[style] ? style : 'corporate', seed, empNo: `NDR-${seededInt(seed, 'emp', 1000, 9999)}` };
+}
+
+/* ── AI 결과 ───────────────────────────────────────────── */
+
+function isAiAvatar(v: unknown): v is AiBrandAvatar {
+  const o = v as AiBrandAvatar | null;
+  return !!o && typeof o.image === 'string' && o.image.startsWith('data:image/');
+}
+
+/** AI가 쓴 문구 — 비어 있으면 고정 문구 */
+function aiText(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
 
 /** 스타일별 인화지 — 명함 바탕색과 가장 가까운 종이 */
@@ -148,12 +163,15 @@ function Avatar({
   name,
   className,
   ringWidth = 3,
+  art = false,
 }: {
   url: string | null;
   style: BrandStyle;
   name: string;
   className?: string;
   ringWidth?: number;
+  /** AI 일러스트 — 얼굴이 이미 가운데라 사진처럼 확대하지 않는다 */
+  art?: boolean;
 }) {
   return (
     <div className={cn('relative shrink-0 rounded-full', className)} style={{ background: style.ring, padding: ringWidth }}>
@@ -166,8 +184,8 @@ function Avatar({
             initial={{ opacity: 0, filter: 'blur(10px)' }}
             animate={{ opacity: 1, filter: 'blur(0px)' }}
             transition={{ duration: 0.6 }}
-            className="h-full w-full scale-[1.3] object-cover object-[50%_32%]"
-            style={{ transformOrigin: '50% 38%' }}
+            className={cn('h-full w-full object-cover', art ? 'scale-[1.12] object-[50%_40%]' : 'scale-[1.3] object-[50%_32%]')}
+            style={{ transformOrigin: art ? '50% 42%' : '50% 38%' }}
           />
         ) : (
           <motion.div
@@ -185,19 +203,26 @@ function Avatar({
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
   const capture = getCapture(answers, 'face');
   const profile = profileOf(answers);
   const [styleId, setStyleId] = useState<StyleId>(profile.style);
   const style = STYLES[styleId];
-  const url = useBrandedPhoto(capture?.image, styleId);
+  const filtered = useBrandedPhoto(capture?.image, styleId);
+  const ai = isAiAvatar(generated) ? generated : null;
+  // AI 아바타는 고른 스타일로만 그렸다 — 다른 스타일로 바꾸면 사진 색 보정 미리보기로 보인다
+  const art = !!ai && styleId === profile.style;
+  const url = art ? ai.image : filtered;
+  const tagline = aiText(ai?.tagline) ?? 'Brand Launch TF';
+  const status = aiText(ai?.status) ?? '브랜드 런칭 준비 중';
+  const reply = aiText(ai?.reply) ?? '와 완전 우리 브랜드 느낌이에요 👏 명함도 이걸로 뽑아요!';
   const { empNo } = profile;
 
   return (
     <ResultShell
       eyebrow="AI 브랜드 아바타 완성"
       title={`${profile.name} 님의 ${style.label} 아바타`}
-      description="브랜드 CI 컬러와 톤을 학습한 AI가 프로필 사진을 브랜드 스타일로 다시 그렸어요. 명함과 사내 메신저에 바로 적용해 보세요."
+      description={art ? '선택한 브랜드 컬러와 스타일을 참고해 AI가 프로필 사진을 다시 그렸어요. 명함과 사내 메신저 적용 예시를 확인해 보세요.' : '사진에 브랜드 컬러 필터를 더한 미리보기예요. 명함과 사내 메신저 적용 예시를 확인해 보세요.'}
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다시 촬영하기"
@@ -211,7 +236,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           transition={{ duration: 14, repeat: Infinity, ease: 'linear' }}
           aria-hidden="true"
         />
-        <Avatar url={url} style={style} name={profile.name} className="h-44 w-44" ringWidth={5} />
+        <Avatar url={url} art={art} style={style} name={profile.name} className="h-44 w-44" ringWidth={5} />
         <span
           className="absolute bottom-1 right-1 flex h-10 w-10 items-center justify-center rounded-full border-4 border-slate-950 font-display text-sm font-extrabold text-white"
           style={{ backgroundColor: style.accent }}
@@ -239,6 +264,11 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           </button>
         ))}
       </div>
+      {ai && (
+        <p className="-mt-2 text-center text-xs text-slate-500 [word-break:keep-all]">
+          {art ? `AI가 방금 찍은 사진으로 직접 그린 ${style.label} 아바타예요` : `AI 아바타는 ${withParticle(STYLES[profile.style].label, '으로/로')} 그렸어요 · 지금은 색 보정 미리보기`}
+        </p>
+      )}
 
       {/* Business card */}
       <Panel title="프로필 명함">
@@ -247,12 +277,12 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           initial={{ opacity: 0, rotateX: 25, y: 10 }}
           animate={{ opacity: 1, rotateX: 0, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="relative mx-auto flex aspect-[9/5] w-full max-w-sm overflow-hidden rounded-xl shadow-2xl shadow-black/50"
+          className={cn('relative mx-auto flex aspect-[9/5] w-full max-w-sm overflow-hidden rounded-xl shadow-2xl shadow-black/50', styleId === 'corporate' && 'demo-dark-surface')}
           style={{ backgroundColor: style.card, color: style.ink }}
         >
           <div className="absolute inset-y-0 left-0 w-2" style={{ backgroundColor: style.accent }} aria-hidden="true" />
           <div className="flex w-full items-center gap-4 p-5 pl-6">
-            <Avatar url={url} style={style} name={profile.name} className="h-20 w-20 sm:h-24 sm:w-24" />
+            <Avatar url={url} art={art} style={style} name={profile.name} className="h-20 w-20 sm:h-24 sm:w-24" />
             <div className="min-w-0 flex-1 text-left">
               <p className="text-[9px] font-bold tracking-[0.35em]" style={{ color: style.sub }}>
                 NEANDER
@@ -263,7 +293,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
               </p>
               <div className="mt-3 space-y-0.5 text-[10px] opacity-80">
                 <p>사번 {empNo}</p>
-                <p>Brand Launch TF</p>
+                <p className="truncate">{tagline}</p>
               </div>
             </div>
           </div>
@@ -291,14 +321,14 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           {/* 내 프로필 팝오버 */}
           <div className="flex items-center gap-3 border-b border-slate-800 bg-slate-900/80 px-4 py-3">
             <div className="relative">
-              <Avatar url={url} style={style} name={profile.name} className="h-12 w-12" ringWidth={2} />
+              <Avatar url={url} art={art} style={style} name={profile.name} className="h-12 w-12" ringWidth={2} />
               <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-emerald-400" />
             </div>
             <div className="min-w-0 text-left">
               <p className="truncate text-sm font-semibold text-white">
                 {profile.name} <span className="text-xs font-normal text-slate-400">· {profile.title}</span>
               </p>
-              <p className="text-[11px] text-emerald-400">● 온라인 · 브랜드 런칭 준비 중</p>
+              <p className="text-[11px] text-emerald-400">● 온라인 · {status}</p>
             </div>
           </div>
 
@@ -307,7 +337,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
               오늘부터 사내 프로필 사진 브랜드 아바타로 통일해요!
             </MessageRow>
             <MessageRow
-              avatar={<Avatar url={url} style={style} name={profile.name} className="h-8 w-8" ringWidth={1.5} />}
+              avatar={<Avatar url={url} art={art} style={style} name={profile.name} className="h-8 w-8" ringWidth={1.5} />}
               name={profile.name}
               role={profile.title}
               time="오전 10:04"
@@ -317,7 +347,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
               저 방금 바꿨어요! 어때요? 😎
             </MessageRow>
             <MessageRow avatar={<Initial name={TEAMMATES[1]!.name} color="#0ea5e9" />} name={TEAMMATES[1]!.name} role={TEAMMATES[1]!.role} time="오전 10:05" delay={0.6}>
-              와 완전 우리 브랜드 느낌이에요 👏 명함도 이걸로 뽑아요!
+              {reply}
             </MessageRow>
             <div className="flex gap-1.5 pl-10">
               {['👍 5', '🔥 3', '💯 2'].map((r) => (
@@ -338,7 +368,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
             <TeamSilhouette key={t.name} style={style} label={t.name} />
           ))}
           <div className="flex flex-col items-center gap-1.5">
-            <Avatar url={url} style={style} name={profile.name} className="h-16 w-16" />
+            <Avatar url={url} art={art} style={style} name={profile.name} className="h-16 w-16" />
             <span className="text-[10px] font-semibold text-white">{profile.name}</span>
           </div>
           {TEAMMATES.slice(2, 4).map((t) => (
@@ -427,7 +457,8 @@ export default defineDemo({
     analyzeEmoji: '🧑‍💼',
     analyzeDurationMs: 3400,
     analyzeImageStepId: 'face',
-    analyzeMessages: ['배경 분리 마스크 다듬는 중', '브랜드 CI 컬러 매핑 중', '아바타 톤 렌더링 중', '명함·메신저 프로필 적용 중'],
+    // AI 일러스트는 10~20초 — 마지막 문구가 기다리는 동안 남는다
+    analyzeMessages: ['배경 분리 마스크 다듬는 중', '브랜드 CI 컬러 매핑 중', '아바타 톤 렌더링 중', '명함·메신저 프로필 적용 중', 'AI 일러스트레이터가 아바타를 그리는 중이에요 (10~20초)'],
   },
   steps: [
     cameraStep({
@@ -436,11 +467,8 @@ export default defineDemo({
       subtitle: '어깨가 살짝 보이게, 정면을 바라봐 주세요',
       mode: 'face',
       subject: '얼굴',
-      scanLabels: ['얼굴 영역 분리', '배경 제거 마스크 생성', '조명·피부톤 보정', '브랜드 스타일 매핑 준비'],
-      readouts: (c) => [
-        { label: '조명 상태', value: c.stats.brightness > 45 ? '양호' : '어두움 · 자동 보정' },
-        { label: '배경 분리 정확도', value: `${93 + (c.seed % 6)}%` },
-      ],
+      scanLabels: ["프로필 사진 준비","선택한 브랜드 방향 확인","아바타 스타일 준비","프로필 구도 구성"],
+      readouts: () => [{"label":"프로필 사진","value":"준비 완료"},{"label":"브랜드 방향","value":"선택한 콘셉트를 반영"}],
     }),
     choiceStep({
       id: 'brand',
@@ -460,17 +488,33 @@ export default defineDemo({
   ],
   computeResult: (answers) => profileOf(answers).style,
   Result,
-  print: (answers) => {
+  print: (answers, _resultKey, generated) => {
     const capture = getCapture(answers, 'face');
     const { name, title, style, empNo } = profileOf(answers);
     const brand = STYLES[style];
     return {
       kind: 'photo',
-      photos: capture ? [{ src: capture.image, look: brand.look }] : [],
+      photos: isAiAvatar(generated) ? [{ src: generated.image }] : capture ? [{ src: capture.image, look: brand.look }] : [],
       title: name,
       caption: `${title} · ${brand.label} 브랜드 아바타`,
       badge: empNo,
       paper: PRINT_PAPER[style],
     };
+  },
+  generate: (answers) => {
+    const capture = getCapture(answers, 'face');
+    if (!capture) return Promise.resolve(null);
+    const fields = getFields<string>(answers, 'profile');
+    const brand = profileOf(answers).style;
+    return requestDemoAi<AiBrandAvatar>(
+      'brand-avatar',
+      { experienceProfile: answers.experienceProfile,
+        photo: capture.image,
+        brand: (BRAND_STYLE_IDS as readonly string[]).includes(brand) ? brand : 'corporate',
+        name: (fields.name ?? '').trim().slice(0, 10),
+        title: (fields.title ?? '').trim().slice(0, 18),
+      },
+      { timeoutMs: 60_000, validate: isAiAvatar }
+    );
   },
 });

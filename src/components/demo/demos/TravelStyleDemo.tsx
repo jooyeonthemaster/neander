@@ -1,9 +1,6 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
-import { QUOTE_HREF } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type {
@@ -13,30 +10,14 @@ import type {
   DemoStepProps,
   DemoResultProps,
 } from '@/types/demo';
-import { answersSeed, seededInt, seededPick, type PrintSpec } from '../kit';
+import { answersSeed, getFields, requestDemoAi, seededInt, seededPick, type PrintSpec } from '../kit';
+import { TRAVEL_DESTINATIONS, TRAVEL_EMOJIS, TRAVEL_MUST_HAVES, TRAVEL_PACES, shortTripCandidate, type AiTravel } from '@/data/demo-ai/travel';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-const DESTINATIONS = [
-  { id: 'city', emoji: '\u{1F3D9}\uFE0F', label: '도시', desc: '화려한 도시의 에너지', gradient: 'from-slate-700 to-blue-900' },
-  { id: 'nature', emoji: '\u{1F332}', label: '자연', desc: '자연 속의 힐링', gradient: 'from-emerald-700 to-green-900' },
-  { id: 'culture', emoji: '\u{1F3DB}\uFE0F', label: '문화', desc: '역사와 예술의 감동', gradient: 'from-amber-700 to-orange-900' },
-  { id: 'beach', emoji: '\u{1F3D6}\uFE0F', label: '해변', desc: '바다와 태양의 여유', gradient: 'from-cyan-600 to-blue-800' },
-  { id: 'adventure', emoji: '\u{1F9D7}', label: '모험', desc: '스릴 넘치는 도전', gradient: 'from-red-700 to-orange-800' },
-] as const;
-
-const PACES = [
-  { id: 'packed', emoji: '\u23F0', label: '빡빡한 일정', desc: '하루에 5곳 이상! 놓치는 건 못 참아' },
-  { id: 'balanced', emoji: '\u2696\uFE0F', label: '균형잡힌', desc: '적당히 보고 적당히 쉬기' },
-  { id: 'slow', emoji: '\u{1F40C}', label: '슬로우 트래블', desc: '한 곳에서 오래 머물며 느끼기' },
-] as const;
-
-const MUST_HAVES = [
-  { id: 'food', emoji: '\u{1F35C}', label: '맛집 탐방' },
-  { id: 'photo', emoji: '\u{1F4F8}', label: '인생샷' },
-  { id: 'shopping', emoji: '\u{1F6CD}\uFE0F', label: '쇼핑' },
-  { id: 'local', emoji: '\u{1F3AD}', label: '로컬 체험' },
-] as const;
+const DESTINATIONS = TRAVEL_DESTINATIONS;
+const PACES = TRAVEL_PACES;
+const MUST_HAVES = TRAVEL_MUST_HAVES;
 
 type ResultKey =
   | 'urban-explorer' | 'city-flaneur' | 'nature-wanderer' | 'culture-pilgrim'
@@ -148,7 +129,7 @@ function StepDestination({ answers, onUpdate }: DemoStepProps) {
             whileTap={{ scale: 0.97 }}
             animate={isSel ? { scale: 1.03 } : { scale: 1, opacity: selected && !isSel ? 0.5 : 1 }}
             className={cn(
-              'relative flex flex-col justify-end overflow-hidden rounded-2xl h-32 p-4 text-left transition-all duration-300',
+              'demo-dark-surface relative flex flex-col justify-end overflow-hidden rounded-2xl h-32 p-4 text-left transition-all duration-300',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950',
               `bg-gradient-to-br ${d.gradient}`,
               isSel ? 'shadow-2xl ring-2 ring-white/50' : 'shadow-lg',
@@ -301,9 +282,26 @@ function personaFor(resultKey: string): ResultData {
   return RESULTS[resultKey as ResultKey] ?? RESULTS['urban-explorer'];
 }
 
-function TravelResult({ resultKey, onRestart, pillarColor }: DemoResultProps) {
-  const tCommon = useTranslations('demos.common');
-  const data = personaFor(resultKey);
+function isAiTravel(v: unknown): v is AiTravel {
+  const o = v as AiTravel | null;
+  return !!o && typeof o.name === 'string' && typeof o.desc === 'string' && typeof o.destination === 'string'
+    && typeof o.tip === 'string' && typeof o.airport === 'string' && /^[A-Z]{3}$/.test(o.airport)
+    && (TRAVEL_EMOJIS as readonly string[]).includes(o.emoji)
+    && Array.isArray(o.packing) && o.packing.every((t) => typeof t === 'string');
+}
+
+/** 화면·출력물이 그리는 페르소나 — AI 결과가 있으면 그것, 없으면 고정 결과 */
+function personaView(answers: DemoAnswers, resultKey: string, generated: unknown): ResultData & { ai: boolean } {
+  const shortTrip = shortTripCandidate(getFields<string>(answers, 'experienceProfile').tripLength, answers.destination);
+  if (isAiTravel(generated)) {
+    const { name, emoji, destination, tip, packing, desc, airport } = generated;
+    return { name, emoji, destination, tip, packing, desc, airport, ...shortTrip, ai: true };
+  }
+  return { ...personaFor(resultKey), ...shortTrip, ai: false };
+}
+
+function TravelResult({ answers, resultKey, onRestart, pillarColor, generated }: DemoResultProps) {
+  const data = personaView(answers, resultKey, generated);
 
   return (
     <motion.div
@@ -336,7 +334,7 @@ function TravelResult({ resultKey, onRestart, pillarColor }: DemoResultProps) {
         className="w-full max-w-sm rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-950/50 to-slate-900/50 p-5"
       >
         <p className="mb-2 text-xs font-semibold tracking-wide text-blue-400 uppercase">
-          이상적인 여행지
+          기간에 맞는 여행지 후보
         </p>
         <p className="text-lg font-bold text-white">{data.destination}</p>
       </motion.div>
@@ -365,9 +363,9 @@ function TravelResult({ resultKey, onRestart, pillarColor }: DemoResultProps) {
           패킹 스타일
         </p>
         <div className="flex justify-center gap-3">
-          {data.packing.map((item) => (
+          {data.packing.map((item, i) => (
             <div
-              key={item}
+              key={`${i}-${item}`}
               className="flex-1 max-w-[120px] rounded-xl border border-slate-700 bg-slate-800/60 px-3 py-3 text-center"
             >
               <p className="text-xs font-medium text-slate-300">{item}</p>
@@ -375,6 +373,10 @@ function TravelResult({ resultKey, onRestart, pillarColor }: DemoResultProps) {
           ))}
         </div>
       </motion.div>
+
+      {data.ai && (
+        <p className="text-xs text-slate-500">AI가 당신의 답변으로 설계한 여행이에요</p>
+      )}
 
       {/* Actions */}
       <motion.div
@@ -388,15 +390,8 @@ function TravelResult({ resultKey, onRestart, pillarColor }: DemoResultProps) {
           onClick={onRestart}
           className="rounded-xl border border-slate-700 px-6 py-3 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
         >
-          다시 진단하기
+          다시 취향 고르기
         </button>
-        <Link
-          href={QUOTE_HREF}
-          className="rounded-xl px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-          style={{ backgroundColor: pillarColor }}
-        >
-          {tCommon('ctaButton')}
-        </Link>
       </motion.div>
     </motion.div>
   );
@@ -406,8 +401,10 @@ function TravelResult({ resultKey, onRestart, pillarColor }: DemoResultProps) {
 
 /* ── Print — 보딩패스 영수증 ───────────────────────────── */
 
-function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
-  const data = personaFor(resultKey);
+function getPrint(answers: DemoAnswers, resultKey: string, generated?: unknown): PrintSpec {
+  const data = personaView(answers, resultKey, generated);
+  const tripLength = getFields<string>(answers, 'experienceProfile').tripLength;
+  const shortTrip = tripLength === 'day' || tripLength === 'weekend';
   const seed = answersSeed(answers);
   const pace = PACES.find((p) => p.id === answers['pace']);
   const mustHave = (answers['mustHave'] as string[] | undefined) ?? [];
@@ -417,16 +414,18 @@ function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
     eyebrow: 'BOARDING PASS · 여행 페르소나',
     title: data.name,
     sections: [
-      { type: 'big', text: `ICN → ${data.airport}` },
+      { type: 'big', text: shortTrip ? tripLength === 'day' ? 'DAY TRIP · 당일' : 'WEEKEND · 2~3일' : `ICN → ${data.airport}` },
       {
         type: 'rows',
-        title: '탑승 정보',
+        title: shortTrip ? '여행 계획 카드' : '가상 탑승 정보',
         rows: [
-          { label: 'FLIGHT', value: `NE ${seededInt(seed, 'flight', 100, 999)}` },
+          { label: 'PLAN', value: `NE ${seededInt(seed, 'flight', 100, 999)}` },
           { label: 'TO', value: data.destination },
           { label: 'CLASS', value: pace?.label ?? '-' },
-          { label: 'GATE', value: String(seededInt(seed, 'gate', 1, 48)) },
-          { label: 'SEAT', value: `${seededInt(seed, 'row', 2, 42)}${seededPick(seed, 'seat', ['A', 'F'])} 창가` },
+          ...(shortTrip ? [{ label: '동선', value: '후보 중 한 지역만 선택' }] : [
+            { label: 'GATE', value: String(seededInt(seed, 'gate', 1, 48)) },
+            { label: 'SEAT', value: `${seededInt(seed, 'row', 2, 42)}${seededPick(seed, 'seat', ['A', 'F'])} 창가` },
+          ]),
           { label: 'MUST-HAVE', value: mustHaves.join(' · ') || '-' },
         ],
       },
@@ -438,12 +437,23 @@ function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
   };
 }
 
+/* ── AI 생성 ──────────────────────────────────────────── */
+
+function generate(answers: DemoAnswers): Promise<AiTravel | null> {
+  return requestDemoAi<AiTravel>(
+    config.id,
+    { experienceProfile: answers.experienceProfile, tripLength: getFields<string>(answers, 'experienceProfile').tripLength ?? 'long', destination: answers['destination'], pace: answers['pace'], mustHave: answers['mustHave'] },
+    { validate: isAiTravel }
+  );
+}
+
 const TravelStyleDemo: DemoModule = {
   config,
   StepComponents: [StepDestination, StepPace, StepMustHave],
   ResultComponent: TravelResult,
   computeResult,
   getPrint,
+  generate,
 };
 
 export default TravelStyleDemo;

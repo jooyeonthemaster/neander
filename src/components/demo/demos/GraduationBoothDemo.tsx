@@ -14,11 +14,13 @@ import {
   defineDemo,
   getCapture,
   getChoice,
+  requestDemoAi,
   seededInt,
   seededPick,
   seededRandom,
   type PhotoLook,
 } from '../kit';
+import { isAiBoothPhoto, type AiGraduationPhoto } from '@/data/demo-ai/photo-booth';
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -108,11 +110,19 @@ const MESSAGES = [
 
 const CONFETTI_COLORS = ['#f43f5e', '#38bdf8', '#a3e635', '#fbbf24', '#e879f9', '#ffffff'];
 
-function pick(answers: DemoAnswers) {
-  const gownId = (getChoice(answers, 'gown') as GownId | undefined) ?? 'black';
-  const placeId = (getChoice(answers, 'place') as PlaceId | undefined) ?? 'gate';
+function isAiGraduation(v: unknown): v is AiGraduationPhoto {
+  return isAiBoothPhoto(v) && ((v as AiGraduationPhoto).message === undefined || typeof (v as AiGraduationPhoto).message === 'string');
+}
+
+/** 결과 화면·출력물이 공유하는 값 — AI가 새로 그린 졸업 사진·축하 한마디가 있으면 그것, 없으면 원본 사진 + 오버레이 + 고정 문구 */
+function pick(answers: DemoAnswers, generated?: unknown) {
+  const pickedGown = getChoice(answers, 'gown') as GownId | undefined;
+  const pickedPlace = getChoice(answers, 'place') as PlaceId | undefined;
+  const gownId: GownId = pickedGown && GOWNS[pickedGown] ? pickedGown : 'black';
+  const placeId: PlaceId = pickedPlace && PLACES[pickedPlace] ? pickedPlace : 'gate';
   const seed = answersSeed(answers);
-  return { gownId, placeId, seed, message: seededPick(seed, 'msg', MESSAGES) };
+  const ai = isAiGraduation(generated) ? generated : null;
+  return { gownId, placeId, seed, message: ai?.message || seededPick(seed, 'msg', MESSAGES), aiImage: ai?.image ?? null };
 }
 
 /* ── Overlays (portrait 좌표: 머리 위 50/14, 눈 31, 목 50/59, 어깨 22/69 & 78/69) ─ */
@@ -300,9 +310,9 @@ function Confetti({ seed, colors }: { seed: number; colors: string[] }) {
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
   const capture = getCapture(answers, 'photo');
-  const { gownId, placeId, seed, message } = pick(answers);
+  const { gownId, placeId, seed, message, aiImage } = pick(answers, generated);
   const gown = GOWNS[gownId];
   const place = PLACES[placeId];
   const [toss, setToss] = useState(0);
@@ -327,34 +337,37 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           >
             <div className="border-2 border-[#c9a227] p-2.5">
               <div className="mb-2 text-center">
-                <p className="font-serif text-[10px] font-semibold tracking-[0.4em] text-[#a1841f]">NEANDER UNIVERSITY</p>
+                <p className="font-serif text-[10px] font-semibold tracking-[0.4em] text-[#826915]">NEANDER UNIVERSITY</p>
                 <p className="font-serif text-2xl font-bold tracking-[0.12em] text-slate-900">CLASS OF 2026</p>
               </div>
 
               <div className="relative aspect-[3/4] w-full">
                 <ProcessedPhoto
-                  src={capture.image}
-                  look={place.look}
+                  src={aiImage ?? capture.image}
+                  look={aiImage ? {} : place.look}
                   className="absolute inset-0 h-full w-full"
-                  alt="AI 졸업 사진"
-                  delayMs={900}
+                  alt={aiImage ? 'AI 졸업 사진' : '졸업 프레임 사진 예시'}
+                  delayMs={aiImage ? 300 : 900}
                 >
-                  <GownOverlay gown={gown} />
+                  {!aiImage && <GownOverlay gown={gown} />}
                 </ProcessedPhoto>
-                <motion.div
-                  key={toss}
-                  className="absolute inset-0"
-                  initial={toss ? { y: 0, opacity: 1 } : { y: -40, opacity: 0 }}
-                  animate={
-                    toss
-                      ? { y: [0, -150, 0], rotate: [0, -160, -360], opacity: 1 }
-                      : { y: 0, opacity: 1 }
-                  }
-                  transition={toss ? { duration: 1.3, ease: 'easeInOut' } : { delay: 1.4, type: 'spring', stiffness: 140, damping: 12 }}
-                  style={{ transformOrigin: '50% 13%' }}
-                >
-                  <CapOverlay gown={gown} />
-                </motion.div>
+                {/* AI 사진은 학사모까지 쓴 모습이라 그림 학사모를 얹지 않는다 */}
+                {!aiImage && (
+                  <motion.div
+                    key={toss}
+                    className="absolute inset-0"
+                    initial={toss ? { y: 0, opacity: 1 } : { y: -40, opacity: 0 }}
+                    animate={
+                      toss
+                        ? { y: [0, -150, 0], rotate: [0, -160, -360], opacity: 1 }
+                        : { y: 0, opacity: 1 }
+                    }
+                    transition={toss ? { duration: 1.3, ease: 'easeInOut' } : { delay: 1.4, type: 'spring', stiffness: 140, damping: 12 }}
+                    style={{ transformOrigin: '50% 13%' }}
+                  >
+                    <CapOverlay gown={gown} />
+                  </motion.div>
+                )}
                 <span className="absolute bottom-2 left-2 rounded-full bg-black/45 px-2 py-0.5 text-[9px] font-semibold text-white backdrop-blur-sm">
                   📍 {place.label}
                 </span>
@@ -377,9 +390,10 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
               onClick={() => setToss((t) => t + 1)}
               className="rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-2.5 text-sm font-semibold text-white hover:border-slate-500"
             >
-              🎓 학사모 던지기
+              {aiImage ? '🎉 축하 꽃가루 뿌리기' : '🎓 학사모 던지기'}
             </motion.button>
           </div>
+          {aiImage && <p className="mt-3 text-center text-xs text-slate-500">AI가 사진 속 모습 그대로 학위복을 입혀 새로 그렸어요</p>}
         </div>
       )}
 
@@ -393,8 +407,8 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
       />
 
       <TraitChips
-        title="AI 합성 과정"
-        items={['인물 영역 분리', '머리 각도에 맞춘 학사모', '학위복 핏 합성', `${place.label} 배경 톤`, '축하 프레임 적용']}
+        title={aiImage ? 'AI 사진 구성' : '예시 프레임 구성'}
+        items={aiImage ? ['학사모와 학위복', `${place.label} 배경`, '축하 프레임 적용'] : ['원본 사진', '학사모 장식', `${place.label} 색 보정`, '축하 프레임 적용']}
       />
     </ResultShell>
   );
@@ -408,9 +422,18 @@ export default defineDemo({
     targetSlug: 'ai-graduation-booth',
     industryId: 'education',
     analyzeEmoji: '🎓',
+    // AI 사진 합성은 10~20초 — 문구를 넉넉히 두고 마지막 문구는 오래 머물러도 자연스럽게
     analyzeDurationMs: 3400,
     analyzeImageStepId: 'photo',
-    analyzeMessages: ['머리 위치에 학사모 맞추는 중', '학위복 합성 중', '캠퍼스 배경 톤 입히는 중', '축하 프레임 인쇄 준비 중'],
+    analyzeMessages: [
+      '학위복 치수 재는 중',
+      '머리 위치에 학사모 맞추는 중',
+      '학위복 합성 중',
+      '캠퍼스 배경 불러오는 중',
+      '축하 한마디 쓰는 중',
+      '축하 프레임 인쇄 준비 중',
+      '마지막 디테일 다듬는 중 · 조금만 기다려 주세요',
+    ],
   },
   steps: [
     choiceStep({
@@ -445,11 +468,8 @@ export default defineDemo({
       mode: 'portrait',
       subject: '졸업 사진',
       countdown: true,
-      scanLabels: ['인물 영역 분리', '머리 위치·기울기 측정', '어깨선 추적', '조명 보정'],
-      readouts: (c) => [
-        { label: '포즈', value: c.stats.contrast > 40 ? '당당한 정면' : '부드러운 미소' },
-        { label: '학사모 핏', value: `${88 + (c.seed % 11)}%` },
-      ],
+      scanLabels: ["사진 불러오기","선택한 가운 준비","캠퍼스 배경 준비","기념 메시지 배치"],
+      readouts: () => [{"label":"촬영 사진","value":"준비 완료"},{"label":"제작 방식","value":"선택한 가운·배경 합성"}],
     }),
   ],
   computeResult: (answers) => {
@@ -457,16 +477,28 @@ export default defineDemo({
     return `${gownId}-${placeId}`;
   },
   Result,
-  print: (answers) => {
+  generate: (answers) => {
     const capture = getCapture(answers, 'photo');
-    const { gownId, placeId, message } = pick(answers);
+    if (!capture) return Promise.resolve(null);
+    const { gownId, placeId } = pick(answers);
+    return requestDemoAi<AiGraduationPhoto>(
+      'graduation-booth',
+      { experienceProfile: answers.experienceProfile, photo: capture.image, gown: gownId, place: placeId },
+      { timeoutMs: 60_000, validate: isAiGraduation }
+    );
+  },
+  print: (answers, _resultKey, generated) => {
+    const capture = getCapture(answers, 'photo');
+    const { gownId, placeId, message, aiImage } = pick(answers, generated);
     const gown = GOWNS[gownId];
     const place = PLACES[placeId];
     return {
       kind: 'photo',
-      photos: capture
-        ? [{ src: capture.image, look: place.look, label: place.label, overlay: <GraduationPrintOverlay gown={gown} /> }]
-        : [],
+      photos: aiImage
+        ? [{ src: aiImage, label: place.label }]
+        : capture
+          ? [{ src: capture.image, look: place.look, label: place.label, overlay: <GraduationPrintOverlay gown={gown} /> }]
+          : [],
       title: '졸업을 축하해요!',
       caption: message,
       badge: 'CLASS OF 2026',

@@ -1,0 +1,776 @@
+/* Shared inputs and outputs follow the five mockup compositions. The paged
+   viewport still owns overflow; media and downloads keep their original data. */
+.experience-venue[data-mockup-layout] .demo-choice-step {
+  width: 100%;
+}
+
+.experience-venue[data-mockup-layout] .demo-choice-grid {
+  gap: 14px;
+  width: 100%;
+}
+
+.experience-venue[data-mockup-layout] .venue-workspace .demo-choice {
+  min-width: 0;
+  min-height: 92px;
+  padding: 22px 20px;
+  gap: 12px;
+  border: 1px solid var(--venue-line);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--venue-ink);
+  box-shadow: none;
+  --content-ink: var(--venue-ink);
+  --content-muted: var(--venue-muted);
+  transition: background .18s, border-color .18s;
+}
+
+.experience-venue[data-mockup-layout] .venue-workspace .demo-choice:hover {
+  border-color: var(--venue-accent);
+  background: color-mix(in srgb, var(--venue-accent) 5%, var(--venue-paper));
+}
+
+.experience-venue[data-mockup-layout] .venue-workspace .demo-choice[aria-pressed='true'] {
+  border-color: var(--venue-accent);
+  background: color-mix(in srgb, var(--venue-accent) 9%, var(--venue-paper));
+  box-shadow: inset 0 0 0 1px var(--venue-accent);
+}
+
+.experience-venue[data-mockup-layout] :is(.demo-choice, .demo-field, .demo-slider, .demo-primary-action, .demo-secondary-action):focus-visible {
+  outline: 2px solid var(--venue-accent);
+  outline-offset: 4px;
+  --tw-ring-color: transparent;
+}
+
+.experience-venue[data-mockup-layout] .demo-choice-copy {
+  min-width: 0;
+  gap: 5px;
+}
+
+.experience-venue[data-mockup-layout] .venue-workspace .demo-choice-label {
+  color: var(--content-ink, var(--venue-ink));
+  font-family: var(--venue-body-font);
+  font-size: clamp(18px, 1.65vw, 25px);
+  font-weight: 650;
+  line-height: 1.45;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.experience-venue[data-mockup-layout] .venue-workspace .demo-choice-description {
+  color: var(--content-muted, var(--venue-muted));
+  font-size: 15px;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.experience-venue[data-mockup-layout] .demo-choice-emoji {
+  font-size: 28px;
+}
+
+.experience-venue[data-mockup-layout] .demo-choice-instruction {
+  color: var(--venue-muted);
+  text-align: left;
+}
+
+.experience-venue[data-mockup-layout] .demo-choice-instruction > span {
+  color: var(--venue-accent);
+}
+
+.experience-venue[data-mockup-layout] .demo-choice-marker {
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+}
+
+.experience-venue[data-mockup-layout] .demo-choice-marker > svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Editorial and console layouts use the large radio rows in the references. */
+.experience-venue:is([data-mockup-layout='editorial'], [data-mockup-layout='console']) .demo-choice-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.experience-venue:is([data-mockup-layout='editorial'], [data-mockup-layout='console']) .demo-choice-grid .demo-choice {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 84px;
+  padding: 18px 24px;
+  gap: 20px;
+  text-align: left;
+}
+
+.experience-venue:is([data-mockup-layout='editorial'], [data-mockup-layout='console']) .demo-choice-copy {
+  flex: 1;
+}
+
+.experience-venue:is([data-mockup-layout='editorial'], [data-mockup-layout='console']) .demo-choice-grid .demo-choice-marker {
+  position: relative;
+  inset: auto;
+  order: -2;
+  display: block;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: 1.5px solid var(--venue-muted);
+  border-radius: 50%;
+  background: transparent;
+}
+
+.experience-venue:is([data-mockup-layout='editorial'], [data-mockup-layout='console']) .demo-choice[aria-pressed='true'] .demo-choice-marker {
+  border-color: var(--venue-accent);
+  background: var(--venue-accent);
+  box-shadow: inset 0 0 0 5px var(--venue-paper);
+}
+
+.experience-venue:is([data-mockup-layout='editorial'], [data-mockup-layout='console']) .demo-choice-marker > svg {
+  display: none;
+}
+
+.experience-venue:is([data-mockup-layout='editorial'], [data-mockup-layout='console']) .demo-choice-swatch {
+  order: -1;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  margin: 0;
+  border-color: var(--venue-line);
+  border-radius: 7px;
+}
+
+.experience-venue[data-mockup-layout='console'] .demo-choice-grid .demo-choice[aria-pressed='true'] {
+  box-shadow: inset 5px 0 0 var(--venue-accent);
+}
+
+/* Dark compositions keep selection as a confident, solid accent surface. */
+.experience-venue:is([data-mockup-layout='centered'], [data-mockup-layout='photo-studio']) .demo-choice-grid {
+  max-width: 1040px;
+  margin-inline: auto;
+}
+
+.experience-venue:is([data-mockup-layout='centered'], [data-mockup-layout='photo-studio']) .demo-choice-grid .demo-choice {
+  justify-content: center;
+  min-height: 94px;
+  border-color: color-mix(in srgb, var(--venue-ink) 65%, transparent);
+}
+
+.experience-venue:is([data-mockup-layout='centered'], [data-mockup-layout='photo-studio']) .demo-choice-grid .demo-choice[aria-pressed='true'] {
+  background: var(--venue-accent);
+  border-color: var(--venue-accent);
+  --content-ink: var(--venue-accent-ink);
+  --content-muted: color-mix(in srgb, var(--venue-accent-ink) 78%, transparent);
+}
+
+.experience-venue:is([data-mockup-layout='centered'], [data-mockup-layout='photo-studio']) .demo-choice-marker {
+  display: none;
+}
+
+.experience-venue[data-mockup-layout='photo-choices'] .demo-choice-grid .demo-choice {
+  min-height: 130px;
+  justify-content: center;
+  background: color-mix(in srgb, var(--venue-ink) 2%, var(--venue-paper));
+}
+
+.experience-venue[data-mockup-layout='photo-choices'] .demo-choice-swatch {
+  height: 68px;
+  margin: 0 0 8px;
+}
+
+/* Forms use the same quiet borders and generous labels as the choice rows. */
+.experience-venue[data-mockup-layout] :is(.demo-text-step, .demo-slider-step) {
+  width: 100%;
+  max-width: 660px;
+  margin-inline: auto;
+}
+
+.experience-venue[data-mockup-layout] .demo-field-label {
+  gap: 16px;
+  margin-bottom: 12px;
+  color: var(--venue-ink);
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.experience-venue[data-mockup-layout] .demo-field-count {
+  flex: none;
+  color: var(--venue-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.experience-venue[data-mockup-layout] .venue-workspace .demo-field {
+  min-height: 58px;
+  padding: 15px 18px;
+  border: 1px solid var(--venue-line);
+  border-radius: 10px;
+  color: var(--venue-ink);
+  background: color-mix(in srgb, var(--venue-ink) 2%, var(--venue-paper));
+  font-size: 18px;
+  line-height: 1.6;
+  box-shadow: none;
+}
+
+.experience-venue[data-mockup-layout] .demo-slider-label {
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.experience-venue[data-mockup-layout] .venue-workspace .demo-slider-label > span {
+  color: var(--venue-ink);
+  font-size: 19px;
+  line-height: 1.5;
+}
+
+.experience-venue[data-mockup-layout] .venue-workspace .demo-slider-label .demo-slider-value {
+  min-width: 44px;
+  padding: 4px 9px;
+  border-radius: 7px;
+  color: var(--venue-accent);
+  background: color-mix(in srgb, var(--venue-accent) 9%, var(--venue-paper));
+  font-size: 17px;
+  text-align: center;
+}
+
+.experience-venue[data-mockup-layout] .demo-slider {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  background: transparent;
+  accent-color: var(--venue-accent);
+}
+
+.experience-venue[data-mockup-layout] .demo-slider::-webkit-slider-runnable-track {
+  height: 5px;
+  border-radius: 5px;
+  background: linear-gradient(to right, var(--venue-accent) var(--demo-slider-value), var(--venue-line) var(--demo-slider-value));
+}
+
+.experience-venue[data-mockup-layout] .demo-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 23px;
+  height: 23px;
+  margin-top: -9px;
+  border: 3px solid var(--venue-paper);
+  border-radius: 50%;
+  background: var(--venue-accent);
+  box-shadow: 0 0 0 1px var(--venue-accent);
+}
+
+.experience-venue[data-mockup-layout] .demo-slider::-moz-range-track {
+  height: 5px;
+  border-radius: 5px;
+  background: var(--venue-line);
+}
+
+.experience-venue[data-mockup-layout] .demo-slider::-moz-range-progress {
+  height: 5px;
+  background: var(--venue-accent);
+}
+
+.experience-venue[data-mockup-layout] .demo-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--venue-paper);
+  border-radius: 50%;
+  background: var(--venue-accent);
+  box-shadow: 0 0 0 1px var(--venue-accent);
+}
+
+.experience-venue[data-mockup-layout] .demo-slider-endpoints {
+  gap: 20px;
+  margin-top: 7px;
+  color: var(--venue-muted);
+  font-size: 15px;
+}
+
+/* Camera previews stay bounded and centered, with theme-aware device controls. */
+.experience-venue[data-mockup-layout] :is(.demo-camera-step, .demo-mic-step) {
+  max-width: 660px;
+}
+
+.experience-venue[data-mockup-layout] .demo-camera-frame {
+  --capture-frame-height: min(320px, calc(var(--demo-available-height, 540px) * .55));
+  border: 1px solid var(--venue-line);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px #00000018;
+}
+
+.experience-venue[data-mockup-layout][data-fit-viewport] .demo-camera-step:is([data-camera-phase='idle'], [data-camera-phase='starting'], [data-camera-phase='error']) .demo-camera-frame {
+  max-width: 430px;
+  height: min(240px, calc(var(--demo-available-height, 540px) * .48));
+}
+
+.experience-venue[data-mockup-layout] .demo-capture-controls {
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.experience-venue[data-mockup-layout] :is(.demo-primary-action, .demo-secondary-action, .demo-record-action) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 12px 24px;
+  border: 1px solid var(--venue-line);
+  border-radius: 9px;
+  font-family: var(--venue-body-font);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.5;
+  box-shadow: none;
+}
+
+.experience-venue[data-mockup-layout] .demo-primary-action {
+  border-color: var(--venue-accent);
+  background: var(--venue-accent);
+  color: var(--venue-accent-ink);
+  --content-ink: var(--venue-accent-ink);
+  --content-muted: var(--venue-accent-ink);
+}
+
+.experience-venue[data-mockup-layout] .demo-secondary-action {
+  background: transparent;
+  color: var(--venue-ink);
+}
+
+.experience-venue[data-mockup-layout] :is(.demo-primary-action, .demo-secondary-action):hover {
+  filter: brightness(.95);
+}
+
+.experience-venue[data-mockup-layout] .demo-camera-hand-toggle {
+  border-color: var(--venue-line);
+  background: var(--venue-paper);
+}
+
+.experience-venue[data-mockup-layout] .demo-camera-hand-toggle > button[aria-checked='true'] {
+  background: var(--venue-accent);
+  color: var(--venue-accent-ink);
+}
+
+.experience-venue[data-mockup-layout] .demo-camera-shutter > button[aria-label] {
+  border-color: var(--venue-accent);
+  background: transparent;
+}
+
+.experience-venue[data-mockup-layout] .demo-camera-shutter > button[aria-label] > span {
+  background: var(--venue-accent);
+}
+
+.experience-venue[data-mockup-layout] .demo-capture-privacy {
+  max-width: 490px;
+  color: var(--venue-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.experience-venue[data-mockup-layout] .demo-mic-console {
+  padding: 22px;
+  border: 1px solid var(--venue-line);
+  border-radius: 12px;
+  background: var(--venue-paper);
+}
+
+.experience-venue[data-mockup-layout] .demo-mic-script {
+  margin-bottom: 20px;
+  padding: 18px;
+  border: 0;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--venue-accent) 6%, var(--venue-paper));
+}
+
+.experience-venue[data-mockup-layout] .demo-mic-script > p:last-child {
+  color: var(--venue-ink);
+  font-size: 21px;
+  line-height: 1.65;
+}
+
+.experience-venue[data-mockup-layout] .demo-mic-waveform .bg-teal-400 {
+  background: var(--venue-accent);
+}
+
+/* A consistent report, including both light and dark service palettes. */
+.experience-venue[data-mockup-layout] .demo-result-shell {
+  width: 100%;
+  gap: 28px;
+  color: var(--venue-ink);
+}
+
+.experience-venue[data-mockup-layout] .demo-result-heading {
+  width: 100%;
+  max-width: 780px;
+}
+
+.experience-venue[data-mockup-layout] .demo-result-heading .demo-result-eyebrow {
+  color: var(--venue-accent);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .12em;
+}
+
+.experience-venue[data-mockup-layout] .demo-result-heading .demo-result-title {
+  font-family: var(--venue-heading-font);
+  font-size: clamp(30px, 3.5vw, 48px);
+  line-height: 1.3;
+}
+
+.experience-venue[data-mockup-layout] .demo-result-heading .demo-result-description {
+  max-width: 620px;
+  color: var(--venue-muted);
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+.experience-venue[data-mockup-layout] :is(.demo-panel, .demo-score-bars, .demo-info-grid) {
+  max-width: 680px;
+}
+
+.experience-venue[data-mockup-layout] :is(.demo-panel, .demo-info-card) {
+  padding: 22px;
+  border: 1px solid var(--venue-line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--venue-ink) 2%, var(--venue-paper));
+}
+
+.experience-venue[data-mockup-layout] .demo-panel-title {
+  color: var(--venue-muted);
+  letter-spacing: .06em;
+}
+
+.experience-venue[data-mockup-layout] .demo-score-bars .demo-score-track {
+  height: 6px;
+  background: var(--venue-line);
+}
+
+.experience-venue[data-mockup-layout] .demo-trait-chip {
+  padding: 7px 14px;
+  border-color: var(--venue-line);
+  color: var(--venue-ink);
+  background: transparent;
+}
+
+.experience-venue[data-mockup-layout] .demo-result-footer {
+  width: 100%;
+  padding-top: 24px;
+  border-top: 1px solid var(--venue-line);
+}
+
+.experience-venue[data-mockup-layout] .demo-result-actions {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.experience-venue[data-mockup-layout] .demo-custom-result :is(.demo-custom-result-eyebrow, .demo-result-item-value) {
+  color: var(--venue-accent);
+}
+
+.experience-venue[data-mockup-layout] .demo-custom-result .demo-custom-result-title {
+  background: none;
+  color: var(--venue-accent);
+}
+
+.experience-venue[data-mockup-layout] .demo-custom-result .demo-result-tag {
+  border-color: color-mix(in srgb, var(--venue-accent) 25%, var(--venue-paper));
+  background: color-mix(in srgb, var(--venue-accent) 8%, var(--venue-paper));
+  color: var(--venue-accent);
+}
+
+.experience-venue[data-mockup-layout] .demo-custom-result :is(.demo-result-note, .demo-result-item) {
+  border-color: var(--venue-line);
+  background: color-mix(in srgb, var(--venue-accent) 4%, var(--venue-paper));
+  color: var(--venue-ink);
+}
+
+.experience-venue[data-mockup-layout] .demo-custom-result .demo-result-note > p {
+  color: var(--venue-ink);
+}
+
+.experience-venue[data-mockup-layout] .demo-custom-result .demo-result-sparkle {
+  color: color-mix(in srgb, var(--venue-accent) 45%, transparent);
+}
+
+.experience-venue[data-mockup-layout] .demo-printer-body {
+  border-radius: 10px;
+  box-shadow: 0 6px 18px #0003;
+}
+
+/* The older bespoke activities share selection colors without changing their
+   specimen colors, photo previews, comparison handles, or playback sizing. */
+.experience-venue[data-mockup-layout] .venue-workspace button[aria-pressed]:not(.demo-choice, .absolute, .demo-dark-surface, [class*='product-chat-']) {
+  border-color: var(--venue-line);
+  border-radius: 10px;
+  box-shadow: none;
+  --tw-ring-color: var(--venue-accent);
+}
+
+.experience-venue[data-mockup-layout] .venue-workspace button[aria-pressed='true']:not(.demo-choice, .absolute, .demo-dark-surface, [class*='product-chat-']) {
+  border-color: var(--venue-accent);
+  box-shadow: inset 0 0 0 1px var(--venue-accent);
+}
+
+.experience-venue[data-mockup-layout] .venue-workspace button[aria-pressed='true']:not(.demo-choice, .absolute, .demo-dark-surface, [class*='product-chat-'], [class*='bg-gradient']) {
+  background: color-mix(in srgb, var(--venue-accent) 10%, var(--venue-paper));
+}
+
+.experience-venue[data-mockup-layout] .venue-workspace input[type='range']:not(.demo-slider) {
+  accent-color: var(--venue-accent);
+}
+
+.experience-venue[data-mockup-layout] .demo-custom-choice {
+  display: flex;
+  position: relative;
+}
+
+.experience-venue[data-mockup-layout='editorial'] .demo-custom-choice::before {
+  content: '';
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border: 1.5px solid var(--venue-muted);
+  border-radius: 50%;
+}
+
+.experience-venue[data-mockup-layout='editorial'] .demo-custom-choice[aria-pressed='true']::before {
+  border-color: var(--venue-accent);
+  background: var(--venue-accent);
+  box-shadow: inset 0 0 0 5px var(--venue-paper);
+}
+
+.experience-venue[data-mockup-layout] .demo-style-vibe > div:first-child {
+  display: none;
+}
+
+.experience-venue[data-mockup-layout] .demo-style-vibe > div:last-child {
+  min-width: 0;
+  padding: 0;
+}
+
+.experience-venue[data-mockup-layout] .demo-palette-choice > span {
+  flex: 1;
+}
+
+.experience-venue[data-mockup-layout] .demo-choice-grid .demo-occasion-choice {
+  display: grid;
+  grid-template-columns: 28px 34px minmax(0, 1fr);
+  gap: 4px 18px;
+}
+
+.experience-venue[data-mockup-layout] .demo-occasion-choice::before,
+.experience-venue[data-mockup-layout] .demo-occasion-choice > span {
+  grid-row: 1 / 3;
+}
+
+.experience-venue[data-mockup-layout] .demo-occasion-choice > p {
+  grid-column: 3;
+  margin: 0;
+}
+
+.experience-venue[data-mockup-layout] .demo-undertone-choice > div:first-child {
+  width: 58px;
+  height: 46px;
+  border-radius: 7px;
+}
+
+.experience-venue[data-mockup-layout] .demo-season-choice > p {
+  flex: 1;
+  margin: 0;
+}
+
+.experience-venue[data-mockup-layout] .demo-season-choice > div {
+  flex: none;
+}
+
+.experience-venue[data-mockup-layout] .venue-workspace .demo-color-swatch-choice {
+  min-height: 0;
+  padding: 12px 8px;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.experience-venue[data-mockup-layout] .demo-color-swatch-choice[aria-pressed='true'] > div {
+  --tw-ring-color: var(--venue-accent);
+}
+
+.experience-venue[data-mockup-layout] .demo-fortune-cards .demo-custom-choice {
+  flex: 1 1 140px;
+  width: auto;
+  height: auto;
+}
+
+.experience-venue[data-mockup-layout] .demo-fortune-cards .demo-custom-choice > .absolute {
+  display: none;
+}
+
+.experience-venue[data-mockup-layout] .venue-workspace .demo-custom-choice > span {
+  color: var(--content-ink, var(--venue-ink));
+  text-shadow: none;
+  filter: none;
+}
+
+/* A light laboratory console surrounds dark scientific diagrams; the SVGs
+   keep their original spectrum, liquid, trajectory, and plate colors. */
+.experience-venue[data-mockup-layout] .venue-workspace :is(.demo-science-diagram, .demo-science-beaker) {
+  background: #13202e;
+  border-color: #263747;
+  border-radius: 10px;
+  --content-ink: #f1f5f9;
+  --content-muted: #bbcbd8;
+  --content-accent: #bae6fd;
+}
+
+.experience-venue[data-mockup-layout] .demo-science-readings > svg {
+  padding: 5px;
+  border-radius: 7px;
+  background: #13202e;
+}
+
+.experience-venue[data-mockup-layout] .demo-science-launch-controls > button {
+  border: 1px solid var(--venue-accent);
+  border-radius: 8px;
+  background: var(--venue-accent);
+  color: var(--venue-accent-ink);
+  box-shadow: none;
+}
+
+.experience-venue[data-mockup-layout] .demo-science-substances > button {
+  border-radius: 8px;
+  border-color: var(--venue-line);
+  color: var(--venue-ink);
+}
+
+.experience-venue[data-mockup-layout] .demo-science-substances > button[class~='border-lime-400'] {
+  border-color: var(--venue-accent);
+  background: color-mix(in srgb, var(--venue-accent) 10%, var(--venue-paper));
+}
+
+.experience-venue[data-mockup-layout] .product-chat {
+  max-width: 680px;
+  border-color: var(--venue-line);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.experience-venue[data-mockup-layout] :is(.product-chat-header, .product-chat-replies) {
+  border-color: var(--venue-line);
+  background: transparent;
+}
+
+.experience-venue[data-mockup-layout] .product-chat-ai > p {
+  border: 1px solid var(--venue-line);
+  border-radius: 10px 10px 10px 2px;
+  background: color-mix(in srgb, var(--venue-ink) 3%, var(--venue-paper));
+  color: var(--venue-ink);
+}
+
+.experience-venue[data-mockup-layout] .product-chat-user > p {
+  border-radius: 10px 10px 2px 10px;
+  background: var(--venue-accent);
+  color: var(--venue-accent-ink);
+}
+
+.experience-venue[data-mockup-layout] :is(.product-chat-options, .product-chat-history-nav) > button {
+  border-radius: 8px;
+  border-color: var(--venue-line);
+  background: transparent;
+  color: var(--venue-ink);
+}
+
+.experience-venue[data-mockup-layout] .product-chat-options > button:hover {
+  border-color: var(--venue-accent);
+  background: color-mix(in srgb, var(--venue-accent) 8%, var(--venue-paper));
+}
+
+.experience-venue[data-mockup-layout] .product-chat-compose > input {
+  border-color: var(--venue-line);
+  border-radius: 8px;
+  color: var(--venue-ink);
+  background: transparent;
+}
+
+.experience-venue[data-mockup-layout] .product-chat-compose > button {
+  border-radius: 8px;
+  background: var(--venue-accent);
+  color: var(--venue-accent-ink);
+}
+
+@media (max-width: 700px) {
+  .experience-venue[data-mockup-layout] .demo-choice-grid {
+    gap: 10px;
+  }
+
+  .experience-venue[data-mockup-layout] .demo-choice-grid[data-choice-columns='3'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .experience-venue[data-mockup-layout] .venue-workspace .demo-choice {
+    min-height: 76px;
+    padding: 15px 12px;
+    gap: 10px;
+  }
+
+  .experience-venue:is([data-mockup-layout='editorial'], [data-mockup-layout='console']) .demo-choice-grid[data-choice-columns] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .experience-venue:is([data-mockup-layout='editorial'], [data-mockup-layout='console']) .demo-choice-grid .demo-choice {
+    min-height: 68px;
+    padding: 14px 16px;
+    gap: 14px;
+  }
+
+  .experience-venue[data-mockup-layout] .venue-workspace .demo-choice-label {
+    font-size: 17px;
+  }
+
+  .experience-venue[data-mockup-layout] .venue-workspace .demo-choice-description {
+    font-size: 14px;
+  }
+
+  .experience-venue[data-mockup-layout] .demo-choice-emoji {
+    font-size: 24px;
+  }
+
+  .experience-venue[data-mockup-layout] .demo-choice-grid .demo-choice-marker {
+    width: 22px;
+    height: 22px;
+  }
+
+  .experience-venue[data-mockup-layout] :is(.demo-primary-action, .demo-secondary-action, .demo-record-action) {
+    min-height: 44px;
+    padding: 10px 16px;
+    font-size: 16px;
+  }
+
+  .experience-venue[data-mockup-layout] :is(.demo-panel, .demo-info-card, .demo-mic-console) {
+    padding: 16px;
+  }
+
+  .experience-venue[data-mockup-layout] .demo-result-shell {
+    gap: 22px;
+  }
+
+  .experience-venue[data-mockup-layout] .demo-mic-script > p:last-child {
+    font-size: 18px;
+  }
+}
+
+@media (max-height: 550px) {
+  .experience-venue[data-mockup-layout] .venue-workspace .demo-choice {
+    min-height: 60px;
+    padding-block: 12px;
+  }
+
+  .experience-venue[data-mockup-layout][data-fit-viewport] .demo-camera-step:is([data-camera-phase='idle'], [data-camera-phase='starting'], [data-camera-phase='error']) .demo-camera-frame {
+    min-height: 80px;
+    height: min(130px, calc(var(--demo-available-height, 200px) - 12px));
+  }
+
+  .experience-venue[data-mockup-layout] .demo-capture-controls {
+    margin-top: 8px;
+    gap: 6px;
+  }
+}

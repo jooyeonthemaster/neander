@@ -1,76 +1,31 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { motion } from 'motion/react';
+import { useLocale, useTranslations } from 'next-intl';
+import Image from 'next/image';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { FitToViewport, ScrollReveal, StaggerChildren, StaggerItem } from '@/components/animations';
-import { pillars, getExperiencesByPillar } from '@/data/experiences';
-import { cn } from '@/lib/utils';
+import { industries, experiences } from '@/data/experiences';
+import { PRODUCTS, quoteHrefFor, type ProductEntry } from '@/data/products';
+import { SERVICE_TEXT, type Lang } from '@/lib/quote/catalog';
+import { startingPrice } from '@/lib/quote/engine';
 
 /* ─────────────────────────────────────────────────────────
-   Pillar icon map
+   홈 'AI 체험' 섹션 — 판매 상품 6가지
+   이름·설명·시작가는 온라인 견적(src/lib/quote)과 같은 값을 쓴다.
+   41개 체험을 성격별로 나눈 5개 카테고리는 서비스 소개 페이지의 필터로 남아 있다.
    ───────────────────────────────────────────────────────── */
-const PILLAR_ICONS: Record<string, React.ReactNode> = {
-  camera: (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z" />
-      <circle cx="12" cy="13" r="3" />
-    </svg>
-  ),
-  scan: (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 7V5a2 2 0 0 1 2-2h2" />
-      <path d="M17 3h2a2 2 0 0 1 2 2v2" />
-      <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
-      <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
-      <path d="M8 12h8" />
-      <path d="M12 8v8" />
-    </svg>
-  ),
-  sparkles: (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3Z" />
-    </svg>
-  ),
-  palette: (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="13.5" cy="6.5" r="0.5" fill="currentColor" />
-      <circle cx="17.5" cy="10.5" r="0.5" fill="currentColor" />
-      <circle cx="8.5" cy="7.5" r="0.5" fill="currentColor" />
-      <circle cx="6.5" cy="12.5" r="0.5" fill="currentColor" />
-      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2Z" />
-    </svg>
-  ),
-  layers: (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
-      <path d="m22 12.65-8.58 3.9a2 2 0 0 1-1.66 0L2 12.56" />
-      <path d="m22 17.65-8.58 3.9a2 2 0 0 1-1.66 0L2 17.56" />
-    </svg>
-  ),
-};
 
-/* ── Experience count per pillar (precomputed) ─────────── */
-const PILLAR_COUNTS: Record<string, number> = {};
-pillars.forEach((p) => {
-  PILLAR_COUNTS[p.id] = getExperiencesByPillar(p.id).length;
-});
-
-/* ── Key color: teal unified ───────────────────────────── */
 const KEY_COLOR = '#24ADB5';
-
-/* ── Reorder: ai-creative (조향) as hero, then rest ────── */
-const HERO_PILLAR_ID = 'ai-creative';
-const heroPillar = pillars.find((p) => p.id === HERO_PILLAR_ID)!;
-const restPillars = pillars.filter((p) => p.id !== HERO_PILLAR_ID);
 
 export function ServicesOverview() {
   const t = useTranslations('services');
+  const locale = useLocale();
+  const lang: Lang = locale === 'en' ? 'en' : 'ko';
 
   return (
     <section className="home-screen relative overflow-hidden bg-white" id="services">
       {/* ── Background layers (light) ──────────────────────── */}
-      {/* Subtle grid pattern */}
       <div
         className="absolute inset-0 opacity-[0.35]"
         style={{
@@ -80,13 +35,11 @@ export function ServicesOverview() {
         }}
         aria-hidden="true"
       />
-      {/* Top-left teal glow */}
       <div
         className="absolute top-[-8%] left-[15%] w-[600px] h-[400px] rounded-full blur-[120px]"
         style={{ background: `radial-gradient(ellipse, ${KEY_COLOR}10 0%, transparent 70%)` }}
         aria-hidden="true"
       />
-      {/* Bottom-right teal glow */}
       <div
         className="absolute bottom-[-5%] right-[10%] w-[500px] h-[300px] rounded-full blur-[100px]"
         style={{ background: 'radial-gradient(ellipse, rgba(36, 173, 181, 0.06) 0%, transparent 70%)' }}
@@ -95,10 +48,9 @@ export function ServicesOverview() {
 
       {/* ── Content ──────────────────────────────────────── */}
       <FitToViewport className="py-16 lg:py-0">
-        <div className="container-wide">
-          {/* Header — compact */}
-          <ScrollReveal className="text-center mb-10 lg:mb-[3.5vh]">
-            <span className="inline-flex items-center gap-2 mb-5 lg:mb-[1.6vh] px-4 py-1.5 rounded-full border border-teal-600/20 bg-teal-500/[0.06] text-[11px] font-semibold uppercase tracking-[0.25em] text-teal-600">
+        <div className="container-wide lg-short:max-w-6xl">
+          <ScrollReveal className="text-center mb-10 lg:mb-[3vh] lg-short:mb-3">
+            <span className="inline-flex lg-short:hidden items-center gap-2 mb-5 lg:mb-[1.6vh] px-4 py-1.5 rounded-full border border-teal-600/20 bg-teal-500/[0.06] text-[11px] font-semibold uppercase tracking-[0.25em] text-teal-600">
               <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
               AI EXPERIENCES
             </span>
@@ -110,46 +62,26 @@ export function ServicesOverview() {
             </p>
           </ScrollReveal>
 
-          {/* ── Bento: hero (ai-creative) + 2x2 grid ─────── */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5">
-            {/* Hero card — AI 크리에이티브 (조향) */}
-            <StaggerChildren staggerDelay={0.08} className="lg:col-span-5 grid grid-cols-1 gap-4 lg:gap-5">
-              <StaggerItem>
-                <PillarCardHero
-                  pillar={heroPillar}
-                  t={t}
-                  count={PILLAR_COUNTS[heroPillar.id]}
-                />
+          <StaggerChildren staggerDelay={0.06} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5 lg-short:gap-3">
+            {PRODUCTS.map((product) => (
+              <StaggerItem key={product.key}>
+                <ProductCard product={product} lang={lang} labels={{ detail: t('viewDetail'), quote: t('addToQuote'), from: t('priceFrom') }} />
               </StaggerItem>
-            </StaggerChildren>
+            ))}
+          </StaggerChildren>
 
-            {/* Remaining 4 pillars in 2x2 grid */}
-            <StaggerChildren
-              staggerDelay={0.08}
-              className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-5"
-            >
-              {restPillars.map((pillar, idx) => (
-                <StaggerItem key={pillar.id}>
-                  <PillarCard
-                    pillar={pillar}
-                    idx={idx}
-                    t={t}
-                    count={PILLAR_COUNTS[pillar.id]}
-                  />
-                </StaggerItem>
-              ))}
-            </StaggerChildren>
-          </div>
-
-          {/* Bottom stat line */}
-          <ScrollReveal className="mt-10 lg:mt-[3vh] flex justify-center">
+          {/* 하단 숫자 줄 + 전체 체험 보기 */}
+          <ScrollReveal className="mt-10 lg:mt-[3vh] lg-short:mt-3 flex flex-wrap items-center justify-center gap-3">
             <div className="inline-flex items-center gap-3 sm:gap-7 px-4 sm:px-7 py-3.5 lg-short:py-2.5 rounded-2xl border border-neutral-200 bg-neutral-50/80 backdrop-blur-sm">
-              <StatItem value="42" label={t('statExperiences')} color="#24ADB5" />
+              <StatItem value={String(PRODUCTS.length)} label={t('statProducts')} />
               <span className="w-px h-4 bg-neutral-200" aria-hidden="true" />
-              <StatItem value="9" label={t('statIndustries')} color="#24ADB5" />
+              <StatItem value={String(experiences.length)} label={t('statExperiences')} />
               <span className="w-px h-4 bg-neutral-200" aria-hidden="true" />
-              <StatItem value="5" label={t('statCategories')} color="#24ADB5" />
+              <StatItem value={String(industries.length)} label={t('statIndustries')} />
             </div>
+            <Link href="/services" className="text-sm font-semibold text-teal-700 underline-offset-4 hover:underline">
+              {t('viewAllExperiences')} →
+            </Link>
           </ScrollReveal>
         </div>
       </FitToViewport>
@@ -157,215 +89,75 @@ export function ServicesOverview() {
   );
 }
 
-/* ── Stat Item ────────────────────────────────────────── */
-function StatItem({ value, label, color }: { value: string; label: string; color: string }) {
+function StatItem({ value, label }: { value: string; label: string }) {
   return (
     <span className="flex items-baseline gap-1.5 whitespace-nowrap">
-      <span
-        className="text-xl sm:text-2xl font-bold tabular-nums"
-        style={{ color }}
-      >
-        {value}
-      </span>
+      <span className="text-xl sm:text-2xl font-bold tabular-nums" style={{ color: KEY_COLOR }}>{value}</span>
       <span className="text-xs sm:text-sm text-neutral-500 font-medium">{label}</span>
     </span>
   );
 }
 
-/* ── Hero Card (AI 크리에이티브 — tall, rich layout) ───── */
-function PillarCardHero({
-  pillar,
-  t,
-  count,
-}: {
-  pillar: (typeof pillars)[number];
-  t: ReturnType<typeof useTranslations>;
-  count: number;
+function ProductCard({ product, lang, labels }: {
+  product: ProductEntry;
+  lang: Lang;
+  labels: { detail: string; quote: string; from: string };
 }) {
+  const text = SERVICE_TEXT[product.key];
+  const price = startingPrice(product.key);
+  const priceText = lang === 'ko' ? `${(price / 10000).toLocaleString('ko-KR')}만원` : `KRW ${price.toLocaleString('en-US')}`;
+
   return (
-    <Link href={`/services?pillar=${pillar.id}`} className="group block h-full focus-visible:outline-none">
-      <motion.div
-        whileHover={{ y: -6 }}
-        transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
-        className={cn(
-          'relative flex flex-col h-full min-h-[380px] lg:min-h-0 rounded-2xl overflow-hidden',
-          'border border-neutral-200/80',
-          'bg-white',
-          'shadow-sm',
-          'transition-all duration-500',
-          'group-hover:shadow-xl group-hover:border-teal-200',
-          'group-focus-visible:ring-2 group-focus-visible:ring-teal-500 group-focus-visible:ring-offset-2',
-        )}
+    <article className="group relative isolate flex h-full min-h-[330px] flex-col overflow-hidden rounded-2xl bg-neutral-950 shadow-sm transition-shadow duration-500 hover:shadow-xl lg:min-h-[clamp(17rem,29vh,21rem)] lg-short:min-h-[15.5rem] motion-reduce:transition-none">
+      {/* 화면 맞춤·부드러운 스크롤 안에서도 배경 사진이 바로 보이도록 처음부터 불러온다. */}
+      <Image
+        src={product.image}
+        alt=""
+        fill
+        loading="eager"
+        sizes="(min-width: 1280px) 420px, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, calc(100vw - 48px)"
+        className="pointer-events-none object-cover transition-transform duration-700 ease-out group-hover:scale-[1.045] motion-reduce:transform-none motion-reduce:transition-none"
+      />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ background: 'linear-gradient(180deg, rgba(8, 15, 17, 0.18) 0%, rgba(8, 15, 17, 0.08) 25%, rgba(8, 15, 17, 0.72) 58%, rgba(8, 15, 17, 0.96) 100%)' }}
+        aria-hidden="true"
+      />
+      <Link
+        href={product.href}
+        className="group/detail relative flex flex-1 flex-col justify-between gap-12 rounded-t-2xl px-6 pt-5 focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-white lg-short:gap-8 lg-short:px-5 lg-short:pt-4"
+        aria-label={`${text.name[lang]} — ${labels.detail}`}
       >
-        {/* Top accent bar — teal */}
-        <div
-          className="h-1 w-full bg-teal-500 transition-all duration-500 group-hover:h-1.5"
-          aria-hidden="true"
-        />
-
-        {/* Background glow on hover */}
-        <div
-          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-          style={{
-            background: `radial-gradient(ellipse at 30% 20%, ${KEY_COLOR}0C 0%, transparent 50%)`,
-          }}
-          aria-hidden="true"
-        />
-
-        <div className="relative flex flex-col h-full p-7 lg:p-9 lg-short:p-7">
-          {/* Icon */}
-          <div className="flex items-start justify-between mb-6 lg-short:mb-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-500/[0.08] text-teal-600 ring-1 ring-teal-500/20 transition-all duration-500 group-hover:scale-110 group-hover:bg-teal-500/[0.12]">
-              {PILLAR_ICONS[pillar.icon] ?? null}
-            </div>
-            <span className="text-3xl font-bold font-mono text-teal-500 opacity-[0.12] group-hover:opacity-[0.20] transition-opacity duration-500">
-              01
-            </span>
-          </div>
-
-          {/* Title */}
-          <h3 className="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight mb-3 leading-tight">
-            {t(pillar.nameKey)}
-          </h3>
-
-          {/* Tagline */}
-          <p className="text-base sm:text-lg text-neutral-600 leading-relaxed mb-3">
-            {t(pillar.taglineKey)}
-          </p>
-
-          {/* Description */}
-          <p className="text-sm text-neutral-400 leading-[1.8] flex-1">
-            {t(pillar.descriptionKey)}
-          </p>
-
-          {/* Bottom: count + CTA */}
-          <div className="mt-6 pt-4 border-t border-neutral-100 flex items-center justify-between">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-teal-600">
-                {count}
-              </span>
-              <span className="text-sm font-medium text-neutral-400">{t('statExperiences')}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-teal-600 transition-all duration-300 group-hover:gap-3">
-              <span>{t('viewDetail')}</span>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="transition-transform duration-300 group-hover:translate-x-1.5"
-                aria-hidden="true"
-              >
-                <path d="M3 8h10M9 4l4 4-4 4" />
-              </svg>
-            </div>
-          </div>
+        <div className="flex items-start justify-between gap-3">
+          <span className="rounded-full border border-white/20 bg-black/60 px-2.5 py-1 text-[10px] font-medium leading-relaxed text-white backdrop-blur-md">
+            {product.caption[lang]}
+          </span>
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-white/30 bg-black/20 text-white backdrop-blur-sm transition-colors group-hover/detail:bg-white group-hover/detail:text-neutral-900 motion-reduce:transition-none" aria-hidden="true">
+            <ArrowUpRight className="size-3.5" />
+          </span>
         </div>
-      </motion.div>
-    </Link>
-  );
-}
-
-/* ── Standard Pillar Card (2x2 grid cards) ────────────── */
-function PillarCard({
-  pillar,
-  idx,
-  t,
-  count,
-}: {
-  pillar: (typeof pillars)[number];
-  idx: number;
-  t: ReturnType<typeof useTranslations>;
-  count: number;
-}) {
-  return (
-    <Link href={`/services?pillar=${pillar.id}`} className="group block h-full focus-visible:outline-none">
-      <motion.div
-        whileHover={{ y: -5 }}
-        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-        className={cn(
-          'relative flex flex-col h-full rounded-2xl overflow-hidden',
-          'border border-neutral-200/80',
-          'bg-white',
-          'shadow-sm',
-          'transition-all duration-500',
-          'group-hover:shadow-lg group-hover:border-teal-200',
-          'group-focus-visible:ring-2 group-focus-visible:ring-teal-500 group-focus-visible:ring-offset-2',
-        )}
-      >
-        {/* Top accent bar — teal */}
-        <div
-          className="h-1 w-full bg-teal-500 transition-all duration-500 group-hover:h-1.5"
-          aria-hidden="true"
-        />
-
-        {/* Background glow on hover */}
-        <div
-          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-          style={{
-            background: `radial-gradient(ellipse at 50% 0%, ${KEY_COLOR}0A 0%, transparent 55%)`,
-          }}
-          aria-hidden="true"
-        />
-
-        <div className="relative flex flex-col h-full p-5 sm:p-6 lg-short:p-4">
-          {/* Icon + Number */}
-          <div className="flex items-start justify-between mb-5 lg-short:mb-3">
-            <div className="flex h-12 w-12 lg-short:h-10 lg-short:w-10 items-center justify-center rounded-xl bg-teal-500/[0.08] text-teal-600 ring-1 ring-teal-500/20 transition-all duration-500 group-hover:scale-105 group-hover:bg-teal-500/[0.12]">
-              {PILLAR_ICONS[pillar.icon] ?? null}
-            </div>
-            <span className="text-xl font-bold font-mono text-teal-500 opacity-[0.12] group-hover:opacity-[0.20] transition-opacity duration-500">
-              0{idx + 2}
-            </span>
-          </div>
-
-          {/* Title */}
-          <h3 className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight mb-2 leading-tight">
-            {t(pillar.nameKey)}
+        <div>
+          <h3 className="text-[22px] font-bold leading-tight tracking-tight text-white group-focus-visible/detail:underline lg-short:text-xl">
+            {text.name[lang]}
           </h3>
-
-          {/* Tagline */}
-          <p className="text-sm text-neutral-500 leading-relaxed mb-2">
-            {t(pillar.taglineKey)}
-          </p>
-
-          {/* Description */}
-          <p className="text-xs text-neutral-400 leading-relaxed flex-1 line-clamp-2 lg-short:hidden">
-            {t(pillar.descriptionKey)}
-          </p>
-
-          {/* Bottom: count + CTA */}
-          <div className="mt-4 lg-short:mt-auto pt-3 border-t border-neutral-100 flex items-center justify-between">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-lg font-bold text-teal-600">
-                {count}
-              </span>
-              <span className="text-xs font-medium text-neutral-400">{t('statExperiences')}</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-teal-600 transition-all duration-300 group-hover:gap-2.5">
-              <span>{t('viewDetail')}</span>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="transition-transform duration-300 group-hover:translate-x-1"
-                aria-hidden="true"
-              >
-                <path d="M3 8h10M9 4l4 4-4 4" />
-              </svg>
-            </div>
-          </div>
+          <p className="mt-2 line-clamp-2 min-h-[2.0lh] text-[13px] leading-relaxed text-white/80 lg-short:mt-1.5 lg-short:text-xs">{text.summary[lang]}</p>
         </div>
-      </motion.div>
-    </Link>
+      </Link>
+      <div className="relative mx-6 mt-4 mb-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/20 pt-3 lg-short:mx-5 lg-short:mt-3 lg-short:mb-4">
+        <span className="whitespace-nowrap text-xs text-white/70">
+          {lang === 'en' && <span className="mr-1">{labels.from}</span>}
+          <span className="text-lg font-bold tabular-nums tracking-tight text-white lg-short:text-base">{priceText}</span>
+          {lang === 'ko' && <span className="ml-1">{labels.from}</span>}
+        </span>
+        <Link
+          href={quoteHrefFor(product.key)}
+          aria-label={`${text.name[lang]} — ${labels.quote}`}
+          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 text-xs font-semibold text-neutral-900 transition-colors hover:bg-teal-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white motion-reduce:transition-none"
+        >
+          {labels.quote}
+          <ArrowRight className="size-3.5" aria-hidden="true" />
+        </Link>
+      </div>
+    </article>
   );
 }

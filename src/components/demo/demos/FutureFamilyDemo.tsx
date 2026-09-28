@@ -7,18 +7,22 @@ import {
   ProcessedPhoto,
   ResultShell,
   TraitChips,
+  answersSeed,
   cameraStep,
   choiceStep,
   clamp,
   defineDemo,
   getCapture,
   getChoice,
+  getFields,
+  requestDemoAi,
   seededInt,
   seededPick,
   type CaptureData,
   type PhotoLook,
   type PrintSpec,
 } from '../kit';
+import { FF_FEATURE_IDS, familyMotifMix, type AiFutureFamily, type FfChild } from '@/data/demo-ai/future-family';
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -27,8 +31,8 @@ type Gender = 'boy' | 'girl';
 type Stage = 'baby' | 'toddler' | 'kid';
 
 const CONCEPTS: Record<ConceptId, { label: string; emoji: string; desc: string }> = {
-  son: { label: '아들', emoji: '👦', desc: '씩씩한 우리 첫째' },
-  daughter: { label: '딸', emoji: '👧', desc: '다정한 우리 첫째' },
+  son: { label: '아들', emoji: '👦', desc: '상상 속 아들 캐릭터' },
+  daughter: { label: '딸', emoji: '👧', desc: '상상 속 딸 캐릭터' },
   twins: { label: '쌍둥이 남매', emoji: '👫', desc: '행복도 두 배' },
   surprise: { label: 'AI에게 맡기기', emoji: '🎁', desc: '두근두근 서프라이즈' },
 };
@@ -51,7 +55,11 @@ const HAIR_COLORS = ['#1f1512', '#2e1d14', '#4a2e1c', '#6b4226'];
 const FIRST_WORDS = ['까까', '맘마', '멍멍', '안녕', '빠빠', '아니야'];
 const FAVORITE_PLAY = ['블록 쌓기', '공룡 흉내', '그림 그리기', '숨바꼭질', '노래 부르기', '모래 놀이'];
 const DREAMS = ['🚀 우주비행사', '🎨 그림 작가', '🩺 동물 의사', '⚽ 축구 선수', '🎹 작곡가', '🔬 과학자', '👩‍🍳 요리사'];
-const PERSONALITY = ['호기심 대장', '애교 만점', '웃음 부자', '씩씩함', '꼼꼼함', '먹보', '음악 감각', '모험가', '배려왕', '수다쟁이'];
+const FAMILY_STORIES: Record<string, { play: string; dream: string; keywords: string[] }> = {
+  nature: { play: '나뭇잎 보물찾기', dream: '🌿 숲을 기록하는 탐험가', keywords: ['숲속 탐험', '작은 발견', '자연 친구'] },
+  art: { play: '가족 그림 전시회', dream: '🎨 색으로 이야기하는 작가', keywords: ['색깔 놀이', '그림책 상상', '함께 그리기'] },
+  space: { play: '종이 로켓 만들기', dream: '🚀 상상 은하 탐험가', keywords: ['우주 놀이', '종이 로켓', '별나라 모험'] },
+};
 
 const PHOTO_LOOK: PhotoLook = {
   adjust: { brightness: 1.05, saturation: 1.05, warmth: 0.12 },
@@ -59,7 +67,7 @@ const PHOTO_LOOK: PhotoLook = {
   vignette: 0.18,
 };
 
-/* ── Genetics (재미용 시드 조합) ──────────────────────────── */
+/* ── Creative character blending (허구의 캐릭터 조합) ──────────────────────────── */
 
 function hexToRgb(hex: string): [number, number, number] {
   const n = parseInt(hex.slice(1), 16);
@@ -91,8 +99,9 @@ function analyze(answers: DemoAnswers) {
   const mix = (seedA ^ Math.imul(seedB, 2654435761)) >>> 0;
   const concept = (getChoice(answers, 'concept') as ConceptId | undefined) ?? 'surprise';
 
+  const motifs = familyMotifMix(answersSeed(answers));
   const features = FEATURES.map((f) => {
-    const pa = seededInt(mix, f.id, 31, 69);
+    const pa = motifs[f.id];
     return { ...f, a: pa, b: 100 - pa };
   });
   const overallA = Math.round(features.reduce((s, f) => s + f.a, 0) / features.length);
@@ -130,10 +139,53 @@ function analyze(answers: DemoAnswers) {
     dream: seededPick(mix, 'dream', DREAMS),
     walk: seededInt(mix, 'walk', 10, 14),
   };
-  const personality = [0, 1, 2].map((i) => PERSONALITY[(seededInt(mix, `p${i}`, 0, PERSONALITY.length - 1) + i * 3) % PERSONALITY.length]!);
-  const uniquePersonality = [...new Set(personality)];
+  // Character interests come from the participant's story choice, never their face.
+  const story = FAMILY_STORIES[getFields<string>(answers, 'experienceProfile').familyStory] ?? FAMILY_STORIES.nature!;
+  predictions.play = story.play;
+  predictions.dream = story.dream;
+  const uniquePersonality = story.keywords;
 
   return { a, b, concept, features, overallA, kids, name, predictions, personality: uniquePersonality };
+}
+
+/* ── AI 결과 ───────────────────────────────────────────── */
+
+function isAiFamily(v: unknown): v is AiFutureFamily {
+  const o = v as AiFutureFamily | null;
+  return (
+    !!o &&
+    typeof o.image === 'string' &&
+    o.image.startsWith('data:image/') &&
+    typeof o.summary === 'string' &&
+    !!o.features &&
+    FF_FEATURE_IDS.every((id) => typeof o.features[id] === 'number') &&
+    typeof o.firstWord === 'string' &&
+    typeof o.play === 'string' &&
+    typeof o.dream === 'string' &&
+    Array.isArray(o.personality) &&
+    o.personality.every((p) => typeof p === 'string')
+  );
+}
+
+/** 화면·출력물이 그리는 결과 — AI 결과가 있으면 닮은 곳·예측·아이 사진을 AI 것으로, 없으면 고정 결과 */
+function familyView(answers: DemoAnswers, generated: unknown) {
+  const r = analyze(answers);
+  if (!isAiFamily(generated)) return { ...r, image: undefined as string | undefined, summary: undefined as string | undefined, ai: false };
+  const motifs = familyMotifMix(answersSeed(answers), generated.features);
+  const features = r.features.map((f) => {
+    const a = motifs[f.id];
+    return { ...f, a, b: 100 - a };
+  });
+  return {
+    ...r,
+    features,
+    overallA: Math.round(features.reduce((s, f) => s + f.a, 0) / features.length),
+    predictions: { ...r.predictions, word: generated.firstWord, play: generated.play, dream: generated.dream },
+    personality: r.personality,
+    image: generated.image,
+    summary: generated.summary,
+    ai: true,
+  };
 }
 
 /* ── Child avatar (SVG) ───────────────────────────────── */
@@ -169,7 +221,7 @@ function ChildAvatar({ look, stage, className }: { look: AvatarLook; stage: Stag
   const bodyR = cx + st.bodyW / 2;
 
   return (
-    <svg viewBox="0 0 120 160" className={className} role="img" aria-label={`${stage === 'baby' ? '아기' : stage === 'toddler' ? '유아' : '어린이'} 시절 예상 모습`}>
+    <svg viewBox="0 0 120 160" className={className} role="img" aria-label={`${stage === 'baby' ? '아기' : stage === 'toddler' ? '유아' : '어린이'} 그림책 속 모습`}>
       {/* 몸 */}
       {stage === 'baby' ? (
         <g>
@@ -312,7 +364,7 @@ function ChildAvatar({ look, stage, className }: { look: AvatarLook; stage: Stag
   );
 }
 
-/* ── Print (4×6 격자: A · B · 아이 · 닮은 곳 분석) ─────────── */
+/* ── Print (4×6 격자: A · B · 아이 · 창작 캐릭터 배합) ─────────── */
 
 const SVG_FONT = "'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif";
 
@@ -361,18 +413,34 @@ function ChildCell({ kids }: { kids: AvatarLook[] }) {
   );
 }
 
+/** AI 아이 사진 칸의 테두리 (글자 없이 하트만) */
+function AiChildFrame() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400">
+      <rect x="5" y="5" width="290" height="390" rx="8" fill="none" stroke="#fda4af" strokeWidth="10" />
+      {[
+        [22, 22, 1.4],
+        [258, 24, 1.2],
+        [256, 356, 1.6],
+      ].map(([x, y, k]) => (
+        <path key={`${x}-${y}`} d={HEART} transform={`translate(${x} ${y}) scale(${k})`} fill="#fb7185" />
+      ))}
+    </svg>
+  );
+}
+
 function ResemblanceCell({ features, overallA }: { features: ReturnType<typeof analyze>['features']; overallA: number }) {
   const barW = 252;
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" fontFamily={SVG_FONT}>
       <text x="24" y="48" fontSize="22" fontWeight="800" fill="#1f2937">
-        닮은 곳 분석
+        창작 캐릭터 배합
       </text>
       <text x="24" y="78" fontSize="13" fontWeight="700" fill={COLOR_A}>
-        A 닮음 {overallA}%
+        A 모티브 {overallA}%
       </text>
       <text x="276" y="78" textAnchor="end" fontSize="13" fontWeight="700" fill={COLOR_B}>
-        B 닮음 {100 - overallA}%
+        B 모티브 {100 - overallA}%
       </text>
       {features.map((f, i) => {
         const y = 112 + i * 44;
@@ -415,15 +483,15 @@ function ParentPhoto({ capture, label, color }: { capture: CaptureData | undefin
   );
 }
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
-  const r = analyze(answers);
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
+  const r = familyView(answers, generated);
   const overallB = 100 - r.overallA;
 
   return (
     <ResultShell
       eyebrow="AI 미래 가족 상상"
       title={`미래에서 온 우리 ${r.name}`}
-      description={`두 분의 얼굴 특징을 섞어 그려 봤어요. 전체적으로 A를 ${r.overallA}%, B를 ${overallB}% 닮았어요.`}
+      description={`${r.summary ?? '두 사진을 참고한 상상 속 캐릭터 예시예요.'} 카드의 허구 배합값은 A 모티브 ${r.overallA}%, B 모티브 ${overallB}%예요. 실제 닮음이나 유전 확률이 아니에요.`}
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다시 상상하기"
@@ -440,7 +508,17 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           <div className="mt-3 flex items-end justify-center gap-0.5 sm:gap-3">
             <ParentPhoto capture={r.a} label="A" color={COLOR_A} />
             <div className="flex items-end">
-              {r.kids.map((kid, i) => (
+              {r.image ? (
+                <motion.div
+                  initial={{ scale: 0.4, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  transition={{ delay: 0.9, type: 'spring', stiffness: 140, damping: 12 }}
+                  className="h-36 w-28 overflow-hidden rounded-2xl border-[3px] border-rose-300 shadow-lg sm:h-44 sm:w-36"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element -- AI가 만든 data URL */}
+                  <img src={r.image} alt={`AI가 상상한 우리 ${r.name}의 4살 모습`} className="h-full w-full object-cover" />
+                </motion.div>
+              ) : r.kids.map((kid, i) => (
                 <motion.div
                   key={kid.gender + i}
                   initial={{ scale: 0.4, opacity: 0, y: 20 }}
@@ -463,11 +541,11 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         </div>
       </motion.div>
 
-      {/* 닮은 곳 분석 */}
-      <Panel title="닮은 곳 분석">
+      {/* 창작 캐릭터 배합 */}
+      <Panel title="창작 캐릭터 배합">
         <div className="mb-4 flex items-center justify-between text-xs font-semibold">
-          <span style={{ color: COLOR_A }}>A 닮음 {r.overallA}%</span>
-          <span style={{ color: COLOR_B }}>B 닮음 {overallB}%</span>
+          <span style={{ color: COLOR_A }}>A 모티브 {r.overallA}%</span>
+          <span style={{ color: COLOR_B }}>B 모티브 {overallB}%</span>
         </div>
         <ul className="space-y-3">
           {r.features.map((f, i) => (
@@ -495,12 +573,12 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         </ul>
       </Panel>
 
-      {/* 성장 타임라인 */}
-      <Panel title="성장 타임라인">
+      {/* 상상 속 그림책 타임라인 */}
+      <Panel title="상상 속 그림책 타임라인">
         <div className="grid grid-cols-3 gap-2">
           {(
             [
-              { stage: 'baby', label: '아기', age: '1세', note: `첫 걸음마 ${r.predictions.walk}개월`, extra: `첫 단어 “${r.predictions.word}”` },
+              { stage: 'baby', label: '아기', age: '1세', note: '상상 속 첫 인사', extra: `첫 단어 “${r.predictions.word}”` },
               { stage: 'toddler', label: '유아', age: '4세', note: '최애 놀이', extra: r.predictions.play },
               { stage: 'kid', label: '어린이', age: '8세', note: '장래희망', extra: r.predictions.dream },
             ] as const
@@ -527,9 +605,10 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         </div>
       </Panel>
 
-      <TraitChips title="AI가 예측한 성격 키워드" items={r.personality} />
+      <TraitChips title="직접 고른 이야기 속 캐릭터 키워드" items={r.personality} />
       <p className="max-w-sm text-[11px] leading-relaxed text-slate-500 [word-break:keep-all]">
-        재미로 보는 AI 상상이에요. 실제 유전과는 관계가 없고, 사진은 이 브라우저 밖으로 전송되지 않아요.
+        {r.ai && 'AI가 두 분의 사진을 보고 그린 아이 모습이에요. '}
+        재미로 보는 AI 상상이에요. 실제 유전·성격·성장 발달을 예측하지 않아요.
       </p>
     </ResultShell>
   );
@@ -537,8 +616,8 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
 
 /* ── Export ─────────────────────────────────────────────── */
 
-function familyPrint(answers: DemoAnswers): PrintSpec {
-  const r = analyze(answers);
+function familyPrint(answers: DemoAnswers, _resultKey: string, generated?: unknown): PrintSpec {
+  const r = familyView(answers, generated);
   const parents = [
     { capture: r.a, label: 'A', color: COLOR_A },
     { capture: r.b, label: 'B', color: COLOR_B },
@@ -547,11 +626,13 @@ function familyPrint(answers: DemoAnswers): PrintSpec {
     kind: 'photo',
     photos: [
       ...parents,
-      { src: FAMILY_PAPER, label: `우리 ${r.name} · 4세`, overlay: <ChildCell kids={r.kids} /> },
+      r.image
+        ? { src: r.image, label: `우리 ${r.name} · 4세`, overlay: <AiChildFrame /> }
+        : { src: FAMILY_PAPER, label: `우리 ${r.name} · 4세`, overlay: <ChildCell kids={r.kids} /> },
       { src: FAMILY_PAPER, overlay: <ResemblanceCell features={r.features} overallA={r.overallA} /> },
     ],
     title: `미래에서 온 우리 ${r.name}`,
-    caption: `A ${r.overallA}% · B ${100 - r.overallA}% 닮았어요 · ${r.personality.join(' · ')}`,
+    caption: `허구의 모티브 배합 A ${r.overallA}% · B ${100 - r.overallA}% · 유전 확률 아님 · ${r.personality.join(' · ')}`,
     paper: 'cream',
   };
 }
@@ -559,6 +640,14 @@ function familyPrint(answers: DemoAnswers): PrintSpec {
 function computeResult(answers: DemoAnswers): string {
   const r = analyze(answers);
   return r.concept === 'twins' ? 'twins' : r.kids[0]!.gender;
+}
+
+/** 분석 화면 동안 AI 아이 사진·분석을 받아 온다 (이미지 생성이라 10~20초) */
+function generate(answers: DemoAnswers): Promise<AiFutureFamily | null> {
+  const r = analyze(answers);
+  if (!r.a || !r.b) return Promise.resolve(null);
+  const child: FfChild = r.concept === 'twins' ? 'twins' : r.kids[0]!.gender;
+  return requestDemoAi<AiFutureFamily>('future-family', { experienceProfile: answers.experienceProfile, partnerA: r.a.image, partnerB: r.b.image, child }, { timeoutMs: 60_000, validate: isAiFamily });
 }
 
 export default defineDemo({
@@ -569,16 +658,16 @@ export default defineDemo({
     analyzeEmoji: '👶',
     analyzeDurationMs: 3800,
     analyzeImageStepId: 'partnerA',
-    analyzeMessages: ['두 분의 얼굴 특징 비교 중', '닮은 곳 확률 계산 중', '아기·유아·어린이 모습 그리는 중', '가족 액자 꾸미는 중'],
+    analyzeMessages: ['두 사진을 창작 참고로 준비 중', '상상 캐릭터의 모티브 섞는 중', '그림책 속 아기·유아·어린이 그리는 중', '가족 액자 꾸미는 중', 'AI가 아이 모습을 그리고 있어요 · 10~20초 걸려요'],
   },
   steps: [
     cameraStep({
       id: 'partnerA',
       title: '먼저 A님, 카메라를 봐 주세요',
-      subtitle: '눈매·코·입매 같은 얼굴 특징을 읽어요',
+      subtitle: '상상 속 캐릭터를 만들 때 참고할 사진이에요',
       mode: 'face',
       subject: 'A님 얼굴',
-      scanLabels: ['얼굴 영역 감지', '눈매·코·입매 측정', '피부 톤 추출', '특징 벡터 A 생성'],
+      scanLabels: ['첫 번째 참고 사진 준비', '사진의 밝기 확인', '선택한 그림책 색감 준비', 'A 캐릭터 모티브 준비'],
     }),
     cameraStep({
       id: 'partnerB',
@@ -586,7 +675,7 @@ export default defineDemo({
       subtitle: '두 분의 특징을 섞어 아이의 모습을 상상해요',
       mode: 'face',
       subject: 'B님 얼굴',
-      scanLabels: ['얼굴 영역 감지', '눈매·코·입매 측정', '피부 톤 추출', '특징 벡터 B 생성'],
+      scanLabels: ['두 번째 참고 사진 준비', '사진의 밝기 확인', '선택한 그림책 이야기 준비', 'B 캐릭터 모티브 준비'],
     }),
     choiceStep({
       id: 'concept',
@@ -604,4 +693,5 @@ export default defineDemo({
   computeResult,
   Result,
   print: familyPrint,
+  generate,
 });

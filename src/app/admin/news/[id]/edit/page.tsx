@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { Select } from '@/components/ui/Select'
 import AdminHeader from '../../../components/AdminHeader'
 import ImageUploader from '../../../components/ImageUploader'
 import TiptapEditor from '../../../components/TiptapEditor'
@@ -215,18 +216,13 @@ export default function AdminNewsEditPage() {
             <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1.5">
               카테고리
             </label>
-            <select
+            <Select
               id="category"
               value={form.category}
-              onChange={(e) => updateField('category', e.target.value as NewsCategory)}
-              className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 transition-colors"
-            >
-              {(Object.entries(NEWS_CATEGORY_LABELS) as [NewsCategory, string][]).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
+              onValueChange={(value) => updateField('category', value as NewsCategory)}
+              triggerClassName="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 transition-colors"
+              options={Object.entries(NEWS_CATEGORY_LABELS).map(([value, label]) => ({ value, label }))}
+            />
           </div>
 
           {/* Summary */}

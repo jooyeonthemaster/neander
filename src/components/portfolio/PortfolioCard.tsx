@@ -1,26 +1,24 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
-import { portfolioProjects, type PortfolioProject } from '@/data/portfolio';
+import type { PortfolioProject } from '@/data/portfolio';
+import type { PortfolioImageMetadata } from '@/types/admin';
 
 interface PortfolioCardProps {
   project: PortfolioProject;
   titleOverride?: string;
+  imageKind?: PortfolioImageMetadata['kind'];
 }
 
-export function PortfolioCard({ project, titleOverride }: PortfolioCardProps) {
+export function PortfolioCard({ project, titleOverride, imageKind }: PortfolioCardProps) {
   const t = useTranslations('portfolio');
+  const locale = useLocale();
   const displayTitle = titleOverride || t(`projects.${project.titleKey}.title`);
-
-  // 기존 프로젝트의 Firestore 태그는 'mediaArt' 같은 내부 키라서, 번역 파일에 표시용 태그가 있으면 그것을 쓴다
-  const legacy = portfolioProjects.find((p) => p.slug === project.slug);
-  const legacyTagsKey = legacy ? `projects.${legacy.titleKey}.tags` : null;
-  const tags =
-    legacyTagsKey && t.has(legacyTagsKey) ? (t.raw(legacyTagsKey) as string[]) : project.tags;
+  const tags = project.tags;
 
   return (
     <motion.div
@@ -47,7 +45,7 @@ export function PortfolioCard({ project, titleOverride }: PortfolioCardProps) {
             <img
               src={project.image}
               alt={displayTitle}
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className={cn('absolute inset-0 h-full w-full transition-transform duration-500', imageKind && imageKind !== 'photo' ? 'object-contain p-2' : 'object-cover group-hover:scale-105')}
               loading="lazy"
             />
           ) : (
@@ -71,11 +69,11 @@ export function PortfolioCard({ project, titleOverride }: PortfolioCardProps) {
           </div>
 
           {/* Year badge */}
-          <div className="absolute right-3 top-3">
+          {project.year && <div className="absolute right-3 top-3">
             <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700 backdrop-blur-sm">
               {project.year}
             </span>
-          </div>
+          </div>}
 
           {/* Featured badge */}
           {project.featured && (
@@ -92,7 +90,7 @@ export function PortfolioCard({ project, titleOverride }: PortfolioCardProps) {
           <h3 className="mb-1.5 text-base font-bold text-slate-900 transition-colors group-hover:text-teal-600 sm:text-lg">
             {displayTitle}
           </h3>
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
             <span>{project.client}</span>
             {project.location && (
               <>
@@ -101,6 +99,11 @@ export function PortfolioCard({ project, titleOverride }: PortfolioCardProps) {
               </>
             )}
           </div>
+          {project.images.length > 0 && (
+            <p className="mt-3 text-xs text-slate-400">
+              {locale === 'ko' ? `이미지 ${project.images.length}개` : `${project.images.length} ${project.images.length === 1 ? 'image' : 'images'}`}
+            </p>
+          )}
         </div>
       </Link>
     </motion.div>

@@ -14,46 +14,13 @@ import {
   hashString,
   seededInt,
   seededPick,
+  requestDemoAi,
   seededRandom,
   textStep,
 } from '../kit';
+import { STYLES, STYLE_ORDER, type AiVision, type ArtStyle } from '@/data/demo-ai/vision-wall';
 
 /* ── Data ──────────────────────────────────────────────── */
-
-type ArtStyle = 'flower' | 'constellation' | 'wave' | 'city';
-
-const STYLES: Record<ArtStyle, { label: string; emoji: string; desc: string; noun: string; swatch: string }> = {
-  flower: {
-    label: '꽃',
-    emoji: '🌸',
-    desc: '아이디어가 꽃처럼 피어나요',
-    noun: '정원',
-    swatch: 'radial-gradient(circle at 50% 60%, #f9a8d4, #c026d3 45%, #1a0b2e 80%)',
-  },
-  constellation: {
-    label: '별자리',
-    emoji: '✨',
-    desc: '생각이 별처럼 이어져요',
-    noun: '별자리',
-    swatch: 'radial-gradient(circle at 30% 30%, #bae6fd 0 3%, transparent 4%), radial-gradient(circle at 70% 60%, #fde68a 0 3%, transparent 4%), linear-gradient(160deg, #0b1a3a, #020617)',
-  },
-  wave: {
-    label: '파도',
-    emoji: '🌊',
-    desc: '에너지가 물결쳐 퍼져요',
-    noun: '물결',
-    swatch: 'linear-gradient(180deg, #03346e 0 45%, #0ea5e9 45% 60%, #22d3ee 60% 75%, #6366f1 75%)',
-  },
-  city: {
-    label: '도시 불빛',
-    emoji: '🌃',
-    desc: '비전이 도시의 불빛이 돼요',
-    noun: '야경',
-    swatch: 'linear-gradient(180deg, #3b0764, #0f0a2a 60%), linear-gradient(90deg, #fbbf24, #f472b6)',
-  },
-};
-
-const STYLE_ORDER: ArtStyle[] = ['flower', 'constellation', 'wave', 'city'];
 
 const PARTICIPANTS: [string, string][] = [
   ['모두가 웃으며 출근하는 회사', '피플팀'],
@@ -130,20 +97,56 @@ function keywordsOf(text: string): string[] {
   return fallback.length ? fallback : ['비전', '미래', '함께'];
 }
 
-/** 결과 화면과 출력물이 함께 쓰는 비전 요약 */
-function summarize(answers: DemoAnswers) {
+function isAiVision(v: unknown): v is AiVision {
+  const o = v as AiVision | null;
+  return (
+    !!o &&
+    typeof o.title === 'string' &&
+    typeof o.mood === 'string' &&
+    typeof o.caption === 'string' &&
+    typeof o.seconds === 'number' &&
+    Array.isArray(o.keywords) &&
+    o.keywords.length > 0 &&
+    o.keywords.every((k) => typeof k === 'string') &&
+    (o.image === null || (typeof o.image === 'string' && o.image.startsWith('data:image/')))
+  );
+}
+
+/** 결과 화면과 출력물이 함께 쓰는 비전 요약 — AI 결과가 있으면 제목·키워드·작품을 그것으로 */
+function summarize(answers: DemoAnswers, generated?: unknown) {
   const vision = visionOf(answers);
   const meta = STYLES[vision.style];
-  const keywords = keywordsOf(vision.text);
-  return {
+  const base = {
     ...vision,
     meta,
-    keywords,
-    title: `${keywords[0]}의 ${meta.noun}`,
     number: String(vision.seed % 10000).padStart(4, '0'),
     particles: 800 + seededInt(vision.seed, 'particles', 0, 1400),
     convertSec: `0.${seededInt(vision.seed, 'ms', 4, 9)}`,
   };
+  if (isAiVision(generated)) {
+    return {
+      ...base,
+      keywords: generated.keywords,
+      title: generated.title.replace(/[『』]/g, ''),
+      ai: { image: generated.image, mood: generated.mood, caption: generated.caption, seconds: generated.seconds.toFixed(1) },
+    };
+  }
+  const keywords = keywordsOf(vision.text);
+  return { ...base, keywords, title: `${keywords[0]}의 ${meta.noun}`, ai: null };
+}
+
+function generate(answers: DemoAnswers): Promise<AiVision | null> {
+  const { text, team, style } = visionOf(answers);
+  return requestDemoAi<AiVision>('vision-wall', { experienceProfile: answers.experienceProfile, text, team: team || undefined, style }, { timeoutMs: 60_000, validate: isAiVision });
+}
+
+/** AI가 그린 작품 (있으면) — 없으면 브라우저에서 그리는 제너러티브 아트 */
+function Artwork({ image, style, seed, mini }: { image?: string | null; style: ArtStyle; seed: number; mini?: boolean }) {
+  if (image) {
+    // eslint-disable-next-line @next/next/no-img-element -- 생성된 data URL이라 next/image 최적화 대상이 아니다
+    return <img src={image} alt="" className="block h-full w-full object-cover" draggable={false} />;
+  }
+  return <VisionArt style={style} seed={seed} mini={mini} />;
 }
 
 /** mini(비전 월 타일)일 때는 정적 SVG, 아니면 motion 애니메이션 */
@@ -550,7 +553,7 @@ function VisionArt({ style, seed, mini = false, className }: { style: ArtStyle; 
 const WALL_DELAY = 0.4;
 const FLY_IN_DELAY = WALL_DELAY + PARTICIPANTS.length * 0.05 + 0.4;
 
-function VisionWall({ style, seed, text, team, color }: { style: ArtStyle; seed: number; text: string; team: string; color: string }) {
+function VisionWall({ style, seed, text, team, color, image }: { style: ArtStyle; seed: number; text: string; team: string; color: string; image?: string | null }) {
   // 네 가지 스타일이 고르게 섞이도록 순서만 결정적으로 섞는다
   const tiles = PARTICIPANTS.map(([vision, teamName], i) => ({
     vision,
@@ -575,7 +578,7 @@ function VisionWall({ style, seed, text, team, color }: { style: ArtStyle; seed:
             animate={{ opacity: [1, 0.2, 1] }}
             transition={{ duration: 1.2, repeat: Infinity }}
           />
-          LIVE · 참여 비전 {PARTICIPANTS.length + 1}
+          예시 월 · 샘플 비전 {PARTICIPANTS.length} + 내 비전 1
         </p>
       </div>
       <div className="grid grid-flow-row-dense grid-cols-4 gap-1.5 sm:grid-cols-6 sm:gap-2">
@@ -603,12 +606,12 @@ function VisionWall({ style, seed, text, team, color }: { style: ArtStyle; seed:
             animate={{ boxShadow: [`inset 0 0 0 2px ${color}, 0 0 0px ${color}`, `inset 0 0 0 2px ${color}, 0 0 24px ${color}`, `inset 0 0 0 2px ${color}, 0 0 0px ${color}`] }}
             transition={{ duration: 2, repeat: Infinity, delay: FLY_IN_DELAY + 0.6 }}
           />
-          <VisionArt style={style} seed={seed} mini />
+          <Artwork image={image} style={style} seed={seed} mini />
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-2 pb-2 pt-6 text-left">
             <p className="line-clamp-2 text-[11px] font-semibold leading-snug text-white [word-break:keep-all] sm:text-xs">{text}</p>
             <p className="mt-0.5 text-[9px] text-white/70">{team ? `${team} · ` : ''}나의 비전</p>
           </div>
-          <span className="absolute left-1.5 top-1.5 z-20 rounded-full px-1.5 py-0.5 text-[8px] font-bold text-white" style={{ backgroundColor: color }}>
+          <span className="demo-accent-surface absolute left-1.5 top-1.5 z-20 rounded-full px-1.5 py-0.5 text-[8px] font-bold text-white" style={{ backgroundColor: color }}>
             NEW
           </span>
         </motion.div>
@@ -619,8 +622,8 @@ function VisionWall({ style, seed, text, team, color }: { style: ArtStyle; seed:
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
-  const { text, team, style, seed, meta, keywords, title, number, particles, convertSec } = summarize(answers);
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
+  const { text, team, style, seed, meta, keywords, title, number, particles, convertSec, ai } = summarize(answers, generated);
 
   return (
     <ResultShell
@@ -639,7 +642,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           transition={{ duration: 0.6 }}
           className="relative aspect-square overflow-hidden rounded-3xl border border-white/10 shadow-2xl"
         >
-          <VisionArt style={style} seed={seed} />
+          <Artwork image={ai?.image} style={style} seed={seed} />
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-4 pb-4 pt-10 text-left">
             <p className="text-[10px] font-bold tracking-[0.25em] text-white/60">VISION #{number}</p>
             <p className="mt-1 text-sm font-semibold leading-snug text-white [word-break:keep-all]">{text}</p>
@@ -648,10 +651,19 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
       </div>
 
       <div className="flex w-full max-w-md flex-col items-center gap-3">
-        <TraitChips title="AI가 읽어낸 키워드" items={keywords.map((k) => `#${k}`)} />
-        <p className="text-[11px] text-slate-500">
-          텍스트 → 이미지 변환 {convertSec}초 · 파티클 {particles.toLocaleString('ko-KR')}개 · 팔레트 자동 생성
-        </p>
+        <TraitChips title={ai ? 'AI가 읽어낸 키워드' : '내 문장에서 고른 예시 키워드'} items={keywords.map((k) => `#${k}`)} />
+        {ai ? (
+          <>
+            <p className="max-w-sm text-sm leading-relaxed text-slate-300 [word-break:keep-all]">{ai.caption}</p>
+            <p className="text-[11px] text-slate-500">
+              감정 · {ai.mood} · {ai.image ? `AI가 당신의 문장으로 그린 작품이에요 · 변환 ${ai.seconds}초` : 'AI가 당신의 문장을 읽고 고른 키워드예요'}
+            </p>
+          </>
+        ) : (
+          <p className="text-[11px] text-slate-500">
+            텍스트 → 이미지 변환 {convertSec}초 · 파티클 {particles.toLocaleString('ko-KR')}개 · 팔레트 자동 생성
+          </p>
+        )}
       </div>
 
       <div className="w-full space-y-3">
@@ -660,7 +672,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           <p className="text-xs text-slate-400 [word-break:keep-all]">참여자들의 비전이 모여 하나의 미디어아트가 돼요</p>
         </div>
         <div className="flex justify-center">
-          <VisionWall style={style} seed={seed} text={text} team={team} color={pillarColor} />
+          <VisionWall style={style} seed={seed} text={text} team={team} color={pillarColor} image={ai?.image} />
         </div>
         <p className="text-[11px] text-slate-500">행사가 끝나면 전체 비전 월 아카이브를 받아볼 수 있어요</p>
       </div>
@@ -677,7 +689,8 @@ export default defineDemo({
     industryId: 'corporate',
     analyzeEmoji: '🎆',
     analyzeDurationMs: 3400,
-    analyzeMessages: ['문장의 감정과 키워드 읽는 중', '텍스트를 이미지로 변환 중', '색과 움직임 생성 중', 'LED 비전 월에 전송 중'],
+    // AI 그림은 10~20초 걸린다 — 마지막 문구가 기다리는 동안 계속 보인다
+    analyzeMessages: ['문장의 감정과 키워드 읽는 중', 'AI가 비전을 그림으로 그리는 중', '색과 빛을 입히는 중', '작품 마무리 중 · 20초 정도 걸려요'],
   },
   steps: [
     textStep({
@@ -699,8 +712,9 @@ export default defineDemo({
   ],
   computeResult: (answers) => visionOf(answers).style,
   Result,
-  print: (answers) => {
-    const v = summarize(answers);
+  generate,
+  print: (answers, _resultKey, generated) => {
+    const v = summarize(answers, generated);
     return {
       kind: 'receipt',
       eyebrow: 'VISION WALL · ENTRY TICKET',
@@ -708,7 +722,8 @@ export default defineDemo({
       sections: [
         { type: 'big', title: '비전 번호', text: `#${v.number}` },
         { type: 'text', title: '나의 비전', text: `“${v.text}”${v.team ? `\n— ${v.team}` : ''}` },
-        { type: 'list', title: 'AI가 읽어낸 키워드', items: v.keywords.map((k) => `#${k}`) },
+        ...(v.ai ? [{ type: 'text' as const, title: 'AI 큐레이터의 한마디', text: v.ai.caption }] : []),
+        { type: 'list', title: v.ai ? 'AI가 읽어낸 키워드' : '내 문장에서 고른 예시 키워드', items: v.keywords.map((k) => `#${k}`) },
         {
           type: 'rows',
           title: '비전 월 게시 정보',
@@ -716,8 +731,15 @@ export default defineDemo({
             { label: '스타일', value: `${v.meta.label} · ${v.meta.noun}` },
             { label: '게시 위치', value: 'LED 월 중앙 타일' },
             { label: '함께한 비전', value: `${PARTICIPANTS.length + 1}개` },
-            { label: '파티클', value: `${v.particles.toLocaleString('ko-KR')}개` },
-            { label: '변환 시간', value: `${v.convertSec}초` },
+            ...(v.ai
+              ? [
+                  { label: '감정', value: v.ai.mood },
+                  ...(v.ai.image ? [{ label: '변환 시간', value: `${v.ai.seconds}초` }] : []),
+                ]
+              : [
+                  { label: '파티클', value: `${v.particles.toLocaleString('ko-KR')}개` },
+                  { label: '변환 시간', value: `${v.convertSec}초` },
+                ]),
           ],
         },
       ],

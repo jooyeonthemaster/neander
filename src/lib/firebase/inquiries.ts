@@ -35,6 +35,21 @@ function stripUndefined<T>(value: T): T {
 }
 
 /**
+ * 저장된 문의를 담당자 메일로 알린다 (/api/inquiry-notify).
+ * 문의는 이미 저장됐으므로 알림이 실패해도 폼은 성공으로 처리한다.
+ * keepalive로 보내 제출 직후 페이지를 떠나도 요청이 끝까지 간다.
+ */
+function notifyInquiry(id: string, payload: Record<string, unknown>): void {
+  if (typeof window === 'undefined') return
+  void fetch('/api/inquiry-notify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(stripUndefined({ id, ...payload })),
+    keepalive: true,
+  }).catch(() => {})
+}
+
+/**
  * 공개 페이지(문의·견적 폼)에서 문의를 저장한다.
  * Firestore 규칙에서 누구나 create만 가능하고, 읽기·수정은 관리자만 가능하다.
  */
@@ -62,6 +77,7 @@ export async function createInquiry(input: InquiryInput): Promise<string> {
       addDoc(collection(db, COLLECTION), stripUndefined(payload)),
       timeout,
     ])
+    notifyInquiry(ref.id, payload)
     return ref.id
   } finally {
     clearTimeout(timer)

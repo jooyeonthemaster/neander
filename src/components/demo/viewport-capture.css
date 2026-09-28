@@ -1,0 +1,237 @@
+/* Capture devices keep their controls readable while their previews use the
+   height supplied by the demo's page viewport. Full-size exports are unchanged. */
+.experience-venue[data-fit-viewport] .demo-camera-step,
+.experience-venue[data-fit-viewport] .demo-mic-step {
+  min-width: 0;
+  max-width: 560px;
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-frame {
+  --capture-frame-height: min(280px, calc(var(--demo-available-height, 520px) * .48));
+  flex: none;
+  width: min(100%, calc(var(--capture-frame-height) * .75));
+  height: var(--capture-frame-height);
+  max-width: none;
+  aspect-ratio: 3 / 4;
+  border-radius: 18px;
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-step:is([data-camera-phase='idle'], [data-camera-phase='starting'], [data-camera-phase='error']) .demo-camera-frame {
+  width: 100%;
+  max-width: 400px;
+  min-height: 120px;
+  height: min(210px, calc(var(--demo-available-height, 520px) * .48));
+  aspect-ratio: auto;
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-step[data-camera-hand-toggle='true']:is([data-camera-phase='idle'], [data-camera-phase='starting']) .demo-camera-frame {
+  height: min(190px, calc(var(--demo-available-height, 520px) * .4));
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-step[data-camera-phase='error'] .demo-camera-frame {
+  height: min(210px, calc(var(--demo-available-height, 520px) * .48));
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-idle {
+  gap: 6px;
+  padding: 8px;
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-idle-icon {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 10px;
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-idle-icon > svg,
+.experience-venue[data-fit-viewport] .demo-camera-idle-icon > div {
+  width: 22px;
+  height: 22px;
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-message {
+  display: none;
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-fit-message {
+  display: block;
+  margin-top: 0;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-error-detail {
+  display: block;
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-live-hint {
+  bottom: 8px;
+  padding: 0 6px;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.experience-venue[data-fit-viewport] .demo-capture-controls {
+  width: 100%;
+  margin-top: 8px;
+  gap: 6px;
+}
+
+.experience-venue[data-fit-viewport] .demo-capture-controls > button {
+  min-height: 40px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-alternatives {
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-alternatives > button {
+  min-height: 32px;
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-hand-toggle {
+  padding: 2px;
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-hand-toggle > button {
+  min-height: 32px;
+  padding: 4px 16px;
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-shutter > button[aria-label] {
+  width: 52px;
+  height: 52px;
+}
+
+.experience-venue[data-fit-viewport] .demo-camera-shutter > button[aria-label] > span {
+  width: 34px;
+  height: 34px;
+}
+
+.experience-venue[data-fit-viewport] .demo-capture-readouts {
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.experience-venue[data-fit-viewport] ul.demo-capture-readouts {
+  padding: 10px 12px;
+}
+
+.experience-venue[data-fit-viewport] .demo-capture-privacy {
+  width: 100%;
+  margin-top: 0;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.35;
+  text-wrap: pretty;
+}
+
+.experience-venue[data-fit-viewport] .demo-capture-privacy > svg {
+  flex: none;
+  margin-top: 3px;
+}
+
+.experience-venue[data-fit-viewport] .demo-mic-console {
+  padding: 12px;
+  border-radius: 18px;
+}
+
+.experience-venue[data-fit-viewport] .demo-mic-script {
+  margin-bottom: 8px;
+  padding: 10px 12px;
+}
+
+.experience-venue[data-fit-viewport] .demo-mic-script > p:last-child {
+  line-height: 1.45;
+}
+
+.experience-venue[data-fit-viewport] .demo-mic-waveform {
+  min-height: 56px;
+  height: min(96px, calc(var(--demo-available-height, 520px) * .2));
+}
+
+.experience-venue[data-fit-viewport] .demo-mic-step:is([data-mic-phase='idle'], [data-mic-phase='starting'], [data-mic-phase='error']) .demo-mic-waveform {
+  height: auto;
+}
+
+.experience-venue[data-fit-viewport] .demo-mic-status {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  text-align: left;
+}
+
+.experience-venue[data-fit-viewport] .demo-mic-status > div {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+}
+
+.experience-venue[data-fit-viewport] .demo-mic-status > div > svg {
+  width: 24px;
+  height: 24px;
+}
+
+.experience-venue[data-fit-viewport] .demo-print-stage {
+  min-height: 0;
+}
+
+.experience-venue[data-fit-viewport] .demo-printer-body {
+  flex: none;
+  gap: 8px;
+  max-width: 100%;
+  padding: 0 12px;
+}
+
+.experience-venue[data-fit-viewport] .demo-printer-name {
+  letter-spacing: .04em;
+}
+
+.experience-venue[data-fit-viewport] .demo-print-controls {
+  max-width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.experience-venue[data-fit-viewport] .demo-print-controls > :is(a, button) {
+  padding-right: 12px;
+  padding-left: 12px;
+  white-space: nowrap;
+}
+
+/* In a short landscape window the device gets its own page. Leave room for
+   the page's 10px padding while retaining the short instruction at full size. */
+@media (max-height: 500px) {
+  .experience-venue[data-fit-viewport] .demo-camera-step:is([data-camera-phase='idle'], [data-camera-phase='starting'], [data-camera-phase='error']) .demo-camera-frame {
+    min-height: 80px;
+    height: min(120px, calc(var(--demo-available-height, 150px) - 12px));
+  }
+
+  .experience-venue[data-fit-viewport] .demo-camera-idle {
+    gap: 4px;
+    padding: 6px;
+  }
+
+  .experience-venue[data-fit-viewport] .demo-camera-idle-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+  }
+
+  .experience-venue[data-fit-viewport] .demo-camera-idle-icon > svg,
+  .experience-venue[data-fit-viewport] .demo-camera-idle-icon > div {
+    width: 20px;
+    height: 20px;
+  }
+
+  .experience-venue[data-fit-viewport] .demo-camera-fit-message {
+    padding: 6px 10px;
+  }
+}

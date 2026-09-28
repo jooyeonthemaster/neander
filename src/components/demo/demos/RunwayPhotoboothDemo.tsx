@@ -14,16 +14,18 @@ import {
   defineDemo,
   getCapture,
   getChoice,
+  requestDemoAi,
   seededInt,
   seededPick,
   seededRandom,
   type PhotoLook,
 } from '../kit';
+import { COVER_HEADLINE, type AiRunwayCover, type RunwayConceptId, type RunwayPoseId } from '@/data/demo-ai/runway';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-type ConceptId = 'paris' | 'milan' | 'seoul' | 'ny';
-type PoseId = 'walk' | 'shoulder' | 'power' | 'close';
+type ConceptId = RunwayConceptId;
+type PoseId = RunwayPoseId;
 
 interface Concept {
   label: string;
@@ -169,6 +171,32 @@ function coverOf(answers: DemoAnswers) {
   };
 }
 
+/* ── AI 결과 (없으면 원본 사진 + 컨셉 보정, 컨셉별 고정 문구) ── */
+
+function isAiCover(v: unknown): v is AiRunwayCover {
+  const o = v as AiRunwayCover | null;
+  return !!o && typeof o.image === 'string' && o.image.startsWith('data:image/');
+}
+
+/** 표지에 들어가는 문구 */
+interface CoverCopy {
+  headline: string;
+  sub: string;
+  lines: string[];
+  note: string;
+}
+
+function coverCopy(concept: Concept, pose: (typeof POSES)[PoseId], ai: AiRunwayCover | null): CoverCopy {
+  const copy: CoverCopy = { headline: concept.headline, sub: concept.sub, lines: concept.lines, note: pose.note };
+  if (!ai) return copy;
+  // 글은 항목별로 형식이 맞을 때만 바꾼다 (표지 한 줄에 들어가야 하므로)
+  if (typeof ai.headline === 'string' && COVER_HEADLINE.test(ai.headline)) copy.headline = ai.headline;
+  if (typeof ai.sub === 'string' && ai.sub.trim()) copy.sub = ai.sub.trim();
+  if (Array.isArray(ai.lines) && ai.lines.length === 2 && ai.lines.every((l) => typeof l === 'string' && l.trim())) copy.lines = ai.lines;
+  if (typeof ai.note === 'string' && ai.note.trim()) copy.note = ai.note.trim();
+  return copy;
+}
+
 /* ── Cover parts ───────────────────────────────────────── */
 
 function barcodeBars(seed: number) {
@@ -221,7 +249,7 @@ const SERIF = 'Didot, "Bodoni 72", Georgia, "Times New Roman", serif';
 const SANS = 'Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", "Helvetica Neue", Arial, sans-serif';
 
 /** 결과 화면의 매거진 표지(마스트헤드·스티커·커버 라인·바코드)를 출력물 위에 그대로 얹는다 */
-function CoverPrint({ concept, seed, vol, looksCount }: { concept: Concept; seed: number; vol: number; looksCount: number }) {
+function CoverPrint({ concept, copy, seed, vol, looksCount }: { concept: Concept; copy: CoverCopy; seed: number; vol: number; looksCount: number }) {
   // 화면 바코드(px 막대)를 표지 좌표로 옮긴다 — 1px ≈ 0.9
   const raw = barcodeBars(seed);
   const bars = raw.map((b, i) => ({ ...b, x: raw.slice(0, i).reduce((sum, p) => sum + p.w * 0.9, 0) }));
@@ -292,13 +320,13 @@ function CoverPrint({ concept, seed, vol, looksCount }: { concept: Concept; seed
         fontStyle={concept.serif ? 'italic' : 'normal'}
         fill="#ffffff"
       >
-        {concept.headline}
+        {copy.headline}
       </text>
       <text x="10.5" y="339" fontFamily={SANS} fontSize="10.5" fontWeight="600" fill="#ffffff" fillOpacity="0.9">
-        {concept.sub}
+        {copy.sub}
       </text>
       <g fontFamily={SANS} fontSize="8" fontWeight="500" fill="#ffffff" fillOpacity="0.8">
-        {[...concept.lines, `${concept.label} 룩 ${looksCount}선`].map((line, i) => (
+        {[...copy.lines, `${concept.label} 룩 ${looksCount}선`].map((line, i) => (
           <text key={line} x="10.5" y={362 + i * 12}>{`+ ${line}`}</text>
         ))}
       </g>
@@ -320,12 +348,14 @@ const PAPER: Record<ConceptId, 'white' | 'cream' | 'black'> = { paris: 'cream', 
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
   const capture = getCapture(answers, 'portrait');
   const conceptId = getConcept(answers);
   const concept = CONCEPTS[conceptId];
   const pose = POSES[getPose(answers)];
   const { seed, vol, photographer, looksCount } = coverOf(answers);
+  const ai = isAiCover(generated) ? generated : null;
+  const copy = coverCopy(concept, pose, ai);
 
   return (
     <ResultShell
@@ -340,12 +370,17 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         initial={{ opacity: 0, y: 24, rotate: -2 }}
         animate={{ opacity: 1, y: 0, rotate: 0 }}
         transition={{ duration: 0.7 }}
-        className="relative aspect-[3/4] w-full max-w-[340px] overflow-hidden rounded-md bg-slate-900 text-left shadow-[0_24px_60px_rgba(0,0,0,0.6)]"
+        className="demo-dark-surface relative aspect-[3/4] w-full max-w-[340px] overflow-hidden rounded-md bg-slate-900 text-left shadow-[0_24px_60px_rgba(0,0,0,0.6)]"
       >
-        {capture && (
-          <div className="absolute inset-0" style={{ transform: `scale(${pose.zoom})`, transformOrigin: pose.origin }}>
-            <ProcessedPhoto src={capture.image} look={concept.look} className="h-full w-full" alt={`${concept.label} 커버 사진`} delayMs={1100} />
-          </div>
+        {ai ? (
+          // AI 표지 사진은 포즈·조명이 이미 들어가 있어 확대·보정하지 않는다
+          <ProcessedPhoto src={ai.image} look={{}} className="absolute inset-0 h-full w-full" alt={`${concept.label} 커버 사진`} delayMs={300} />
+        ) : (
+          capture && (
+            <div className="absolute inset-0" style={{ transform: `scale(${pose.zoom})`, transformOrigin: pose.origin }}>
+              <ProcessedPhoto src={capture.image} look={concept.look} className="h-full w-full" alt={`${concept.label} 커버 사진`} delayMs={1100} />
+            </div>
+          )
         )}
         <RunwayLights color={concept.accent} />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-black/60 to-transparent" />
@@ -401,12 +436,12 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
             className={cn('mt-0.5 text-[26px] font-extrabold leading-[0.95] text-white drop-shadow', concept.serif ? 'italic' : 'font-display')}
             style={concept.serif ? { fontFamily: 'Didot, "Bodoni 72", Georgia, serif' } : undefined}
           >
-            {concept.headline}
+            {copy.headline}
           </p>
-          <p className="mt-1 text-xs font-semibold text-white/90">{concept.sub}</p>
+          <p className="mt-1 text-xs font-semibold text-white/90">{copy.sub}</p>
           <div className="mt-2 flex items-end justify-between gap-2">
             <ul className="space-y-0.5 text-[9px] font-medium text-white/80">
-              {concept.lines.map((line) => (
+              {copy.lines.map((line) => (
                 <li key={line}>+ {line}</li>
               ))}
               <li>+ {concept.label} 룩 {looksCount}선</li>
@@ -422,7 +457,14 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         </div>
       </motion.div>
 
-      <TraitChips title="적용된 AI 변환" items={['컬렉션 컬러 그레이딩', `${concept.city} 런웨이 조명`, '매거진 표지 레이아웃', `${pose.label} 크롭`]} />
+      <TraitChips
+        title={ai ? 'AI 표지 구성' : '예시 표지 구성'}
+        items={
+          ai
+            ? ['AI 착장 피팅', `${concept.city} 런웨이 배경·조명`, `${pose.label} 포즈 연출`, '매거진 표지 레이아웃']
+            : ['원본 사진 색 보정', '매거진 표지 레이아웃', `${pose.label} 크롭`]
+        }
+      />
 
       <Panel title="스타일링 크레딧">
         <dl className="space-y-3 text-sm">
@@ -439,9 +481,11 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           ))}
         </dl>
         <p className="mt-4 rounded-xl bg-slate-950/60 p-3 text-xs leading-relaxed text-slate-300 [word-break:keep-all]">
-          📸 {photographer}의 코멘트: &ldquo;{pose.note}&rdquo;
+          📸 {photographer}의 코멘트: &ldquo;{copy.note}&rdquo;
         </p>
-        <p className="mt-3 text-[11px] text-slate-500 [word-break:keep-all]">현장 부스에서는 위 착장을 AI가 전신 사진에 직접 입혀 고화질로 출력해요.</p>
+        <p className="mt-3 text-[11px] text-slate-500 [word-break:keep-all]">
+          {ai ? 'AI가 방금 찍은 사진에 위 착장을 입혀 표지 사진을 새로 찍었어요.' : '현장 부스에서는 위 착장을 AI가 전신 사진에 직접 입혀 고화질로 출력해요.'}
+        </p>
       </Panel>
     </ResultShell>
   );
@@ -457,7 +501,8 @@ export default defineDemo({
     analyzeEmoji: '📸',
     analyzeDurationMs: 3600,
     analyzeImageStepId: 'portrait',
-    analyzeMessages: ['런웨이 조명 세팅 중', '컬렉션 의상 피팅 중', '런웨이 배경 합성 중', '매거진 표지 편집 중'],
+    // AI 표지 사진은 10~20초 — 마지막 문구가 기다리는 동안 남는다
+    analyzeMessages: ['런웨이 조명 세팅 중', '컬렉션 의상 피팅 중', '런웨이 배경 합성 중', '매거진 표지 편집 중', 'AI 포토그래퍼가 표지 컷을 촬영 중이에요 (10~20초)'],
   },
   steps: [
     choiceStep({
@@ -487,31 +532,40 @@ export default defineDemo({
       mode: 'portrait',
       subject: '모습',
       countdown: true,
-      scanLabels: ['인물 영역 분리', '포즈·실루엣 측정', '런웨이 조명 매칭', '의상 피팅 포인트 추출'],
+      scanLabels: ['촬영 컷 준비', '사진 밝기 확인', '선택한 포즈 준비', '커버 연출 브리프 정리'],
       readouts: (c) => [
-        { label: '실루엣', value: `${(7.4 + (c.seed % 9) / 10).toFixed(1)}등신` },
-        { label: '포즈 점수', value: `${86 + (c.seed % 13)}점` },
-        { label: '조명', value: c.stats.contrast > 45 ? '드라마틱' : '소프트' },
-        { label: '베스트 앵글', value: seededPick(c.seed, 'angle', ['정면', '좌 15°', '우 15°']) },
+        { label: '사진 준비', value: c.source === 'sample' ? '샘플 컷' : '나의 촬영 컷' },
+        { label: '사진 밝기', value: c.stats.brightness > 55 ? '밝은 조명' : '차분한 조명' },
+        { label: '촬영 팁', value: '머리 위 여백 확보' },
+        { label: '다음 작업', value: '커버 연출' },
       ],
     }),
   ],
   computeResult: (answers) => getConcept(answers),
   Result,
-  print: (answers) => {
+  print: (answers, _resultKey, generated) => {
     const capture = getCapture(answers, 'portrait');
     const conceptId = getConcept(answers);
     const concept = CONCEPTS[conceptId];
     const pose = POSES[getPose(answers)];
     const { seed, vol, photographer, looksCount } = coverOf(answers);
+    const ai = isAiCover(generated) ? generated : null;
+    const overlay = <CoverPrint concept={concept} copy={coverCopy(concept, pose, ai)} seed={seed} vol={vol} looksCount={looksCount} />;
     return {
       kind: 'photo',
-      photos: capture
-        ? [{ src: capture.image, look: concept.look, overlay: <CoverPrint concept={concept} seed={seed} vol={vol} looksCount={looksCount} /> }]
-        : [],
+      photos: ai ? [{ src: ai.image, overlay }] : capture ? [{ src: capture.image, look: concept.look, overlay }] : [],
       title: '커버 스타로 데뷔했어요!',
       caption: `${concept.label} · ${pose.label} 컷 · ${photographer}`,
       paper: PAPER[conceptId],
     };
+  },
+  generate: (answers) => {
+    const capture = getCapture(answers, 'portrait');
+    if (!capture) return Promise.resolve(null);
+    return requestDemoAi<AiRunwayCover>(
+      'runway-photobooth',
+      { experienceProfile: answers.experienceProfile, photo: capture.image, concept: getConcept(answers), pose: getPose(answers) },
+      { timeoutMs: 60_000, validate: isAiCover }
+    );
   },
 });

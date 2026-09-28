@@ -1,9 +1,11 @@
 'use client';
 
+import { withParticle } from '@/lib/korean';
+
 /* ─────────────────────────────────────────────────────────
    NEANDERco.  |  Demo Kit — camera capture step
    웹캠 권한 요청 → 라이브 프리뷰 + 가이드 → 촬영 → "AI 스캔" 연출.
-   촬영 이미지는 브라우저 메모리에서만 쓰고 전송하지 않는다.
+   촬영 이미지는 결과 생성을 위해 /api/demo-ai 로만 전송하고 서버에 저장하지 않는다.
    ───────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
@@ -38,7 +40,7 @@ export interface CameraStepOptions {
   subject?: string;
   /** 스캔 연출 중 순서대로 체크되는 문구 */
   scanLabels?: string[];
-  /** 스캔 완료 후 보여줄 측정값 */
+  /** 사진 준비 완료 후 보여줄 측정값 */
   readouts?: (capture: CaptureData) => { label: string; value: string }[];
   /** 포토부스처럼 3-2-1 카운트다운 후 촬영 */
   countdown?: boolean;
@@ -49,10 +51,10 @@ type Phase = 'idle' | 'starting' | 'live' | 'countdown' | 'scanning' | 'done' | 
 const SCAN_MS = 2800;
 
 const DEFAULT_SCAN_LABELS: Record<CameraMode, string[]> = {
-  face: ['얼굴 영역 감지', '랜드마크 68개 추출', '피부·조명 보정', '특징 벡터 생성'],
-  hand: ['손 영역 감지', '손가락 관절 추적', '주요 선 윤곽 추출', '패턴 벡터 생성'],
-  handBack: ['손 영역 감지', '손가락 끝마디 5개 추적', '손톱 윤곽 추출', '패턴 벡터 생성'],
-  portrait: ['인물 영역 분리', '자세·비율 측정', '조명·색감 보정', '스타일 특징 추출'],
+  face: ['촬영 이미지 준비', '프레임과 밝기 확인', '선택한 조건 연결', '체험 이미지 준비 완료'],
+  hand: ['손바닥 이미지 준비', '프레임과 밝기 확인', '체험용 가이드 표시', '해석용 이미지 준비 완료'],
+  handBack: ['손등 이미지 준비', '프레임과 밝기 확인', '디자인 가이드 표시', '가상 시안 준비 완료'],
+  portrait: ['인물 이미지 준비', '프레임과 밝기 확인', '선택한 연출 연결', '스타일링 이미지 준비 완료'],
 };
 
 /* 좌표는 3:4 프레임 기준 % — photo.ts의 FACE_POINTS와 같은 좌표계 */
@@ -101,11 +103,7 @@ const MODE_HINT: Record<CameraMode, string> = {
 };
 
 /** 받침 유무에 맞춰 목적격 조사(을/를)를 붙인다 */
-function withObjectParticle(word: string): string {
-  const code = word.charCodeAt(word.length - 1) - 0xac00;
-  if (code < 0 || code > 11171) return `${word}을(를)`;
-  return `${word}${code % 28 === 0 ? '를' : '을'}`;
-}
+function withObjectParticle(word: string): string { return withParticle(word, '을/를'); }
 
 function cameraErrorMessage(error: unknown): string {
   const name = error instanceof DOMException ? error.name : '';
@@ -465,9 +463,13 @@ function CameraCapture({ opts, answers, onUpdate }: { opts: CameraStepOptions } 
   const readouts = phase === 'done' && capture && opts.readouts ? opts.readouts(capture) : [];
 
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-col items-center sm:max-w-xl">
+    <div
+      className="demo-camera-step mx-auto flex w-full max-w-sm flex-col items-center sm:max-w-xl"
+      data-camera-phase={phase}
+      data-camera-hand-toggle={isHand && !presetHand ? 'true' : undefined}
+    >
       {/* Frame — 모바일은 폭 기준, 태블릿 이상은 화면 높이에 맞춰 한 화면에 들어오게 키운다 */}
-      <div className="relative aspect-[3/4] w-full max-w-[340px] overflow-hidden sm:w-[clamp(240px,calc((100dvh_-_600px)*0.75),500px)] sm:max-w-full rounded-3xl border border-slate-700 bg-slate-900 shadow-2xl shadow-black/40">
+      <div data-demo-page-atomic className="demo-camera-frame relative aspect-[3/4] w-full max-w-[280px] overflow-hidden sm:w-[clamp(220px,calc((100dvh_-_460px)*0.75),320px)] sm:max-w-full rounded-3xl border border-slate-700 bg-slate-900 shadow-2xl shadow-black/40">
         {showVideo && (
           <>
             <video
@@ -487,7 +489,7 @@ function CameraCapture({ opts, answers, onUpdate }: { opts: CameraStepOptions } 
               />
               LIVE
             </div>
-            <p className="absolute inset-x-0 bottom-4 text-center text-xs font-medium text-white drop-shadow">
+            <p className="demo-camera-live-hint absolute inset-x-0 bottom-4 text-center text-xs font-medium text-white drop-shadow">
               {MODE_HINT[mode]}
             </p>
             <AnimatePresence>
@@ -537,20 +539,20 @@ function CameraCapture({ opts, answers, onUpdate }: { opts: CameraStepOptions } 
               </>
             )}
             {phase === 'done' && (
-              <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-teal-500/90 px-3 py-1 text-xs font-bold text-white">
+              <div className="demo-capture-complete absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-teal-500/90 px-3 py-1 text-xs font-bold text-white">
                 <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
                 </svg>
-                스캔 완료
+                사진 준비 완료
               </div>
             )}
           </>
         )}
 
         {(phase === 'idle' || phase === 'starting' || phase === 'error') && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
+          <div className="demo-camera-idle absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
             <GuideOverlay mode={mode} thumbLeft={thumbLeft} />
-            <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-500/15 text-teal-300">
+            <div className="demo-camera-idle-icon relative flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-500/15 text-teal-300">
               {phase === 'starting' ? (
                 <motion.div
                   className="h-7 w-7 rounded-full border-2 border-teal-300 border-t-transparent"
@@ -565,7 +567,7 @@ function CameraCapture({ opts, answers, onUpdate }: { opts: CameraStepOptions } 
               )}
             </div>
             {/* 점선 가이드 위에서도 읽히도록 문구 뒤에 반투명 배경 */}
-            <div className="relative max-w-xs space-y-1.5 rounded-xl bg-slate-950/70 px-4 py-3 backdrop-blur-sm">
+            <div className="demo-camera-message relative max-w-xs space-y-1.5 rounded-xl bg-slate-950/70 px-4 py-3 backdrop-blur-sm">
               <p className="relative text-sm font-semibold text-white">
                 {phase === 'starting'
                   ? '카메라 권한을 요청하고 있어요'
@@ -583,6 +585,13 @@ function CameraCapture({ opts, answers, onUpdate }: { opts: CameraStepOptions } 
                     : 'AI가 촬영 이미지를 분석해 결과를 만들어 드려요'}
               </p>
             </div>
+            <p className="demo-camera-fit-message relative hidden rounded-xl bg-slate-950/70 px-3 py-2 text-center text-sm font-semibold text-white">
+              {phase === 'starting'
+                ? '카메라 권한을 허용해주세요'
+                : phase === 'error'
+                  ? errorSource === 'upload' ? '다른 사진을 선택해주세요' : '사진으로도 체험할 수 있어요'
+                  : '사진을 준비해주세요'}
+            </p>
           </div>
         )}
 
@@ -601,12 +610,12 @@ function CameraCapture({ opts, answers, onUpdate }: { opts: CameraStepOptions } 
       </div>
 
       {/* Controls */}
-      <div className="mt-6 flex w-full flex-col items-center gap-3">
+      <div className="demo-capture-controls mt-6 flex w-full flex-col items-center gap-3">
         {isHand && !presetHand && phase !== 'scanning' && phase !== 'done' && (
           <div
             role="radiogroup"
             aria-label="촬영할 손"
-            className="inline-flex rounded-full border border-slate-700 bg-slate-900/70 p-1 text-xs font-semibold"
+            className="demo-camera-hand-toggle inline-flex rounded-full border border-slate-700 bg-slate-900/70 p-1 text-xs font-semibold"
           >
             {(['left', 'right'] as const).map((which) => (
               <button
@@ -632,7 +641,7 @@ function CameraCapture({ opts, answers, onUpdate }: { opts: CameraStepOptions } 
               <button
                 type="button"
                 onClick={cancelRequest}
-                className="rounded-xl border border-slate-600 px-6 py-3 text-sm font-semibold text-slate-200 transition-colors hover:border-slate-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300"
+                className="demo-secondary-action rounded-xl border border-slate-600 px-6 py-3 text-sm font-semibold text-slate-200 transition-colors hover:border-slate-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300"
               >
                 취소
               </button>
@@ -646,7 +655,7 @@ function CameraCapture({ opts, answers, onUpdate }: { opts: CameraStepOptions } 
                     ? () => fileRef.current?.click()
                     : startCamera
                 }
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300"
+                className="demo-primary-action inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="m22 8-6 4 6 4V8Z" />
@@ -659,7 +668,7 @@ function CameraCapture({ opts, answers, onUpdate }: { opts: CameraStepOptions } 
                   : '카메라 켜기'}
               </motion.button>
             )}
-            <div className="flex items-center gap-4 text-xs text-slate-400">
+            <div className="demo-camera-alternatives flex items-center gap-4 text-xs text-slate-400">
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
@@ -691,7 +700,7 @@ function CameraCapture({ opts, answers, onUpdate }: { opts: CameraStepOptions } 
         )}
 
         {showVideo && (
-          <div className="flex items-center gap-5">
+          <div className="demo-camera-shutter flex items-center gap-5">
             <button
               type="button"
               onClick={() => {
@@ -719,7 +728,7 @@ function CameraCapture({ opts, answers, onUpdate }: { opts: CameraStepOptions } 
         )}
 
         {phase === 'scanning' && (
-          <ul className="w-full max-w-[340px] space-y-2 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-left">
+          <ul className="demo-capture-readouts w-full max-w-[340px] space-y-2 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-left">
             {scanLabels.map((label, i) => {
               const done = i < scanIndex;
               const active = i === scanIndex;
@@ -740,7 +749,7 @@ function CameraCapture({ opts, answers, onUpdate }: { opts: CameraStepOptions } 
         {phase === 'done' && (
           <>
             {readouts.length > 0 && (
-              <div className="grid w-full max-w-[340px] grid-cols-2 gap-2">
+              <div className="demo-capture-readouts grid w-full max-w-[340px] grid-cols-2 gap-2">
                 {readouts.map((r) => (
                   <div key={r.label} className="rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2 text-left">
                     <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">{r.label}</p>
@@ -759,11 +768,16 @@ function CameraCapture({ opts, answers, onUpdate }: { opts: CameraStepOptions } 
           </>
         )}
 
-        <p className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500">
+        {phase === 'error' && error && (
+          <p className="demo-camera-error-detail hidden w-full rounded-xl border border-slate-700 bg-slate-900/60 p-3 text-left text-sm leading-relaxed text-slate-300" aria-live="polite">
+            {error}
+          </p>
+        )}
+        <p className="demo-capture-privacy mt-1 flex items-center gap-1.5 text-[11px] text-slate-500">
           <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
           </svg>
-          촬영 이미지는 이 브라우저 안에서만 쓰이고 저장·전송되지 않아요
+          사진은 AI 결과를 만드는 데만 쓰이고, 네안데르는 저장하지 않아요
         </p>
       </div>
     </div>

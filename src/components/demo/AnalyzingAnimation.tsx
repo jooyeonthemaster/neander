@@ -13,6 +13,8 @@ interface AnalyzingAnimationProps {
   durationMs?: number;
   /** 카메라로 촬영한 이미지 — 있으면 이모지 대신 표시 */
   image?: string;
+  /** 실제 AI 응답을 기다리는 데모 — durationMs가 지나도 안 끝나면 경과 시간을 보여준다 */
+  aiWait?: boolean;
 }
 
 export function AnalyzingAnimation({
@@ -22,8 +24,19 @@ export function AnalyzingAnimation({
   messages,
   durationMs = 3000,
   image,
+  aiWait = false,
 }: AnalyzingAnimationProps) {
   const [messageIndex, setMessageIndex] = useState(0);
+  const [elapsedSec, setElapsedSec] = useState(0);
+
+  useEffect(() => {
+    if (!aiWait) return;
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => setElapsedSec(Math.floor((Date.now() - startedAt) / 1000)), 1000);
+    return () => window.clearInterval(timer);
+  }, [aiWait]);
+  // 연출 시간이 지나도 AI 응답을 기다리는 중이면 (사진 생성은 10~20초) 경과 시간을 보여준다
+  const overtime = aiWait && elapsedSec * 1000 >= durationMs;
 
   useEffect(() => {
     if (!messages || messages.length < 2) return;
@@ -110,6 +123,9 @@ export function AnalyzingAnimation({
           </motion.p>
         </AnimatePresence>
       </div>
+      <p className={`mt-3 h-4 text-xs text-teal-300/80 transition-opacity ${overtime ? 'opacity-100' : 'opacity-0'}`} aria-hidden={!overtime}>
+        AI가 결과를 만드는 중이에요 · {elapsedSec}초
+      </p>
     </div>
   );
 }

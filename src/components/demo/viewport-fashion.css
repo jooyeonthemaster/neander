@@ -1,0 +1,20 @@
+.experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-picker { width: 100%; }
+.experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-summary { display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-bottom: 16px; color: var(--venue-muted); }
+.experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-summary p { margin: 0; min-height: 48px; font-size: 16px; line-height: 1.5; text-align: left; word-break: keep-all; overflow-wrap: anywhere; }
+.experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-summary > span { flex-shrink: 0; color: var(--venue-accent); font-size: 16px; line-height: 1.5; }
+.experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-summary strong { color: var(--venue-ink); }
+.experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-choice { display: grid; grid-template-columns: 8px minmax(0, 1fr); gap: 12px; align-items: stretch; min-height: 78px; padding: 12px; border: 1px solid var(--venue-line); border-radius: var(--venue-radius); background: var(--venue-paper); color: var(--venue-ink); text-align: left; }
+.experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-choice[aria-pressed='true'] { border-color: var(--venue-accent); box-shadow: inset 0 0 0 1px var(--venue-accent); background: color-mix(in srgb, var(--venue-accent) 13%, var(--venue-paper)); }
+.experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-choice:hover { border-color: var(--venue-accent); }
+.experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-choice:focus-visible { outline: 2px solid var(--venue-accent); outline-offset: 3px; }
+.experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-swatch { width: 8px; height: 100%; min-height: 46px; border-radius: 8px; }
+.experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-label { display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 0; }
+.experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-label > span { font-size: 16px; line-height: 1.3; color: var(--venue-muted); }
+.experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-label strong { color: var(--venue-ink); font-size: 18px; line-height: 1.4; word-break: keep-all; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-choice { gap: 8px; padding: 10px; min-height: 80px; }
+  .experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-label strong { font-size: 17px; }
+  .experience-venue[data-program='ai-fashion-timemachine'] .fashion-era-summary { margin-bottom: 12px; }
+}

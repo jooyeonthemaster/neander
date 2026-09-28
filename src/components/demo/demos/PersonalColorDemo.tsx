@@ -3,7 +3,7 @@
 import { motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { QUOTE_HREF } from '@/lib/constants';
+import { getServiceContactHref } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type {
@@ -13,31 +13,21 @@ import type {
   DemoStepProps,
   DemoResultProps,
 } from '@/types/demo';
-import type { PrintSpec } from '../kit';
+import { requestDemoAi, type PrintSpec } from '../kit';
+import {
+  PC_COLOR_SWATCHES,
+  PC_SEASONS,
+  PC_SEASON_PALETTES,
+  PC_UNDERTONES,
+  type AiPersonalColor,
+  type PcColor,
+} from '@/data/demo-ai/personal-color';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-const UNDERTONES = [
-  { id: 'warm', label: '웜 (Warm)', from: 'from-amber-300', to: 'to-orange-400', desc: '혈관이 초록/올리브색으로 보여요' },
-  { id: 'cool', label: '쿨 (Cool)', from: 'from-rose-300', to: 'to-blue-400', desc: '혈관이 파란/보라색으로 보여요' },
-  { id: 'neutral', label: '뉴트럴 (Neutral)', from: 'from-amber-200', to: 'to-rose-300', desc: '두 가지가 골고루 섞여 보여요' },
-] as const;
-
-const COLOR_SWATCHES = [
-  { id: 'darkBrown', hex: '#3E2723', label: '다크 브라운' },
-  { id: 'black', hex: '#1A1A1A', label: '블랙' },
-  { id: 'hazel', hex: '#8D6E63', label: '헤이즐' },
-  { id: 'grayBrown', hex: '#78909C', label: '그레이 브라운' },
-  { id: 'honey', hex: '#FFB74D', label: '허니' },
-  { id: 'reddishBrown', hex: '#A1887F', label: '레디쉬 브라운' },
-] as const;
-
-const SEASON_PALETTES = [
-  { id: 'spring', label: '봄 웜', colors: ['#FFD54F', '#FF8A80', '#FFAB91', '#FFE082', '#C5E1A5', '#FFF9C4'] },
-  { id: 'summer', label: '여름 쿨', colors: ['#90CAF9', '#CE93D8', '#F48FB1', '#B2DFDB', '#E1BEE7', '#B3E5FC'] },
-  { id: 'autumn', label: '가을 웜', colors: ['#8D6E63', '#FF8F00', '#BF360C', '#4E342E', '#827717', '#E65100'] },
-  { id: 'winter', label: '겨울 쿨', colors: ['#E53935', '#1E88E5', '#000000', '#FFFFFF', '#7B1FA2', '#00897B'] },
-] as const;
+const UNDERTONES = PC_UNDERTONES;
+const COLOR_SWATCHES = PC_COLOR_SWATCHES;
+const SEASON_PALETTES = PC_SEASON_PALETTES;
 
 const LIGHT_COLORING = new Set(['hazel', 'honey', 'reddishBrown', 'grayBrown']);
 
@@ -85,7 +75,7 @@ const config: DemoConfig = {
     {
       id: 'undertone',
       titleKey: '피부 언더톤을 선택해 주세요',
-      subtitleKey: '손목 안쪽 혈관 색을 참고해 보세요',
+      subtitleKey: '평소 느끼는 색을 골라주세요 · 확신이 없다면 뉴트럴로 시작해요',
       canProceed: (a) => !!a['undertone'],
     },
     {
@@ -108,15 +98,17 @@ const config: DemoConfig = {
 function StepUndertone({ answers, onUpdate }: DemoStepProps) {
   const selected = answers['undertone'] as string | undefined;
   return (
-    <div className="grid gap-4">
+    <div className="demo-choice-grid grid gap-4">
       {UNDERTONES.map((t) => (
         <motion.button
           key={t.id}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => onUpdate('undertone', t.id)}
+          type="button"
+          aria-pressed={selected === t.id}
           className={cn(
-            'flex items-center gap-5 rounded-2xl border p-5 text-left transition-colors',
+            'demo-choice demo-custom-choice demo-undertone-choice flex items-center gap-5 rounded-2xl border p-5 text-left transition-colors',
             selected === t.id
               ? 'border-teal-500 bg-teal-500/10'
               : 'border-slate-700 bg-slate-900/50 hover:border-slate-600',
@@ -160,7 +152,9 @@ function StepColoring({ answers, onUpdate }: DemoStepProps) {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => toggle(c.id)}
-              className="flex flex-col items-center gap-2"
+              type="button"
+              aria-pressed={active}
+              className="demo-choice demo-color-swatch-choice flex flex-col items-center gap-2"
             >
               <div
                 className={cn(
@@ -183,15 +177,17 @@ function StepColoring({ answers, onUpdate }: DemoStepProps) {
 function StepPreference({ answers, onUpdate }: DemoStepProps) {
   const selected = answers['preference'] as string | undefined;
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="demo-choice-grid grid grid-cols-2 gap-4">
       {SEASON_PALETTES.map((s) => (
         <motion.button
           key={s.id}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => onUpdate('preference', s.id)}
+          type="button"
+          aria-pressed={selected === s.id}
           className={cn(
-            'rounded-2xl border p-4 text-left transition-colors',
+            'demo-choice demo-custom-choice demo-season-choice rounded-2xl border p-4 text-left transition-colors',
             selected === s.id
               ? 'border-teal-500 bg-teal-500/10'
               : 'border-slate-700 bg-slate-900/50 hover:border-slate-600',
@@ -247,6 +243,27 @@ function seasonResult(resultKey: string) {
   return RESULTS[resultKey as SeasonKey] ?? RESULTS.spring;
 }
 
+const HEX = /^#[0-9A-Fa-f]{6}$/;
+const isColorList = (v: unknown) => Array.isArray(v) && v.length > 0 && v.every((c: PcColor) => !!c && typeof c.hex === 'string' && HEX.test(c.hex));
+
+function isAiPersonalColor(v: unknown): v is AiPersonalColor {
+  const o = v as AiPersonalColor | null;
+  return !!o && (PC_SEASONS as readonly string[]).includes(o.season) && typeof o.name === 'string' && typeof o.desc === 'string'
+    && isColorList(o.colors) && isColorList(o.avoid) && Array.isArray(o.tips);
+}
+
+/** 화면·출력물이 그리는 진단 — AI 결과가 있으면 그것, 없으면 고정 결과 */
+interface ColorView { name: string; en: string; emoji: string; desc: string; colors: PcColor[]; avoid: PcColor[]; tips: string[]; ai: boolean }
+
+function colorView(resultKey: string, generated: unknown): ColorView {
+  if (isAiPersonalColor(generated)) {
+    return { ...generated, emoji: RESULTS[generated.season].emoji, ai: true };
+  }
+  const d = seasonResult(resultKey);
+  const named = (hex: string) => ({ hex, name: '' });
+  return { name: d.name, en: d.en, emoji: d.emoji, desc: d.desc, colors: d.colors.map(named), avoid: d.avoid.map(named), tips: [], ai: false };
+}
+
 /** 진단에 쓰인 답변을 사람이 읽는 이름으로 */
 function diagnosisInputs(answers: DemoAnswers) {
   const coloring = (answers['coloring'] as string[] | undefined) ?? [];
@@ -259,28 +276,28 @@ function diagnosisInputs(answers: DemoAnswers) {
 
 /* ── Result Component ───────────────────────────────────── */
 
-function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps) {
+function ResultComponent({ resultKey, onRestart, pillarColor, generated }: DemoResultProps) {
   const tCommon = useTranslations('demos.common');
-  const data = seasonResult(resultKey);
+  const data = colorView(resultKey, generated);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="flex flex-col items-center gap-8 text-center"
+      className="demo-custom-result flex flex-col items-center gap-8 text-center"
     >
       {/* Season emoji */}
       <span className="text-6xl">{data.emoji}</span>
 
       {/* Label */}
-      <p className="text-sm font-medium tracking-widest text-slate-400 uppercase">
+      <p className="demo-custom-result-eyebrow text-sm font-medium tracking-widest text-slate-400 uppercase">
         당신의 퍼스널 컬러
       </p>
 
       {/* Season name */}
       <div>
-        <h2 className="text-3xl font-bold" style={{ color: pillarColor }}>
+        <h2 className="demo-custom-result-title text-3xl font-bold" style={{ color: `var(--venue-accent, ${pillarColor})` }}>
           {data.name}
         </h2>
         <p className="mt-1 text-base text-slate-400">{data.en}</p>
@@ -295,12 +312,13 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
           추천 컬러 팔레트
         </p>
         <div className="flex flex-wrap justify-center gap-3">
-          {data.colors.map((hex) => (
+          {data.colors.map(({ hex, name }) => (
             <div
               key={hex}
+              title={name || undefined}
               className={cn(
                 'h-9 w-9 rounded-full shadow-md',
-                hex === '#FFFFFF' && 'border border-slate-600',
+                hex.toUpperCase() === '#FFFFFF' && 'border border-slate-600',
               )}
               style={{ backgroundColor: hex }}
             />
@@ -311,12 +329,13 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
       {/* Colors to avoid */}
       <div>
         <p className="mb-3 text-xs font-semibold tracking-wide text-slate-400 uppercase">
-          피해야 할 색상
+          함께 비교해 볼 색상
         </p>
         <div className="flex justify-center gap-3">
-          {data.avoid.map((hex) => (
+          {data.avoid.map(({ hex, name }) => (
             <div
               key={hex}
+              title={name || undefined}
               className="h-8 w-8 rounded-full opacity-60 shadow-inner"
               style={{ backgroundColor: hex }}
             />
@@ -324,20 +343,40 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
         </div>
       </div>
 
+      {/* 스타일링 팁 — AI 결과에만 있다 */}
+      {data.tips.length > 0 && (
+        <div className="w-full max-w-sm">
+          <p className="mb-3 text-xs font-semibold tracking-wide text-slate-400 uppercase">
+            스타일링 팁
+          </p>
+          <ul className="space-y-2 text-left">
+            {data.tips.map((tip) => (
+              <li key={tip} className="demo-result-item rounded-xl border border-slate-700 bg-slate-800/40 px-4 py-2.5 text-sm text-slate-300">
+                {tip}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {data.ai && (
+        <p className="-mt-4 text-xs text-slate-500">직접 알려주신 취향을 바탕으로 만든 컬러 추천이에요</p>
+      )}
+
       {/* Actions */}
-      <div className="flex gap-3 pt-2">
+      <div className="demo-legacy-result-cta flex gap-3 pt-2">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onRestart}
-          className="rounded-xl border border-slate-700 px-6 py-3 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500"
+          className="demo-secondary-action rounded-xl border border-slate-700 px-6 py-3 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500"
         >
-          다시 진단하기
+          다른 조합 찾아보기
         </motion.button>
         <Link
-          href={QUOTE_HREF}
-          className="rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
-          style={{ backgroundColor: pillarColor }}
+          href={getServiceContactHref('ai-personal-color')}
+          className="demo-primary-action demo-accent-surface rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
+          style={{ backgroundColor: `var(--venue-accent, ${pillarColor})` }}
         >
           {tCommon('ctaButton')}
         </Link>
@@ -348,30 +387,47 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
 
 /* ── Print ──────────────────────────────────────────────── */
 
-function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
-  const data = seasonResult(resultKey);
+function getPrint(answers: DemoAnswers, resultKey: string, generated?: unknown): PrintSpec {
+  const data = colorView(resultKey, generated);
   const inputs = diagnosisInputs(answers);
+  const code = (c: PcColor) => (c.name ? `${c.hex} ${c.name}` : c.hex);
+  const signature = data.colors[0]!;
   return {
     kind: 'receipt',
     eyebrow: '당신의 퍼스널 컬러',
     title: data.name,
     sections: [
-      { type: 'big', title: '시그니처 컬러', text: data.colors[0] },
+      { type: 'big', title: signature.name ? `시그니처 컬러 · ${signature.name}` : '시그니처 컬러', text: signature.hex },
       { type: 'text', text: data.desc },
       {
         type: 'rows',
-        title: '진단 근거',
+        title: '직접 선택한 컬러 취향',
         rows: [
           { label: '언더톤', value: inputs.undertone ?? '-' },
           { label: '눈·모발 컬러', value: inputs.coloring.join(' · ') || '-' },
           { label: '끌린 팔레트', value: inputs.preference ?? '-' },
         ],
       },
-      { type: 'text', title: '추천 컬러 코드', text: data.colors.join(' ') },
-      { type: 'text', title: '피해야 할 컬러', text: data.avoid.join(' ') },
+      data.ai
+        ? { type: 'list', title: '추천 컬러 코드', items: data.colors.map(code) }
+        : { type: 'text', title: '추천 컬러 코드', text: data.colors.map((c) => c.hex).join(' ') },
+      data.ai
+        ? { type: 'list', title: '함께 비교할 컬러', items: data.avoid.map(code) }
+        : { type: 'text', title: '함께 비교할 컬러', text: data.avoid.map((c) => c.hex).join(' ') },
+      ...(data.tips.length > 0 ? [{ type: 'list' as const, title: '스타일링 팁', items: data.tips }] : []),
     ],
     footer: '자연광 아래에서 옷장 속 컬러와 맞춰 보세요',
   };
+}
+
+/* ── AI 생성 ──────────────────────────────────────────── */
+
+function generate(answers: DemoAnswers): Promise<AiPersonalColor | null> {
+  return requestDemoAi<AiPersonalColor>(
+    config.id,
+    { experienceProfile: answers.experienceProfile, undertone: answers['undertone'], coloring: answers['coloring'], preference: answers['preference'] },
+    { validate: isAiPersonalColor }
+  );
 }
 
 /* ── Export ──────────────────────────────────────────────── */
@@ -382,6 +438,7 @@ const PersonalColorDemo: DemoModule = {
   ResultComponent,
   computeResult,
   getPrint,
+  generate,
 };
 
 export default PersonalColorDemo;

@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/test-results-html/
 
 # next.js
 /.next/
@@ -53,3 +56,6 @@ service-account*.json
 
 # firebase CLI logs
 firebase-debug*.log
+
+# QA 스크린샷·목업 산출물 (로컬 전용)
+/output/

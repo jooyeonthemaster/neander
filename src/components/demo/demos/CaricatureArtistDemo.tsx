@@ -12,13 +12,15 @@ import {
   defineDemo,
   getCapture,
   getChoice,
+  requestDemoAi,
   seededPick,
   type PhotoLook,
 } from '../kit';
+import { CARICATURE_FRAME_IDS, CARICATURE_STYLE_IDS, type AiCaricature, type CaricatureFrameId, type CaricatureStyleId } from '@/data/demo-ai/caricature';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-type StyleId = 'webtoon' | 'popart' | 'pixel' | 'sketch' | 'watercolor';
+type StyleId = CaricatureStyleId;
 
 const STYLES: Record<StyleId, { label: string; emoji: string; desc: string; artist: string; look: PhotoLook }> = {
   webtoon: {
@@ -63,7 +65,7 @@ const STYLES: Record<StyleId, { label: string; emoji: string; desc: string; arti
   },
 };
 
-type FrameId = 'postcard' | 'poster' | 'sticker';
+type FrameId = CaricatureFrameId;
 
 const COMMENTS = [
   '눈매의 생기를 살리려고 하이라이트를 한 번 더 올렸어요.',
@@ -117,31 +119,55 @@ function Framed({ frame, children }: { frame: FrameId; children: React.ReactNode
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
+/* ── AI 결과 (없으면 원본 사진 + 필터) ─────────────────── */
+
+function isAiCaricature(v: unknown): v is AiCaricature {
+  const o = v as AiCaricature | null;
+  return !!o && typeof o.image === 'string' && o.image.startsWith('data:image/');
+}
+
+/** 화면·출력물이 같이 쓰는 캐리커처 — AI 그림이 있으면 그것, 없으면 원본 사진에 화풍 필터 */
+function caricatureOf(answers: DemoAnswers, generated: unknown) {
   const capture = getCapture(answers, 'face');
   const style = STYLES[(getChoice(answers, 'style') as StyleId) ?? 'webtoon'] ?? STYLES.webtoon;
   const frame = (getChoice(answers, 'frame') as FrameId) ?? 'postcard';
-  const seed = answersSeed(answers);
-  const comment = seededPick(seed, 'comment', COMMENTS);
+  const ai = isAiCaricature(generated) ? generated : null;
+  const aiPoints = ai?.points && ai.points.length === 3 && ai.points.every((p) => typeof p === 'string') ? ai.points : null;
+  return {
+    capture,
+    style,
+    frame,
+    ai,
+    /** 그림 — AI 그림은 이미 화풍이 입혀져 있어 필터를 쓰지 않는다 */
+    art: ai ? { src: ai.image, look: {} as PhotoLook } : capture ? { src: capture.image, look: style.look } : null,
+    comment: typeof ai?.comment === 'string' && ai.comment ? ai.comment : seededPick(answersSeed(answers), 'comment', COMMENTS),
+    points: aiPoints,
+  };
+}
+
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
+  const { style, frame, ai, art, comment, points } = caricatureOf(answers, generated);
+  const layout = frame === 'postcard' ? '엽서 레이아웃' : frame === 'poster' ? '포스터 레이아웃' : '스티커 커팅';
 
   return (
     <ResultShell
       eyebrow={style.artist}
       title={`${style.label} 캐리커처 완성!`}
-      description={`AI 화가의 한마디: "${comment}"`}
+      description={`${ai ? 'AI 화가의 한마디' : '예시 작품 소개'}: "${comment}"`}
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다른 스타일로 그리기"
     >
-      {capture && (
+      {art && (
         <Framed frame={frame}>
-          <ProcessedPhoto src={capture.image} look={style.look} className="aspect-[3/4] w-full" alt={`${style.label} 캐리커처`} delayMs={1200} />
+          <ProcessedPhoto src={art.src} look={art.look} className="aspect-[3/4] w-full" alt={`${style.label} 캐리커처`} delayMs={ai ? 300 : 1200} />
         </Framed>
       )}
       <TraitChips
-        title="적용된 AI 변환"
-        items={['얼굴 비율 과장', `${style.label} 필터`, '배경 단순화', frame === 'postcard' ? '엽서 레이아웃' : frame === 'poster' ? '포스터 레이아웃' : '스티커 커팅']}
+        title={points ? 'AI 화가가 살린 매력 포인트' : '예시 구성'}
+        items={points ? [...points, `${style.label} 화풍`, layout] : ['원본 사진', `${style.label} 필터`, layout]}
       />
+      {ai && <p className="text-xs text-slate-500">AI가 방금 찍은 사진으로 직접 그린 캐리커처예요</p>}
     </ResultShell>
   );
 }
@@ -160,7 +186,8 @@ export default defineDemo({
     analyzeEmoji: '🎨',
     analyzeDurationMs: 3200,
     analyzeImageStepId: 'face',
-    analyzeMessages: ['얼굴 특징 과장 포인트 찾는 중', '붓 터치 생성 중', '색 채우는 중', '서명 넣는 중'],
+    // AI 그림은 10~20초 — 마지막 문구가 기다리는 동안 남는다
+    analyzeMessages: ['얼굴 특징 과장 포인트 찾는 중', '밑그림 스케치 중', '붓 터치 생성 중', '색 채우는 중', 'AI 화가가 한 획씩 그리는 중이에요 (10~20초)'],
   },
   steps: [
     cameraStep({
@@ -169,11 +196,8 @@ export default defineDemo({
       subtitle: '재미있는 표정일수록 캐리커처가 살아나요',
       mode: 'face',
       countdown: true,
-      scanLabels: ['얼굴 윤곽 추출', '이목구비 비율 측정', '표정 특징 분석', '과장 포인트 선정'],
-      readouts: (c) => [
-        { label: '표정 에너지', value: `${60 + (c.seed % 38)}%` },
-        { label: '조명 대비', value: c.stats.contrast > 45 ? '드라마틱' : '부드러움' },
-      ],
+      scanLabels: ["초상 사진 준비","선택한 화풍 확인","표현 강도 정리","캐릭터 구도 구성"],
+      readouts: () => [{"label":"제작 방식","value":"사진 기반 캐릭터 창작"},{"label":"과장 정도","value":"선택한 방향을 반영"}],
     }),
     choiceStep({
       id: 'style',
@@ -199,16 +223,29 @@ export default defineDemo({
   ],
   computeResult,
   Result,
-  print: (answers) => {
-    const capture = getCapture(answers, 'face');
-    const style = STYLES[(getChoice(answers, 'style') as StyleId) ?? 'webtoon'] ?? STYLES.webtoon;
-    const frame = (getChoice(answers, 'frame') as FrameId) ?? 'postcard';
+  print: (answers, _resultKey, generated) => {
+    const { style, frame, ai, art, comment } = caricatureOf(answers, generated);
     return {
       kind: 'photo',
-      photos: capture ? [{ src: capture.image, look: style.look }] : [],
+      photos: art ? [ai ? { src: art.src } : art] : [],
       title: `${style.label} 캐리커처`,
-      caption: `AI 화가의 한마디 · ${seededPick(answersSeed(answers), 'comment', COMMENTS)}`,
+      caption: `${ai ? 'AI 화가의 한마디' : '예시 작품 소개'} · ${comment}`,
       paper: frame === 'poster' ? 'black' : frame === 'postcard' ? 'cream' : 'white',
     };
+  },
+  generate: (answers) => {
+    const capture = getCapture(answers, 'face');
+    if (!capture) return Promise.resolve(null);
+    const style = getChoice(answers, 'style') ?? 'webtoon';
+    const frame = getChoice(answers, 'frame') ?? 'postcard';
+    return requestDemoAi<AiCaricature>(
+      'caricature-artist',
+      { experienceProfile: answers.experienceProfile,
+        photo: capture.image,
+        style: (CARICATURE_STYLE_IDS as readonly string[]).includes(style) ? style : 'webtoon',
+        frame: (CARICATURE_FRAME_IDS as readonly string[]).includes(frame) ? frame : 'postcard',
+      },
+      { timeoutMs: 60_000, validate: isAiCaricature }
+    );
   },
 });

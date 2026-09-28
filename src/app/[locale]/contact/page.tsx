@@ -3,11 +3,15 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SectionHeader } from '@/components/ui';
 import { ScrollReveal } from '@/components/animations';
 import { ContactTabs } from '@/components/contact/ContactTabs';
+import { getExperienceBySlug } from '@/data/experiences';
+import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
+import { redirect } from '@/i18n/navigation';
+import { QUOTE_HREF, getServiceContactHref } from '@/lib/constants';
 
 interface Props {
   params: Promise<{ locale: string }>;
   /** ?type=quote 로 들어오면 견적 계산 탭을 연다 */
-  searchParams: Promise<{ type?: string }>;
+  searchParams: Promise<{ type?: string; service?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -15,18 +19,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'contact' });
 
   return {
+    alternates: localeAlternates('/contact', locale),
     title: t('title'),
     description: t('description'),
     openGraph: {
       title: t('title'),
       description: t('description'),
+      images: [DEFAULT_OG_IMAGE],
     },
   };
 }
 
 export default async function ContactPage({ params, searchParams }: Props) {
   const { locale } = await params;
-  const { type } = await searchParams;
+  const { type, service } = await searchParams;
+  const initialService = typeof service === 'string' && getExperienceBySlug(service) ? service : undefined;
+  // 예전 견적 탭 주소는 온라인 견적 페이지로 넘긴다
+  if (type === 'quote') {
+    redirect({ href: initialService ? getServiceContactHref(initialService) : QUOTE_HREF, locale });
+  }
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'contact' });
 
@@ -74,7 +85,7 @@ export default async function ContactPage({ params, searchParams }: Props) {
           <h2 id="contact-form-title" className="sr-only">
             {t('title')}
           </h2>
-          <ContactTabs initialTab={type === 'quote' ? 'quote' : 'inquiry'} />
+          <ContactTabs initialTab="inquiry" initialService={initialService} />
         </div>
       </section>
     </main>

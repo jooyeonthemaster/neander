@@ -3,18 +3,11 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslations } from 'next-intl';
-import { useRouter, usePathname } from '@/i18n/navigation';
-import {
-  industries,
-  experiences,
-  pillars,
-  type PillarId,
-  type IndustryId,
-  type Industry,
-} from '@/data/experiences';
+import { experiences, getIndustryById, pillars, type PillarId } from '@/data/experiences';
 import { ScrollReveal } from '@/components/animations';
 import { ExperienceCard } from './ExperienceCard';
-import { EXPERIENCE_PHOTOS } from '@/data/experience-photos';
+import { DemoModal } from '@/components/demo/DemoModal';
+import { hasDemoForSlug } from '@/data/demo-registry';
 import { cn } from '@/lib/utils';
 
 /* ── Pillar icon SVGs ────────────────────────────────── */
@@ -82,115 +75,6 @@ function PillarIcon({ icon, className }: { icon: string; className?: string }) {
   }
 }
 
-/* ── Industry tab icon SVGs ───────────────────────────── */
-
-function IndustryIcon({ icon, className }: { icon: string; className?: string }) {
-  const props = {
-    xmlns: 'http://www.w3.org/2000/svg',
-    width: 18,
-    height: 18,
-    viewBox: '0 0 24 24',
-    fill: 'none',
-    stroke: 'currentColor',
-    strokeWidth: 1.5,
-    strokeLinecap: 'round' as const,
-    strokeLinejoin: 'round' as const,
-    className,
-    'aria-hidden': true as const,
-  };
-
-  switch (icon) {
-    case 'sparkles':
-      return (
-        <svg {...props}>
-          <path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3Z" />
-        </svg>
-      );
-    case 'wine':
-      return (
-        <svg {...props}>
-          <path d="M8 22h8" />
-          <path d="M12 11v11" />
-          <path d="M20 7c0 4.418-3.582 8-8 8S4 11.418 4 7" />
-          <path d="M4 7h16" />
-          <path d="M7 2l-1 5" />
-          <path d="M17 2l1 5" />
-        </svg>
-      );
-    case 'shirt':
-      return (
-        <svg {...props}>
-          <path d="M20.38 3.46 16 2 12 4 8 2 3.62 3.46a2 2 0 0 0-1.34 1.73l-.97 6.83A1 1 0 0 0 2.3 13h3.2l.72 6.06a2 2 0 0 0 1.99 1.74h7.58a2 2 0 0 0 1.99-1.74L18.5 13h3.2a1 1 0 0 0 .99-1.12l-.97-6.83a2 2 0 0 0-1.34-1.73Z" />
-        </svg>
-      );
-    case 'music':
-      return (
-        <svg {...props}>
-          <path d="M9 18V5l12-2v13" />
-          <circle cx="6" cy="18" r="3" />
-          <circle cx="18" cy="16" r="3" />
-        </svg>
-      );
-    case 'graduationCap':
-      return (
-        <svg {...props}>
-          <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0Z" />
-          <path d="M22 10v6" />
-          <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" />
-        </svg>
-      );
-    case 'party':
-      return (
-        <svg {...props}>
-          <path d="M5.8 11.3 2 22l10.7-3.79" />
-          <path d="M4 3h.01" />
-          <path d="M22 8h.01" />
-          <path d="M15 2h.01" />
-          <path d="M22 20h.01" />
-          <path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10" />
-          <path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.63-.69 1.08-1.33 1.08h-.36c-.87 0-1.53.77-1.32 1.62l.14.53" />
-          <path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.59 4.91 9.14 5.5 9.14 6.14v.36c0 .87-.77 1.53-1.62 1.32l-.53-.14" />
-        </svg>
-      );
-    case 'building':
-      return (
-        <svg {...props}>
-          <rect x="4" y="2" width="16" height="20" rx="2" />
-          <path d="M9 22v-4h6v4" />
-          <path d="M8 6h.01" />
-          <path d="M16 6h.01" />
-          <path d="M12 6h.01" />
-          <path d="M12 10h.01" />
-          <path d="M12 14h.01" />
-          <path d="M16 10h.01" />
-          <path d="M16 14h.01" />
-          <path d="M8 10h.01" />
-          <path d="M8 14h.01" />
-        </svg>
-      );
-    case 'landmark':
-      return (
-        <svg {...props}>
-          <line x1="3" x2="21" y1="22" y2="22" />
-          <line x1="6" x2="6" y1="18" y2="11" />
-          <line x1="10" x2="10" y1="18" y2="11" />
-          <line x1="14" x2="14" y1="18" y2="11" />
-          <line x1="18" x2="18" y1="18" y2="11" />
-          <polygon points="12 2 20 7 4 7" />
-          <line x1="2" x2="22" y1="18" y2="18" />
-        </svg>
-      );
-    case 'heart':
-      return (
-        <svg {...props}>
-          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-        </svg>
-      );
-    default:
-      return null;
-  }
-}
-
 /* ── Pillar Filter Pill ──────────────────────────────── */
 
 function PillarPill({
@@ -207,6 +91,7 @@ function PillarPill({
   return (
     <button
       onClick={onClick}
+      aria-pressed={isActive}
       className={cn(
         'relative flex flex-shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium',
         'whitespace-nowrap transition-all duration-200 border',
@@ -227,128 +112,87 @@ function PillarPill({
   );
 }
 
-/* ── Tab Button ───────────────────────────────────────── */
-
-function TabButton({
-  industry,
-  isActive,
-  onClick,
-  label,
-  isEmpty = false,
-}: {
-  industry: Industry;
-  isActive: boolean;
-  onClick: () => void;
-  label: string;
-  /** 현재 필라에 이 산업군 체험이 없으면 흐리게 표시하고 선택할 수 없게 한다 */
-  isEmpty?: boolean;
-}) {
-  return (
-    <button
-      role="tab"
-      aria-selected={isActive}
-      onClick={onClick}
-      disabled={isEmpty}
-      className={cn(
-        'relative flex flex-shrink-0 items-center gap-2 lg:gap-1.5 px-4 lg:px-2 py-3 text-sm font-medium',
-        'whitespace-nowrap transition-all duration-200',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 rounded-md',
-        isEmpty
-          ? 'text-neutral-300 cursor-not-allowed'
-          : isActive
-            ? 'text-teal-700'
-            : 'text-neutral-500 hover:text-neutral-800'
-      )}
-    >
-      <IndustryIcon
-        icon={industry.icon}
-        className={cn(
-          'h-4 w-4 transition-colors',
-          isEmpty ? 'text-neutral-300' : isActive ? 'text-teal-600' : 'text-neutral-400'
-        )}
-      />
-      <span>{label}</span>
-
-      {/* Animated underline indicator */}
-      {isActive && (
-        <motion.div
-          layoutId="industry-tab-indicator"
-          className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-teal-600"
-          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        />
-      )}
-    </button>
-  );
-}
-
-/* ── Helpers ─────────────────────────────────────────── */
-
-/** 해당 필라 + 산업군 조합의 체험 개수 */
-function countExperiences(pillar: PillarId | 'all', industry: IndustryId): number {
-  return experiences.filter(
-    (exp) => (pillar === 'all' || exp.pillar === pillar) && exp.industry === industry
-  ).length;
-}
-
-/** 해당 필라에서 체험이 있는 첫 산업군 (없으면 첫 번째 탭) */
-function firstIndustryWithExperiences(pillar: PillarId | 'all'): IndustryId {
-  const found = industries.find((industry) => countExperiences(pillar, industry.id) > 0);
-  return found?.id ?? industries[0].id;
-}
-
 /* ── Main IndustryShowcase Section ────────────────────── */
 
 interface IndustryShowcaseProps {
   initialPillar?: PillarId;
-  initialIndustry?: IndustryId;
+  /** ?demo=<slug> 로 들어오면 그 데모 팝업을 연 채로 시작한다 */
+  initialDemo?: string;
 }
 
-export function IndustryShowcase({ initialPillar, initialIndustry }: IndustryShowcaseProps) {
+export function IndustryShowcase({ initialPillar, initialDemo }: IndustryShowcaseProps) {
   const t = useTranslations('services');
-  const router = useRouter();
-  const pathname = usePathname();
   const [activePillar, setActivePillar] = useState<PillarId | 'all'>(initialPillar ?? 'all');
-  // 필라에 해당 산업군 체험이 없으면 빈 화면이 되므로, 체험이 있는 첫 탭에서 시작한다.
-  const [activeTab, setActiveTab] = useState<IndustryId>(() =>
-    initialIndustry && countExperiences(initialPillar ?? 'all', initialIndustry) > 0
-      ? initialIndustry
-      : firstIndustryWithExperiences(initialPillar ?? 'all')
-  );
+  useEffect(() => { setActivePillar(initialPillar ?? 'all'); }, [initialPillar]);
   const sectionRef = useRef<HTMLElement>(null);
-  const tabListRef = useRef<HTMLDivElement>(null);
+
+  const industryName = useCallback(
+    (id: Parameters<typeof getIndustryById>[0]) => {
+      const industry = getIndustryById(id);
+      return industry ? t(industry.nameKey) : '';
+    },
+    [t]
+  );
 
   const pillarMap = useMemo(() => {
     const map = new Map(pillars.map((p) => [p.id, p]));
     return map;
   }, []);
 
-  const activeExperiences = useMemo(() => {
-    let filtered = experiences;
-    if (activePillar !== 'all') {
-      filtered = filtered.filter((exp) => exp.pillar === activePillar);
-    }
-    return filtered.filter((exp) => exp.industry === activeTab);
-  }, [activeTab, activePillar]);
-
-  const hasPhotoCard = activeExperiences.some((exp) => EXPERIENCE_PHOTOS[exp.slug]);
+  // 산업군은 필터 대신 카드 뱃지로만 보여 준다 — 필라만 고르면 해당 체험이 한 화면에 다 나온다
+  const activeExperiences = useMemo(
+    () => (activePillar === 'all' ? experiences : experiences.filter((exp) => exp.pillar === activePillar)),
+    [activePillar]
+  );
 
   const handlePillarClick = useCallback((pillarId: PillarId | 'all') => {
+    if (pillarId === activePillar) return;
     setActivePillar(pillarId);
-    // 지금 보고 있는 산업군에 해당 필라 체험이 없으면 결과가 있는 탭으로 옮긴다.
-    setActiveTab((current) =>
-      countExperiences(pillarId, current) > 0
-        ? current
-        : firstIndustryWithExperiences(pillarId)
-    );
-    if (pillarId === 'all') {
-      router.replace(pathname, { scroll: false });
-    } else {
-      router.replace(`${pathname}?pillar=${pillarId}`, { scroll: false });
-    }
-  }, [router, pathname]);
+    const url = new URL(window.location.href);
+    if (pillarId === 'all') url.searchParams.delete('pillar');
+    else url.searchParams.set('pillar', pillarId);
+    window.history.pushState(null, '', url);
+  }, [activePillar]);
 
-  const handleTabClick = useCallback((id: IndustryId) => {
-    setActiveTab(id);
+
+  /* ── 데모 팝업 — URL ?demo=<slug> 와 맞춰 두어 뒤로가기로 닫히고 링크로 공유된다 ── */
+  const [openDemo, setOpenDemo] = useState<string | null>(
+    initialDemo && hasDemoForSlug(initialDemo) ? initialDemo : null
+  );
+  // 팝업을 열면서 기록을 쌓았는지 — 그랬다면 닫을 때 history.back()으로 되돌린다
+  const pushedDemoRef = useRef(false);
+
+  const openDemoPopup = useCallback((slug: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('demo', slug);
+    window.history.pushState(null, '', url);
+    pushedDemoRef.current = true;
+    setOpenDemo(slug);
+  }, []);
+
+  const closeDemoPopup = useCallback(() => {
+    if (pushedDemoRef.current) {
+      window.history.back();
+      return;
+    }
+    const url = new URL(window.location.href);
+    url.searchParams.delete('demo');
+    window.history.replaceState(null, '', url);
+    setOpenDemo(null);
+  }, []);
+
+  useEffect(() => {
+    const onPopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const selectedPillar = params.get('pillar');
+      setActivePillar(pillars.some((pillar) => pillar.id === selectedPillar) ? selectedPillar as PillarId : 'all');
+      const slug = params.get('demo');
+      const valid = slug && hasDemoForSlug(slug) ? slug : null;
+      pushedDemoRef.current = valid !== null;
+      setOpenDemo(valid);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
   /* Auto-scroll when arriving with a pillar param */
@@ -419,54 +263,18 @@ export function IndustryShowcase({ initialPillar, initialIndustry }: IndustrySho
             </div>
           </ScrollReveal>
 
-          {/* Industry tab bar */}
-          <ScrollReveal delay={0.15}>
-            <div className="mt-6 lg:mt-8">
-              <div
-                ref={tabListRef}
-                role="tablist"
-                aria-label="Industry tabs"
-                className={cn(
-                  'flex overflow-x-auto scrollbar-none',
-                  'border-b border-neutral-200',
-                  '-mx-4 px-4 sm:mx-0 sm:px-0 sm:justify-center-safe lg:flex-wrap'
-                )}
-              >
-                {industries.map((industry) => {
-                  const count = countExperiences(activePillar, industry.id);
-                  return (
-                    <TabButton
-                      key={industry.id}
-                      industry={industry}
-                      isActive={activeTab === industry.id}
-                      onClick={() => handleTabClick(industry.id)}
-                      label={count > 0 ? `${t(industry.nameKey)} ${count}` : t(industry.nameKey)}
-                      isEmpty={count === 0}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          </ScrollReveal>
-
-          {/* Tab content */}
-          <div className="mt-8 min-h-[320px]" role="tabpanel" aria-live="polite">
+          {/* Experience grid */}
+          <div className="mt-8 min-h-[320px] lg:mt-10" aria-live="polite">
             <AnimatePresence mode="wait">
               <motion.div
-                key={`${activePillar}-${activeTab}`}
+                key={activePillar}
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
               >
                 {activeExperiences.length > 0 ? (
-                  <div
-                    className={cn(
-                      'grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3',
-                      // 현장 사진 카드가 섞이면 높이를 맞추지 않는다 (사진 없는 카드가 늘어나 비어 보이지 않게)
-                      hasPhotoCard && 'items-start'
-                    )}
-                  >
+                  <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
                     {activeExperiences.map((exp) => {
                       const pillar = pillarMap.get(exp.pillar);
                       return (
@@ -477,8 +285,9 @@ export function IndustryShowcase({ initialPillar, initialIndustry }: IndustrySho
                           oneLiner={t(exp.oneLinerKey)}
                           pillarId={exp.pillar}
                           pillarName={pillar ? t(pillar.nameKey) : ''}
+                          industryName={industryName(exp.industry)}
                           pillarColor={pillar?.color ?? '#0D9488'}
-                          stretch={!hasPhotoCard}
+                          onOpenDemo={hasDemoForSlug(exp.slug) ? () => openDemoPopup(exp.slug) : undefined}
                         />
                       );
                     })}
@@ -499,6 +308,10 @@ export function IndustryShowcase({ initialPillar, initialIndustry }: IndustrySho
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {openDemo && <DemoModal key={openDemo} slug={openDemo} onClose={closeDemoPopup} />}
+      </AnimatePresence>
     </section>
   );
 }

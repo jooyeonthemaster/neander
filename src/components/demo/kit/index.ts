@@ -20,4 +20,5 @@ export { defineDemo, cameraStep, micStep, choiceStep, textStep, sliderStep } fro
 export type { DemoStepDef, ChoiceOption, TextField, SliderField } from './steps';
 export { ResultShell, Panel, ScoreBars, TraitChips, InfoGrid, RadarChart, ProcessedPhoto } from './ResultParts';
 export { PrintStage } from './PrintStage';
+export { requestDemoAi, audioUrlToBase64 } from './ai';
 export type { PrintSpec, ReceiptSpec, ReceiptSection, PhotoPrintSpec, PrintMeta } from './print';

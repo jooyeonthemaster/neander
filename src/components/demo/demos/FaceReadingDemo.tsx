@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { withParticle } from '@/lib/korean';
 import type { DemoAnswers, DemoResultProps } from '@/types/demo';
 import {
   FACE_POINTS,
@@ -8,7 +9,6 @@ import {
   Panel,
   ProcessedPhoto,
   ResultShell,
-  ScoreBars,
   answersSeed,
   cameraStep,
   choiceStep,
@@ -16,14 +16,16 @@ import {
   defineDemo,
   getCapture,
   getChoice,
+  requestDemoAi,
   seededInt,
   seededPick,
   type PhotoLook,
 } from '../kit';
+import { FACE_FEATURE_KEYS, FACE_FORTUNE_IDS, FACE_TYPE_IDS } from '@/data/demo-ai/face-reading';
+import type { AiFaceReading, FaceFortuneId, FaceType } from '@/data/demo-ai/face-reading';
+import { isNotObserved } from '@/data/demo-ai/photo-reading';
 
 /* ── Data ──────────────────────────────────────────────── */
-
-type FaceType = 'moon' | 'tiger' | 'crane' | 'deer' | 'dragon' | 'owl';
 
 const FACE_TYPES: Record<FaceType, { name: string; emoji: string; desc: string; keywords: string[]; match: FaceType }> = {
   moon: {
@@ -70,12 +72,10 @@ const FACE_TYPES: Record<FaceType, { name: string; emoji: string; desc: string; 
   },
 };
 
-const TYPE_ORDER: FaceType[] = ['moon', 'tiger', 'crane', 'deer', 'dragon', 'owl'];
-
-type FeatureKey = 'forehead' | 'eyes' | 'nose' | 'lips' | 'chin';
+const TYPE_ORDER: FaceType[] = [...FACE_TYPE_IDS];
 
 const FEATURES: {
-  key: FeatureKey;
+  key: (typeof FACE_FEATURE_KEYS)[number];
   label: string;
   palace: string;
   points: { x: number; y: number }[];
@@ -85,7 +85,7 @@ const FEATURES: {
   {
     key: 'forehead',
     label: '이마',
-    palace: '관록궁',
+    palace: '관록궁(전통 관상에서 이마를 부르는 말)',
     points: [FACE_POINTS.forehead],
     side: 'right',
     readings: [
@@ -97,7 +97,7 @@ const FEATURES: {
   {
     key: 'eyes',
     label: '눈',
-    palace: '감찰관',
+    palace: '감찰관(전통 관상에서 눈을 부르는 말)',
     points: [FACE_POINTS.eyeL, FACE_POINTS.eyeR],
     side: 'left',
     readings: [
@@ -109,7 +109,7 @@ const FEATURES: {
   {
     key: 'nose',
     label: '코',
-    palace: '재백궁',
+    palace: '재백궁(전통 관상에서 코를 부르는 말)',
     points: [FACE_POINTS.nose],
     side: 'right',
     readings: [
@@ -121,7 +121,7 @@ const FEATURES: {
   {
     key: 'lips',
     label: '입',
-    palace: '출납관',
+    palace: '출납관(전통 관상에서 입을 부르는 말)',
     points: [FACE_POINTS.lips],
     side: 'left',
     readings: [
@@ -133,7 +133,7 @@ const FEATURES: {
   {
     key: 'chin',
     label: '턱',
-    palace: '지각',
+    palace: '지각(전통 관상에서 턱을 부르는 말)',
     points: [FACE_POINTS.chin],
     side: 'right',
     readings: [
@@ -146,7 +146,7 @@ const FEATURES: {
 
 const MARKER_COLORS = ['#f59e0b', '#38bdf8', '#34d399', '#f472b6', '#a78bfa'];
 
-type FortuneId = 'wealth' | 'love' | 'career' | 'health';
+type FortuneId = FaceFortuneId;
 
 const FORTUNES: Record<
   FortuneId,
@@ -198,7 +198,7 @@ const FORTUNES: Record<
   },
 };
 
-const FORTUNE_ORDER: FortuneId[] = ['wealth', 'love', 'career', 'health'];
+const FORTUNE_ORDER: FortuneId[] = [...FACE_FORTUNE_IDS];
 const LUCKY_COLORS = ['골드', '로즈 핑크', '스카이 블루', '민트 그린', '라벤더', '코랄'];
 
 /* ── Reading ──────────────────────────────────────────── */
@@ -340,7 +340,6 @@ function tierOf(score: number): 0 | 1 | 2 {
   return score >= 84 ? 0 : score >= 74 ? 1 : 2;
 }
 
-const TIER_LABEL = ['상승운', '안정운', '준비운'] as const;
 
 /** 고른 운(관심운) 집중 풀이 + 행운 아이템 */
 function focusReading(answers: DemoAnswers, seed: number, scores: Record<FortuneId, number>) {
@@ -356,18 +355,67 @@ function focusReading(answers: DemoAnswers, seed: number, scores: Record<Fortune
   return { focusId, focus, focusScore, tier, lucky };
 }
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
-  const capture = getCapture(answers, 'face');
-  const { seed, type, featureIdx, scores, total, balance, harmony } = read(answers);
+/* ── AI 결과 ──────────────────────────────────────────── */
+
+function isAiFace(v: unknown): v is AiFaceReading {
+  const o = v as AiFaceReading | null;
+  return (
+    !!o && o.observed === true && (FACE_TYPE_IDS as readonly string[]).includes(o.type) && typeof o.summary === 'string'
+    && Array.isArray(o.keywords) && !!o.features && FACE_FEATURE_KEYS.every((k) => typeof o.features[k]?.head === 'string')
+    && !!o.scores && FACE_FORTUNE_IDS.every((id) => typeof o.scores[id] === 'number') && typeof o.focusText === 'string' && !!o.lucky
+  );
+}
+
+/** 화면·출력물이 그리는 관상 — AI 결과가 있으면 그것, 없으면(실패·얼굴 미인식) 사진 시드 기반 고정 풀이 */
+function faceView(answers: DemoAnswers, generated: unknown) {
+  const base = read(answers);
+  const ai = isAiFace(generated) ? generated : null;
+  const choices = (answers.experienceProfile ?? {}) as Record<string, string>;
+  const roles: Record<string, FaceType> = { explorer: 'dragon', keeper: 'deer', maker: 'owl' };
+  const type = ai?.type ?? roles[choices.role] ?? 'moon';
   const face = FACE_TYPES[type];
+  const scores = ai ? ai.scores : base.scores;
+  const total = ai
+    ? Math.round(FORTUNE_ORDER.reduce((s, id) => s + scores[id], 0) / FORTUNE_ORDER.length + 3)
+    : base.total;
+  const focusBase = focusReading(answers, base.seed, scores);
+  return {
+    type,
+    face,
+    desc: ai?.summary ?? `${face.emoji} ${withParticle(face.name, '을/를')} 모티프로 고른 창작 이야기입니다. 사진은 초상을 꾸미는 데 사용하며 성격이나 미래의 근거가 아닙니다.`,
+    keywords: ai?.keywords ?? face.keywords,
+    readings: FEATURES.map((f) => ai?.features[f.key] ?? ({ head: `${f.label}에 더한 이야기`, text: '사진의 윤곽 위에 고전적인 상징을 얹었습니다. 이 부위의 모양으로 성격이나 능력을 판단하지 않으며, 직접 고른 역할이 이야기의 중심입니다.' })),
+    scores,
+    total: Math.min(total, 99),
+    balance: ai?.balance ?? base.balance,
+    harmony: ai?.harmony ?? base.harmony,
+    ...focusBase,
+    focusText: ai?.focusText ?? `${withParticle(focusBase.focus.label, '을/를')} 소재로 한 오늘의 작은 질문입니다. 지금 바꿀 수 있는 행동 한 가지를 정하고 5분만 시도해 보세요. 결과를 예언하는 대신 직접 만드는 장면을 남겨보세요.`,
+    lucky: ai
+      ? [
+          { label: '행운의 색', value: ai.lucky.color },
+          { label: '행운의 숫자', value: String(ai.lucky.number) },
+          { label: '행운 아이템', value: ai.lucky.item },
+        ]
+      : focusBase.lucky,
+    motto: ai?.motto ?? '웃는 얼굴이 최고의 관상',
+    ai: !!ai,
+    /** 카메라로 찍었는데 AI가 얼굴을 못 찾은 경우 — 다시 찍기 안내 */
+    retake: isNotObserved(generated) && getCapture(answers, 'face')?.source !== 'sample',
+  };
+}
+
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
+  const capture = getCapture(answers, 'face');
+  const v = faceView(answers, generated);
+  const { face, focus, lucky } = v;
   const match = FACE_TYPES[face.match];
-  const { focusId, focus, focusScore, tier, lucky } = focusReading(answers, seed, scores);
 
   return (
     <ResultShell
-      eyebrow="AI 관상 리포트"
+      eyebrow="상징으로 읽는 창작 초상"
       title={`${face.emoji} ${face.name}`}
-      description={face.desc}
+      description={v.desc}
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다시 관상 보기"
@@ -378,7 +426,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
             src={capture.image}
             look={LOOK}
             className="aspect-[3/4] w-60 shrink-0 rounded-2xl border border-amber-200/20"
-            alt="관상 분석 사진"
+            alt="상징 그래픽을 더한 초상 사진"
             delayMs={900}
           >
             <FaceMap />
@@ -386,25 +434,13 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         )}
         <div className="flex w-full flex-1 flex-col justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-5 text-left">
           <div>
-            <p className="text-xs text-slate-400">관상 총운</p>
-            <p className="font-display text-5xl font-extrabold" style={{ color: pillarColor }}>
-              {total}
-              <span className="ml-1 text-base font-semibold text-slate-500">점</span>
-            </p>
+            <p className="text-xs text-slate-400">오늘의 이야기 모티프</p>
+            <p className="mt-2 text-xl font-bold" style={{ color: pillarColor }}>{face.name}</p>
           </div>
-          <div className="space-y-1.5 text-xs">
-            <div className="flex justify-between text-slate-400">
-              <span>삼정 균형</span>
-              <span className="font-semibold text-amber-300">{balance}%</span>
-            </div>
-            <div className="flex justify-between text-slate-400">
-              <span>오관 조화</span>
-              <span className="font-semibold text-amber-300">{harmony} / 5</span>
-            </div>
-          </div>
+          <p className="text-xs leading-relaxed text-slate-400">전통적 상징을 빌린 캐릭터 이야기입니다. 외모로 성격이나 운명을 판단하지 않습니다.</p>
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="mr-0.5 text-[11px] text-slate-500">성격 키워드</span>
-            {face.keywords.map((k) => (
+            <span className="mr-0.5 text-[11px] text-slate-500">캐릭터 키워드</span>
+            {v.keywords.map((k) => (
               <span key={k} className="rounded-full px-2.5 py-0.5 text-xs font-medium" style={{ backgroundColor: `${pillarColor}22`, color: pillarColor }}>
                 #{k}
               </span>
@@ -413,10 +449,10 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         </div>
       </div>
 
-      <Panel title="부위별 관상 풀이">
+      <Panel title="초상에 담은 상징 이야기">
         <ol className="space-y-4">
           {FEATURES.map((f, i) => {
-            const reading = f.readings[featureIdx[i]!]!;
+            const reading = v.readings[i]!;
             return (
               <motion.li
                 key={f.key}
@@ -444,17 +480,6 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         </ol>
       </Panel>
 
-      <Panel title="올해의 운세 점수">
-        <ScoreBars
-          color={pillarColor}
-          suffix="점"
-          items={FORTUNE_ORDER.map((id) => ({
-            label: `${FORTUNES[id].emoji} ${FORTUNES[id].label}${id === focusId ? ' · 관심운' : ''}`,
-            value: scores[id],
-          }))}
-        />
-      </Panel>
-
       <div
         className="w-full max-w-md rounded-2xl border p-5 text-left"
         style={{ borderColor: `${pillarColor}66`, background: `linear-gradient(135deg, ${pillarColor}1f, transparent 70%)` }}
@@ -463,11 +488,11 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           <p className="text-sm font-bold text-white">
             {focus.emoji} {focus.label} 집중 풀이
           </p>
-          <span className="rounded-full px-2.5 py-0.5 text-[11px] font-bold text-white" style={{ backgroundColor: pillarColor }}>
-            {TIER_LABEL[tier]} · {focusScore}점
+          <span className="demo-accent-surface rounded-full px-2.5 py-0.5 text-[11px] font-bold text-white" style={{ backgroundColor: pillarColor }}>
+            오락용 이야기
           </span>
         </div>
-        <p className="mt-3 text-sm leading-relaxed text-slate-200 [word-break:keep-all]">{focus.texts[tier]}</p>
+        <p className="mt-3 text-sm leading-relaxed text-slate-200 [word-break:keep-all]">{v.focusText}</p>
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
           {lucky.map((item) => (
             <div key={item.label} className="rounded-xl bg-slate-950/50 px-2 py-2.5">
@@ -480,10 +505,17 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
 
       <InfoGrid
         items={[
-          { emoji: match.emoji, label: '찰떡 궁합 관상', value: match.name, desc: '함께하면 서로의 운을 끌어올려요' },
-          { emoji: '🗝️', label: '관상 한마디', value: '웃는 얼굴이 최고의 관상', desc: '표정이 바뀌면 관상도 바뀌어요' },
+          { emoji: match.emoji, label: '함께 등장할 캐릭터', value: match.name, desc: '이야기 속 상징을 조합한 창작 설정이에요' },
+          { emoji: '🗝️', label: '오늘의 한마디', value: v.motto, desc: '마음에 드는 문장을 가볍게 간직하세요' },
         ]}
       />
+
+      {v.ai && <p className="text-xs text-slate-500">사진을 참고하고 직접 고른 주제로 쓴 창작 이야기예요</p>}
+      {v.retake && (
+        <p className="max-w-md text-xs text-slate-500 [word-break:keep-all]">
+          얼굴이 또렷하게 보이지 않아 기본 풀이를 보여드렸어요. 밝은 곳에서 정면으로 다시 찍으면 초상 사진을 더 선명하게 담을 수 있어요.
+        </p>
+      )}
 
       <p className="max-w-md text-[11px] leading-relaxed text-slate-500 [word-break:keep-all]">
         재미로 보는 관상 풀이예요. 얼굴이 운명을 정하지는 않으니 좋은 말만 기억해 주세요 🙂
@@ -502,7 +534,7 @@ export default defineDemo({
     analyzeEmoji: '🔮',
     analyzeDurationMs: 3600,
     analyzeImageStepId: 'face',
-    analyzeMessages: ['이마와 눈썹의 기운 읽는 중', '눈매와 코의 조화 살피는 중', '입꼬리·턱선 해석 중', '관상 리포트 쓰는 중'],
+    analyzeMessages: ['초상과 선택한 주제 확인 중', '전통적 상징으로 창작 이야기 구성 중', '사진 카드와 응원 문장 준비 중'],
   },
   steps: [
     cameraStep({
@@ -511,13 +543,8 @@ export default defineDemo({
       subtitle: '편안한 표정으로 카메라를 바라봐 주세요',
       mode: 'face',
       subject: '얼굴',
-      scanLabels: ['이마 넓이·높이 측정', '눈매 각도 분석', '콧대·콧방울 비율 계산', '입꼬리 방향 추적', '턱선 윤곽 추출'],
-      readouts: (c) => [
-        { label: '인상 온도', value: c.stats.warmth >= 50 ? '따뜻한 인상' : '시원한 인상' },
-        { label: '안면 대칭도', value: `${88 + (c.seed % 10)}%` },
-        { label: '혈색', value: c.stats.brightness > 50 ? '맑고 환함' : '차분함' },
-        { label: '분석 부위', value: '오관 5부위' },
-      ],
+      scanLabels: ["초상 사진 준비","선택한 이야기 확인","상징 모티프 준비","창작 카드 구성"],
+      readouts: () => [{"label":"사진","value":"초상 카드에 사용"},{"label":"이야기","value":"오락용 상징 해석"}],
     }),
     choiceStep({
       id: 'fortune',
@@ -532,44 +559,48 @@ export default defineDemo({
       })),
     }),
   ],
+  // AI 결과가 오면 결과 화면·출력물은 AI가 고른 유형으로 그린다 (resultKey는 고정 결과용)
   computeResult: (answers) => read(answers).type,
   Result,
-  print: (answers) => {
+  generate: (answers) => {
+    const photo = getCapture(answers, 'face')?.image;
+    if (!photo) return Promise.resolve(null);
+    return requestDemoAi<unknown>(
+      'face-reading',
+      { experienceProfile: answers.experienceProfile, photo, fortune: getChoice(answers, 'fortune') ?? 'wealth' },
+      { validate: (d): d is unknown => isAiFace(d) || isNotObserved(d) }
+    );
+  },
+  print: (answers, _resultKey, generated) => {
     const capture = getCapture(answers, 'face');
-    const { seed, type, featureIdx, scores, total, balance, harmony } = read(answers);
-    const face = FACE_TYPES[type];
-    const { focus, focusScore, tier, lucky } = focusReading(answers, seed, scores);
+    const { face, readings, keywords, focus, focusText, lucky, motto } = faceView(
+      answers,
+      generated
+    );
     return {
       kind: 'receipt',
-      eyebrow: 'AI 관상 리포트',
+      eyebrow: '오락용 창작 초상 카드',
       title: face.name,
       photo: capture ? { src: capture.image } : undefined,
       sections: [
-        { type: 'big', title: '관상 총운', text: `${total}점` },
+        { type: 'text', text: '전통적 상징을 차용한 창작입니다. 외모로 성격이나 실제 미래를 판단하지 않습니다.' },
         {
           type: 'rows',
           title: '관상 요약',
           rows: [
-            { label: '키워드', value: face.keywords.map((k) => `#${k}`).join(' ') },
-            { label: '삼정 균형', value: `${balance}%` },
-            { label: '오관 조화', value: `${harmony} / 5` },
-            { label: '찰떡 궁합', value: FACE_TYPES[face.match].name },
+            { label: '키워드', value: keywords.map((k) => `#${k}`).join(' ') },
+            { label: '이야기 속 동료', value: FACE_TYPES[face.match].name },
           ],
         },
         {
           type: 'rows',
           title: '부위별 풀이',
-          rows: FEATURES.map((f, i) => ({ label: f.label, value: f.readings[featureIdx[i]!]!.head })),
+          rows: FEATURES.map((f, i) => ({ label: `${f.label} · ${f.palace}`, value: readings[i]!.head })),
         },
-        {
-          type: 'bars',
-          title: '올해의 운세',
-          bars: FORTUNE_ORDER.map((id) => ({ label: FORTUNES[id].label, value: scores[id] })),
-        },
-        { type: 'text', title: `${focus.label} · ${TIER_LABEL[tier]} ${focusScore}점`, text: focus.texts[tier] },
+        { type: 'text', title: `${focus.label} · 창작 이야기`, text: focusText },
         { type: 'rows', title: '행운 포인트', rows: lucky },
       ],
-      footer: '웃는 얼굴이 최고의 관상이에요',
+      footer: motto,
     };
   },
 });

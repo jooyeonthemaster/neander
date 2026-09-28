@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
-import type { DemoAnswers, DemoResultProps } from '@/types/demo';
+import type { DemoAnswers, DemoResultProps, DemoStepProps } from '@/types/demo';
 import {
   Panel,
   ProcessedPhoto,
@@ -14,9 +14,12 @@ import {
   defineDemo,
   getCapture,
   getChoice,
+  requestDemoAi,
   seededRandom,
+  type DemoStepDef,
   type PhotoLook,
 } from '../kit';
+import { isAiBoothPhoto, type AiHistoryPhoto } from '@/data/demo-ai/photo-booth';
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -170,8 +173,61 @@ const ERAS: Record<EraId, Era> = {
 };
 
 function pickEra(answers: DemoAnswers): EraId {
-  return (getChoice(answers, 'era') as EraId | undefined) ?? 'joseon';
+  const picked = getChoice(answers, 'era') as EraId | undefined;
+  return picked && ERAS[picked] ? picked : 'joseon';
 }
+
+/** 시대마다 두 인물 중 방문객이 고른 쪽 (0 | 1) */
+function pickRole(answers: DemoAnswers): 0 | 1 {
+  return answers['role'] === 1 ? 1 : 0;
+}
+
+function isAiHistory(v: unknown): v is AiHistoryPhoto {
+  return isAiBoothPhoto(v) && ((v as AiHistoryPhoto).story === undefined || typeof (v as AiHistoryPhoto).story === 'string');
+}
+
+/* ── Step: 인물 선택 (고른 시대의 두 인물) ─────────────────── */
+
+function RoleStep({ answers, onUpdate }: DemoStepProps) {
+  const era = ERAS[pickEra(answers)];
+  const selected = answers['role'];
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:gap-4">
+      {era.outfits.map((o, i) => {
+        const isSelected = selected === i;
+        return (
+          <motion.button
+            key={o.role}
+            type="button"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => onUpdate('role', i)}
+            aria-pressed={isSelected}
+            className={cn(
+              'relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl border p-4 text-center transition-colors sm:p-5',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400',
+              isSelected ? 'border-teal-400 bg-teal-500/10 ring-1 ring-teal-400/40' : 'border-slate-700 bg-slate-900/50 hover:border-slate-600'
+            )}
+          >
+            <span className="mb-1 h-10 w-full rounded-lg border border-white/10" style={{ background: `linear-gradient(135deg, ${o.robe} 0 70%, ${o.trim} 70% 100%)` }} aria-hidden="true" />
+            <span className="text-sm font-semibold text-slate-100 sm:text-base">{o.role}</span>
+            <span className="text-xs leading-relaxed text-slate-400">{o.headLabel}</span>
+          </motion.button>
+        );
+      })}
+    </div>
+  );
+}
+
+const roleStep: DemoStepDef = {
+  meta: {
+    id: 'role',
+    titleKey: '어떤 인물이 되어 볼까요?',
+    subtitleKey: '고른 시대의 옷차림으로 AI가 사진을 새로 그려드려요',
+    canProceed: (a) => a['role'] === 0 || a['role'] === 1,
+  },
+  Component: RoleStep,
+};
 
 /* ── Costume overlays (viewBox 300x400 = 3:4 프레임, portrait 좌표) ── */
 
@@ -334,8 +390,8 @@ const STAINS = [
 ] as const;
 const STAIN_RGB = '120,80,30';
 
-/** 출력물용 정적 오버레이 — 의상 + 옛 사진 얼룩 + (조선) 낙관 */
-function PrintOverlay({ eraId, outfit }: { eraId: EraId; outfit: Outfit }) {
+/** 출력물용 정적 오버레이 — 의상 + 옛 사진 얼룩 + (조선) 낙관. AI 사진이면 의상은 이미 그려져 있다 */
+function PrintOverlay({ eraId, outfit, ai }: { eraId: EraId; outfit: Outfit; ai: boolean }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="900" height="1200">
       <defs>
@@ -346,7 +402,7 @@ function PrintOverlay({ eraId, outfit }: { eraId: EraId; outfit: Outfit }) {
           </radialGradient>
         ))}
       </defs>
-      <CostumeArt outfit={outfit} />
+      {!ai && <CostumeArt outfit={outfit} />}
       {STAINS.map((_, i) => (
         <rect key={i} width="300" height="400" fill={`url(#stain-${i})`} />
       ))}
@@ -371,7 +427,7 @@ const ERA_PAPER: Record<EraId, 'white' | 'cream' | 'black'> = {
 
 /* ── Photo card ────────────────────────────────────────── */
 
-function HistoryCard({ era, eraId, outfit, image }: { era: Era; eraId: EraId; outfit: Outfit; image: string }) {
+function HistoryCard({ era, eraId, outfit, image, ai }: { era: Era; eraId: EraId; outfit: Outfit; image: string; ai: boolean }) {
   const f = era.frame;
   const modern = eraId === 'modern';
   return (
@@ -379,7 +435,7 @@ function HistoryCard({ era, eraId, outfit, image }: { era: Era; eraId: EraId; ou
       initial={{ opacity: 0, y: 20, rotate: 2 }}
       animate={{ opacity: 1, y: 0, rotate: -1 }}
       transition={{ duration: 0.6 }}
-      className="relative w-[272px] p-3 shadow-2xl shadow-black/50"
+      className={cn('relative w-[272px] p-3 shadow-2xl shadow-black/50', eraId === 'samguk' && 'demo-dark-surface')}
       style={{ backgroundColor: f.bg, border: eraId === 'joseon' ? `8px solid ${f.border}` : `2px solid ${f.border}` }}
     >
       {eraId === 'samguk' && (
@@ -402,19 +458,22 @@ function HistoryCard({ era, eraId, outfit, image }: { era: Era; eraId: EraId; ou
         className={cn('relative aspect-[3/4] w-full overflow-hidden', modern && 'rounded-sm')}
         style={modern ? { boxShadow: `0 0 0 6px #fffdf7, 0 0 0 7px ${f.border}` } : { boxShadow: `0 0 0 1px ${f.border}` }}
       >
-        <ProcessedPhoto src={image} look={era.look} className="absolute inset-0 h-full w-full" alt={`${era.title} 역사 사진`} delayMs={1000}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={outfit.role}
-              className="absolute inset-0"
-              initial={{ opacity: 0, y: -12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.45 }}
-            >
-              <CostumeOverlay outfit={outfit} />
-            </motion.div>
-          </AnimatePresence>
+        <ProcessedPhoto src={image} look={ai ? {} : era.look} className="absolute inset-0 h-full w-full" alt={`${era.title} 역사 사진`} delayMs={ai ? 300 : 1000}>
+          {/* AI 사진은 시대 의상·질감까지 새로 그린 것이라 그림 의상을 얹지 않는다 */}
+          {!ai && (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={outfit.role}
+                className="absolute inset-0"
+                initial={{ opacity: 0, y: -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.45 }}
+              >
+                <CostumeOverlay outfit={outfit} />
+              </motion.div>
+            </AnimatePresence>
+          )}
           {/* 오래된 사진 얼룩 */}
           <div
             className="pointer-events-none absolute inset-0 mix-blend-multiply"
@@ -505,13 +564,17 @@ function Quiz({ era, seed, color }: { era: Era; seed: number; color: string }) {
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
   const capture = getCapture(answers, 'photo');
   const eraId = pickEra(answers);
   const era = ERAS[eraId];
   const seed = answersSeed(answers);
-  const [variant, setVariant] = useState<0 | 1>(0);
+  const ai = isAiHistory(generated) ? generated : null;
+  const [picked, setVariant] = useState<0 | 1>(() => pickRole(answers));
+  // AI 사진은 고른 인물로 그려졌으니 의상 탭을 바꿀 수 없다
+  const variant = ai ? pickRole(answers) : picked;
   const outfit = era.outfits[variant];
+  const image = ai?.image ?? capture?.image;
 
   return (
     <ResultShell
@@ -523,23 +586,33 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
       restartLabel="다른 시대로 떠나기"
     >
       <div className="flex flex-col items-center gap-4">
-        <div className="flex rounded-xl border border-slate-700 bg-slate-900/60 p-1" role="tablist" aria-label="의상 선택">
-          {era.outfits.map((o, i) => (
-            <button
-              key={o.role}
-              type="button"
-              role="tab"
-              aria-selected={variant === i}
-              onClick={() => setVariant(i as 0 | 1)}
-              className={cn('rounded-lg px-4 py-1.5 text-xs font-semibold transition-colors', variant === i ? 'text-white' : 'text-slate-400 hover:text-slate-200')}
-              style={variant === i ? { backgroundColor: pillarColor } : undefined}
-            >
-              {o.role}
-            </button>
-          ))}
-        </div>
-        {capture && <HistoryCard era={era} eraId={eraId} outfit={outfit} image={capture.image} />}
+        {!ai && (
+          <div className="flex rounded-xl border border-slate-700 bg-slate-900/60 p-1" role="tablist" aria-label="의상 선택">
+            {era.outfits.map((o, i) => (
+              <button
+                key={o.role}
+                type="button"
+                role="tab"
+                aria-selected={variant === i}
+                onClick={() => setVariant(i as 0 | 1)}
+                className={cn('rounded-lg px-4 py-1.5 text-xs font-semibold transition-colors', variant === i ? 'demo-accent-surface text-white' : 'text-slate-400 hover:text-slate-200')}
+                style={variant === i ? { backgroundColor: pillarColor } : undefined}
+              >
+                {o.role}
+              </button>
+            ))}
+          </div>
+        )}
+        {image && <HistoryCard era={era} eraId={eraId} outfit={outfit} image={image} ai={!!ai} />}
+        {ai && <p className="text-xs text-slate-500">AI가 사진 속 모습 그대로 {outfit.role}의 모습으로 새로 그렸어요</p>}
       </div>
+
+      {ai?.story && (
+        <Panel title="사진 속 나의 하루">
+          <p className="text-sm leading-relaxed text-slate-300 [word-break:keep-all]">{ai.story}</p>
+          <p className="mt-2 text-[11px] text-slate-500">AI가 지어낸 이야기예요</p>
+        </Panel>
+      )}
 
       <Panel title="역사 교육 카드">
         <div className="space-y-4 text-sm">
@@ -581,9 +654,18 @@ export default defineDemo({
     targetSlug: 'ai-history-travel',
     industryId: 'education',
     analyzeEmoji: '⏳',
+    // AI 사진 합성은 10~20초 — 문구를 넉넉히 두고 마지막 문구는 오래 머물러도 자연스럽게
     analyzeDurationMs: 3500,
     analyzeImageStepId: 'photo',
-    analyzeMessages: ['시대 고증 자료 찾는 중', '시대 의상 입히는 중', '옛 사진 질감 입히는 중', '역사 교육 카드 만드는 중'],
+    analyzeMessages: [
+      '타임머신 예열 중',
+      '시대 고증 자료 찾는 중',
+      '시대 의상 입히는 중',
+      '그 시절 배경으로 이동 중',
+      '옛 사진 질감 입히는 중',
+      '역사 교육 카드 만드는 중',
+      '곧 도착해요 · 조금만 기다려 주세요',
+    ],
   },
   steps: [
     choiceStep({
@@ -599,6 +681,7 @@ export default defineDemo({
         swatch: ERAS[id].swatch,
       })),
     }),
+    roleStep,
     cameraStep({
       id: 'photo',
       title: '시간 여행 사진을 찍어요',
@@ -606,26 +689,35 @@ export default defineDemo({
       mode: 'portrait',
       subject: '모습',
       countdown: true,
-      scanLabels: ['인물 영역 분리', '머리·어깨 위치 측정', '시대 의상 치수 맞춤', '옛 사진 질감 준비'],
-      readouts: (c) => [
-        { label: '자세', value: c.stats.contrast > 42 ? '늠름함' : '단정함' },
-        { label: '의상 핏', value: `${86 + (c.seed % 13)}%` },
-      ],
+      scanLabels: ["사진 불러오기","선택한 시대 참고","의상·배경 콘셉트 준비","엽서 질감 구성"],
+      readouts: () => [{"label":"촬영 사진","value":"준비 완료"},{"label":"장면","value":"역사 자료를 참고한 창작"}],
     }),
   ],
   computeResult: (answers) => pickEra(answers),
   Result,
-  print: (answers) => {
+  generate: (answers) => {
+    const capture = getCapture(answers, 'photo');
+    if (!capture) return Promise.resolve(null);
+    return requestDemoAi<AiHistoryPhoto>(
+      'history-travel',
+      { experienceProfile: answers.experienceProfile, photo: capture.image, era: pickEra(answers), role: pickRole(answers) },
+      { timeoutMs: 60_000, validate: isAiHistory }
+    );
+  },
+  print: (answers, _resultKey, generated) => {
     const capture = getCapture(answers, 'photo');
     const eraId = pickEra(answers);
     const era = ERAS[eraId];
-    // 결과 화면이 처음 보여주는 의상
-    const outfit = era.outfits[0];
+    // 방문객이 고른 인물 (결과 화면이 처음 보여주는 의상)
+    const outfit = era.outfits[pickRole(answers)];
+    const aiImage = isAiHistory(generated) ? generated.image : null;
     return {
       kind: 'photo',
-      photos: capture
-        ? [{ src: capture.image, look: era.look, label: outfit.role, overlay: <PrintOverlay eraId={eraId} outfit={outfit} /> }]
-        : [],
+      photos: aiImage
+        ? [{ src: aiImage, label: outfit.role, overlay: <PrintOverlay eraId={eraId} outfit={outfit} ai /> }]
+        : capture
+          ? [{ src: capture.image, look: era.look, label: outfit.role, overlay: <PrintOverlay eraId={eraId} outfit={outfit} ai={false} /> }]
+          : [],
       title: era.title,
       caption: `${era.period} · ${era.scene}`,
       badge: era.hanja,

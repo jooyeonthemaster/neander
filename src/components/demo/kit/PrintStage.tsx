@@ -5,12 +5,12 @@
    결과가 나오면 화면 속 프린터에서 출력물(영수증/4×6 인화지)이 뽑혀 나온다.
    ───────────────────────────────────────────────────────── */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { renderPrint, type PrintMeta, type PrintSpec, type RenderedPrint } from './print';
 
-type Stage = 'rendering' | 'printing' | 'done';
+type Stage = 'rendering' | 'printing' | 'done' | 'error';
 
 /** 감열 프린터의 줄 단위 급지 느낌 — 일정 간격으로 끊어 움직인다 */
 const lineFeed = (steps: number) => (t: number) => Math.min(1, Math.ceil(t * steps) / steps);
@@ -31,6 +31,40 @@ export function PrintStage({
   const [print, setPrint] = useState<RenderedPrint | null>(null);
   const [stage, setStage] = useState<Stage>('rendering');
   const [run, setRun] = useState(0);
+  const [renderAttempt, setRenderAttempt] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [availableWidth, setAvailableWidth] = useState<number | null>(null);
+  const [availableHeight, setAvailableHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const venue = container.closest('.experience-venue[data-fit-viewport]');
+    const viewport = container.closest('[data-demo-viewport]');
+    const measure = () => {
+      setAvailableWidth(container.clientWidth);
+      // The page viewport owns this height. Measuring the print's own height would
+      // repeatedly shrink its paper as the preview resizes.
+      const height = venue
+        ? Number.parseFloat(getComputedStyle(container).getPropertyValue('--demo-available-height'))
+        : NaN;
+      setAvailableHeight(Number.isFinite(height) && height > 0 ? height : null);
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(container);
+    if (venue) observer.observe(venue);
+    if (viewport) observer.observe(viewport);
+    // The viewport publishes its measured budget as a CSS variable. It can change
+    // without changing the print's width (orientation, fullscreen or a new page).
+    const mutationObserver = new MutationObserver(measure);
+    if (venue) mutationObserver.observe(venue, { attributes: true, attributeFilter: ['style'] });
+    if (viewport) mutationObserver.observe(viewport, { attributes: true, attributeFilter: ['style'] });
+    measure();
+    return () => {
+      observer.disconnect();
+      mutationObserver.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -41,15 +75,23 @@ export function PrintStage({
         setStage('printing');
       })
       .catch(() => {
-        if (alive) setStage('done');
+        if (alive) setStage('error');
       });
     return () => {
       alive = false;
     };
-  }, [spec, meta]);
+  }, [spec, meta, renderAttempt]);
 
-  const paperWidth = isPhoto ? 300 : 280;
-  const paperHeight = print ? (paperWidth * print.height) / print.width : isPhoto ? 450 : 520;
+  // Fit the physical preview in both axes; renderPrint keeps the full export resolution.
+  const paperRatio = print ? print.height / print.width : isPhoto ? 1.5 : 520 / 280;
+  const widthLimit = Math.min(isPhoto ? 300 : 280, Math.max(160, (availableWidth ?? 348) - 48));
+  const paperWidth = availableHeight === null
+    ? widthLimit
+    : Math.min(widthLimit, Math.max(56, availableHeight - 156) / paperRatio);
+  const paperHeight = paperWidth * paperRatio;
+  const printerWidth = availableHeight === null
+    ? paperWidth + 44
+    : Math.min(availableWidth ?? 348, Math.max(280, paperWidth + 44));
   const printMs = isPhoto ? 3400 : Math.min(4200, 1400 + paperHeight * 2.4);
 
   const replay = () => {
@@ -58,13 +100,13 @@ export function PrintStage({
   };
 
   return (
-    <div className="flex w-full flex-col items-center">
+    <div ref={containerRef} data-demo-page-atomic className="demo-print-stage flex w-full min-w-0 flex-col items-center">
       {/* Printer body */}
       <div
-        className="relative z-10 flex h-14 items-center justify-between rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-700 to-slate-900 px-4 shadow-[0_12px_30px_rgba(0,0,0,0.45)]"
-        style={{ width: paperWidth + 44 }}
+        className="demo-printer-body relative z-10 flex h-14 items-center justify-between rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-700 to-slate-900 px-4 shadow-[0_12px_30px_rgba(0,0,0,0.45)]"
+        style={{ width: printerWidth }}
       >
-        <span className="text-[10px] font-bold tracking-[0.25em] text-slate-400">
+        <span className="demo-printer-name text-[10px] font-bold tracking-[0.25em] text-slate-400">
           NEANDER {isPhoto ? 'PHOTO' : 'PRINT'}
         </span>
         <span className="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
@@ -73,14 +115,14 @@ export function PrintStage({
             animate={stage === 'done' ? { opacity: 1 } : { opacity: [1, 0.25, 1] }}
             transition={{ duration: 0.8, repeat: stage === 'done' ? 0 : Infinity }}
           />
-          {stage === 'done' ? '출력 완료' : hold ? '대기 중' : stage === 'printing' ? '출력 중' : '준비 중'}
+          {stage === 'error' ? '출력 준비 실패' : stage === 'done' ? '출력 완료' : hold ? '대기 중' : stage === 'printing' ? '출력 중' : '준비 중'}
         </span>
         {/* 급지구 */}
         <span className="absolute inset-x-3 -bottom-1 h-2 rounded-full bg-black shadow-inner" aria-hidden="true" />
       </div>
 
       {/* Paper — 급지구 아래로 밀려 나온다 */}
-      <div className="relative -mt-1 overflow-hidden px-6 pb-8" style={{ width: paperWidth + 48 }}>
+      <div className="demo-print-paper relative -mt-1 overflow-hidden px-6 pb-8" style={{ width: paperWidth + 48 }}>
         <div style={{ height: paperHeight }}>
           {print && !hold && (
             <motion.div
@@ -132,18 +174,20 @@ export function PrintStage({
         </div>
       </div>
 
+      {stage === 'error' && <div className="demo-print-error" role="alert"><p>출력물을 만들지 못했어요. 다시 준비해 주세요.</p><button type="button" className="demo-primary-action" onClick={() => { setPrint(null); setStage('rendering'); setRenderAttempt((attempt) => attempt + 1); }}>출력 다시 준비하기</button></div>}
+      {stage !== 'error' && (stage !== 'done' || !print || hold) && <div className="demo-print-controls"><button type="button" disabled className="demo-primary-action" aria-busy={!hold}>출력물 저장 · {hold ? '결과 공개 후 가능' : '준비 중'}</button></div>}
       <AnimatePresence>
         {stage === 'done' && print && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="-mt-2 flex items-center gap-2"
+            className="demo-print-controls -mt-2 flex items-center gap-2"
           >
             <a
               href={print.url}
               download={fileName}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-lg transition-transform hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300"
+              className="demo-primary-action inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300"
             >
               <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
@@ -154,7 +198,7 @@ export function PrintStage({
             <button
               type="button"
               onClick={replay}
-              className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500 hover:text-white"
+              className="demo-secondary-action min-h-11 rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500 hover:text-white"
             >
               다시 출력
             </button>

@@ -15,14 +15,24 @@ import {
   getCapture,
   getChoice,
   renderLook,
+  requestDemoAi,
   seededPick,
   type PhotoLook,
 } from '../kit';
+import {
+  HO_HANJA,
+  HO_KO,
+  PAINTER_FORMAT_IDS,
+  PAINTER_STYLE_IDS,
+  type AiPortrait,
+  type PainterFormatId,
+  type PainterStyleId,
+} from '@/data/demo-ai/traditional-painter';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-type StyleId = 'ink' | 'minhwa' | 'dancheong' | 'bluewhite';
-type FormatId = 'scroll' | 'screen';
+type StyleId = PainterStyleId;
+type FormatId = PainterFormatId;
 
 interface PaintStyle {
   label: string;
@@ -148,10 +158,34 @@ const HO_SECOND: [string, string, string][] = [
   ['촌', '村', '마을'],
 ];
 
-function makeHo(seed: number) {
+function makeHo(seed: number): Ho {
   const [k1, h1, trait] = seededPick(seed, 'ho1', HO_FIRST);
   const [k2, h2, place] = seededPick(seed, 'ho2', HO_SECOND);
   return { ko: `${k1}${k2}`, hanja: `${h1}${h2}`, h1, h2, meaning: `${trait} ${place}의 주인` };
+}
+
+interface Ho {
+  ko: string;
+  hanja: string;
+  h1: string;
+  h2: string;
+  meaning: string;
+}
+
+/* ── AI 결과 ───────────────────────────────────────────── */
+
+function isAiPortrait(v: unknown): v is AiPortrait {
+  const o = v as AiPortrait | null;
+  return !!o && typeof o.image === 'string' && o.image.startsWith('data:image/');
+}
+
+/** AI가 지은 호 — 형식이 맞을 때만 쓴다 (낙관에 한 글자씩 새기므로) */
+function aiHo(ai: AiPortrait): Ho | null {
+  const { hoKo, hoHanja, hoMeaning } = ai;
+  if (typeof hoKo !== 'string' || typeof hoHanja !== 'string' || typeof hoMeaning !== 'string') return null;
+  if (!HO_KO.test(hoKo) || !HO_HANJA.test(hoHanja) || !hoMeaning.trim()) return null;
+  const [h1, h2] = [...hoHanja] as [string, string];
+  return { ko: hoKo, hanja: hoHanja, h1, h2, meaning: hoMeaning.trim() };
 }
 
 /* ── Render hook (한 번 변환해 여러 폭에 재사용) ─────────── */
@@ -210,7 +244,7 @@ function Painting({ url, alt, className, imgClassName, delay = 0 }: { url: strin
 }
 
 /** 낙관 — 오른쪽 세로줄부터 읽는 2×2 백문인(白文印) */
-function Seal({ ho, size = 44 }: { ho: ReturnType<typeof makeHo>; size?: number }) {
+function Seal({ ho, size = 44 }: { ho: Ho; size?: number }) {
   return (
     <motion.div
       initial={{ scale: 2.2, opacity: 0, rotate: -12 }}
@@ -227,7 +261,7 @@ function Seal({ ho, size = 44 }: { ho: ReturnType<typeof makeHo>; size?: number 
   );
 }
 
-function Inscription({ ho, styleHanja, className }: { ho: ReturnType<typeof makeHo>; styleHanja: string; className?: string }) {
+function Inscription({ ho, styleHanja, className }: { ho: Ho; styleHanja: string; className?: string }) {
   return (
     <p
       className={cn('font-serif text-[13px] leading-[1.35] tracking-[0.2em] text-stone-800 [writing-mode:vertical-rl]', className)}
@@ -245,7 +279,7 @@ function silkBackground(style: PaintStyle) {
   return `repeating-linear-gradient(45deg, rgba(255,255,255,0.07) 0 2px, transparent 2px 9px), repeating-linear-gradient(-45deg, rgba(0,0,0,0.08) 0 2px, transparent 2px 9px), ${style.silk}`;
 }
 
-function HangingScroll({ url, style, ho }: { url: string | null; style: PaintStyle; ho: ReturnType<typeof makeHo> }) {
+function HangingScroll({ url, style, ho }: { url: string | null; style: PaintStyle; ho: Ho }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: -30 }}
@@ -295,7 +329,7 @@ const SCREEN_PANELS = [
   { rotate: 16, caption: '寫照', img: '-scale-x-100 object-[50%_30%] saturate-[0.85]' },
 ];
 
-function FoldingScreen({ url, style, ho }: { url: string | null; style: PaintStyle; ho: ReturnType<typeof makeHo> }) {
+function FoldingScreen({ url, style, ho }: { url: string | null; style: PaintStyle; ho: Ho }) {
   return (
     <div className="w-full max-w-md">
       <div className="flex items-stretch justify-center" style={{ perspective: 900 }}>
@@ -355,22 +389,28 @@ function FoldingScreen({ url, style, ho }: { url: string | null; style: PaintSty
 const INSCRIPTION_DATE = '丙午秋';
 const SERIF_SVG = "'AppleMyungjo', 'Nanum Myeongjo', 'Batang', 'Noto Serif KR', serif";
 
-function portraitOf(answers: DemoAnswers) {
+function portraitOf(answers: DemoAnswers, generated?: unknown) {
   const capture = getCapture(answers, 'face');
   const pickedStyle = getChoice(answers, 'style') as StyleId | undefined;
   const pickedFormat = getChoice(answers, 'format') as FormatId | undefined;
   const formatId: FormatId = pickedFormat && FORMATS[pickedFormat] ? pickedFormat : 'scroll';
+  const style = (pickedStyle && STYLES[pickedStyle]) || STYLES.ink;
+  const ai = isAiPortrait(generated) ? generated : null;
   return {
     capture,
-    style: (pickedStyle && STYLES[pickedStyle]) || STYLES.ink,
+    style,
     formatId,
     format: FORMATS[formatId],
-    ho: makeHo(capture?.seed ?? 7),
+    ai,
+    /** 그림 원본 — AI 초상화는 이미 화풍이 입혀져 있어 필터를 쓰지 않는다 */
+    art: ai ? { src: ai.image, look: {} as PhotoLook } : capture ? { src: capture.image, look: style.look } : null,
+    ho: (ai && aiHo(ai)) || makeHo(capture?.seed ?? 7),
+    comment: typeof ai?.comment === 'string' && ai.comment ? ai.comment : null,
   };
 }
 
 /** 출력물용 제문 + 낙관 (300×400, 그림 오른쪽 위 여백에 얹는다) */
-function InscriptionOverlay({ ho, style }: { ho: ReturnType<typeof makeHo>; style: PaintStyle }) {
+function InscriptionOverlay({ ho, style }: { ho: Ho; style: PaintStyle }) {
   const main = [...`${ho.hanja}先生眞影`];
   const side = [...INSCRIPTION_DATE, '', ...style.hanja];
   return (
@@ -406,15 +446,15 @@ function InscriptionOverlay({ ho, style }: { ho: ReturnType<typeof makeHo>; styl
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
-  const { capture, style, formatId, format, ho } = portraitOf(answers);
-  const url = useRenderedLook(capture?.image, style.look);
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
+  const { capture, style, formatId, format, ho, ai, art, comment } = portraitOf(answers, generated);
+  const url = useRenderedLook(art?.src, art?.look ?? style.look);
 
   return (
     <ResultShell
       eyebrow={`AI 전통 화가 · ${style.label} ${format.label}`}
       title={`${ho.ko}(${ho.hanja}) 선생의 초상`}
-      description={`AI 화가가 ‘${ho.meaning}’이라는 뜻의 호를 지어 낙관을 찍었어요.`}
+      description={`${ai ? 'AI가 그린 초상' : '전통 화풍 필터를 더한 예시'}에 ‘${ho.meaning}’이라는 뜻의 호와 낙관을 담았어요.`}
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다른 화풍으로 그리기"
@@ -430,6 +470,12 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         ]}
       />
 
+      {comment && (
+        <Panel title="화원의 한마디">
+          <p className="text-sm leading-relaxed text-slate-300 [word-break:keep-all]">🖌️ “{comment}”</p>
+        </Panel>
+      )}
+
       <Panel title={`한국 미술 이야기 · ${style.label}`}>
         <p className="text-sm leading-relaxed text-slate-300 [word-break:keep-all]">{style.history}</p>
         <p className="mt-3 rounded-xl bg-slate-950/60 px-3 py-2 text-xs leading-relaxed text-slate-400 [word-break:keep-all]">
@@ -440,7 +486,11 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         </p>
       </Panel>
 
-      <TraitChips title="AI 변환 기법" items={style.techniques} />
+      <TraitChips
+        title={ai ? 'AI 그림 구성' : '예시 구성'}
+        items={ai ? [`${style.label} ${style.hanja} 화풍`, '전신사조 필선', '한복 의관 정제', '호(號) 작명 · 낙관'] : [`${style.label} 필터`, `${format.label} 표구`, '예시 호(號) · 낙관']}
+      />
+      {ai && <p className="text-xs text-slate-500">AI 화원이 방금 찍은 사진을 보고 직접 그린 초상화예요</p>}
     </ResultShell>
   );
 }
@@ -459,7 +509,8 @@ export default defineDemo({
     analyzeEmoji: '🖌️',
     analyzeDurationMs: 3600,
     analyzeImageStepId: 'face',
-    analyzeMessages: ['먹을 갈고 붓을 고르는 중', '필선으로 윤곽 옮기는 중', '전통 안료 채색 중', '호를 짓고 낙관 새기는 중'],
+    // AI 초상화는 10~20초 — 마지막 문구가 기다리는 동안 남는다
+    analyzeMessages: ['먹을 갈고 붓을 고르는 중', '필선으로 윤곽 옮기는 중', '전통 안료 채색 중', '호를 짓고 낙관 새기는 중', 'AI 화원이 한 획씩 그리는 중이에요 (10~20초)'],
   },
   steps: [
     cameraStep({
@@ -468,10 +519,10 @@ export default defineDemo({
       subtitle: '옛 초상화처럼 단정한 표정이면 더 멋지게 그려져요',
       mode: 'face',
       subject: '얼굴',
-      scanLabels: ['얼굴 윤곽 추출', '이목구비 필선 분석', '먹선 경로 계산', '전신(傳神) 포인트 선정'],
+      scanLabels: ['초상 참고 사진 준비', '선택한 화풍 정리', '먹의 농담과 여백 준비', '창작 초상 구성 준비'],
       readouts: (c) => [
-        { label: '필선 대비', value: c.stats.contrast > 45 ? '굵고 힘찬 선' : '부드러운 선' },
-        { label: '추천 농담', value: c.stats.brightness > 50 ? '담묵(옅은 먹)' : '농묵(짙은 먹)' },
+        { label: '사진 대비', value: c.stats.contrast > 45 ? '굵고 힘찬 선' : '부드러운 선' },
+        { label: '사진 밝기', value: c.stats.brightness > 50 ? '밝은 편' : '차분한 편' },
       ],
     }),
     choiceStep({
@@ -500,14 +551,31 @@ export default defineDemo({
   ],
   computeResult,
   Result,
-  print: (answers) => {
-    const { capture, style, format, ho } = portraitOf(answers);
+  print: (answers, _resultKey, generated) => {
+    const { style, format, ho, ai, art } = portraitOf(answers, generated);
+    const overlay = <InscriptionOverlay ho={ho} style={style} />;
     return {
       kind: 'photo',
-      photos: capture ? [{ src: capture.image, look: style.look, overlay: <InscriptionOverlay ho={ho} style={style} /> }] : [],
+      photos: art ? [ai ? { src: art.src, overlay } : { ...art, overlay }] : [],
       title: `${ho.ko}(${ho.hanja}) 선생의 초상`,
       caption: `${ho.hanja}之印 · ${ho.meaning} · ${style.label} ${format.label}`,
       paper: 'cream',
     };
+  },
+  generate: (answers) => {
+    const capture = getCapture(answers, 'face');
+    if (!capture) return Promise.resolve(null);
+    const style = getChoice(answers, 'style') ?? 'ink';
+    const format = getChoice(answers, 'format') ?? 'scroll';
+    return requestDemoAi<AiPortrait>(
+      'traditional-painter',
+      {
+        experienceProfile: answers.experienceProfile,
+        photo: capture.image,
+        style: (PAINTER_STYLE_IDS as readonly string[]).includes(style) ? style : 'ink',
+        format: (PAINTER_FORMAT_IDS as readonly string[]).includes(format) ? format : 'scroll',
+      },
+      { timeoutMs: 60_000, validate: isAiPortrait }
+    );
   },
 });

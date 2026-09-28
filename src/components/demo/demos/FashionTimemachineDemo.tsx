@@ -1,25 +1,28 @@
 'use client';
 
 import { motion } from 'motion/react';
-import type { DemoAnswers, DemoResultProps } from '@/types/demo';
+import { useState } from 'react';
+import type { DemoAnswers, DemoResultProps, DemoStepProps } from '@/types/demo';
 import {
   ProcessedPhoto,
   ResultShell,
   TraitChips,
+  answersSeed,
   cameraStep,
-  choiceStep,
-  clamp,
   defineDemo,
   getCapture,
   getChoices,
+  requestDemoAi,
   seededInt,
-  type CaptureData,
   type PhotoLook,
+  type DemoStepDef,
 } from '../kit';
+import { isAiFashion, type AiFashion, type FashionEraId } from '@/data/demo-ai/fashion-era';
+import '../viewport-fashion.css';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-type EraId = 'e1920' | 'e1950' | 'e1970' | 'e1990' | 'y2k' | 'e2080';
+type EraId = FashionEraId;
 
 interface Era {
   year: string;
@@ -159,24 +162,78 @@ const ERAS: Record<EraId, Era> = {
 
 const ERA_IDS = Object.keys(ERAS) as EraId[];
 
+function EraChoiceStep({ answers, onUpdate }: DemoStepProps) {
+  const selected = getChoices(answers, 'eras').filter((id): id is EraId => id in ERAS);
+  const [previewId, setPreviewId] = useState<EraId | undefined>(() => selected[selected.length - 1]);
+  const preview = previewId ? ERAS[previewId] : undefined;
+
+  const choose = (id: EraId) => {
+    setPreviewId(id);
+    if (selected.includes(id)) onUpdate('eras', selected.filter((item) => item !== id));
+    else if (selected.length < 3) onUpdate('eras', [...selected, id]);
+  };
+
+  return (
+    <div className="fashion-era-picker">
+      <div className="fashion-era-summary" aria-live="polite">
+        <p>{preview ? <><strong>{preview.year}</strong> · {preview.desc}</> : '시대를 누르면 그때의 스타일을 살펴볼 수 있어요.'}</p>
+        <span aria-label={`${selected.length}개 선택, 최대 3개`}>{selected.length} / 3</span>
+      </div>
+      <div className="fashion-era-options">
+        {ERA_IDS.map((id) => <button key={id} type="button" className="demo-choice fashion-era-choice" data-era={id} aria-pressed={selected.includes(id)} onClick={() => choose(id)}>
+          <span className="fashion-era-swatch" style={{ background: ERAS[id].swatch }} aria-hidden="true" />
+          <span className="fashion-era-label"><span>{ERAS[id].year}</span><strong>{ERAS[id].label}</strong></span>
+        </button>)}
+      </div>
+    </div>
+  );
+}
+
+const eraChoiceStep: DemoStepDef = {
+  meta: {
+    id: 'eras',
+    titleKey: '어느 시대로 떠나볼까요?',
+    subtitleKey: '최대 3개 시대를 고르면 한 장의 타임라인 포스터로 만들어요',
+    canProceed: (answers) => getChoices(answers, 'eras').length >= 1,
+  },
+  Component: EraChoiceStep,
+};
+
 /* ── Analysis ─────────────────────────────────────────── */
 
-/** 촬영 이미지 톤으로 시대별 싱크로율을 만든다 — 같은 사진이면 같은 결과 */
-function synchro(capture: CaptureData | undefined, eras: EraId[]) {
-  const s = capture?.stats ?? { brightness: 55, warmth: 55, saturation: 40, contrast: 40 };
-  const seed = capture?.seed ?? 3;
-  const bias: Record<EraId, number> = {
-    e1920: s.contrast * 0.12,
-    e1950: (s.warmth - 50) * 0.15 + 3,
-    e1970: (s.warmth - 50) * 0.2,
-    e1990: (s.contrast - 40) * 0.1 + 2,
-    y2k: s.saturation * 0.1,
-    e2080: (100 - s.warmth) * 0.08,
-  };
+/** 포스터용 허구의 연출값. 외모 평가가 아니며 입력·체험 회차에 따라 달라진다. */
+function synchro(answers: DemoAnswers, eras: EraId[]) {
+  const seed = answersSeed(answers);
   return eras
-    .map((id) => ({ id, score: Math.round(clamp(78 + bias[id] + seededInt(seed, id, -6, 8), 71, 98)) }))
+    .map((id) => ({ id, score: seededInt(seed, `style-${id}`, 72, 98) }))
     .sort((a, b) => b.score - a.score);
 }
+
+/** 화면·출력물이 같은 회차의 연출값을 사용한다. AI는 콘셉트와 사진을, 예시는 필터를 제공한다. */
+function fashionView(answers: DemoAnswers, generated: unknown) {
+  const capture = getCapture(answers, 'portrait');
+  const eras = sortedEras(answers);
+  const ai = isAiFashion(generated) ? generated : null;
+  // 고른 시대와 AI 순위가 정확히 맞을 때만 AI 결과를 쓴다
+  const useAi = !!ai && ai.ranking.length === eras.length && eras.every((id) => ai.ranking.some((r) => r.id === id));
+  const seed = answersSeed(answers);
+  const ranking: { id: EraId; score: number; reason?: string }[] = useAi
+    ? [...ai!.ranking].sort((a, b) => b.score - a.score).map((item, index) => ({ ...item, score: seededInt(seed, 'poster-top', 87, 98) - index * 5 }))
+    : synchro(answers, eras);
+  const best = ranking[0]!;
+  return {
+    capture,
+    eras,
+    ranking,
+    best,
+    /** 1위 시대를 AI가 그린 사진 */
+    aiImage: useAi ? ai!.image : undefined,
+    seed,
+  };
+}
+
+/** AI 사진은 보정 없이 그대로 */
+const AI_LOOK: PhotoLook = {};
 
 function sortedEras(answers: DemoAnswers): EraId[] {
   const picked = getChoices(answers, 'eras').filter((id): id is EraId => id in ERAS);
@@ -371,23 +428,41 @@ function EraOverlay({ id, seed }: { id: EraId; seed: number }) {
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
-  const capture = getCapture(answers, 'portrait');
-  const eras = sortedEras(answers);
-  const ranking = synchro(capture, eras);
-  const best = ranking[0]!;
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
+  const { capture, eras, ranking, best, aiImage, seed } = fashionView(answers, generated);
   const scoreOf = (id: EraId) => ranking.find((r) => r.id === id)?.score ?? 80;
-  const seed = capture?.seed ?? 3;
+  const reasonOf = (id: EraId) => ranking.find((r) => r.id === id)?.reason;
 
   return (
     <ResultShell
+      coreCount={aiImage ? 2 : 1}
       eyebrow="AI 패션 타임머신"
       title={`${ERAS[best.id].year} ${ERAS[best.id].label} 룩이 인생 룩!`}
-      description={`고른 ${eras.length}개 시대의 패션·헤어·메이크업을 입혀 시간 여행 타임라인 포스터로 출력했어요.`}
+      description={
+        aiImage
+          ? eras.length === 1
+            ? `선택한 ${ERAS[best.id].year} 스타일로 AI 사진과 타임라인 포스터를 만들었어요.`
+            : `선택한 ${eras.length}개 시대 중 ${ERAS[best.id].year} 스타일을 AI 사진으로 만들고, 나머지 시대는 필터 시안으로 함께 담았어요.`
+          : `선택한 ${eras.length}개 시대의 필터와 장식을 더한 예시 타임라인 포스터예요.`
+      }
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다른 시대로 떠나기"
     >
+      {aiImage && (
+        <motion.figure initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="w-64 sm:w-72">
+          <ProcessedPhoto
+            src={aiImage}
+            look={AI_LOOK}
+            className="aspect-[3/4] rounded-sm shadow-[0_24px_60px_rgba(0,0,0,0.55)] ring-4 ring-[#f4efe6]"
+            alt={`AI가 ${ERAS[best.id].year} 스타일을 입힌 사진`}
+            delayMs={300}
+          />
+          <figcaption className="mt-2 text-xs text-slate-400">
+            {ERAS[best.id].emoji} AI가 그린 {ERAS[best.id].year}의 나 · 스타일 연출 지수 {best.score}%
+          </figcaption>
+        </motion.figure>
+      )}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -418,8 +493,16 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
                   style={{ background: isBest ? pillarColor : '#57534e' }}
                   aria-hidden="true"
                 />
-                <div className="w-28 shrink-0 sm:w-32">
-                  {capture ? (
+                <div className="demo-dark-surface w-28 shrink-0 sm:w-32">
+                  {capture && isBest && aiImage ? (
+                    <ProcessedPhoto
+                      src={aiImage}
+                      look={AI_LOOK}
+                      className="aspect-[3/4] rounded-sm shadow-md ring-1 ring-stone-900/20"
+                      alt={`AI가 ${era.year} 스타일을 입힌 사진`}
+                      delayMs={700 + i * 450}
+                    />
+                  ) : capture ? (
                     <ProcessedPhoto
                       src={capture.image}
                       look={era.look}
@@ -436,15 +519,18 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-2">
                     <p className="font-display text-2xl font-extrabold leading-none">{era.year}</p>
-                    {isBest && (
-                      <span className="rounded-full px-2 py-0.5 text-[9px] font-bold text-white" style={{ backgroundColor: pillarColor }}>
+                    {isBest && eras.length > 1 && (
+                      <span className="demo-accent-surface rounded-full px-2 py-0.5 text-[9px] font-bold text-white" style={{ backgroundColor: pillarColor }}>
                         BEST
                       </span>
                     )}
                   </div>
                   <p className="mt-1 text-xs font-semibold text-stone-600">
-                    {era.emoji} {era.label} · 싱크로율 {scoreOf(id)}%
+                    {era.emoji} {era.label} · 스타일 연출 지수 {scoreOf(id)}%
                   </p>
+                  {reasonOf(id) && (
+                    <p className="mt-1.5 text-xs font-medium leading-relaxed text-stone-900 [word-break:keep-all]">“{reasonOf(id)}”</p>
+                  )}
                   <p className="mt-1.5 text-xs leading-relaxed text-stone-700 [word-break:keep-all]">{era.blurb}</p>
                   <dl className="mt-2 space-y-0.5 text-[11px] leading-snug text-stone-600">
                     <div className="flex gap-1.5">
@@ -468,11 +554,12 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
 
         <div className="mt-5 flex items-center justify-between border-t border-stone-300 pt-2 font-mono text-[9px] text-stone-500">
           <span>TIME TRAVEL POSTER</span>
-          <span>No.{String(seededInt(seed, 'poster', 1, 9999)).padStart(4, '0')}</span>
+          <span>No.{String(seededInt(seed, 'poster', 100000, 999999))}</span>
         </div>
       </motion.div>
 
-      <TraitChips title="자동 적용된 시대 스타일" items={eras.flatMap((id) => [ERAS[id].hair, ERAS[id].makeup.split(' + ')[0]!])} />
+      <p className="text-xs text-slate-400">스타일 연출 지수는 이번 포스터를 위한 창작 예시값이에요. 외모의 적합도나 실제 평가 점수가 아니에요.</p>
+      <TraitChips title="시대 스타일 아이디어" items={eras.flatMap((id) => [ERAS[id].hair, ERAS[id].makeup.split(' + ')[0]!])} />
     </ResultShell>
   );
 }
@@ -487,23 +574,11 @@ export default defineDemo({
     analyzeEmoji: '⏳',
     analyzeDurationMs: 3800,
     analyzeImageStepId: 'portrait',
-    analyzeMessages: ['타임머신 좌표 설정 중', '시대별 의상 고증 불러오는 중', '헤어·메이크업 입히는 중', '타임라인 포스터 인쇄 중'],
+    // AI 분석 + 사진 변환은 약 20초 — 마지막 문구가 남은 시간을 채운다
+    analyzeMessages: ['타임머신 좌표 설정 중', '선택한 시대의 무드 정리 중', '시대별 패션 모티브 준비 중', '헤어·메이크업 입히는 중', '그 시대의 카메라로 촬영 중', '타임라인 포스터 인쇄 중', '타임머신 착륙 중… 거의 다 됐어요'],
   },
   steps: [
-    choiceStep({
-      id: 'eras',
-      title: '어느 시대로 떠나볼까요?',
-      subtitle: '최대 3개 시대를 고르면 한 장의 타임라인 포스터로 만들어요',
-      columns: 3,
-      multi: { min: 1, max: 3 },
-      options: ERA_IDS.map((id) => ({
-        id,
-        emoji: ERAS[id].emoji,
-        label: `${ERAS[id].year} ${ERAS[id].label}`,
-        desc: ERAS[id].desc,
-        swatch: ERAS[id].swatch,
-      })),
-    }),
+    eraChoiceStep,
     cameraStep({
       id: 'portrait',
       title: '타임머신 포토 스팟에 섰어요',
@@ -511,35 +586,45 @@ export default defineDemo({
       mode: 'portrait',
       subject: '모습',
       countdown: true,
-      scanLabels: ['인물 영역 분리', '헤어 라인·얼굴형 측정', '의상 실루엣 추출', '시대별 스타일 매핑'],
+      scanLabels: ['촬영 컷 준비', '시대별 헤어 참고하기', '의상 모티브 준비', '타임라인 구성하기'],
       readouts: (c) => [
-        { label: '얼굴형', value: ['계란형', '하트형', '둥근형', '각진형'][c.seed % 4]! },
-        { label: '헤어 볼륨', value: c.stats.contrast > 45 ? '풍성' : '차분' },
-        { label: '컬러 톤', value: c.stats.warmth > 55 ? '웜' : c.stats.warmth < 45 ? '쿨' : '뉴트럴' },
-        { label: '시간 여행', value: '준비 완료' },
+        { label: '사진 준비', value: c.source === 'sample' ? '샘플 컷' : '촬영 컷' },
+        { label: '사진 밝기', value: c.stats.brightness > 55 ? '밝음' : '차분함' },
+        { label: '비교 방식', value: '같은 구도 · 다른 시대' },
+        { label: '시간 여행', value: '연출 준비 완료' },
       ],
     }),
   ],
-  computeResult: (answers) => synchro(getCapture(answers, 'portrait'), sortedEras(answers))[0]!.id,
+  computeResult: (answers) => synchro(answers, sortedEras(answers))[0]!.id,
   Result,
-  print: (answers) => {
+  generate: (answers) => {
     const capture = getCapture(answers, 'portrait');
-    const eras = sortedEras(answers);
-    const best = synchro(capture, eras)[0]!;
-    const seed = capture?.seed ?? 3;
+    if (!capture) return Promise.resolve(null);
+    return requestDemoAi<AiFashion>(
+      'fashion-timemachine',
+      { experienceProfile: answers.experienceProfile, photo: capture.image, eras: sortedEras(answers) },
+      { timeoutMs: 60_000, validate: isAiFashion }
+    );
+  },
+  print: (answers, _resultKey, generated) => {
+    const { capture, eras, best, aiImage, seed } = fashionView(answers, generated);
     return {
       kind: 'photo',
-      // 고른 시대마다 한 칸 (포스터와 같은 연대순)
+      // 고른 시대마다 한 칸 (포스터와 같은 연대순) — AI가 그린 1위 시대는 그 사진 그대로
       photos: capture
-        ? eras.map((id) => ({
-            src: capture.image,
-            look: ERAS[id].look,
-            label: `${ERAS[id].year} ${ERAS[id].label}`,
-            overlay: <EraPrintOverlay id={id} seed={seed} />,
-          }))
+        ? eras.map((id) =>
+            id === best.id && aiImage
+              ? { src: aiImage, label: `${ERAS[id].year} ${ERAS[id].label}` }
+              : {
+                  src: capture.image,
+                  look: ERAS[id].look,
+                  label: `${ERAS[id].year} ${ERAS[id].label}`,
+                  overlay: <EraPrintOverlay id={id} seed={seed} />,
+                }
+          )
         : [],
       title: `인생 룩은 ${ERAS[best.id].year} ${ERAS[best.id].label}`,
-      caption: `싱크로율 ${best.score}% · ${timelineOf(eras)}`,
+      caption: `창작 예시 연출 지수 ${best.score}% · ${timelineOf(eras)} · No.${seededInt(seed, 'poster', 100000, 999999)}`,
       badge: `BEST ${ERAS[best.id].year}`,
       paper: 'cream',
     };

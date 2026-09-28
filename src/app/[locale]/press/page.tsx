@@ -4,6 +4,7 @@ import { SectionHeader } from '@/components/ui';
 import { ScrollReveal } from '@/components/animations';
 import { PressGrid } from '@/components/press/PressGrid';
 import { PRESS_ARTICLES } from '@/lib/press-data';
+import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -14,11 +15,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'press' });
 
   return {
+    alternates: localeAlternates('/press', locale),
     title: t('title'),
     description: t('subtitle'),
     openGraph: {
       title: t('title'),
       description: t('subtitle'),
+      images: [DEFAULT_OG_IMAGE],
     },
   };
 }

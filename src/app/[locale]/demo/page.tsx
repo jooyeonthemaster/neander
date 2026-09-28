@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { ScrollReveal } from '@/components/animations';
+import { localeAlternates } from '@/lib/seo';
 
 export async function generateMetadata({
   params,
@@ -11,6 +12,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'demo' });
 
   return {
+    alternates: localeAlternates('/demo', locale),
     title: t('metaTitle'),
     description: t('metaDescription'),
   };

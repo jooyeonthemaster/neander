@@ -3,7 +3,7 @@
 import { motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { QUOTE_HREF } from '@/lib/constants';
+import { getServiceContactHref } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type {
@@ -13,34 +13,18 @@ import type {
   DemoStepProps,
   DemoResultProps,
 } from '@/types/demo';
-import type { PrintSpec } from '../kit';
+import { requestDemoAi, type PrintSpec } from '../kit';
+import { FORTUNE_ACTIONS, FORTUNE_CATEGORIES, FORTUNE_DIRECTIONS, FORTUNE_ELEMENTS, type AiFortune } from '@/data/demo-ai/fortune';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-const MONTHS = [
-  { month: 1, emoji: '\u2651' }, { month: 2, emoji: '\u2652' },
-  { month: 3, emoji: '\u2653' }, { month: 4, emoji: '\u2648' },
-  { month: 5, emoji: '\u2649' }, { month: 6, emoji: '\u264A' },
-  { month: 7, emoji: '\u264B' }, { month: 8, emoji: '\u264C' },
-  { month: 9, emoji: '\u264D' }, { month: 10, emoji: '\u264E' },
-  { month: 11, emoji: '\u264F' }, { month: 12, emoji: '\u2650' },
-] as const;
+const MONTHS = Array.from({ length: 12 }, (_, index) => {
+  const month = index + 1;
+  return { month, emoji: month >= 3 && month <= 5 ? '🌱' : month >= 6 && month <= 8 ? '☀️' : month >= 9 && month <= 11 ? '🍂' : '❄️' };
+});
 
-const ELEMENTS = [
-  { id: 'fire', label: '\uBD88 \uD83D\uDD25', gradient: 'from-red-500 to-orange-600' },
-  { id: 'water', label: '\uBB3C \uD83D\uDCA7', gradient: 'from-blue-400 to-cyan-600' },
-  { id: 'earth', label: '흙 🌍', gradient: 'from-amber-600 to-yellow-800' },
-  { id: 'air', label: '\uBC14\uB78C \uD83C\uDF2C\uFE0F', gradient: 'from-sky-300 to-blue-400' },
-  { id: 'metal', label: '\uAE08\uC18D \u2699\uFE0F', gradient: 'from-slate-400 to-zinc-600' },
-] as const;
-
-const CATEGORIES = [
-  { id: 'love', label: '\uC5F0\uC560 \uD83D\uDC95' },
-  { id: 'career', label: '\uC9C1\uC5C5 \uD83D\uDCBC' },
-  { id: 'health', label: '\uAC74\uAC15 \uD83D\uDCAA' },
-  { id: 'wealth', label: '\uC7AC\uBB3C \uD83D\uDCB0' },
-  { id: 'creativity', label: '\uCC3D\uC758 \u2728' },
-] as const;
+const ELEMENTS = FORTUNE_ELEMENTS;
+const CATEGORIES = FORTUNE_CATEGORIES;
 
 type ResultKey = 'phoenix-fire' | 'ocean-wisdom' | 'earth-guardian' | 'wind-dancer' | 'golden-path' | 'rising-star';
 type CategoryId = 'love' | 'career' | 'health' | 'wealth' | 'creativity';
@@ -93,7 +77,7 @@ const config: DemoConfig = {
     {
       id: 'month',
       titleKey: '\uD0DC\uC5B4\uB09C \uB2EC\uC744 \uC54C\uB824\uC8FC\uC138\uC694',
-      subtitleKey: '\uBCC4\uC790\uB9AC\uC758 \uAE30\uC6B4\uC744 \uC77D\uC5B4\uBCFC\uAC8C\uC694',
+      subtitleKey: '태어난 계절의 분위기를 이야기 소재로 사용해요',
       canProceed: (a) => typeof a['month'] === 'number',
     },
     {
@@ -116,15 +100,17 @@ const config: DemoConfig = {
 function StepMonth({ answers, onUpdate }: DemoStepProps) {
   const selected = answers['month'] as number | undefined;
   return (
-    <div className="grid grid-cols-4 gap-3">
+    <div className="demo-choice-grid grid grid-cols-4 gap-3">
       {MONTHS.map(({ month, emoji }) => (
         <motion.button
           key={month}
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.93 }}
           onClick={() => onUpdate('month', month)}
+          type="button"
+          aria-pressed={selected === month}
           className={cn(
-            'flex flex-col items-center justify-center gap-1 rounded-xl border p-3 transition-colors',
+            'demo-choice demo-custom-choice flex flex-col items-center justify-center gap-1 rounded-xl border p-3 transition-colors',
             selected === month
               ? 'border-purple-500 bg-purple-500/10'
               : 'border-slate-700 bg-slate-900/50 hover:border-slate-600',
@@ -144,15 +130,17 @@ function StepElement({ answers, onUpdate }: DemoStepProps) {
   const selected = answers['element'] as string | undefined;
   return (
     // 모바일에서 가로 스크롤로 숨겨지지 않도록 줄바꿈해 가운데 정렬한다
-    <div className="flex flex-wrap justify-center gap-3">
+    <div className="demo-choice-grid demo-fortune-cards flex flex-wrap justify-center gap-3">
       {ELEMENTS.map((el) => (
         <motion.button
           key={el.id}
           whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.94 }}
           onClick={() => onUpdate('element', el.id)}
+          type="button"
+          aria-pressed={selected === el.id}
           className={cn(
-            'relative flex h-28 w-24 shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border transition-colors sm:w-28',
+            'demo-choice demo-custom-choice relative flex h-28 w-24 shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border transition-colors sm:w-28',
             selected === el.id
               ? 'border-purple-400 ring-2 ring-purple-500/40'
               : 'border-transparent',
@@ -183,16 +171,18 @@ function StepElement({ answers, onUpdate }: DemoStepProps) {
 function StepCategory({ answers, onUpdate }: DemoStepProps) {
   const selected = answers['category'] as string | undefined;
   return (
-    <div className="flex flex-wrap justify-center gap-3">
+    <div className="demo-choice-grid demo-fortune-cards flex flex-wrap justify-center gap-3">
       {CATEGORIES.map((cat) => (
         <motion.button
           key={cat.id}
           whileHover={{ rotateY: 12, scale: 1.05 }}
           whileTap={{ scale: 0.94 }}
           onClick={() => onUpdate('category', cat.id)}
+          type="button"
+          aria-pressed={selected === cat.id}
           style={{ perspective: 600 }}
           className={cn(
-            'flex h-32 w-22 shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border p-3 transition-colors sm:w-26',
+            'demo-choice demo-custom-choice flex h-32 w-22 shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border p-3 transition-colors sm:w-26',
             'bg-gradient-to-b from-indigo-900 to-purple-950',
             selected === cat.id
               ? 'border-purple-400 ring-2 ring-purple-500/50'
@@ -224,18 +214,46 @@ function plainLabel(label: string): string {
   return label.split(' ')[0] ?? label;
 }
 
-function readFortune(answers: DemoAnswers, resultKey: string) {
+function isAiFortune(v: unknown): v is AiFortune {
+  const o = v as AiFortune | null;
+  return !!o && typeof o.name === 'string' && Array.isArray(o.lines) && o.lines.every((l) => typeof l === 'string')
+    && typeof o.luckyNumber === 'number' && typeof o.luckyColor === 'string' && typeof o.advice === 'string'
+    && (FORTUNE_DIRECTIONS as readonly string[]).includes(o.direction);
+}
+
+/** 화면·출력물이 그리는 점괘 — AI 결과가 있으면 그것, 없으면 고정 결과 */
+function readFortune(answers: DemoAnswers, resultKey: string, generated?: unknown) {
   const data = RESULTS[resultKey as ResultKey] ?? RESULTS['rising-star'];
   const month = (answers['month'] as number) ?? 1;
   const category = (answers['category'] as CategoryId) ?? 'love';
-  return {
-    data,
+  const base = {
     month,
     categoryLabel: CATEGORIES.find((c) => c.id === category)?.label ?? '',
     element: ELEMENTS.find((e) => e.id === answers['element']),
+    luckyItem: FORTUNE_ACTIONS[category].item,
+    todayLine: FORTUNE_ACTIONS[category].line,
+  };
+  if (isAiFortune(generated)) {
+    return {
+      ...base,
+      name: generated.name,
+      message: generated.lines.join('\n'),
+      luckyColor: generated.luckyColor,
+      luckyNumber: generated.luckyNumber,
+      advice: generated.advice,
+      direction: generated.direction as string,
+      ai: true,
+    };
+  }
+  return {
+    ...base,
+    name: data.name,
+    message: data.message,
+    luckyColor: data.luckyColor,
     luckyNumber: (month * 7) % 99 + 1,
     advice: data.advice[category] ?? data.advice.love,
     direction: SEASON_DIRECTIONS[seasonOf(month)] ?? data.direction,
+    ai: false,
   };
 }
 
@@ -259,22 +277,23 @@ function computeResult(answers: DemoAnswers): string {
 
 /* ── Result Component ──────────────────────────────────── */
 
-function ResultComponent({ resultKey, answers, onRestart, pillarColor }: DemoResultProps) {
+function ResultComponent({ resultKey, answers, onRestart, pillarColor, generated }: DemoResultProps) {
   const tCommon = useTranslations('demos.common');
-  const { data, categoryLabel, luckyNumber, advice, direction } = readFortune(answers, resultKey);
+  const f = readFortune(answers, resultKey, generated);
+  const { categoryLabel, luckyNumber, advice, direction } = f;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="relative flex flex-col items-center gap-6 overflow-hidden text-center"
+      className="demo-custom-result relative flex flex-col items-center gap-6 overflow-hidden text-center"
     >
       {/* Decorative stars */}
       {[...Array(5)].map((_, i) => (
         <motion.span
           key={i}
-          className="pointer-events-none absolute text-purple-400/30"
+          className="demo-result-sparkle pointer-events-none absolute text-purple-400/30"
           style={{
             top: `${10 + i * 18}%`,
             left: `${5 + i * 20}%`,
@@ -288,20 +307,20 @@ function ResultComponent({ resultKey, answers, onRestart, pillarColor }: DemoRes
       ))}
 
       {/* Archetype label */}
-      <p className="text-sm font-medium tracking-widest text-purple-400/80 uppercase">
+      <p className="demo-custom-result-eyebrow text-sm font-medium tracking-widest text-purple-400/80 uppercase">
         당신의 운세 아키타입
       </p>
 
       {/* Archetype name */}
       <h2
-        className="bg-gradient-to-r from-purple-400 via-fuchsia-400 to-purple-500 bg-clip-text text-3xl font-extrabold text-transparent sm:text-4xl"
+        className="demo-custom-result-title bg-gradient-to-r from-purple-400 via-fuchsia-400 to-purple-500 bg-clip-text text-3xl font-extrabold text-transparent sm:text-4xl"
       >
-        {data.name}
+        {f.name}
       </h2>
 
       {/* Fortune message */}
-      <div className="max-w-sm rounded-2xl border border-purple-800/40 bg-purple-950/40 px-6 py-4">
-        {data.message.split('\n').map((line, i) => (
+      <div className="demo-result-note max-w-sm rounded-2xl border border-purple-800/40 bg-purple-950/40 px-6 py-4">
+        {f.message.split('\n').map((line, i) => (
           <p key={i} className="text-sm leading-relaxed text-purple-200/90">
             {line}
           </p>
@@ -312,41 +331,49 @@ function ResultComponent({ resultKey, answers, onRestart, pillarColor }: DemoRes
       <div className="grid w-full max-w-xs grid-cols-3 gap-3">
         {[
           { label: '\uD589\uC6B4\uC758 \uC22B\uC790', value: String(luckyNumber) },
-          { label: '\uD589\uC6B4\uC758 \uC0C9', value: data.luckyColor },
+          { label: '\uD589\uC6B4\uC758 \uC0C9', value: f.luckyColor },
           { label: '\uD589\uC6B4\uC758 \uBC29\uD5A5', value: direction },
         ].map((item) => (
           <div
             key={item.label}
-            className="flex flex-col items-center gap-1 rounded-xl border border-purple-800/30 bg-slate-900/60 px-2 py-3"
+            className="demo-result-item flex flex-col items-center gap-1 rounded-xl border border-purple-800/30 bg-slate-900/60 px-2 py-3"
           >
             <span className="text-[10px] text-slate-400">{item.label}</span>
-            <span className="text-sm font-bold text-purple-300">{item.value}</span>
+            <span className="demo-result-item-value text-sm font-bold text-purple-300">{item.value}</span>
           </div>
         ))}
       </div>
 
       {/* Category advice */}
-      <div className="rounded-xl border border-purple-700/30 bg-indigo-950/30 px-5 py-3">
+      <div className="demo-result-note rounded-xl border border-purple-700/30 bg-indigo-950/30 px-5 py-3">
         <p className="text-xs text-slate-400 mb-1">
           {categoryLabel} 운세
         </p>
         <p className="text-sm font-semibold text-purple-200">{advice}</p>
       </div>
 
+      <section className="demo-result-note w-full max-w-md rounded-xl border p-4 text-left" aria-label="오늘의 작은 행운">
+        <h3 className="font-bold">오늘의 작은 행운</h3>
+        <p className="mt-2 text-sm">행운 아이템 · {f.luckyItem}</p>
+        <p className="mt-2 text-sm leading-relaxed">오늘의 한마디 · {f.todayLine}</p>
+      </section>
+
+      <p className="text-xs text-slate-500">계절과 원소의 상징으로 만든 오락용 이야기입니다. 사주·오행 계산이나 실제 미래 예측이 아닙니다.</p>
+
       {/* Actions */}
-      <div className="flex gap-3 pt-2">
+      <div className="demo-legacy-result-cta flex gap-3 pt-2">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onRestart}
-          className="rounded-xl border border-slate-700 px-6 py-3 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500"
+          className="demo-secondary-action rounded-xl border border-slate-700 px-6 py-3 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500"
         >
           다시 점치기
         </motion.button>
         <Link
-          href={QUOTE_HREF}
-          className="rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
-          style={{ backgroundColor: pillarColor }}
+          href={getServiceContactHref('ai-fortune-robot')}
+          className="demo-primary-action demo-accent-surface rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
+          style={{ backgroundColor: `var(--venue-accent, ${pillarColor})` }}
         >
           {tCommon('ctaButton')}
         </Link>
@@ -359,29 +386,42 @@ function ResultComponent({ resultKey, answers, onRestart, pillarColor }: DemoRes
 
 /* ── Print — 운세 뽑기 종이 ───────────────────────────────── */
 
-function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
-  const { data, month, categoryLabel, element, luckyNumber, advice, direction } = readFortune(answers, resultKey);
+function getPrint(answers: DemoAnswers, resultKey: string, generated?: unknown): PrintSpec {
+  const f = readFortune(answers, resultKey, generated);
+  const { month, categoryLabel, element, luckyNumber, advice, direction } = f;
   return {
     kind: 'receipt',
     eyebrow: '로봇이 뽑아 준 오늘의 점괘',
-    title: data.name,
+    title: f.name,
     sections: [
-      { type: 'text', title: '점괘', text: data.message },
+      { type: 'text', title: '점괘', text: f.message },
       { type: 'big', title: '행운의 숫자', text: String(luckyNumber) },
       {
         type: 'rows',
         title: '행운 아이템',
         rows: [
-          { label: '행운의 색', value: data.luckyColor },
+          { label: '행운의 색', value: f.luckyColor },
           { label: '행운의 방향', value: direction },
           { label: '태어난 달', value: `${month}월` },
           { label: '끌린 원소', value: element ? plainLabel(element.label) : '-' },
+          { label: '행운 아이템', value: f.luckyItem },
         ],
       },
       { type: 'text', title: `${plainLabel(categoryLabel)} 운세`, text: advice },
+      { type: 'text', title: '오늘의 한마디', text: f.todayLine },
     ],
-    footer: '좋은 점괘는 간직하고, 나쁜 점괘는 잊어요',
+    footer: '상징을 활용한 오락용 창작이며 실제 미래를 예측하지 않습니다.',
   };
+}
+
+/* ── AI 생성 ──────────────────────────────────────────── */
+
+function generate(answers: DemoAnswers): Promise<AiFortune | null> {
+  return requestDemoAi<AiFortune>(
+    config.id,
+    { experienceProfile: answers.experienceProfile, month: answers['month'], element: answers['element'], category: answers['category'] },
+    { validate: isAiFortune }
+  );
 }
 
 const FortuneRobotDemo: DemoModule = {
@@ -390,6 +430,7 @@ const FortuneRobotDemo: DemoModule = {
   ResultComponent,
   computeResult,
   getPrint,
+  generate,
 };
 
 export default FortuneRobotDemo;

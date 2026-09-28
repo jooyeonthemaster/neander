@@ -11,18 +11,24 @@ import {
   defineDemo,
   getCapture,
   getChoice,
+  getFields,
   hashString,
+  requestDemoAi,
   seededInt,
   seededRandom,
   type CaptureStats,
 } from '../kit';
+import { COORD_COLORS, COORD_SLOTS, COORD_TONES } from '@/data/demo-ai/coord';
+import type { AiCoord, CoordFit, CoordStyle, CoordTone, CoordTpo } from '@/data/demo-ai/coord';
+import { isNotObserved } from '@/data/demo-ai/photo-reading';
+import { withParticle } from '@/lib/korean';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-type Tone = 'warm' | 'cool' | 'neutral';
-type TpoId = 'work' | 'date' | 'travel' | 'party';
-type StyleId = 'minimal' | 'casual' | 'street' | 'classic' | 'feminine' | 'sporty';
-type FitId = 'slim' | 'regular' | 'over';
+type Tone = CoordTone;
+type TpoId = CoordTpo;
+type StyleId = CoordStyle;
+type FitId = CoordFit;
 type Item = readonly [name: string, emoji: string];
 
 const TONES: Record<Tone, { name: string; palette: string; tip: string; colors: { n: string; h: string }[] }> = {
@@ -146,6 +152,7 @@ interface Piece {
 
 function styleOutfits(answers: DemoAnswers) {
   const capture = getCapture(answers, 'tone');
+  const profile = getFields<string>(answers, 'experienceProfile');
   const tone = toneOf(capture?.stats);
   const tpo = pick<TpoId>(answers, 'tpo', TPOS, 'date');
   const style = pick<StyleId>(answers, 'style', STYLES, 'minimal');
@@ -159,7 +166,11 @@ function styleOutfits(answers: DemoAnswers) {
   const outfits = [0, 1, 2].map((k) => {
     const top = TOPS[style][(t0 + k) % 4]!;
     const bottom = BOTTOMS[style][(b0 + k * 3) % 4]!;
-    const shoes = SHOES[style][(sh0 + k) % 3]!;
+    const shoes: readonly [string, string] = profile.movement === 'walking'
+      ? ['쿠션감 있는 낮은 스니커즈', '👟']
+      : profile.weather === 'rain'
+        ? ['접지력 있는 생활 방수화', '👟']
+        : SHOES[style][(sh0 + k) % 3]!;
     const acc = ACCESSORIES[tpo][(a0 + k) % 4]!;
     const ci = c0 + k * 2;
     const pieces: Piece[] = [
@@ -168,12 +179,50 @@ function styleOutfits(answers: DemoAnswers) {
       { slot: '슈즈', name: shoes[0], emoji: shoes[1], color: colors[(ci + 4) % 6]! },
       { slot: '액세서리', name: acc[0], emoji: acc[1], color: colors[(ci + 1) % 6]! },
     ];
-    const tip = [f.tip, TONES[tone].tip, TPOS[tpo].tip][k]!;
+    const weatherTip = profile.weather === 'hot' ? '더운 날은 통기성 있는 소재와 얇은 냉방용 겉옷을 준비해요.'
+      : profile.weather === 'cold' ? '보온 이너와 겉옷을 겹치고 목과 발을 따뜻하게 해요.'
+        : profile.weather === 'rain' ? '밑단이 젖지 않는 길이와 접지력 있는 신발을 먼저 살펴요.'
+          : '벗기 쉬운 얇은 레이어로 실내외 온도 차이에 대비해요.';
+    const movementTip = profile.movement === 'walking' ? '오래 걷는 날은 낮은 신발과 가벼운 가방을 우선해요.'
+      : profile.movement === 'seated' ? '앉았을 때 허리가 조이지 않는지 확인해요.' : f.tip;
+    const tip = [weatherTip, movementTip, TPOS[tpo].tip][k]!;
     const match = 96 - k * 3 + seededInt(seed, `match${k}`, -1, 1);
     return { name: TPOS[tpo].looks[k]!, pieces, tip, match };
   });
 
   return { tone, tpo, style, fit, seed, outfits };
+}
+
+/* ── AI 결과 ──────────────────────────────────────────── */
+
+const SLOT_LABELS: Record<(typeof COORD_SLOTS)[number], string> = { top: '상의', bottom: '하의', shoes: '슈즈', accessory: '액세서리' };
+
+function isAiCoord(v: unknown): v is AiCoord {
+  const o = v as AiCoord | null;
+  return (
+    !!o && o.observed === true && (COORD_TONES as readonly string[]).includes(o.tone) && typeof o.observation === 'string'
+    && Array.isArray(o.outfits) && o.outfits.length === 3
+    && o.outfits.every((look) => typeof look?.name === 'string' && COORD_SLOTS.every((slot) => look.pieces?.[slot]?.color in COORD_COLORS))
+  );
+}
+
+/** 화면·출력물이 그리는 코디 — AI 결과가 있으면 그것, 없으면(실패·사람 미인식) 사진 톤 + 답변 기반 조합 */
+function coordView(answers: DemoAnswers, generated: unknown) {
+  const base = styleOutfits(answers);
+  if (!isAiCoord(generated)) {
+    const retake = isNotObserved(generated) && getCapture(answers, 'tone')?.source !== 'sample';
+    return { ...base, observation: null as string | null, ai: false, retake };
+  }
+  const outfits = generated.outfits.map((look) => ({
+    name: look.name,
+    match: look.match,
+    tip: look.tip,
+    pieces: COORD_SLOTS.map((slot): Piece => {
+      const p = look.pieces[slot];
+      return { slot: SLOT_LABELS[slot], name: p.name, emoji: p.emoji, color: { n: p.color, h: COORD_COLORS[p.color] } };
+    }),
+  }));
+  return { ...base, tone: generated.tone, outfits, observation: generated.observation, ai: true, retake: false };
 }
 
 /* ── Result parts ──────────────────────────────────────── */
@@ -211,22 +260,24 @@ function DecorativeQR({ seed, className }: { seed: number; className?: string })
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
   const capture = getCapture(answers, 'tone');
-  const { tone, tpo, style, fit, seed, outfits } = styleOutfits(answers);
+  const view = coordView(answers, generated);
+  const { tone, tpo, style, fit, seed, outfits } = view;
   const toneData = TONES[tone];
   const ring = `conic-gradient(${toneData.colors.map((c, i) => `${c.h} ${(i * 100) / 6}% ${((i + 1) * 100) / 6}%`).join(', ')})`;
 
   return (
     <ResultShell
+      coreCount={2}
       eyebrow="AI 스타일리스트의 코디 추천"
       title={`${TPOS[tpo].label} ${STYLES[style].label} 코디 3벌`}
-      description={`${toneData.palette}에서 ${FITS[fit].label}으로 맞춘 조합이에요. 마음에 드는 룩은 QR로 바로 쇼핑할 수 있어요.`}
+      description={`${toneData.palette}에서 ${withParticle(FITS[fit].label, '으로/로')} 맞춘 조합이에요. 현장에서는 QR로 바로 쇼핑할 수 있어요.`}
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다른 TPO로 추천받기"
     >
-      {/* 퍼스널 톤 드레이프 */}
+      {/* 참고 색감 드레이프 */}
       <Panel className="flex items-center gap-4">
         <div className="relative h-24 w-24 shrink-0 rounded-full p-1" style={{ background: ring }}>
           {capture ? (
@@ -235,14 +286,14 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
               look={{ adjust: { brightness: 1.04, saturation: 1.05 } }}
               className="h-full w-full rounded-full border-2 border-slate-900"
               imgClassName="object-top"
-              alt="퍼스널 톤 분석 사진"
+              alt="참고 색감 분석 사진"
             />
           ) : (
             <div className="h-full w-full rounded-full bg-slate-800" />
           )}
         </div>
         <div className="min-w-0">
-          <p className="text-[11px] font-medium text-slate-500">퍼스널 톤</p>
+          <p className="text-[11px] font-medium text-slate-500">참고 색감</p>
           <p className="text-lg font-bold text-white">{toneData.name}</p>
           <p className="text-xs text-slate-400">{toneData.palette}</p>
           <div className="mt-2 flex flex-wrap gap-1">
@@ -250,6 +301,9 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
               <span key={c.n} className="h-4 w-4 rounded-full border border-white/20" style={{ background: c.h }} title={c.n} />
             ))}
           </div>
+          {view.observation && (
+            <p className="mt-2 text-xs leading-relaxed text-slate-400 [word-break:keep-all]">👀 {view.observation}</p>
+          )}
         </div>
       </Panel>
 
@@ -257,7 +311,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
       <div className="grid w-full max-w-md gap-4">
         {outfits.map((look, k) => (
           <motion.div
-            key={look.name}
+            key={`${k}-${look.name}`}
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 + k * 0.15 }}
@@ -270,7 +324,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
                 </p>
                 <p className="text-base font-bold text-white">{look.name}</p>
               </div>
-              <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs font-semibold text-teal-300">매칭 {look.match}%</span>
+              <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs font-semibold text-teal-300">연출 지수 {look.match}</span>
             </div>
             <div className="mt-3 grid grid-cols-4 gap-2">
               {look.pieces.map((p) => (
@@ -301,20 +355,27 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
       </div>
 
       {/* 구매 QR */}
-      <Panel title="코디 카드 · 구매 QR">
+      <Panel title="코디 카드 · 현장 출력 예시">
         <div className="flex items-center gap-4">
           <div className="rounded-xl bg-white p-2">
             <DecorativeQR seed={seed} className="h-24 w-24" />
           </div>
           <div className="min-w-0 text-sm">
-            <p className="font-semibold text-white">추천 아이템 12개 한 번에 담기</p>
+            <p className="font-semibold text-white">세 가지 코디를 한 장에 기록해요</p>
             <p className="mt-1 text-xs leading-relaxed text-slate-400 [word-break:keep-all]">
-              현장에서는 코디 카드와 함께 출력돼 스캔하면 브랜드 상품 페이지로 바로 이어져요.
+              이 QR은 출력물 배치를 보여주는 장식이에요. 데모에서 상품 구매나 실시간 재고 조회로 연결되지는 않아요.
             </p>
             <p className="mt-1 text-[11px] text-slate-600">데모용 장식 이미지예요</p>
           </div>
         </div>
       </Panel>
+
+      {view.ai && <p className="text-xs text-slate-500">AI 스타일리스트가 방금 찍은 사진과 답변을 보고 짠 코디예요</p>}
+      {view.retake && (
+        <p className="max-w-md text-xs text-slate-500 [word-break:keep-all]">
+          사진에서 모습이 잘 보이지 않아 답변 기반 코디를 보여드렸어요. 상반신이 보이게 다시 찍으면 AI가 지금 옷차림까지 반영해요.
+        </p>
+      )}
     </ResultShell>
   );
 }
@@ -329,20 +390,20 @@ export default defineDemo({
     analyzeEmoji: '👗',
     analyzeDurationMs: 3400,
     analyzeImageStepId: 'tone',
-    analyzeMessages: ['퍼스널 팔레트 적용 중', '브랜드 상품 DB 3,200개 탐색 중', 'TPO별 코디 조합 생성 중', '코디 카드 출력 중'],
+    analyzeMessages: ['퍼스널 팔레트 적용 중', '날씨와 활동량 조건 확인 중', 'TPO별 코디 조합 생성 중', '코디 카드 출력 중'],
   },
   steps: [
     cameraStep({
       id: 'tone',
-      title: '퍼스널 톤부터 가볍게 볼게요',
-      subtitle: '얼굴 톤으로 어울리는 옷 색을 골라요 · 카메라가 없다면 샘플로 넘어가도 돼요',
+      title: '코디에 참고할 사진을 준비해요',
+      subtitle: '사진의 색감은 조명에 따라 달라져요 · 카메라 없이 샘플로 체험해도 좋아요',
       mode: 'portrait',
       subject: '모습',
-      scanLabels: ['인물 영역 분리', '피부 언더톤 측정', '명도·채도 대비 계산', '퍼스널 팔레트 매칭'],
+      scanLabels: ['코디 참고 사진 준비', '사진의 색감 확인', '사진의 밝기·대비 확인', '선호 스타일 브리프 준비'],
       readouts: (c) => {
         const tone = toneOf(c.stats);
         return [
-          { label: '퍼스널 톤', value: TONES[tone].name },
+          { label: '참고 색감', value: TONES[tone].name },
           { label: '추천 팔레트', value: tone === 'warm' ? '어스 & 캐멀' : tone === 'cool' ? '쿨 모노' : '소프트 뉴트럴' },
           { label: '명도', value: c.stats.brightness > 58 ? '라이트' : c.stats.brightness > 40 ? '미디엄' : '딥' },
           { label: '대비감', value: c.stats.contrast > 45 ? '하이 콘트라스트' : '로우 콘트라스트' },
@@ -374,9 +435,19 @@ export default defineDemo({
     return `${tpo}-${style}`;
   },
   Result,
-  print: (answers) => {
+  generate: (answers) => {
+    const photo = getCapture(answers, 'tone')?.image;
+    if (!photo) return Promise.resolve(null);
+    const { tpo, style, fit } = styleOutfits(answers);
+    return requestDemoAi<unknown>(
+      'coord-recommender',
+      { experienceProfile: answers.experienceProfile, photo, tpo, style, fit },
+      { validate: (d): d is unknown => isAiCoord(d) || isNotObserved(d) }
+    );
+  },
+  print: (answers, _resultKey, generated) => {
     const capture = getCapture(answers, 'tone');
-    const { tone, tpo, style, fit, outfits } = styleOutfits(answers);
+    const { tone, tpo, style, fit, outfits } = coordView(answers, generated);
     const toneData = TONES[tone];
     return {
       kind: 'receipt',
@@ -384,12 +455,12 @@ export default defineDemo({
       title: `${TPOS[tpo].label} ${STYLES[style].label} 코디 3벌`,
       photo: capture ? { src: capture.image } : undefined,
       sections: [
-        { type: 'big', title: '베스트 코디 매칭', text: `${outfits[0]!.match}%` },
+        { type: 'big', title: '베스트 코디 · 창작 참고 지수', text: `${outfits[0]!.match}%` },
         {
           type: 'rows',
           title: '스타일 프로필',
           rows: [
-            { label: '퍼스널 톤', value: toneData.name },
+            { label: '참고 색감', value: toneData.name },
             { label: '팔레트', value: toneData.palette },
             { label: 'TPO', value: TPOS[tpo].label },
             { label: '핏', value: FITS[fit].label },

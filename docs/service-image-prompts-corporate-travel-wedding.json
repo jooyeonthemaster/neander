@@ -1,0 +1,126 @@
+{
+  "generatedFor": "Corporate, tourism and wedding service concept thumbnails",
+  "method": "built-in image_gen",
+  "images": [
+    {
+      "slug": "ai-brand-avatar",
+      "prompt": "Use case: photorealistic-natural. Asset type: a 16:9 wide service thumbnail for a Korean experiential-event studio. Create ONE full-bleed premium editorial concept photograph, realistic materials, beautiful natural light, polished but credible pop-up event staging. Frame main subject within central 80% for thumbnail cropping. The image describes a possible service experience, not a real documented client event. No text overlays, no writing, no letters, no company logos, no brands, no watermark. No collage or grid of separate photos. Screens and printed outputs may contain image-only visual content. Human anatomy and hands must be plausible. A smiling Korean woman in her late twenties in smart cream business-casual clothing stands beside a large portrait monitor at a refined corporate creative workshop. On the monitor is a single charming polished 3D avatar bust unmistakably based on her face and bob haircut, wearing a cobalt jacket against a peach background. She holds a small thick printed portrait card of her avatar at chest height. Compose woman and large matching avatar face as equal focal points, three-quarter medium-wide view, pale blue and warm peach accents, brushed aluminium hardware, sunlit contemporary workspace.",
+      "output": "public/images/services/concepts/ai-brand-avatar.webp",
+      "method": "built-in image_gen",
+      "source": "/Users/idongju/.codex/generated_images/01a0cdbb-423a-71e0-a5bc-eb78e1c34151/exec-80bd8e93-2594-4a35-8f9c-584468e7aefd.png",
+      "width": 1200,
+      "height": 675,
+      "visualReview": "passed"
+    },
+    {
+      "slug": "ai-product-experience",
+      "prompt": "Use case: photorealistic-natural. Asset type: a 16:9 wide service thumbnail for a Korean experiential-event studio. Create ONE full-bleed premium editorial concept photograph, realistic materials, beautiful natural light, polished but credible pop-up event staging. Frame main subject within central 80% for thumbnail cropping. The image describes a possible service experience, not a real documented client event. No text overlays, no writing, no letters, no company logos, no brands, no watermark. No collage or grid of separate photos. Screens and printed outputs may contain image-only visual content. Human anatomy and hands must be plausible. A Korean man in his early thirties thoughtfully trying a premium unbranded cream wireless headphone at a sophisticated interactive product discovery pop-up. A tabletop screen beside him shows an image-only large close-up render of the same headphone surrounded by three simple material-color swatches, and two physical alternative color samples sit on low plinths. Another hand lightly touches the screen. Clean curved off-white display furniture, sage green background, tactile soft-touch plastic and brushed aluminium, soft directional exhibition lighting, clear story of personalized product recommendation, medium-wide side angle.",
+      "output": "public/images/services/concepts/ai-product-experience.webp",
+      "method": "built-in image_gen",
+      "source": "/Users/idongju/.codex/generated_images/01a0cdbb-423a-71e0-a5bc-eb78e1c34151/exec-cefc9a9d-29fa-4df9-8aa8-86bdc97a378b.png",
+      "width": 1200,
+      "height": 675,
+      "visualReview": "passed"
+    },
+    {
+      "slug": "ai-team-chemistry",
+      "prompt": "Use case: photorealistic-natural. Asset type: a 16:9 wide service thumbnail for a Korean experiential-event studio. Create ONE full-bleed premium editorial concept photograph, realistic materials, beautiful natural light, polished but credible pop-up event staging. Frame main subject within central 80% for thumbnail cropping. The image describes a possible service experience, not a real documented client event. No text overlays, no writing, no letters, no company logos, no brands, no watermark. No collage or grid of separate photos. Screens and printed outputs may contain image-only visual content. Human anatomy and hands must be plausible. Four Korean adult coworkers, two women and two men, in relaxed business-casual clothes gather around a circular oak workshop table, smiling and discussing colorful personalized role cards. A large flat tablet on the tabletop shows four small avatar circles linked into an elegant colorful connected team diagram, purely graphic, no writing. Candid team energy and shared participation, natural poses, card colors coral mustard teal and blue, broad windows in a bright creative meeting space, photographed from a slightly elevated diagonal angle with faces and tabletop visible.",
+      "output": "public/images/services/concepts/ai-team-chemistry.webp",
+      "method": "built-in image_gen",
+      "source": "/Users/idongju/.codex/generated_images/01a0cdbb-423a-71e0-a5bc-eb78e1c34151/exec-b696bda4-5ba5-4566-a5e3-614614551ec9.png",
+      "width": 1200,
+      "height": 675,
+      "visualReview": "passed"
+    },
+    {
+      "slug": "ai-vision-wall",
+      "prompt": "Use case: photorealistic-natural. Asset type: a 16:9 wide service thumbnail for a Korean experiential-event studio. Create ONE full-bleed premium editorial concept photograph, realistic materials, beautiful natural light, polished but credible pop-up event staging. Frame main subject within central 80% for thumbnail cropping. The image describes a possible service experience, not a real documented client event. No text overlays, no writing, no letters, no company logos, no brands, no watermark. No collage or grid of separate photos. Screens and printed outputs may contain image-only visual content. Human anatomy and hands must be plausible. An immersive corporate creativity event in a dark elegant gallery. Three Korean adult participants viewed at three-quarter angles stand near a huge seamless LED wall filled with a luminous dreamlike garden of sculptural blue and coral flowers, floating islands and tiny imagined green cities, representing their ideas transformed into collective media art. One participant in the foreground uses a small touch tablet on a slim pedestal. Strong screen glow, realistic LED texture, reflected light on polished concrete, striking monumental wide composition, deep navy with cyan apricot and coral light.",
+      "output": "public/images/services/concepts/ai-vision-wall.webp",
+      "method": "built-in image_gen",
+      "source": "/Users/idongju/.codex/generated_images/01a0cdbb-423a-71e0-a5bc-eb78e1c34151/exec-7c4be47b-77d7-4f44-8a33-2ae32eb147ba.png",
+      "width": 1200,
+      "height": 675,
+      "visualReview": "passed"
+    },
+    {
+      "slug": "ai-business-card",
+      "prompt": "Use case: photorealistic-natural. Asset type: a 16:9 wide service thumbnail for a Korean experiential-event studio. Create ONE full-bleed premium editorial concept photograph, realistic materials, beautiful natural light, polished but credible pop-up event staging. Frame main subject within central 80% for thumbnail cropping. The image describes a possible service experience, not a real documented client event. No text overlays, no writing, no letters, no company logos, no brands, no watermark. No collage or grid of separate photos. Screens and printed outputs may contain image-only visual content. Human anatomy and hands must be plausible. Close-up editorial product photograph of a Korean adult creative professional's hands selecting one bespoke business card from three beautifully designed thick textured cotton cards on a warm grey tabletop. Each card has a small stylized portrait illustration and a different abstract geometric identity pattern in cobalt, coral or forest green; absolutely no letters or writing. A compact card printer and a softly blurred tablet with a matching portrait design appear behind. Warm side sunlight, tactile paper edges, elegant networking pop-up detail, shallow depth of field, visually clear personalized instant card design.",
+      "output": "public/images/services/concepts/ai-business-card.webp",
+      "method": "built-in image_gen",
+      "source": "/Users/idongju/.codex/generated_images/01a0cdbb-423a-71e0-a5bc-eb78e1c34151/exec-6c09e054-5343-4450-bda6-321bff7ad965.png",
+      "width": 1200,
+      "height": 675,
+      "visualReview": "passed"
+    },
+    {
+      "slug": "ai-hanbok-booth",
+      "prompt": "Use case: photorealistic-natural. Asset type: a 16:9 wide service thumbnail for a Korean experiential-event studio. Create ONE full-bleed premium editorial concept photograph, realistic materials, beautiful natural light, polished but credible pop-up event staging. Frame main subject within central 80% for thumbnail cropping. The image describes a possible service experience, not a real documented client event. No text overlays, no writing, no letters, no company logos, no brands, no watermark. No collage or grid of separate photos. Screens and printed outputs may contain image-only visual content. Human anatomy and hands must be plausible. A delighted Korean woman in her late twenties wearing casual ivory linen stands in a refined Korean culture experience booth with warm timber lattice screens. She holds a large freshly printed portrait in both hands: the portrait clearly depicts her dressed in beautiful pastel mint-and-rose hanbok against a sunlit palace garden. Beside her a slender large portrait display also shows the same elegant hanbok transformation. Real person in casual modern clothes and virtual hanbok portrait visually distinct, soft daylight, Korean traditional architectural textures, graceful medium-wide composition.",
+      "output": "public/images/services/concepts/ai-hanbok-booth.webp",
+      "method": "built-in image_gen",
+      "source": "/Users/idongju/.codex/generated_images/01a0cdbb-423a-71e0-a5bc-eb78e1c34151/exec-9adc2591-6362-4e83-a5d4-3609aae97af5.png",
+      "width": 1200,
+      "height": 675,
+      "visualReview": "passed"
+    },
+    {
+      "slug": "ai-traditional-painter",
+      "prompt": "Use case: photorealistic-natural. Asset type: a 16:9 wide service thumbnail for a Korean experiential-event studio. Create ONE full-bleed premium editorial concept photograph, realistic materials, beautiful natural light, polished but credible pop-up event staging. Frame main subject within central 80% for thumbnail cropping. The image describes a possible service experience, not a real documented client event. No text overlays, no writing, no letters, no company logos, no brands, no watermark. No collage or grid of separate photos. Screens and printed outputs may contain image-only visual content. Human anatomy and hands must be plausible. A Korean man in his early thirties in a simple cream shirt delightedly examining a small hanging scroll portrait of himself rendered in delicate Korean ink wash and muted minhwa-inspired botanical colors. The real hanging scroll is the dominant foreground subject on a warm wood table with its paper fibres and wooden rollers visible. Behind it, the man and a discreet tablet displaying the matching painted portrait remain visible. A beautiful contemporary Korean cultural workshop with hanji paper walls, one ceramic vase and a brush rest, quiet warm natural side light, crafted museum-quality atmosphere.",
+      "output": "public/images/services/concepts/ai-traditional-painter.webp",
+      "method": "built-in image_gen",
+      "source": "/Users/idongju/.codex/generated_images/01a0cdbb-423a-71e0-a5bc-eb78e1c34151/exec-4c131d62-9984-40b5-90c6-676aeb4dd652.png",
+      "width": 1200,
+      "height": 675,
+      "visualReview": "passed"
+    },
+    {
+      "slug": "ai-heritage-timemachine",
+      "prompt": "Use case: photorealistic-natural. Asset type: a 16:9 wide service thumbnail for a Korean experiential-event studio. Create ONE full-bleed premium editorial concept photograph, realistic materials, beautiful natural light, polished but credible pop-up event staging. Frame main subject within central 80% for thumbnail cropping. The image describes a possible service experience, not a real documented client event. No text overlays, no writing, no letters, no company logos, no brands, no watermark. No collage or grid of separate photos. Screens and printed outputs may contain image-only visual content. Human anatomy and hands must be plausible. An engaging Korean heritage museum installation. A Korean adult visitor wearing a light jacket touches a waist-high slanted interactive display while a huge landscape wall projection vividly reconstructs an imagined historic Korean palace courtyard with tiled roofs, richly painted timber eaves, people in historical clothing and mountain backdrop in golden morning light. In the real room foreground is a small weathered stone architectural fragment on a low plinth, connecting artifact to reconstructed setting. Clear physical museum space with cool grey stone floor and warm projected historical scene, cinematic wide angle, realistic immersive light.",
+      "output": "public/images/services/concepts/ai-heritage-timemachine.webp",
+      "method": "built-in image_gen",
+      "source": "/Users/idongju/.codex/generated_images/01a0cdbb-423a-71e0-a5bc-eb78e1c34151/exec-e6841a39-c003-486a-9bc6-4e412b9c604b.png",
+      "width": 1200,
+      "height": 675,
+      "visualReview": "passed"
+    },
+    {
+      "slug": "ai-travel-style",
+      "prompt": "Use case: photorealistic-natural. Asset type: a 16:9 wide service thumbnail for a Korean experiential-event studio. Create ONE full-bleed premium editorial concept photograph, realistic materials, beautiful natural light, polished but credible pop-up event staging. Frame main subject within central 80% for thumbnail cropping. The image describes a possible service experience, not a real documented client event. No text overlays, no writing, no letters, no company logos, no brands, no watermark. No collage or grid of separate photos. Screens and printed outputs may contain image-only visual content. Human anatomy and hands must be plausible. A bright premium travel discovery pop-up: a Korean woman in her late twenties and a Korean man in his early thirties in casual travel clothing smile while comparing beautiful thick destination recommendation cards. One card prominently shows a turquoise Korean coastal island, the other a lush forest hiking path. An angled tablet on a pale oak counter shows one large serene coastal destination photograph and tiny pictorial preference icons without text. A small unbranded carry-on bag rests beside the counter, cream and turquoise palette, lively fresh daylight, clear visual story of different personalized travel styles, three-quarter medium-wide shot.",
+      "output": "public/images/services/concepts/ai-travel-style.webp",
+      "method": "built-in image_gen",
+      "source": "/Users/idongju/.codex/generated_images/01a0cdbb-423a-71e0-a5bc-eb78e1c34151/exec-41494cd3-aad0-4255-8dd2-d40329517475.png",
+      "width": 1200,
+      "height": 675,
+      "visualReview": "passed"
+    },
+    {
+      "slug": "ai-wedding-booth",
+      "prompt": "Use case: photorealistic-natural. Asset type: a 16:9 wide service thumbnail for a Korean experiential-event studio. Create ONE full-bleed premium editorial concept photograph, realistic materials, beautiful natural light, polished but credible pop-up event staging. Frame main subject within central 80% for thumbnail cropping. The image describes a possible service experience, not a real documented client event. No text overlays, no writing, no letters, no company logos, no brands, no watermark. No collage or grid of separate photos. Screens and printed outputs may contain image-only visual content. Human anatomy and hands must be plausible. At a refined wedding reception photo experience, a Korean bride and groom in their late twenties, elegant ivory gown and black tuxedo, happily admire a large freshly printed romantic portrait of themselves as a cinematic fairytale couple in a magical rose garden. The physical premium print in an ivory border is visible in the foreground, and a discreet portrait display behind them shows the same enchanting garden portrait. Real reception setting has ivory draped fabric, sculptural white flowers and candlelight bokeh, romantic blush and champagne palette, natural human warmth, sophisticated editorial medium-wide composition.",
+      "output": "public/images/services/concepts/ai-wedding-booth.webp",
+      "method": "built-in image_gen",
+      "source": "/Users/idongju/.codex/generated_images/01a0cdb9-8b19-7061-ba7d-ef2ba3ad3da5/exec-6a8902ff-bea0-400c-b60b-d52670ee2b8e.png",
+      "width": 1200,
+      "height": 675,
+      "visualReview": "passed by parent agent"
+    },
+    {
+      "slug": "ai-couple-chemistry",
+      "prompt": "Use case: photorealistic-natural. Asset type: a 16:9 wide service thumbnail for a Korean experiential-event studio. Create ONE full-bleed premium editorial concept photograph, realistic materials, beautiful natural light, polished but credible pop-up event staging. Frame main subject within central 80% for thumbnail cropping. The image describes a possible service experience, not a real documented client event. No text overlays, no writing, no letters, no company logos, no brands, no watermark. No collage or grid of separate photos. Screens and printed outputs may contain image-only visual content. Human anatomy and hands must be plausible. A playful Korean couple in their late twenties wearing stylish casual cream and terracotta clothing sit side by side laughing at a modern relationship-themed event table. Between them they hold one beautifully printed couple card showing two small illustrated portraits connected by a simple coral heart and overlapping colorful circles, no score or writing. A tablet on the table displays the same charming purely graphic compatibility composition. Coral pink arched backdrop, soft warm light, restrained cream decor, candid affectionate body language, clean premium lifestyle photograph, strong two-person focus.",
+      "output": "public/images/services/concepts/ai-couple-chemistry.webp",
+      "method": "built-in image_gen",
+      "source": "/Users/idongju/.codex/generated_images/01a0cdb9-8b19-7061-ba7d-ef2ba3ad3da5/exec-4df5175e-ffb5-4b16-809a-5437acae9e77.png",
+      "width": 1200,
+      "height": 675,
+      "visualReview": "passed by parent agent"
+    },
+    {
+      "slug": "ai-memory-movie",
+      "prompt": "Use case: photorealistic-natural. Asset type: a 16:9 wide service thumbnail for a Korean experiential-event studio. Create ONE full-bleed premium editorial concept photograph, realistic materials, beautiful natural light, polished but credible pop-up event staging. Frame main subject within central 80% for thumbnail cropping. The image describes a possible service experience, not a real documented client event. No text overlays, no writing, no letters, no company logos, no brands, no watermark. No collage or grid of separate photos. Screens and printed outputs may contain image-only visual content. Human anatomy and hands must be plausible. An intimate keepsake movie-making station at a beautiful celebration venue. Two Korean adults in their thirties sit shoulder to shoulder watching a large landscape desktop display that shows one cinematic warmly lit candid image of the same couple walking together by the sea; below the image is a narrow visible sequence of tiny photographic filmstrip thumbnails and a simple audio waveform, no text or labels. Real printed snapshots are tastefully scattered on the walnut desk beside an unbranded small photo scanner. Over-the-shoulder view with both partial profiles and the luminous screen visible, sunset amber light, emotionally warm, tangible paper and glass textures.",
+      "output": "public/images/services/concepts/ai-memory-movie.webp",
+      "method": "built-in image_gen",
+      "source": "/Users/idongju/.codex/generated_images/01a0cdb9-8b19-7061-ba7d-ef2ba3ad3da5/exec-39dd3ad7-acae-4e71-88d4-2b8d47f05b2c.png",
+      "width": 1200,
+      "height": 675,
+      "visualReview": "passed by parent agent"
+    }
+  ]
+}

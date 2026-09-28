@@ -1,0 +1,56 @@
+.experience-venue[data-fit-viewport] .demo-media-fit {
+  flex-shrink: 0;
+  break-inside: avoid;
+}
+
+.experience-venue[data-fit-viewport] .demo-media-fit-art {
+  transform: scale(var(--demo-media-scale, 1)) translateY(var(--demo-media-top, 0px));
+  transform-origin: top left;
+}
+
+.experience-venue[data-fit-viewport] .demo-photocard-pack {
+  width: 100%;
+  break-inside: avoid;
+}
+
+.experience-venue[data-fit-viewport] .demo-photocard-controls {
+  height: auto;
+  min-height: 64px;
+  max-width: 100%;
+}
+
+.experience-venue[data-fit-viewport] .demo-photocard-controls button {
+  min-height: 44px;
+}
+
+/* Keep captions and playback controls at reading size, outside the scaled film. */
+.experience-venue[data-fit-viewport] .demo-mv-frame-lyric,
+.experience-venue[data-fit-viewport] .demo-mv-frame-track {
+  display: none;
+}
+
+.experience-venue[data-fit-viewport] .demo-mv-caption {
+  display: block;
+  color: var(--venue-ink);
+  font-size: 17px;
+  line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.experience-venue[data-fit-viewport] .demo-mv-caption p + p {
+  margin-top: 6px;
+}
+
+.experience-venue[data-fit-viewport] .demo-mv-controls {
+  break-inside: avoid;
+}
+
+.experience-venue[data-fit-viewport] .demo-mv-controls button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.experience-venue[data-fit-viewport] .demo-mv-caption + div {
+  margin-top: 12px;
+}

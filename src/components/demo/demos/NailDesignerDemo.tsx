@@ -1,5 +1,7 @@
 'use client';
 
+import { nailBlockedReason } from '@/data/demo-ai/beauty-completion';
+
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import type { DemoAnswers, DemoResultProps, DemoStepProps } from '@/types/demo';
@@ -15,18 +17,20 @@ import {
   getChoice,
   handPose,
   hashString,
+  requestDemoAi,
   seededInt,
   seededRandom,
   type DemoStepDef,
   type PhotoLook,
 } from '../kit';
+import { isAiNail, type AiNail, type NailMoodId, type NailPaletteId, type NailPatternId, type NailShapeId } from '@/data/demo-ai/nail';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-type MoodId = 'lovely' | 'chic' | 'natural' | 'funky' | 'elegant' | 'dreamy';
-type PaletteId = 'cherry' | 'nude' | 'midnight' | 'mint' | 'wine' | 'lavender';
-type PatternId = 'french' | 'gradient' | 'glitter' | 'marble' | 'art';
-type ShapeId = 'round' | 'square' | 'almond' | 'stiletto';
+type MoodId = NailMoodId;
+type PaletteId = NailPaletteId;
+type PatternId = NailPatternId;
+type ShapeId = NailShapeId;
 
 const MOODS: Record<MoodId, { label: string; emoji: string; desc: string; adj: string }> = {
   lovely: { label: '러블리', emoji: '💗', desc: '사랑스럽고 달콤하게', adj: '러블리' },
@@ -77,12 +81,13 @@ interface NailDesign {
   pattern: PatternId;
   shape: ShapeId;
   mood: MoodId;
+  finish: string;
   seed: number;
 }
 
 /* ── Helpers ───────────────────────────────────────────── */
 
-/** 손 스캔 시드로 손톱 가로 폭(mm)을 "측정"한다 */
+/** Illustration widths only; never a measurement from the photograph. */
 function nailSizes(seed: number): number[] {
   return FINGERS.map((f, i) => f.base + seededInt(seed, `nail-${i}`, -1, 1));
 }
@@ -96,11 +101,13 @@ function designFrom(answers: DemoAnswers, overrides?: { pattern?: PatternId; sha
   const mood = pick<MoodId>(answers, 'mood', MOODS, 'lovely');
   const palette = pick<PaletteId>(answers, 'palette', PALETTES, 'cherry');
   const captureSeed = getCapture(answers, 'hand')?.seed ?? 11;
+  const profile = (answers.experienceProfile ?? {}) as Record<string, string>;
   return {
     palette: PALETTES[palette].colors,
     pattern: overrides?.pattern ?? pick<PatternId>(answers, 'pattern', PATTERNS, 'gradient'),
     shape: overrides?.shape ?? pick<ShapeId>(answers, 'shape', SHAPES, 'round'),
     mood,
+    finish: profile.nailFinish ?? 'gloss',
     // 무늬 배치는 손 스캔 + 무드 + 팔레트로 고정 — 미리보기와 결과가 같은 디자인이 된다
     seed: hashString(`${captureSeed}-${mood}-${palette}`),
   };
@@ -277,10 +284,11 @@ function Nail({ design, index, w, uid }: { design: NailDesign; index: number; w:
       <g clipPath={`url(#${clipId})`}>
         {layer}
         {deco}
+        {design.finish === 'pearl' && accent && [0.25, 0.45, 0.65].map((y, i) => <circle key={y} cx={w * (i % 2 ? 0.65 : 0.35)} cy={h * y} r={w * 0.07} fill="#ffffff" opacity="0.65" />)}
         <path
           d={`M${w * 0.24} ${h * 0.2} Q${w * 0.17} ${h * 0.55} ${w * 0.25} ${h * 0.88}`}
           stroke="#ffffff"
-          strokeOpacity="0.5"
+          strokeOpacity={design.finish === 'matte' ? 0.08 : 0.5}
           strokeWidth={w * 0.09}
           strokeLinecap="round"
           fill="none"
@@ -310,7 +318,7 @@ function skinTone(brightness: number): [string, string] {
 
 function HandRender({ design, sizes, skin }: { design: NailDesign; sizes: number[]; skin: [string, string] }) {
   return (
-    <svg viewBox="0 0 320 250" className="h-auto w-full" role="img" aria-label="AI가 생성한 다섯 손가락 네일 디자인">
+    <svg viewBox="0 0 320 250" className="h-auto w-full" role="img" aria-label="선택한 조건을 표현한 다섯 손가락 네일 일러스트">
       <defs>
         <linearGradient id="nail-skin" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0" stopColor={skin[1]} />
@@ -443,8 +451,8 @@ function DetailStudio({ answers, onUpdate }: DemoStepProps) {
 
       <div className="w-full flex-1 space-y-5">
         <div>
-          <p className="mb-2 text-xs font-semibold text-slate-400">패턴</p>
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+          <p className="mb-2 text-xs font-semibold text-slate-400">패턴 <span aria-live="polite">{pattern ? '✓ 선택 완료' : '· 선택 필요'}</span></p>
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-5" role="group" aria-label="네일 패턴">
             {(Object.keys(PATTERNS) as PatternId[]).map((id) => (
               <button
                 key={id}
@@ -463,8 +471,8 @@ function DetailStudio({ answers, onUpdate }: DemoStepProps) {
           </div>
         </div>
         <div>
-          <p className="mb-2 text-xs font-semibold text-slate-400">쉐입</p>
-          <div className="grid grid-cols-4 gap-2">
+          <p className="mb-2 text-xs font-semibold text-slate-400">쉐입 <span aria-live="polite">{shape ? '✓ 선택 완료' : '· 선택 필요'}</span></p>
+          <div className="grid grid-cols-4 gap-2" role="group" aria-label="네일 쉐입">
             {(Object.keys(SHAPES) as ShapeId[]).map((id) => (
               <button
                 key={id}
@@ -493,25 +501,30 @@ const detailStep: DemoStepDef = {
     titleKey: '패턴과 쉐입을 골라주세요',
     subtitleKey: '고를 때마다 미리보기에 바로 반영돼요',
     canProceed: (a) => !!getChoice(a, 'pattern') && !!getChoice(a, 'shape'),
+    getBlockedReason: nailBlockedReason,
   },
   Component: DetailStudio,
 };
 
 /* ── Result ────────────────────────────────────────────── */
 
-/** 결과 화면과 출력물이 함께 쓰는 디자인 요약 */
-function summaryOf(answers: DemoAnswers) {
+/** 결과 화면과 출력물이 함께 쓰는 디자인 요약 — AI 결과가 있으면 AI가 지은 이름 */
+function summaryOf(answers: DemoAnswers, ai?: AiNail | null) {
   const design = designFrom(answers);
   const mood = MOODS[design.mood];
   const palette = PALETTES[pick<PaletteId>(answers, 'palette', PALETTES, 'cherry')];
   const pattern = PATTERNS[design.pattern];
   const shape = SHAPES[design.shape];
-  return { design, mood, palette, pattern, shape, title: `${mood.adj} ${palette.name} ${pattern.label}` };
+  return { design, mood, palette, pattern, shape, title: ai?.title ?? `${mood.adj} ${palette.name} ${pattern.label}` };
 }
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
+/** AI 사진은 보정 없이 그대로 */
+const AI_LOOK: PhotoLook = {};
+
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
   const capture = getCapture(answers, 'hand');
-  const { design, mood, palette, pattern, shape, title } = summaryOf(answers);
+  const ai = isAiNail(generated) ? generated : null;
+  const { design, mood, palette, pattern, shape, title } = summaryOf(answers, ai);
   const sizes = nailSizes(capture?.seed ?? 11);
   const leftSizes = sizes.map((mm, i) => mm - (seededRandom(design.seed, `L${i}`) > 0.65 ? 1 : 0));
   const serial = serialOf(design);
@@ -519,9 +532,9 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
 
   return (
     <ResultShell
-      eyebrow="세상에 하나뿐인 AI 네일 디자인"
+      eyebrow={ai ? '나의 AI 네일 디자인' : '선택한 조건으로 만든 네일 예시'}
       title={title}
-      description={`${mood.desc} 무드에 ${palette.name} 컬러를 얹은 ${shape.label} ${pattern.label} 네일이에요. 약지는 포인트 네일로 디자인했어요.`}
+      description={ai?.desc ?? `${mood.desc} 무드에 ${palette.name} 컬러를 얹은 ${shape.label} ${pattern.label} 네일이에요. 약지는 포인트 네일로 디자인했어요.`}
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="새 디자인 만들기"
@@ -552,15 +565,22 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
       <div className="flex w-full max-w-md flex-col items-center gap-4 sm:flex-row sm:items-stretch">
         {capture && (
           <div className="w-full max-w-[240px] shrink-0 sm:w-52">
-            <ProcessedPhoto
-              src={capture.image}
-              look={HAND_LOOK}
-              className="aspect-[3/4] rounded-2xl border border-slate-700"
-              alt="내 손에 가상 적용한 네일"
-            >
-              <PhotoNails design={design} thumbLeft={capture.hand?.thumbLeft ?? true} />
-              <span className="absolute bottom-2 left-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white">내 손에 가상 적용</span>
-            </ProcessedPhoto>
+            {ai ? (
+              // AI가 내 손 사진의 손톱에 직접 칠한 결과
+              <ProcessedPhoto src={ai.image} look={AI_LOOK} className="aspect-[3/4] rounded-2xl border border-slate-700" alt="AI가 내 손에 그린 네일">
+                <span className="absolute bottom-2 left-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white">AI가 내 손에 그린 네일</span>
+              </ProcessedPhoto>
+            ) : (
+              <ProcessedPhoto
+                src={capture.image}
+                look={HAND_LOOK}
+                className="aspect-[3/4] rounded-2xl border border-slate-700"
+                alt="내 손에 가상 적용한 네일"
+              >
+                <PhotoNails design={design} thumbLeft={capture.hand?.thumbLeft ?? true} />
+                <span className="absolute bottom-2 left-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white">내 손에 가상 적용</span>
+              </ProcessedPhoto>
+            )}
           </div>
         )}
         <InfoGrid
@@ -568,7 +588,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
             { emoji: mood.emoji, label: '무드', value: mood.label },
             { emoji: '🎨', label: '팔레트', value: palette.name },
             { emoji: '💅', label: '쉐입 · 길이', value: `${shape.label} · ${shape.length}` },
-            { emoji: '⏳', label: '지속력', value: '약 7~10일' },
+            { emoji: '🖼️', label: '출력', value: '디자인 참고 시트' },
           ]}
         />
       </div>
@@ -589,15 +609,15 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
               {row.list.map(({ mm, i }) => (
                 <div key={i} className="flex flex-col items-center gap-0.5">
                   <Sticker design={design} index={i} mm={mm} uid={`sheet-${row.side}`} />
-                  <span className="font-mono text-[9px] text-slate-500">{mm}mm</span>
+                  <span className="font-mono text-[9px] text-slate-500">{FINGERS[i].name}</span>
                 </div>
               ))}
             </div>
           ))}
-          <p className="mt-2 text-[10px] text-slate-400">✂ 점선을 따라 떼어 붙이세요 · 젤 타입 실제 부착용</p>
+          <p className="mt-2 text-[10px] text-slate-400">DESIGN REFERENCE · 인쇄 크기와 재질은 제작 시 별도 확인</p>
         </div>
         <p className="mt-3 text-xs leading-relaxed text-slate-400 [word-break:keep-all]">
-          손 스캔으로 잰 손톱 폭({FINGERS.map((f, i) => `${f.name} ${sizes[i]}`).join(' · ')}mm)에 맞춰 양손 10개 사이즈로 출력돼요.
+          손가락별 패턴을 비교하는 디자인 시트예요. 실제 제작 전에는 각 손톱의 폭과 길이를 직접 확인해 주세요.
         </p>
       </Panel>
     </ResultShell>
@@ -614,23 +634,18 @@ export default defineDemo({
     analyzeEmoji: '💅',
     analyzeDurationMs: 3600,
     analyzeImageStepId: 'hand',
-    analyzeMessages: ['손톱 사이즈에 맞춰 캔버스 준비 중', '무드·팔레트로 디자인 생성 중', '포인트 네일 디테일 그리는 중', '스티커 시트 배치 중'],
+    // AI 사진 변환은 10~20초 — 마지막 문구가 남은 시간을 채운다
+    analyzeMessages: ['생활 장면과 마감 선호 확인', '선택한 패턴과 팔레트 시안 구성', '손가락별 디자인 시트 준비'],
   },
   steps: [
     cameraStep({
       id: 'hand',
-      title: '손등을 스캔해 볼게요',
-      subtitle: '손등이 보이게 손가락을 쫙 펴서 가이드에 맞춰주세요 · 손톱 크기를 재요',
+      title: '손 위에 디자인을 올려볼게요',
+      subtitle: '손등이 보이게 손가락을 펴주세요 · 사진은 디자인 시안에만 사용해요',
       mode: 'handBack',
       subject: '손등',
-      scanLabels: ['손 영역 감지', '손가락 끝마디 5개 추적', '손톱 폭·길이 측정', '네일 곡률 계산'],
-      readouts: (c) => {
-        const sizes = nailSizes(c.seed);
-        return [
-          ...FINGERS.map((f, i) => ({ label: f.name, value: `${sizes[i]}mm` })),
-          { label: '곡률', value: `C커브 ${38 + (c.seed % 17)}%` },
-        ];
-      },
+      scanLabels: ['손 사진 준비', '선택한 디자인 구성', '가상 네일 시안 준비'],
+      readouts: () => [{ label: '체험 방식', value: '사진 위 디자인 시안' }, { label: '실제 사이즈', value: '제작 전 별도 확인' }],
     }),
     choiceStep({
       id: 'mood',
@@ -652,12 +667,31 @@ export default defineDemo({
   ],
   computeResult: (answers) => `${pick<PatternId>(answers, 'pattern', PATTERNS, 'gradient')}-${pick<ShapeId>(answers, 'shape', SHAPES, 'round')}`,
   Result,
-  print: (answers) => {
+  generate: (answers) => {
     const capture = getCapture(answers, 'hand');
-    const { design, palette, pattern, shape, title } = summaryOf(answers);
+    if (!capture) return Promise.resolve(null);
+    const design = designFrom(answers);
+    return requestDemoAi<AiNail>(
+      'nail-designer',
+      { experienceProfile: answers.experienceProfile,
+        photo: capture.image,
+        mood: design.mood,
+        palette: pick<PaletteId>(answers, 'palette', PALETTES, 'cherry'),
+        pattern: design.pattern,
+        shape: design.shape,
+      },
+      { timeoutMs: 60_000, validate: isAiNail }
+    );
+  },
+  print: (answers, _resultKey, generated) => {
+    const capture = getCapture(answers, 'hand');
+    const ai = isAiNail(generated) ? generated : null;
+    const { design, palette, pattern, shape, title } = summaryOf(answers, ai);
     return {
       kind: 'photo',
-      photos: capture
+      photos: ai
+        ? [{ src: ai.image, label: 'AI가 내 손에 그린 네일' }]
+        : capture
         ? [
             {
               src: capture.image,

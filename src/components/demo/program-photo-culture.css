@@ -1,0 +1,220 @@
+/* Service signatures extend the shared accessible controls without shrinking type. */
+
+/* DRESS NOTE — a quiet fashion editor's working spread. */
+.experience-venue[data-program='ai-style-profiler'] .venue-program-name { padding-bottom: .8rem; border-bottom: 1px solid #62695b; letter-spacing: .2em; }
+.experience-venue[data-program='ai-style-profiler'] .venue-welcome h2 { max-width: 13ch; line-height: 1.28; }
+.experience-venue[data-program='ai-style-profiler'] .venue-brief { border: 0; border-top: 5px double #8a917f; border-radius: 0; background: #fffef9; box-shadow: 0 20px 50px #303c2910; }
+.experience-venue[data-program='ai-style-profiler'] .venue-question { padding-bottom: 1.4rem; border-bottom: 1px solid #d1d4c8; }
+.experience-venue[data-program='ai-style-profiler'] .venue-option { border-width: 0 0 1px; border-radius: 0; background: transparent; border-color: #c6cbbd; }
+.experience-venue[data-program='ai-style-profiler'] .venue-option[aria-pressed='true'] { background: #e3e8da; border-bottom: 3px solid #4a6048; box-shadow: none; }
+.experience-venue[data-program='ai-style-profiler'] .venue-image { border-radius: 0; border: 8px solid #fffef9; box-shadow: 0 12px 35px #23332017; }
+.experience-venue[data-program='ai-style-profiler'] .venue-signature-mark { border: 1px solid #66745d; border-radius: 0; transform: rotate(-5deg); }
+.experience-venue[data-program='ai-style-profiler'] .venue-navigation { border-top: 2px solid #4a6048; }
+
+/* THE COVER — a full-bleed fashion cover and sharp monochrome controls. */
+.experience-venue[data-program='ai-runway-photobooth'] .venue-program-name { letter-spacing: .28em; border-top: 1px solid #c5b698; padding-top: .8rem; }
+.experience-venue[data-program='ai-runway-photobooth'] .venue-welcome h2 { font-style: italic; text-shadow: 0 4px 30px #00000060; line-height: 1.22; }
+.experience-venue[data-program='ai-runway-photobooth'] .venue-brief { border: 1px solid #73695c; border-radius: 0; background: #171411f2; box-shadow: 14px 14px 0 #08070640; }
+.experience-venue[data-program='ai-runway-photobooth'] .venue-question { padding-block: 1rem; }
+.experience-venue[data-program='ai-runway-photobooth'] .venue-option { border-color: #7a7064; border-radius: 0; background: #24211d; }
+.experience-venue[data-program='ai-runway-photobooth'] .venue-option[aria-pressed='true'] { background: #eee4ce; color: #171412; border-color: #eee4ce; }
+.experience-venue[data-program='ai-runway-photobooth'] .venue-option[aria-pressed='true'] .venue-option-detail { color: #514b40; }
+.experience-venue[data-program='ai-runway-photobooth'] .venue-image { border: 1px solid #eee4ce80; border-radius: 0; }
+.experience-venue[data-program='ai-runway-photobooth'] .venue-signature-mark { color: #eee4ce; background: transparent; border: 1px solid #eee4ce; border-radius: 50%; }
+.experience-venue[data-program='ai-runway-photobooth'] .venue-guide { border-left: 3px solid #b39a7c; padding-left: 1.5rem; }
+
+/* TIME WARDROBE — an archive envelope with a burgundy date stamp. */
+.experience-venue[data-program='ai-fashion-timemachine'] .venue-program-name { border-bottom: 2px solid #973b26; padding-bottom: .7rem; letter-spacing: .12em; }
+.experience-venue[data-program='ai-fashion-timemachine'] .venue-brief { background: #fff7df; border: 1px solid #ad9062; border-left: 10px solid #b48b3e; border-radius: 5px; box-shadow: 5px 7px 0 #c3a36c60; }
+.experience-venue[data-program='ai-fashion-timemachine'] .venue-question + .venue-question { border-top: 2px dashed #c4a672; padding-top: 1.6rem; }
+.experience-venue[data-program='ai-fashion-timemachine'] .venue-option { border: 1px dashed #ac8861; background: #fcf0d3; border-radius: 3px; }
+.experience-venue[data-program='ai-fashion-timemachine'] .venue-option[aria-pressed='true'] { border: 2px solid #973b26; background: #f0d9ae; box-shadow: inset 0 0 0 3px #fff7df; }
+.experience-venue[data-program='ai-fashion-timemachine'] .venue-image { filter: sepia(.24); border: 9px solid #fff7df; border-bottom-width: 30px; border-radius: 2px; transform: rotate(-1.2deg); }
+.experience-venue[data-program='ai-fashion-timemachine'] .venue-signature-mark { border: 3px double #973b26; border-radius: 50%; color: #973b26; transform: rotate(-15deg); }
+.experience-venue[data-program='ai-fashion-timemachine'] .venue-navigation { border-top: 2px dashed #b68f5f; }
+
+/* LOOK SERVICE — a crisp blue work order inside a fitting-room window. */
+.experience-venue[data-program='ai-coord-recommender'] .venue-program-name { color: #2157b6; font-weight: 700; letter-spacing: .12em; }
+.experience-venue[data-program='ai-coord-recommender'] .venue-welcome h2 { padding-left: 1rem; border-left: 6px solid #2157b6; }
+.experience-venue[data-program='ai-coord-recommender'] .venue-brief { background: #ffffff; border: 1px solid #c0cdde; border-top: 12px solid #2157b6; border-radius: 12px 12px 3px 3px; box-shadow: 0 18px 45px #243e6420; }
+.experience-venue[data-program='ai-coord-recommender'] .venue-question { border-bottom: 1px solid #dce4ed; padding-bottom: 1.4rem; }
+.experience-venue[data-program='ai-coord-recommender'] .venue-option { background: #f3f6fb; border: 1px solid #b9c9df; border-radius: 6px; box-shadow: 0 3px 0 #d9e2ee; }
+.experience-venue[data-program='ai-coord-recommender'] .venue-option[aria-pressed='true'] { background: #e2edff; border: 2px solid #2157b6; box-shadow: 0 3px 0 #9bb5db; }
+.experience-venue[data-program='ai-coord-recommender'] .venue-image { border: 1px solid #adc0d8; border-radius: 10px; }
+.experience-venue[data-program='ai-coord-recommender'] .venue-signature-mark { border: 0; border-radius: 6px; background: #2157b6; color: #ffffff; }
+.experience-venue[data-program='ai-coord-recommender'] .venue-guide { border-top: 8px solid #2157b6; padding-top: 1.25rem; }
+
+/* DEBUT CLUB — a cherry dressing-room mirror, with plush controls. */
+.experience-venue[data-program='ai-idol-makeup-booth'] .venue-program-name { color: #ffd2e3; letter-spacing: .2em; }
+.experience-venue[data-program='ai-idol-makeup-booth'] .venue-welcome h2 { text-shadow: 2px 3px 0 #a13f6a60; }
+.experience-venue[data-program='ai-idol-makeup-booth'] .venue-brief { background: radial-gradient(ellipse at 100% 0, #75435980, transparent 65%), #4b2037; border: 1px solid #b47592; border-radius: 32px; box-shadow: 0 22px 55px #160b1550; }
+.experience-venue[data-program='ai-idol-makeup-booth'] .venue-option { border: 1px solid #b57592; border-radius: 22px; background: #602e47; box-shadow: inset 0 1px 0 #f5bfd530; }
+.experience-venue[data-program='ai-idol-makeup-booth'] .venue-option[aria-pressed='true'] { background: #ffc0d5; border-color: #ffe1ed; color: #47162d; box-shadow: 0 0 0 4px #df92b324; }
+.experience-venue[data-program='ai-idol-makeup-booth'] .venue-option[aria-pressed='true'] .venue-option-detail { color: #6f3650; }
+.experience-venue[data-program='ai-idol-makeup-booth'] .venue-image { border-radius: 48% 48% 18px 18px; border: 6px dotted #efc9d3; box-shadow: 0 0 0 7px #743d53, 0 20px 40px #1f0b1740; }
+.experience-venue[data-program='ai-idol-makeup-booth'] .venue-signature-mark { background: #ffcede; border: 0; color: #60223f; border-radius: 50%; transform: rotate(12deg); }
+.experience-venue[data-program='ai-idol-makeup-booth'] .venue-navigation { border-top: 1px solid #be7c99; }
+
+/* DEAR COLLECTOR — a lilac sleeve and a lemon sticker, like a personal card binder. */
+.experience-venue[data-program='ai-fan-photocard'] .venue-program-name { color: #674089; text-decoration: underline; text-decoration-color: #d4bded; text-underline-offset: .4em; }
+.experience-venue[data-program='ai-fan-photocard'] .venue-brief { border: 2px solid #76548e; border-radius: 20px; background: #fcf8ff; box-shadow: 8px 8px 0 #cbb5e2; }
+.experience-venue[data-program='ai-fan-photocard'] .venue-question:nth-child(2) { padding: 1.4rem; background: #f7f1c9; border-radius: 12px 24px 12px 24px; }
+.experience-venue[data-program='ai-fan-photocard'] .venue-option { border: 1px solid #bea5d5; border-radius: 16px 5px 16px 5px; background: #f2eafa; }
+.experience-venue[data-program='ai-fan-photocard'] .venue-option[aria-pressed='true'] { background: #e6d5f8; border: 2px solid #745097; box-shadow: 3px 3px 0 #b497cd; }
+.experience-venue[data-program='ai-fan-photocard'] .venue-option[aria-pressed='true'] .venue-option-detail { color: #684a81; }
+.experience-venue[data-program='ai-fan-photocard'] .venue-scene { margin-inline: .6rem; }
+.experience-venue[data-program='ai-fan-photocard'] .venue-image { border: 10px solid #fffdfd; border-bottom-width: 28px; border-radius: 8px; box-shadow: 4px 8px 0 #bfa9d080; transform: rotate(1.5deg); }
+.experience-venue[data-program='ai-fan-photocard'] .venue-signature-mark { border-radius: 30% 40% 35% 42%; background: #eee68c; color: #594171; border: 2px solid #594171; transform: rotate(-12deg); }
+.experience-venue[data-program='ai-fan-photocard'] .venue-navigation { border-top: 2px dashed #baa1ce; }
+
+/* SIDE A — a venue poster turned into a video director's controls. */
+.experience-venue[data-program='ai-musicvideo-maker'] .venue-program-name { color: #d2f07b; letter-spacing: .3em; border-bottom: 4px solid #d2f07b; padding-bottom: .6rem; }
+.experience-venue[data-program='ai-musicvideo-maker'] .venue-welcome h2 { line-height: 1.08; color: #e0f5a3; text-shadow: 3px 3px 0 #596344; }
+.experience-venue[data-program='ai-musicvideo-maker'] .venue-brief { border: 1px solid #788163; border-top: 9px solid #d2f07b; background: #20251df5; border-radius: 0; box-shadow: 9px 9px 0 #0a0e0990; }
+.experience-venue[data-program='ai-musicvideo-maker'] .venue-question { border-bottom: 1px solid #5c6750; padding-bottom: 1.5rem; }
+.experience-venue[data-program='ai-musicvideo-maker'] .venue-option { border: 1px solid #65774e; border-radius: 0; background: #2d3526; }
+.experience-venue[data-program='ai-musicvideo-maker'] .venue-option[aria-pressed='true'] { color: #1c2815; background: #d2f07b; border-color: #e5ff9b; box-shadow: 4px 4px 0 #b79fe2; }
+.experience-venue[data-program='ai-musicvideo-maker'] .venue-option[aria-pressed='true'] .venue-option-detail { color: #3b4b2f; }
+.experience-venue[data-program='ai-musicvideo-maker'] .venue-image { border-radius: 0; border-bottom: 8px solid #b79fe2; filter: saturate(1.08); }
+.experience-venue[data-program='ai-musicvideo-maker'] .venue-signature-mark { border: 1px solid #d2f07b; border-radius: 0; background: #d2f07b; color: #25301c; transform: rotate(-5deg); }
+.experience-venue[data-program='ai-musicvideo-maker'] .venue-guide { border-left: 5px solid #b79fe2; padding-left: 1.25rem; }
+
+/* CASTING ROOM — photo-contact prints and black index tabs. */
+.experience-venue[data-program='ai-celeb-lookalike'] .venue-program-name { letter-spacing: .22em; color: #333330; }
+.experience-venue[data-program='ai-celeb-lookalike'] .venue-welcome h2 { border-bottom: 3px solid #333330; padding-bottom: .7rem; }
+.experience-venue[data-program='ai-celeb-lookalike'] .venue-brief { border-radius: 0; background: #fdfcf8; border-top: 14px solid #333330; box-shadow: 0 12px 35px #2d2c2512; }
+.experience-venue[data-program='ai-celeb-lookalike'] .venue-question { padding-left: 1.2rem; border-left: 1px solid #b6b4ae; }
+.experience-venue[data-program='ai-celeb-lookalike'] .venue-option { border: 1px solid #afada5; border-radius: 0; background: #f1efea; }
+.experience-venue[data-program='ai-celeb-lookalike'] .venue-option[aria-pressed='true'] { background: #333330; border-color: #333330; color: #ffffff; }
+.experience-venue[data-program='ai-celeb-lookalike'] .venue-option[aria-pressed='true'] .venue-option-detail { color: #e0ded6; }
+.experience-venue[data-program='ai-celeb-lookalike'] .venue-image { filter: grayscale(.92); border: 12px solid #fdfcf8; outline: 1px solid #afada5; border-radius: 0; }
+.experience-venue[data-program='ai-celeb-lookalike'] .venue-signature-mark { border-radius: 0; background: #333330; color: #fffdf7; }
+.experience-venue[data-program='ai-celeb-lookalike'] .venue-guide { border-top: 2px solid #333330; padding-top: 1.3rem; }
+
+/* TAKE ONE — warm metal, illuminated buttons and a restrained studio meter. */
+.experience-venue[data-program='ai-voice-lab'] .venue-program-name { color: #f0ba68; letter-spacing: .3em; }
+.experience-venue[data-program='ai-voice-lab'] .venue-welcome h2 { border-left: 5px solid #b78946; padding-left: 1rem; line-height: 1.2; }
+.experience-venue[data-program='ai-voice-lab'] .venue-brief { background: linear-gradient(160deg, #39362f, #2d2a23); border: 1px solid #776b54; border-radius: 13px; box-shadow: inset 0 2px 0 #cdb98c30, 0 24px 55px #06060450; }
+.experience-venue[data-program='ai-voice-lab'] .venue-question { padding: 1.3rem; background: #24231e; border: 1px solid #665e4d; border-radius: 8px; }
+.experience-venue[data-program='ai-voice-lab'] .venue-option { border: 1px solid #756a52; border-radius: 8px; background: #3d3a2f; box-shadow: 0 4px 0 #151510; }
+.experience-venue[data-program='ai-voice-lab'] .venue-option[aria-pressed='true'] { color: #30251a; background: #f0ba68; border-color: #ffda9e; box-shadow: 0 2px 0 #151510, inset 0 1px 0 #fff3d1; }
+.experience-venue[data-program='ai-voice-lab'] .venue-option[aria-pressed='true'] .venue-option-detail { color: #5a432b; }
+.experience-venue[data-program='ai-voice-lab'] .venue-image { border: 8px solid #494335; border-radius: 14px; box-shadow: inset 0 0 0 2px #a99975; }
+.experience-venue[data-program='ai-voice-lab'] .venue-signature-mark { background: #583d2c; color: #ffc579; border: 2px solid #b88951; border-radius: 50%; }
+.experience-venue[data-program='ai-voice-lab'] .venue-navigation { border-top: 1px solid #817457; }
+
+/* 옷의 결 — two quiet cloth panels, celadon and unbleached paper. */
+.experience-venue[data-program='ai-hanbok-booth'] .venue-program-name { color: #356755; letter-spacing: .28em; }
+.experience-venue[data-program='ai-hanbok-booth'] .venue-welcome h2 { line-height: 1.36; border-right: 4px solid #ba8175; padding-right: 1rem; }
+.experience-venue[data-program='ai-hanbok-booth'] .venue-brief { background: #fffdf3; border: 1px solid #c0cebc; border-bottom: 10px solid #356755; border-radius: 2px; box-shadow: 0 15px 40px #2c554a15; }
+.experience-venue[data-program='ai-hanbok-booth'] .venue-option { background: #f4f6ed; border: 1px solid #a9bfad; border-radius: 0 18px 0 18px; }
+.experience-venue[data-program='ai-hanbok-booth'] .venue-option[aria-pressed='true'] { background: #dfebdf; border: 2px solid #356755; box-shadow: inset 4px 0 0 #ba8175; }
+.experience-venue[data-program='ai-hanbok-booth'] .venue-image { border: 1px solid #719983; border-radius: 42% 0 0 0; box-shadow: 8px 8px 0 #cad8c8; }
+.experience-venue[data-program='ai-hanbok-booth'] .venue-signature-mark { border: 1px solid #356755; background: #fffdf3; color: #356755; border-radius: 0; }
+.experience-venue[data-program='ai-hanbok-booth'] .venue-guide { padding-left: 1.4rem; border-left: 6px solid #ba8175; }
+
+/* 먹 한 점 — a painter's blank sheet, a vermilion seal, room to breathe. */
+.experience-venue[data-program='ai-traditional-painter'] .venue-program-name { letter-spacing: .32em; color: #5e6858; }
+.experience-venue[data-program='ai-traditional-painter'] .venue-welcome h2 { line-height: 1.35; border-bottom: 3px solid #33362f; border-radius: 0 0 48% 5%; padding-bottom: 1rem; }
+.experience-venue[data-program='ai-traditional-painter'] .venue-brief { border: 0; border-left: 1px solid #bdb9a9; border-radius: 0; background: #fffaf0; box-shadow: 0 10px 25px #4547380b; }
+.experience-venue[data-program='ai-traditional-painter'] .venue-question { padding-block: .7rem 1.6rem; border-bottom: 1px solid #d2cfc0; }
+.experience-venue[data-program='ai-traditional-painter'] .venue-option { border: 1px solid #bbbbaa; background: transparent; border-radius: 2px; box-shadow: none; }
+.experience-venue[data-program='ai-traditional-painter'] .venue-option[aria-pressed='true'] { background: #f0eadd; border: 2px solid #a84131; box-shadow: none; }
+.experience-venue[data-program='ai-traditional-painter'] .venue-image { filter: saturate(.62); border: 12px solid #fffaf0; border-top: 3px solid #7e806e; border-bottom: 3px solid #7e806e; border-radius: 0; }
+.experience-venue[data-program='ai-traditional-painter'] .venue-signature-mark { border: 3px double #a84131; border-radius: 1px; background: #a84131; color: #fffaf0; transform: rotate(-4deg); }
+.experience-venue[data-program='ai-traditional-painter'] .venue-navigation { border-top: 1px solid #adae9a; }
+
+/* 시간의 문 — a bronze doorway in a midnight-green exhibition room. */
+.experience-venue[data-program='ai-heritage-timemachine'] .venue-program-name { color: #dfbd73; letter-spacing: .25em; }
+.experience-venue[data-program='ai-heritage-timemachine'] .venue-welcome h2 { line-height: 1.33; text-shadow: 0 6px 35px #071d1d90; }
+.experience-venue[data-program='ai-heritage-timemachine'] .venue-brief { background: #17322ff0; border: 4px double #998758; border-radius: 2px; box-shadow: 0 22px 50px #031b1b60; }
+.experience-venue[data-program='ai-heritage-timemachine'] .venue-question { border-bottom: 1px solid #607a68; padding-bottom: 1.3rem; }
+.experience-venue[data-program='ai-heritage-timemachine'] .venue-option { background: #27473f; border: 1px solid #778568; border-radius: 2px; }
+.experience-venue[data-program='ai-heritage-timemachine'] .venue-option[aria-pressed='true'] { border: 2px solid #dfbd73; background: #405a43; box-shadow: inset 0 0 0 3px #273d31; }
+.experience-venue[data-program='ai-heritage-timemachine'] .venue-option[aria-pressed='true'] .venue-option-detail { color: #d6dfd0; }
+.experience-venue[data-program='ai-heritage-timemachine'] .venue-option[aria-pressed='true'] .venue-option-level { color: inherit; }
+.experience-venue[data-program='ai-heritage-timemachine'] .venue-image { border: 1px solid #b69b60; border-radius: 48% 48% 2px 2px; box-shadow: 0 0 0 9px #18322d, 0 0 0 10px #907d4e; }
+.experience-venue[data-program='ai-heritage-timemachine'] .venue-signature-mark { color: #dfbd73; background: #28433a; border: 3px double #a78d54; border-radius: 50%; }
+.experience-venue[data-program='ai-heritage-timemachine'] .venue-guide { border-left: 1px solid #ab975f; padding-left: 1.4rem; }
+
+/* NEXT STOP — an oversized boarding pass, including a clean tear-off edge. */
+.experience-venue[data-program='ai-travel-style'] .venue-program-name { color: #245ba0; letter-spacing: .18em; }
+.experience-venue[data-program='ai-travel-style'] .venue-welcome h2 { line-height: 1.15; border-left: 8px solid #d79441; padding-left: 1rem; }
+.experience-venue[data-program='ai-travel-style'] .venue-brief { background: #fffdf6; border: 1px solid #bfcedc; border-top: 12px solid #245ba0; border-radius: 12px; box-shadow: 0 16px 30px #2a406d16; }
+.experience-venue[data-program='ai-travel-style'] .venue-question + .venue-question { border-top: 2px dashed #a7b7c9; padding-top: 1.5rem; }
+.experience-venue[data-program='ai-travel-style'] .venue-option { border: 1px solid #a7bfd6; border-radius: 2px; background: #edf3f8; }
+.experience-venue[data-program='ai-travel-style'] .venue-option[aria-pressed='true'] { background: #245ba0; border-color: #245ba0; color: #ffffff; box-shadow: 0 4px 0 #d79441; }
+.experience-venue[data-program='ai-travel-style'] .venue-option[aria-pressed='true'] .venue-option-detail { color: #e1edff; }
+.experience-venue[data-program='ai-travel-style'] .venue-image { border: 8px solid #fffdf6; border-radius: 7px; box-shadow: 0 8px 0 #cad3d4; }
+.experience-venue[data-program='ai-travel-style'] .venue-signature-mark { border: 3px solid #245ba0; border-radius: 50%; color: #245ba0; background: #fffdf6; transform: rotate(-12deg); }
+.experience-venue[data-program='ai-travel-style'] .venue-navigation { border-top: 2px dashed #a7b7c9; }
+
+/* 우리의 장면 — a cream invitation with a fine wine-coloured border. */
+.experience-venue[data-program='ai-wedding-booth'] .venue-program-name { color: #85424f; letter-spacing: .3em; }
+.experience-venue[data-program='ai-wedding-booth'] .venue-welcome h2 { line-height: 1.4; font-weight: 700; }
+.experience-venue[data-program='ai-wedding-booth'] .venue-brief { background: #fffaf1; border: 4px double #be9290; border-radius: 100px 100px 12px 12px; padding-top: 3rem; box-shadow: 0 20px 45px #713c4012; }
+.experience-venue[data-program='ai-wedding-booth'] .venue-question { padding-bottom: 1.5rem; border-bottom: 1px solid #dbc1b4; }
+.experience-venue[data-program='ai-wedding-booth'] .venue-option { background: #fcf3ea; border: 1px solid #cfafa4; border-radius: 22px 22px 6px 6px; }
+.experience-venue[data-program='ai-wedding-booth'] .venue-option[aria-pressed='true'] { background: #f0dcd5; border: 2px solid #85424f; box-shadow: none; }
+.experience-venue[data-program='ai-wedding-booth'] .venue-image { border: 6px solid #fffaf1; outline: 1px solid #b88d87; border-radius: 48% 48% 8px 8px; }
+.experience-venue[data-program='ai-wedding-booth'] .venue-signature-mark { background: #fffaf1; color: #85424f; border: 2px solid #b88d87; border-radius: 50%; }
+.experience-venue[data-program='ai-wedding-booth'] .venue-navigation { border-top: 3px double #b88d87; }
+
+/* 둘의 문장 — soft postcards with red-pencil, handwritten accents. */
+.experience-venue[data-program='ai-couple-chemistry'] .venue-program-name { color: #af5748; letter-spacing: .12em; }
+.experience-venue[data-program='ai-couple-chemistry'] .venue-welcome h2 { line-height: 1.2; text-decoration: underline; text-decoration-color: #d5a297; text-decoration-thickness: 3px; text-underline-offset: .2em; }
+.experience-venue[data-program='ai-couple-chemistry'] .venue-brief { background: #fffcf3; border: 1px solid #d4bca5; border-radius: 4px 25px 5px 20px; box-shadow: 7px 9px 0 #d4c6b366; }
+.experience-venue[data-program='ai-couple-chemistry'] .venue-question:nth-child(2) { background: #f2ecde; padding: 1.4rem; border-radius: 18px; }
+.experience-venue[data-program='ai-couple-chemistry'] .venue-option { background: #f8eee3; border: 1px solid #d1afa0; border-radius: 22px 22px 22px 4px; }
+.experience-venue[data-program='ai-couple-chemistry'] .venue-option[aria-pressed='true'] { background: #f1d8c9; border: 2px solid #af5748; box-shadow: 3px 3px 0 #d5a79a; }
+.experience-venue[data-program='ai-couple-chemistry'] .venue-option[aria-pressed='true'] .venue-option-level { color: inherit; }
+.experience-venue[data-program='ai-couple-chemistry'] .venue-image { border: 10px solid #fffcf3; border-bottom-width: 30px; border-radius: 3px; transform: rotate(-1deg); box-shadow: 0 12px 35px #6b423019; }
+.experience-venue[data-program='ai-couple-chemistry'] .venue-signature-mark { color: #af5748; background: transparent; border: 2px solid #af5748; border-radius: 45% 55% 48% 42%; transform: rotate(-8deg); }
+.experience-venue[data-program='ai-couple-chemistry'] .venue-guide { border-left: 4px solid #788d76; padding-left: 1.3rem; }
+
+/* 작은 가족책 — a butter-yellow picture book with blue paper-cut tabs. */
+.experience-venue[data-program='ai-future-family'] .venue-program-name { color: #4d6b8e; letter-spacing: .18em; }
+.experience-venue[data-program='ai-future-family'] .venue-welcome h2 { line-height: 1.18; text-shadow: 2px 3px 0 #d3c59070; }
+.experience-venue[data-program='ai-future-family'] .venue-brief { background: #fffbed; border: 2px solid #d1bf84; border-left: 11px solid #4d6b8e; border-radius: 6px 28px 28px 6px; box-shadow: 8px 8px 0 #d5bf8266; }
+.experience-venue[data-program='ai-future-family'] .venue-question { padding-bottom: 1rem; }
+.experience-venue[data-program='ai-future-family'] .venue-option { background: #f3eed9; border: 1px solid #c3c59c; border-radius: 20px 7px 20px 7px; }
+.experience-venue[data-program='ai-future-family'] .venue-option[aria-pressed='true'] { background: #dce5e5; border: 2px solid #4d6b8e; box-shadow: 4px 4px 0 #cba477; }
+.experience-venue[data-program='ai-future-family'] .venue-image { border: 8px solid #fffbed; border-radius: 28px 6px 28px 6px; box-shadow: 8px 8px 0 #d1b87a; }
+.experience-venue[data-program='ai-future-family'] .venue-signature-mark { color: #ffffff; background: #4d6b8e; border: 0; border-radius: 30% 40% 32% 38%; transform: rotate(8deg); }
+.experience-venue[data-program='ai-future-family'] .venue-navigation { border-top: 3px solid #c3ad76; }
+
+/* AFTER CREDITS — personal cinema, olive velvet and a widescreen still. */
+.experience-venue[data-program='ai-memory-movie'] .venue-program-name { letter-spacing: .28em; color: #e7ce9a; }
+.experience-venue[data-program='ai-memory-movie'] .venue-welcome h2 { line-height: 1.35; text-shadow: 0 5px 25px #090c0870; }
+.experience-venue[data-program='ai-memory-movie'] .venue-brief { background: #282c24f5; border: 1px solid #7c8169; border-radius: 4px; box-shadow: 0 22px 60px #080b0670; }
+.experience-venue[data-program='ai-memory-movie'] .venue-question + .venue-question { border-top: 1px solid #70715e; padding-top: 1.4rem; }
+.experience-venue[data-program='ai-memory-movie'] .venue-option { border: 1px solid #84836b; border-radius: 3px; background: #393e31; }
+.experience-venue[data-program='ai-memory-movie'] .venue-option[aria-pressed='true'] { background: #e7ce9a; color: #2e2e21; border-color: #f5dfb6; box-shadow: 0 3px 0 #a99774; }
+.experience-venue[data-program='ai-memory-movie'] .venue-option[aria-pressed='true'] .venue-option-detail { color: #545039; }
+.experience-venue[data-program='ai-memory-movie'] .venue-image { border-block: 14px solid #141910; border-inline: 1px solid #7c8169; border-radius: 2px; box-shadow: 0 16px 35px #00000050; }
+.experience-venue[data-program='ai-memory-movie'] .venue-signature-mark { background: #e7ce9a; color: #30332c; border: 5px double #30332c; border-radius: 50%; }
+.experience-venue[data-program='ai-memory-movie'] .venue-guide { border-top: 2px solid #bd9385; padding-top: 1.3rem; }
+
+/* Inverted selections keep their numbers and check marks readable too. */
+.experience-venue[data-program='ai-runway-photobooth'] .venue-option[aria-pressed='true'] :is(.venue-option-level, .venue-option-check),
+.experience-venue[data-program='ai-idol-makeup-booth'] .venue-option[aria-pressed='true'] :is(.venue-option-level, .venue-option-check),
+.experience-venue[data-program='ai-musicvideo-maker'] .venue-option[aria-pressed='true'] :is(.venue-option-level, .venue-option-check),
+.experience-venue[data-program='ai-celeb-lookalike'] .venue-option[aria-pressed='true'] :is(.venue-option-level, .venue-option-check),
+.experience-venue[data-program='ai-voice-lab'] .venue-option[aria-pressed='true'] :is(.venue-option-level, .venue-option-check),
+.experience-venue[data-program='ai-travel-style'] .venue-option[aria-pressed='true'] :is(.venue-option-level, .venue-option-check),
+.experience-venue[data-program='ai-memory-movie'] .venue-option[aria-pressed='true'] :is(.venue-option-level, .venue-option-check) { color: inherit; }
+
+@media (max-width: 640px) {
+  .experience-venue[data-program='ai-fan-photocard'] .venue-question:nth-child(2),
+  .experience-venue[data-program='ai-couple-chemistry'] .venue-question:nth-child(2),
+  .experience-venue[data-program='ai-voice-lab'] .venue-question { padding: 1rem; }
+  .experience-venue[data-program='ai-wedding-booth'] .venue-brief { border-radius: 38px 38px 10px 10px; padding-top: 1.7rem; }
+  .experience-venue[data-program='ai-fan-photocard'] .venue-image,
+  .experience-venue[data-program='ai-fashion-timemachine'] .venue-image,
+  .experience-venue[data-program='ai-couple-chemistry'] .venue-image { transform: none; }
+  .experience-venue[data-program='ai-hanbok-booth'] .venue-image { border-radius: 30px 0 0 0; }
+  .experience-venue[data-program='ai-future-family'] .venue-brief { border-left-width: 6px; }
+  .experience-venue[data-program='ai-coord-recommender'] .venue-welcome h2,
+  .experience-venue[data-program='ai-travel-style'] .venue-welcome h2,
+  .experience-venue[data-program='ai-voice-lab'] .venue-welcome h2 { padding-left: .75rem; }
+}

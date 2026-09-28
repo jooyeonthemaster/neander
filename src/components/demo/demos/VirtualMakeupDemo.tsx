@@ -1,5 +1,7 @@
 'use client';
 
+import { makeupBlockedReason } from '@/data/demo-ai/beauty-completion';
+
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -10,39 +12,38 @@ import {
   Panel,
   ResultShell,
   cameraStep,
-  clamp,
   defineDemo,
   getCapture,
   getChoice,
   renderLook,
-  seededInt,
+  requestDemoAi,
   seededRandom,
-  type CaptureStats,
   type DemoStepDef,
   type PhotoLook,
   type PhotoPaint,
 } from '../kit';
+import { isAiMakeup, type AiMakeup, type MakeupLookId, type MakeupTone } from '@/data/demo-ai/virtual-makeup';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-type Tone = 'warm' | 'cool' | 'neutral';
-type LookId = 'coral' | 'rose' | 'mlbb' | 'red' | 'smoky';
+type Tone = MakeupTone;
+type LookId = MakeupLookId;
 
 const TONES: Record<Tone, { name: string; short: string; desc: string }> = {
   warm: {
-    name: '웜 언더톤',
+    name: '따뜻한 컬러 방향',
     short: '웜톤',
-    desc: '노란 기가 도는 따뜻한 피부예요. 코랄·오렌지·브라운 계열이 생기를 살려줘요.',
+    desc: '따뜻한 느낌을 원한다면 코랄·오렌지·브라운 계열을 나란히 비교해 보세요.',
   },
   cool: {
-    name: '쿨 언더톤',
+    name: '차가운 컬러 방향',
     short: '쿨톤',
-    desc: '푸른 기가 도는 맑은 피부예요. 로즈·푸시아·블루 레드 계열이 깨끗하게 받쳐줘요.',
+    desc: '차가운 느낌을 원한다면 로즈·푸시아·블루 레드 계열을 나란히 비교해 보세요.',
   },
   neutral: {
-    name: '뉴트럴 언더톤',
+    name: '뉴트럴 컬러 방향',
     short: '뉴트럴',
-    desc: '웜과 쿨의 중간이라 폭넓게 소화해요. 채도 낮은 MLBB 계열이 특히 편안해요.',
+    desc: '양쪽 계열을 함께 탐색하고 싶다면 채도가 낮은 MLBB 컬러부터 비교해 보세요.',
   },
 };
 
@@ -187,20 +188,6 @@ const INTENSITIES = [
 
 /* ── Helpers ───────────────────────────────────────────── */
 
-function toneOf(stats?: CaptureStats): Tone {
-  const warmth = stats?.warmth ?? 52;
-  if (warmth >= 56) return 'warm';
-  if (warmth <= 46) return 'cool';
-  return 'neutral';
-}
-
-function shadeNumber(brightness: number): string {
-  if (brightness > 62) return '17호 · 라이트';
-  if (brightness > 48) return '21호 · 내추럴';
-  if (brightness > 36) return '23호 · 미디엄';
-  return '25호 · 탠';
-}
-
 function getLookId(answers: DemoAnswers): LookId {
   const id = getChoice(answers, 'look');
   return id && id in LOOKS ? (id as LookId) : 'coral';
@@ -247,30 +234,18 @@ function makeupPaints(look: MakeupLook, k: number): PhotoPaint[] {
   return paints;
 }
 
-function buildLook(look: MakeupLook, k: number): PhotoLook {
-  return { adjust: { brightness: 1.03, saturation: 1.04, contrast: 1.02 }, paints: makeupPaints(look, k) };
+function buildLook(look: MakeupLook, k: number, answers: DemoAnswers): PhotoLook {
+  const profile = (answers.experienceProfile ?? {}) as Record<string, string>;
+  const finish = profile.finish;
+  const style = { ...look, gloss: finish === 'matte' ? false : look.gloss, shimmer: finish === 'matte' ? false : look.shimmer };
+  const opacity = finish === 'sheer' ? 0.72 : 1;
+  return { adjust: { brightness: 1.03, saturation: 1.04, contrast: finish === 'matte' ? 1.04 : 1.02 }, paints: makeupPaints(style, k * opacity) };
 }
 
-/** 피부 톤 궁합 — 같은 사진이면 같은 점수 */
-function rankLooks(tone: Tone, seed: number) {
-  return LOOK_IDS.map((id) => {
-    const look = LOOKS[id];
-    const base = look.tone === tone ? 92 : look.tone === 'neutral' || tone === 'neutral' ? 84 : 71;
-    return { id, score: clamp(base + seededInt(seed, `fit-${id}`, -4, 4), 55, 99) };
-  }).sort((a, b) => b.score - a.score);
-}
-
-/** 고른 룩의 피부 톤 궁합 — 결과 화면과 출력물이 같은 점수를 쓴다 */
-function fitOf(answers: DemoAnswers) {
-  const capture = getCapture(answers, 'face');
+/** Color direction describes the selected cosmetic palette, never a measured skin trait. */
+function styleDirection(answers: DemoAnswers) {
   const lookId = getLookId(answers);
-  const tone = toneOf(capture?.stats);
-  const seed = capture?.seed ?? 7;
-  const ranking = rankLooks(tone, seed);
-  const mine = ranking.find((r) => r.id === lookId) ?? ranking[0]!;
-  const isBest = ranking[0]!.id === lookId;
-  const alt = isBest ? ranking[1]! : ranking[0]!;
-  return { lookId, tone, seed, ranking, mine, isBest, alt };
+  return { lookId, tone: LOOKS[lookId].tone };
 }
 
 /** 캡처 이미지에 룩을 입힌 결과 — 새 룩을 렌더링하는 동안에는 이전 결과를 유지한다 */
@@ -304,9 +279,10 @@ const BARE_LOOK: PhotoLook = { adjust: { brightness: 1.03, saturation: 1.04, con
 function LookStudio({ answers, onUpdate }: DemoStepProps) {
   const capture = getCapture(answers, 'face');
   const selected = getChoice(answers, 'look') as LookId | undefined;
+  const selectedIntensity = getChoice(answers, 'intensity');
   const intensity = getIntensity(answers);
   const look = selected ? LOOKS[selected] : undefined;
-  const preview = useRenderedLook(capture?.image, look ? buildLook(look, intensity.k) : BARE_LOOK);
+  const preview = useRenderedLook(capture?.image, look ? buildLook(look, intensity.k, answers) : BARE_LOOK);
 
   return (
     <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
@@ -317,7 +293,7 @@ function LookStudio({ answers, onUpdate }: DemoStepProps) {
             <img src={preview.url} alt="AR 메이크업 미리보기" className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center text-xs text-slate-500">
-              {capture ? 'AR 준비 중…' : '얼굴 스캔이 필요해요'}
+              {capture ? '시안 준비 중…' : '먼저 사진을 준비해 주세요'}
             </div>
           )}
           <div className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-[9px] font-bold tracking-widest text-white">
@@ -335,16 +311,17 @@ function LookStudio({ answers, onUpdate }: DemoStepProps) {
           </div>
         </div>
 
-        <div className="mt-3 grid grid-cols-3 gap-1 rounded-xl border border-slate-800 bg-slate-900/60 p-1" role="group" aria-label="메이크업 농도">
+        <p className="mt-3 text-xs font-semibold text-slate-400">강도 <span aria-live="polite">{selectedIntensity ? '✓ 선택 완료' : '· 선택 필요'}</span></p>
+        <div className="mt-2 grid grid-cols-3 gap-1 rounded-xl border border-slate-800 bg-slate-900/60 p-1" role="group" aria-label="메이크업 강도">
           {INTENSITIES.map((level) => (
             <button
               key={level.id}
               type="button"
               onClick={() => onUpdate('intensity', level.id)}
-              aria-pressed={intensity.id === level.id}
+              aria-pressed={selectedIntensity === level.id}
               className={cn(
                 'rounded-lg py-1.5 text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400',
-                intensity.id === level.id ? 'bg-teal-500/20 text-teal-200' : 'text-slate-400 hover:text-white'
+                selectedIntensity === level.id ? 'bg-teal-500/20 text-teal-200' : 'text-slate-400 hover:text-white'
               )}
             >
               {level.label}
@@ -353,7 +330,8 @@ function LookStudio({ answers, onUpdate }: DemoStepProps) {
         </div>
       </div>
 
-      <div className="grid w-full grid-cols-2 gap-2.5">
+      <div className="grid w-full grid-cols-2 gap-2.5" role="group" aria-label="메이크업 룩">
+        <p className="col-span-2 text-xs font-semibold text-slate-400">룩 <span aria-live="polite">{selected ? '✓ 선택 완료' : '· 선택 필요'}</span></p>
         {LOOK_IDS.map((id, i) => {
           const item = LOOKS[id];
           const isSelected = selected === id;
@@ -389,16 +367,19 @@ const lookStep: DemoStepDef = {
   meta: {
     id: 'look',
     titleKey: 'AR로 메이크업 룩을 입혀볼게요',
-    subtitleKey: '룩을 누르면 내 얼굴에 바로 적용돼요 · 농도도 조절해 보세요',
-    canProceed: (a) => !!getChoice(a, 'look'),
+    subtitleKey: '강도와 룩을 각각 골라주세요 · 고른 조합은 미리보기에 바로 반영돼요',
+    canProceed: (a) => !makeupBlockedReason(a),
+    getBlockedReason: makeupBlockedReason,
   },
   Component: LookStudio,
 };
 
 /* ── Result parts ──────────────────────────────────────── */
 
-function MakeupCompare({ src, look }: { src: string; look: PhotoLook }) {
-  const { url } = useRenderedLook(src, look);
+function MakeupCompare({ src, look, aiImage }: { src: string; look: PhotoLook; aiImage?: string }) {
+  const rendered = useRenderedLook(aiImage ? undefined : src, look);
+  // AI가 메이크업을 입힌 사진이 있으면 그게 '후', 없으면 캔버스 합성
+  const url = aiImage ?? rendered.url;
 
   if (!url) {
     return (
@@ -449,23 +430,17 @@ function DecorativeQR({ seed, className }: { seed: number; className?: string })
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
   const capture = getCapture(answers, 'face');
-  const { lookId, tone, seed, ranking, mine, isBest, alt } = fitOf(answers);
+  const ai = isAiMakeup(generated) ? generated : null;
+  const { lookId, tone } = styleDirection(answers);
   const look = LOOKS[lookId];
   const intensity = getIntensity(answers);
-  const warmth = capture?.stats.warmth ?? 52;
-  const altLook = LOOKS[alt.id];
-
-  const verdict = isBest
-    ? `${look.name} 룩은 ${TONES[tone].short} 피부와 궁합 ${mine.score}%로 가장 잘 어울려요. 오늘의 베스트 선택이에요!`
-    : mine.score >= 82
-      ? `${look.name} 룩도 잘 어울리지만, ${altLook.name} 룩이 ${alt.score - mine.score}%p 더 화사하게 받쳐줘요.`
-      : `${look.name} 룩은 포인트 데이에 즐기고, 데일리로는 ${altLook.name} 룩을 추천해요.`;
+  const alternatives = LOOK_IDS.filter(id => id !== lookId);
 
   return (
     <ResultShell
-      eyebrow="AR 메이크업 비포 & 애프터"
+      eyebrow="가상 메이크업 비포 & 애프터"
       title={`${look.name} 룩 완성`}
       description={look.mood}
       pillarColor={pillarColor}
@@ -481,13 +456,13 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           className="rounded-2xl bg-white p-3 pb-4 shadow-2xl shadow-black/40"
         >
           {capture ? (
-            <MakeupCompare src={capture.image} look={buildLook(look, intensity.k)} />
+            <MakeupCompare src={capture.image} look={buildLook(look, intensity.k, answers)} aiImage={ai?.image} />
           ) : (
             <div className="aspect-[3/4] rounded-lg bg-slate-100" />
           )}
           <div className="mt-3 flex items-end justify-between px-1 text-left">
             <div>
-              <p className="text-[9px] font-bold tracking-[0.3em] text-slate-400">NEANDER AR MAKEUP</p>
+              <p className="text-[9px] font-bold tracking-[0.3em] text-slate-400">NEANDER LOOK FITTING</p>
               <p className="font-display text-sm font-bold text-slate-900">
                 {look.emoji} {look.name} · {intensity.label}
               </p>
@@ -500,7 +475,26 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           </div>
         </motion.div>
         <p className="mt-3 text-xs text-slate-500">가운데 핸들을 좌우로 밀어 비교해 보세요</p>
+        {ai && <p className="mt-1 text-[11px] text-slate-600">AI가 내 사진에 직접 메이크업을 그렸어요</p>}
       </div>
+
+      {ai && (
+        <Panel title="AI 메이크업 아티스트 코멘트">
+          <p className="text-sm leading-relaxed text-slate-200 [word-break:keep-all]">{ai.comment}</p>
+          <ul className="mt-3 space-y-1.5">
+            {ai.tips.map((tip, i) => (
+              <li key={i} className="flex gap-2 text-xs leading-relaxed text-slate-400 [word-break:keep-all]">
+                <span className="font-bold" style={{ color: pillarColor }}>
+                  {i + 1}
+                </span>
+                {tip}
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      )}
+
+      <p className="max-w-md text-xs leading-relaxed text-slate-400">선택한 컬러를 사진에 표현한 가상 시안이에요. 실제 피부 언더톤 측정이나 제품 발색 시험 결과가 아니에요.</p>
 
       {/* 쉐이드 리스트 */}
       <Panel title="이 룩에 쓴 제품">
@@ -529,69 +523,27 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           ))}
         </ul>
         <div className="mt-4 flex items-center gap-3 border-t border-slate-800 pt-4">
-          <DecorativeQR seed={seed + lookId.length} className="h-14 w-14 shrink-0 rounded" />
+          <DecorativeQR seed={(capture?.seed ?? 7) + lookId.length} className="h-14 w-14 shrink-0 rounded" />
           <p className="text-xs leading-relaxed text-slate-400 [word-break:keep-all]">
             현장에서는 제품별 QR이 함께 출력돼 바로 구매 페이지로 이어져요. <span className="text-slate-600">(데모용 이미지)</span>
           </p>
         </div>
       </Panel>
 
-      {/* 톤 맞춤 추천 */}
-      <Panel title="AI 톤 맞춤 추천">
-        <div className="flex items-center justify-between">
+      <Panel title="오늘의 컬러 스타일 가이드">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-semibold text-white">{TONES[tone].name}</p>
-          <p className="text-xs text-slate-500">피부 온도 지수 {warmth}</p>
+          <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300">선택한 표현 · {intensity.label}</span>
         </div>
-        <div className="relative mt-2 h-2.5 rounded-full" style={{ background: 'linear-gradient(90deg, #93c5fd, #f5d0c5 50%, #fb923c)' }}>
-          <motion.span
-            className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow"
-            style={{ backgroundColor: pillarColor }}
-            initial={{ left: '50%' }}
-            animate={{ left: `${clamp(warmth, 4, 96)}%` }}
-            transition={{ type: 'spring', stiffness: 60, damping: 12, delay: 0.3 }}
-          />
-        </div>
-        <div className="mt-1 flex justify-between text-[10px] text-slate-500">
-          <span>쿨</span>
-          <span>뉴트럴</span>
-          <span>웜</span>
-        </div>
+        <div className="mt-3 h-10 rounded-xl" style={{ background: swatchOf(look) }} aria-label={`${look.name} 아이·치크·립 컬러 조합`} />
         <p className="mt-3 text-xs leading-relaxed text-slate-400 [word-break:keep-all]">{TONES[tone].desc}</p>
-
-        <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-          <div className="flex items-center gap-3">
-            <p className="font-display text-3xl font-extrabold" style={{ color: pillarColor }}>
-              {mine.score}%
-            </p>
-            <p className="text-sm leading-snug text-slate-200 [word-break:keep-all]">{verdict}</p>
-          </div>
-          <div className="mt-3 flex items-center gap-3 rounded-lg bg-slate-900/80 p-2.5">
-            <span className="h-8 w-14 shrink-0 rounded-md border border-white/10" style={{ background: swatchOf(altLook) }} aria-hidden="true" />
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-medium text-slate-500">{isBest ? '같은 톤 다른 추천' : 'AI 베스트 추천'}</p>
-              <p className="text-sm font-semibold text-white">
-                {altLook.emoji} {altLook.name}
-              </p>
-            </div>
-            <span className="text-sm font-bold text-teal-300">{alt.score}%</span>
-          </div>
-        </div>
-
-        <ul className="mt-4 space-y-2">
-          {ranking.map((r, i) => (
-            <li key={r.id} className="flex items-center gap-2 text-xs">
-              <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: LOOKS[r.id].lip }} aria-hidden="true" />
-              <span className={cn('w-24 shrink-0', r.id === lookId ? 'font-semibold text-white' : 'text-slate-400')}>{LOOKS[r.id].name}</span>
-              <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-800">
-                <motion.span
-                  className="block h-full rounded-full"
-                  style={{ background: swatchOf(LOOKS[r.id]) }}
-                  initial={{ width: 0 }}
-                  animate={{ width: `${r.score}%` }}
-                  transition={{ duration: 0.8, delay: 0.4 + i * 0.08 }}
-                />
-              </span>
-              <span className="w-8 text-right font-mono text-slate-400">{r.score}</span>
+        <p className="mt-5 text-xs font-semibold text-slate-300">다음에 비교해 볼 팔레트</p>
+        <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+          {alternatives.map(id => (
+            <li key={id} className="rounded-xl border border-white/10 bg-white/5 p-3 text-left">
+              <div className="h-6 rounded-md" style={{ background: swatchOf(LOOKS[id]) }} />
+              <p className="mt-2 text-xs font-semibold text-white">{LOOKS[id].emoji} {LOOKS[id].name}</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{LOOKS[id].desc}</p>
             </li>
           ))}
         </ul>
@@ -610,30 +562,36 @@ export default defineDemo({
     analyzeEmoji: '💄',
     analyzeDurationMs: 3400,
     analyzeImageStepId: 'face',
-    analyzeMessages: ['입술 경계 따라 립 채우는 중', '볼 위치에 블러셔 블렌딩 중', '눈두덩 섀도 그라데이션 중', '톤 맞춤 제품 고르는 중'],
+    // AI 사진 변환은 10~20초 — 마지막 문구가 남은 시간을 채운다
+    analyzeMessages: ['장면·질감·선택 룩을 한 브리프로 정리', '사진에 메이크업 콘셉트 표현', '전후 비교와 스타일링 노트 준비'],
   },
   steps: [
     cameraStep({
       id: 'face',
-      title: '얼굴을 스캔해 볼게요',
+      title: '거울 앞, 사진을 준비해요',
       subtitle: '정면을 바라보고, 눈과 입술이 잘 보이게 해주세요',
       mode: 'face',
       subject: '얼굴',
-      scanLabels: ['안면 랜드마크 468개 인식', '입술·눈두덩·볼 영역 분리', '피부 언더톤 측정', 'AR 메이크업 레이어 준비'],
-      readouts: (c) => [
-        { label: '언더톤', value: TONES[toneOf(c.stats)].name },
-        { label: '피부 호수', value: shadeNumber(c.stats.brightness) },
-        { label: '입술 영역', value: '트래킹 완료' },
-        { label: 'AR 추적', value: `${56 + (c.seed % 5)}fps` },
-      ],
+      scanLabels: ['정면 사진 준비', '선택한 룩과 질감 확인', '가상 메이크업 시안 준비'],
+      readouts: c => [{ label: '사진 밝기', value: c.stats.brightness > 45 ? '밝은 편' : '조명을 높여주세요' }, { label: '체험 방식', value: '사진 기반 스타일링' }],
     }),
     lookStep,
   ],
   computeResult: (answers) => getLookId(answers),
   Result,
-  print: (answers) => {
+  generate: (answers) => {
     const capture = getCapture(answers, 'face');
-    const { lookId, tone, mine } = fitOf(answers);
+    if (!capture) return Promise.resolve(null);
+    return requestDemoAi<AiMakeup>(
+      'virtual-makeup',
+      { experienceProfile: answers.experienceProfile, photo: capture.image, look: getLookId(answers), intensity: getIntensity(answers).id },
+      { timeoutMs: 60_000, validate: isAiMakeup }
+    );
+  },
+  print: (answers, _resultKey, generated) => {
+    const capture = getCapture(answers, 'face');
+    const ai = isAiMakeup(generated) ? generated : null;
+    const { lookId, tone } = styleDirection(answers);
     const look = LOOKS[lookId];
     const intensity = getIntensity(answers);
     const lip = look.shades.find((s) => s.part === '립');
@@ -643,12 +601,12 @@ export default defineDemo({
       photos: capture
         ? [
             { src: capture.image, label: '전' },
-            { src: capture.image, look: buildLook(look, intensity.k), label: '후' },
+            ai ? { src: ai.image, label: '후' } : { src: capture.image, look: buildLook(look, intensity.k, answers), label: '후' },
           ]
         : [],
       title: `${look.name} 룩 완성`,
-      caption: `${intensity.label} · ${TONES[tone].short} 궁합 ${mine.score}%${lip ? ` · 립 ${lip.shade}` : ''}`,
-      badge: 'AR MAKEUP',
+      caption: `${intensity.label} · ${TONES[tone].short} 컬러 방향${lip ? ` · 립 ${lip.shade}` : ''}`,
+      badge: 'LOOK FITTING',
     };
   },
 });

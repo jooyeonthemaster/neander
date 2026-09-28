@@ -2,7 +2,7 @@ export interface PortfolioProject {
   slug: string;
   titleKey: string;
   descriptionKey: string;
-  year: number;
+  year: number | null;
   category: 'online' | 'offline' | 'service' | 'ip';
   tags: string[];
   image: string;

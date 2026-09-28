@@ -1,0 +1,252 @@
+/* Approved mockups: a readable question, deliberate photography, one choice at a time. */
+.experience-venue[data-mockup-layout] .mockup-scene {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  margin-inline: auto;
+  color: var(--venue-ink);
+}
+.experience-venue[data-mockup-layout] .mockup-scene-copy { display: flex; flex-direction: column; min-height: 0; min-width: 0; height: 100%; }
+.experience-venue[data-mockup-layout] .mockup-scene .demo-page-window { display: flex; align-items: center; }
+.experience-venue[data-mockup-layout] .mockup-content { width: 100%; max-width: 1160px; margin-inline: auto; }
+.experience-venue[data-mockup-layout] .mockup-content h2,
+.experience-venue[data-mockup-layout] .mockup-scene .venue-question legend {
+  width: 100%;
+  margin: 0;
+  color: var(--venue-ink);
+  font-family: var(--venue-heading-font);
+  font-size: clamp(32px, 3.65vw, 54px);
+  font-weight: var(--venue-title-weight, 700);
+  line-height: 1.35;
+  letter-spacing: -.045em;
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.experience-venue[data-mockup-layout] .mockup-scene .venue-question legend { display: block; margin-bottom: 30px; }
+.experience-venue[data-mockup-layout] .mockup-scene .venue-question legend > span { color: inherit; font: inherit; }
+.experience-venue[data-mockup-layout] .mockup-signature { margin: 0 0 18px; color: var(--venue-accent); font-size: 13px; font-weight: 650; line-height: 1.5; letter-spacing: .14em; }
+.experience-venue[data-mockup-layout] .mockup-invitation { max-width: 42em; margin: 24px 0 0; color: var(--venue-muted); font-size: 19px; line-height: 1.8; word-break: keep-all; overflow-wrap: anywhere; }
+.experience-venue[data-mockup-layout] .mockup-welcome-meta { display: flex; flex-wrap: wrap; gap: 10px 20px; margin-top: 30px; color: var(--venue-muted); font-size: 14px; line-height: 1.6; }
+.experience-venue[data-mockup-layout] .mockup-welcome-meta > span + span { padding-left: 20px; border-left: 1px solid var(--venue-line); }
+.experience-venue[data-mockup-layout] .mockup-scene-photo { position: relative; min-width: 0; }
+.experience-venue[data-mockup-layout] .mockup-scene-photo .venue-image { display: block; position: relative; width: 100%; height: 100%; min-height: 0; max-height: none; margin: 0; border: 0; border-radius: 8px; outline: none; transform: none; box-shadow: none; }
+.experience-venue[data-mockup-layout] .mockup-scene-photo .venue-image-shade { background: linear-gradient(transparent 76%, #0009); }
+.experience-venue[data-mockup-layout] .mockup-scene-photo .venue-image figcaption { left: 10px; bottom: 9px; right: 10px; font-size: 10px; line-height: 1.4; text-align: left; }
+.experience-venue[data-mockup-layout] .mockup-scene .venue-question { min-width: 0; margin: 0; padding: 0; border: 0; }
+.experience-venue[data-mockup-layout] .mockup-scene .venue-options { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; width: 100%; padding: 0; border: 0; border-radius: 0; overflow: visible; }
+.experience-venue[data-mockup-layout] .mockup-scene .venue-option { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 20px; min-width: 0; min-height: 76px; padding: 18px 24px; border: 1px solid var(--venue-line); border-radius: 8px; background: transparent; color: var(--venue-ink); text-align: left; box-shadow: none; transform: none; }
+.experience-venue[data-mockup-layout] .mockup-scene .venue-option:hover { border-color: var(--venue-accent); background: color-mix(in srgb, var(--venue-accent) 5%, var(--venue-paper)); }
+.experience-venue[data-mockup-layout] .mockup-scene .venue-option[aria-pressed='true'] { border-color: var(--venue-accent); outline: 1px solid var(--venue-accent); outline-offset: -1px; background: color-mix(in srgb, var(--venue-accent) 9%, var(--venue-paper)); box-shadow: none; }
+.experience-venue[data-mockup-layout] .mockup-scene .venue-option:focus-visible { outline: 3px solid var(--venue-accent); outline-offset: 4px; }
+.experience-venue[data-mockup-layout] .mockup-scene .venue-option-label { font-size: clamp(20px, 1.9vw, 27px); font-weight: 600; line-height: 1.4; }
+.experience-venue[data-mockup-layout] .mockup-scene .venue-option-swatch { flex-shrink: 0; width: 28px; height: 28px; margin: 0; border-radius: 50%; border: 1px solid var(--venue-line); }
+.experience-venue[data-mockup-layout] .mockup-option-radio { display: block; width: 29px; height: 29px; flex-shrink: 0; padding: 5px; border: 1.5px solid var(--venue-muted); border-radius: 50%; background-clip: content-box; }
+.experience-venue[data-mockup-layout] [aria-pressed='true'] .mockup-option-radio { border-color: var(--venue-accent); background-color: var(--venue-accent); }
+.experience-venue[data-mockup-layout] .mockup-scene .venue-option-check { display: none; }
+.experience-venue[data-mockup-layout] .mockup-scene .venue-current-choice-detail { min-height: 1.6em; margin: 20px 0 0; color: var(--venue-muted); font-size: 15px; line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere; }
+
+/* 01 — an inset photograph and large editorial choice rows. */
+.experience-venue[data-mockup-layout='editorial'] .mockup-scene { grid-template-columns: minmax(180px, .8fr) minmax(0, 1.8fr); align-items: center; gap: clamp(28px, 4vw, 62px); }
+.experience-venue[data-mockup-layout='editorial'] .mockup-editorial-photo { width: 100%; height: min(100%, 560px); align-self: center; min-height: 0; }
+.experience-venue[data-mockup-layout='editorial'] .mockup-editorial-photo .venue-image { border-radius: 0; }
+.experience-venue[data-mockup-layout='editorial'] .mockup-scene .venue-question legend { margin-bottom: 28px; }
+
+/* 02 — a small symbol, one centered question and three calm buttons. */
+.experience-venue[data-mockup-layout='centered'] .mockup-content { max-width: 1040px; text-align: center; }
+.experience-venue[data-mockup-layout='centered'] .mockup-content > .mockup-scene-photo { width: min(240px, 30vw); height: min(168px, 22dvh); margin: 0 auto 32px; }
+.experience-venue[data-mockup-layout='centered'] .mockup-invitation { margin-inline: auto; }
+.experience-venue[data-mockup-layout='centered'] .mockup-welcome-meta { justify-content: center; }
+.experience-venue[data-mockup-layout='centered'] .mockup-scene .venue-options { grid-template-columns: repeat(var(--mockup-option-count), minmax(0, 1fr)); gap: 16px; }
+.experience-venue[data-mockup-layout='centered'] .mockup-scene .venue-option { justify-content: center; text-align: center; padding-inline: 16px; border-radius: 12px; }
+.experience-venue[data-mockup-layout='centered'] .mockup-scene .venue-option[aria-pressed='true'] { background: var(--venue-accent); color: var(--venue-accent-ink); }
+
+/* 03 — photographs belong to the choices, with no competing hero photo. */
+.experience-venue[data-mockup-layout='photo-choices'] .mockup-scene .venue-options { grid-template-columns: repeat(var(--mockup-option-count), minmax(0, 1fr)); gap: 20px; }
+.experience-venue[data-mockup-layout='photo-choices'] .mockup-scene .venue-option { display: flex; flex-direction: column; gap: 0; justify-content: flex-start; padding: 4px; overflow: hidden; border-radius: 9px; background: var(--venue-paper); }
+.experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-photo { position: relative; display: block; width: 100%; height: clamp(150px, 23dvh, 240px); flex-shrink: 0; overflow: hidden; border-radius: 5px; }
+.experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-photo img { object-fit: cover; }
+.experience-venue[data-mockup-layout='photo-choices'] .mockup-scene .venue-option-label { display: flex; justify-content: center; align-items: center; flex: 1; width: 100%; min-height: 92px; padding: 18px 12px; text-align: center; }
+.experience-venue[data-mockup-layout='photo-choices'] .mockup-scene .venue-option-check { display: block; width: 32px; height: 32px; top: 13px; right: 13px; padding: 6px; border-radius: 50%; color: var(--venue-accent-ink); background: var(--venue-accent); }
+.experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-preview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 28px; }
+.experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-preview > div { overflow: hidden; border: 1px solid var(--venue-line); border-radius: 8px; background: var(--venue-paper); }
+.experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-preview .mockup-choice-photo { height: min(180px, 21dvh); }
+.experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-preview > div > span:last-child { display: block; padding: 14px 10px; text-align: center; font-size: 18px; font-weight: 600; word-break: keep-all; }
+
+/* 04 — the portrait remains a bounded preview inside the photography studio. */
+.experience-venue[data-mockup-layout='photo-studio'] .mockup-content { max-width: 1050px; text-align: center; }
+.experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .mockup-scene-photo { width: min(230px, 24dvh); height: min(285px, 30dvh); margin: 22px auto 28px; padding: 7px; border: 1px solid var(--venue-line); }
+.experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .mockup-scene-photo::before,
+.experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .mockup-scene-photo::after { content: ''; position: absolute; width: 15px; height: 15px; pointer-events: none; }
+.experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .mockup-scene-photo::before { top: -7px; left: -7px; border-top: 1px solid var(--venue-muted); border-left: 1px solid var(--venue-muted); }
+.experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .mockup-scene-photo::after { bottom: -7px; right: -7px; border-bottom: 1px solid var(--venue-muted); border-right: 1px solid var(--venue-muted); }
+.experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-image { border-radius: 0; }
+.experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-question legend { margin-bottom: 0; }
+.experience-venue[data-mockup-layout='photo-studio'] .mockup-invitation { margin: 14px auto 0; }
+.experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-options { grid-template-columns: repeat(var(--mockup-option-count), minmax(0, 1fr)); gap: 12px; }
+.experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-option { min-height: 68px; justify-content: center; text-align: center; padding: 14px; }
+.experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-option-label { font-size: 21px; }
+.experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-option[aria-pressed='true'] { background: var(--venue-accent); color: var(--venue-accent-ink); }
+.experience-venue[data-mockup-layout='photo-studio'] .mockup-welcome-meta { margin-top: 20px; justify-content: center; }
+
+/* 05 — a quiet phase rail leaves the question and controls in charge. */
+.experience-venue[data-mockup-layout='console'] .mockup-scene { grid-template-columns: 158px minmax(0, 1fr); gap: 40px; }
+.experience-venue[data-mockup-layout='console'] .mockup-phase-rail { display: flex; flex-direction: column; justify-content: center; gap: 42px; height: 100%; min-height: 0; margin: 0; padding: 20px 0; border-right: 1px solid var(--venue-line); list-style: none; }
+.experience-venue[data-mockup-layout='console'] .mockup-phase-rail li { position: relative; display: flex; flex-direction: column; gap: 7px; padding-left: 20px; color: var(--venue-muted); }
+.experience-venue[data-mockup-layout='console'] .mockup-phase-rail li > span { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.experience-venue[data-mockup-layout='console'] .mockup-phase-rail li > strong { color: inherit; font-size: 22px; line-height: 1.4; }
+.experience-venue[data-mockup-layout='console'] .mockup-phase-rail li[aria-current] { color: var(--venue-ink); }
+.experience-venue[data-mockup-layout='console'] .mockup-phase-rail li[aria-current] > span { color: var(--venue-accent); }
+.experience-venue[data-mockup-layout='console'] .mockup-phase-rail li[aria-current]::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 4px; border-radius: 2px; background: var(--venue-accent); }
+.experience-venue[data-mockup-layout='console'] .mockup-welcome-heading,
+.experience-venue[data-mockup-layout='console'] .mockup-scene .venue-question legend { display: grid; grid-template-columns: minmax(0, 1fr) 170px; gap: 24px; align-items: center; }
+.experience-venue[data-mockup-layout='console'] .mockup-scene .mockup-scene-photo { width: 170px; height: 126px; }
+.experience-venue[data-mockup-layout='console'] .mockup-scene .venue-option { min-height: 82px; background: var(--venue-paper); }
+.experience-venue[data-mockup-layout='console'] .mockup-scene .venue-option[aria-pressed='true'] { box-shadow: inset 5px 0 var(--venue-accent); background: color-mix(in srgb, var(--venue-accent) 9%, var(--venue-paper)); }
+
+/* Activity pages use the same modest image proportions, never a full-height poster. */
+.experience-venue[data-mockup-layout] .mockup-station-guide { display: flex; flex-direction: column; justify-content: center; gap: 16px; padding: 0; border: 0; background: none; box-shadow: none; }
+.experience-venue[data-mockup-layout] .mockup-station-guide .mockup-scene-photo { width: 100%; height: min(330px, 42dvh); }
+.experience-venue[data-mockup-layout] .mockup-guide-caption { margin: 0; color: var(--venue-muted); font-size: 14px; line-height: 1.6; }
+.experience-venue[data-mockup-layout='centered'] .mockup-station-guide,
+.experience-venue[data-mockup-layout='photo-choices'] .mockup-station-guide,
+.experience-venue[data-mockup-layout='photo-studio'] .mockup-station-guide { display: none; }
+.experience-venue:is([data-mockup-layout='centered'], [data-mockup-layout='photo-choices'], [data-mockup-layout='photo-studio']) .venue-station-grid { grid-template-columns: minmax(0, 1fr); }
+.experience-venue[data-mockup-layout='console'] .venue-station-grid { display: grid; grid-template-columns: 158px minmax(0, 1fr); gap: 40px; }
+
+@media (max-width: 900px) {
+  .experience-venue[data-mockup-layout] .mockup-content h2,
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-question legend { font-size: clamp(27px, 4vw, 38px); }
+  .experience-venue[data-mockup-layout='editorial'] .mockup-scene { grid-template-columns: 25% minmax(0, 1fr); gap: 24px; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-option { min-height: 64px; padding: 14px 18px; gap: 14px; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-option-label { font-size: 20px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-scene,
+  .experience-venue[data-mockup-layout='console'] .venue-station-grid { grid-template-columns: 108px minmax(0, 1fr); gap: 24px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-phase-rail li > strong { font-size: 18px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-welcome-heading,
+  .experience-venue[data-mockup-layout='console'] .mockup-scene .venue-question legend { grid-template-columns: minmax(0, 1fr) 110px; gap: 15px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-scene .mockup-scene-photo { width: 110px; height: 90px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-scene .venue-option { padding: 4px; gap: 0; }
+  .experience-venue[data-mockup-layout] .mockup-station-guide { display: none; }
+  .experience-venue[data-mockup-layout='console'] .mockup-station-guide { display: flex; }
+  .experience-venue[data-mockup-layout='editorial'] .venue-station-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .experience-venue[data-mockup-layout] .mockup-scene .demo-page-window { align-items: flex-start; }
+  .experience-venue[data-mockup-layout] .mockup-content h2,
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-question legend { font-size: clamp(26px, 7vw, 34px); line-height: 1.4; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-question legend { margin-bottom: 22px; }
+  .experience-venue[data-mockup-layout] .mockup-signature { margin-bottom: 12px; font-size: 11px; letter-spacing: .1em; }
+  .experience-venue[data-mockup-layout] .mockup-invitation { margin-top: 16px; font-size: 16px; line-height: 1.7; }
+  .experience-venue[data-mockup-layout] .mockup-welcome-meta { gap: 7px 12px; margin-top: 20px; font-size: 12px; }
+  .experience-venue[data-mockup-layout] .mockup-welcome-meta > span + span { padding-left: 12px; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-options { gap: 10px; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-option { min-height: 62px; padding: 14px; gap: 12px; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-option-label { font-size: 18px; }
+  .experience-venue[data-mockup-layout] .mockup-option-radio { width: 24px; height: 24px; padding: 4px; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-current-choice-detail { margin-top: 16px; font-size: 14px; line-height: 1.65; }
+  .experience-venue[data-mockup-layout='editorial'] .mockup-scene { grid-template-columns: minmax(0, 1fr); grid-template-rows: 116px minmax(0, 1fr); gap: 20px; }
+  .experience-venue[data-mockup-layout='editorial'] .mockup-editorial-photo { height: 116px; }
+  .experience-venue[data-mockup-layout='editorial'] .mockup-editorial-photo .venue-image > img { object-position: center 38%; }
+  .experience-venue[data-mockup-layout='centered'] .mockup-content > .mockup-scene-photo { width: 160px; height: 112px; margin-bottom: 26px; }
+  .experience-venue[data-mockup-layout='centered'] .mockup-scene .venue-options { grid-template-columns: minmax(0, 1fr); }
+  .experience-venue[data-mockup-layout='centered'] .mockup-scene .venue-option { min-height: 58px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-scene .venue-options { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-scene .venue-option { flex-direction: row; min-height: 102px; padding: 4px; gap: 0; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-photo { width: 104px; height: 96px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-scene .venue-option-label { min-height: 0; padding: 16px 12px; text-align: left; justify-content: flex-start; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-scene .venue-option-check { width: 25px; height: 25px; top: 8px; left: 78px; right: auto; padding: 4px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-preview { grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: 20px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-preview > div { display: flex; align-items: center; gap: 14px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-preview .mockup-choice-photo { width: 100px; height: 82px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-preview > div > span:last-child { flex: 1; padding: 10px 10px 10px 0; text-align: left; font-size: 16px; }
+  .experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .mockup-scene-photo { width: 146px; height: 182px; margin: 18px auto 24px; }
+  .experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-question legend { margin-bottom: 0; }
+  .experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-option { min-height: 58px; padding: 10px; gap: 7px; }
+  .experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-option:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-option-label { font-size: 16px; }
+  .experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-option-swatch { width: 20px; height: 20px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-scene { grid-template-columns: minmax(0, 1fr); grid-template-rows: 48px minmax(0, 1fr); gap: 22px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-phase-rail { flex-direction: row; justify-content: flex-start; gap: 0; width: 100%; height: auto; padding: 0 0 12px; border-right: 0; border-bottom: 1px solid var(--venue-line); }
+  .experience-venue[data-mockup-layout='console'] .mockup-phase-rail li { flex: 1; flex-direction: row; align-items: center; gap: 5px; padding: 0 0 0 8px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-phase-rail li > span { font-size: 12px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-phase-rail li > strong { font-size: 13px; white-space: nowrap; }
+  .experience-venue[data-mockup-layout='console'] .mockup-phase-rail li[aria-current]::before { width: 2px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-welcome-heading,
+  .experience-venue[data-mockup-layout='console'] .mockup-scene .venue-question legend { grid-template-columns: minmax(0, 1fr) 76px; gap: 12px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-scene .mockup-scene-photo { width: 76px; height: 82px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-scene .venue-image figcaption { font-size: 8px; bottom: 6px; left: 5px; right: 5px; }
+  .experience-venue[data-mockup-layout='console'] .venue-station-grid { display: flex; flex-direction: column; gap: 18px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-station-guide { flex-shrink: 0; height: auto; overflow: visible; }
+  .experience-venue[data-mockup-layout='console'] .venue-workspace { flex: 1; min-height: 0; }
+}
+
+@media (max-height: 760px) and (min-width: 601px) {
+  .experience-venue[data-mockup-layout] .mockup-content h2,
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-question legend { font-size: 34px; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-option { min-height: 62px; padding-block: 12px; }
+  .experience-venue[data-mockup-layout='centered'] .mockup-content > .mockup-scene-photo { width: 160px; height: 108px; margin-bottom: 22px; }
+  .experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .mockup-scene-photo { width: 136px; height: 166px; margin-block: 18px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-photo { height: 150px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-scene .venue-option-label { min-height: 64px; }
+}
+
+@media (max-width: 360px) {
+  .experience-venue[data-mockup-layout] .mockup-content h2,
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-question legend { font-size: 25px; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-question legend { margin-bottom: 16px; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-options { gap: 8px; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-option { min-height: 56px; padding-block: 11px; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-current-choice-detail { margin-top: 12px; font-size: 13px; }
+  .experience-venue[data-mockup-layout='editorial'] .mockup-scene { grid-template-rows: 70px minmax(0, 1fr); gap: 14px; }
+  .experience-venue[data-mockup-layout='editorial'] .mockup-editorial-photo { height: 70px; }
+  .experience-venue[data-mockup-layout='centered'] .mockup-content > .mockup-scene-photo { width: 140px; height: 90px; margin-bottom: 22px; }
+  .experience-venue[data-mockup-layout='centered'] .mockup-scene .venue-option { min-height: 54px; }
+  .experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .mockup-scene-photo { width: 122px; height: 148px; }
+  .experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-question legend { margin-bottom: 0; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-scene .venue-option { min-height: 88px; padding: 4px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-photo { width: 82px; height: 80px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-scene .venue-option-check { left: 57px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-scene { grid-template-rows: 40px minmax(0, 1fr); gap: 14px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-scene .mockup-scene-photo { height: 64px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-phase-rail li > strong { font-size: 12px; }
+}
+
+/* Short landscape keeps each photograph and button smaller than a content page. */
+@media (min-width: 601px) and (max-height: 500px) {
+  .experience-venue[data-mockup-layout] .mockup-content h2,
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-question legend { font-size: 28px; line-height: 1.35; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-question legend { margin-bottom: 14px; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-options { gap: 8px; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-option { min-height: 50px; padding: 10px 14px; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-option-label { font-size: 18px; }
+  .experience-venue[data-mockup-layout] .mockup-scene .venue-current-choice-detail { margin-top: 12px; font-size: 13px; }
+  .experience-venue[data-mockup-layout] .mockup-signature { margin-bottom: 10px; }
+  .experience-venue[data-mockup-layout] .mockup-invitation { margin-top: 12px; font-size: 16px; line-height: 1.6; }
+  .experience-venue[data-mockup-layout] .mockup-welcome-meta { margin-top: 14px; font-size: 12px; }
+  .experience-venue:is([data-mockup-layout='centered'], [data-mockup-layout='photo-studio']) .mockup-content { position: relative; min-height: 144px; padding-left: 154px; }
+  .experience-venue[data-mockup-layout='centered'] .mockup-content > .mockup-scene-photo { position: absolute; left: 0; top: 6px; width: 130px; height: 96px; margin: 0; }
+  .experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .mockup-scene-photo { position: absolute; left: 8px; top: 7px; width: 110px; height: 132px; margin: 0; }
+  .experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-option { min-height: 56px; padding: 10px; gap: 7px; }
+  .experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-option-label { font-size: 16px; }
+  .experience-venue[data-mockup-layout='photo-studio'] .mockup-scene .venue-option-swatch { width: 20px; height: 20px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-scene .venue-option { flex-direction: row; min-height: 78px; padding: 4px; gap: 0; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-photo { width: 74px; height: 70px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-scene .venue-option-label { min-height: 0; padding: 10px; font-size: 17px; text-align: left; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-scene .venue-option-check { width: 24px; height: 24px; left: 54px; right: auto; top: 8px; padding: 4px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-preview { gap: 10px; margin-top: 16px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-preview .mockup-choice-photo { width: 100%; height: 74px; }
+  .experience-venue[data-mockup-layout='photo-choices'] .mockup-choice-preview > div > span:last-child { padding: 8px; font-size: 15px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-phase-rail { gap: 20px; padding-block: 0; }
+  .experience-venue[data-mockup-layout='console'] .mockup-phase-rail li { gap: 3px; padding-left: 14px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-phase-rail li > span { font-size: 15px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-phase-rail li > strong { font-size: 17px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-scene .mockup-scene-photo { width: 92px; height: 64px; }
+  .experience-venue[data-mockup-layout='console'] .mockup-welcome-heading,
+  .experience-venue[data-mockup-layout='console'] .mockup-scene .venue-question legend { grid-template-columns: minmax(0, 1fr) 92px; }
+}

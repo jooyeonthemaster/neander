@@ -27,8 +27,30 @@ interface SmoothScrollProviderProps {
 
 export default function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
   const lenisRef = useRef<Lenis | null>(null);
+  const pathname = usePathname();
   // The home page uses native CSS scroll snapping, which Lenis would fight
-  const isHome = usePathname() === '/';
+  const isHome = pathname === '/';
+  // 뒤로·앞으로 가기는 브라우저가 이전 위치로 돌려놓으므로 맨 위로 올리지 않는다
+  const isHistoryNav = useRef(false);
+
+  useEffect(() => {
+    const onPop = () => { isHistoryNav.current = true; };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  // 링크로 다른 페이지에 가면 맨 위에서 시작한다.
+  // Lenis가 자기 스크롤 위치를 들고 있어 Next의 기본 '맨 위로'가 먹지 않고, 이전 페이지 위치에 머물렀다
+  // (예: 회사 소개를 내려 본 뒤 서비스 소개를 누르면 제목이 화면 밖에 있어 글자가 안 보였다).
+  useEffect(() => {
+    if (isHistoryNav.current) {
+      isHistoryNav.current = false;
+      return;
+    }
+    if (window.location.hash) return;
+    lenisRef.current?.scrollTo(0, { immediate: true, force: true });
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     if (isHome) return;

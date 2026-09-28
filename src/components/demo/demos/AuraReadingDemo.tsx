@@ -6,7 +6,6 @@ import {
   Panel,
   ProcessedPhoto,
   ResultShell,
-  ScoreBars,
   TraitChips,
   answersSeed,
   cameraStep,
@@ -15,14 +14,15 @@ import {
   defineDemo,
   getCapture,
   getChoice,
-  seededInt,
+  requestDemoAi,
   seededRandom,
   type PhotoLook,
 } from '../kit';
+import { AURA_IDS, AURA_MOODS, AURA_PROFILE_LABELS } from '@/data/demo-ai/aura';
+import type { AiAura, AuraId } from '@/data/demo-ai/aura';
+import { isNotObserved } from '@/data/demo-ai/photo-reading';
 
 /* ── Data ──────────────────────────────────────────────── */
-
-type AuraId = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'indigo' | 'violet';
 
 interface Aura {
   label: string;
@@ -124,60 +124,69 @@ const AURAS: Record<AuraId, Aura> = {
   },
 };
 
-const SPECTRUM: AuraId[] = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'];
-const PROFILE_LABELS = ['에너지 레벨', '감수성', '공감력', '창의력', '안정감'] as const;
+const SPECTRUM: AuraId[] = [...AURA_IDS];
+const PROFILE_LABELS = AURA_PROFILE_LABELS;
 
-type MoodId = 'passion' | 'flutter' | 'joy' | 'tired' | 'calm' | 'dreamy';
-
-const MOODS: { id: MoodId; emoji: string; label: string; desc: string; target: number }[] = [
-  { id: 'passion', emoji: '🔥', label: '열정 가득', desc: '뭐든 해낼 것 같아요', target: 0 },
-  { id: 'flutter', emoji: '💓', label: '두근두근', desc: '설레는 일이 있어요', target: 1 },
-  { id: 'joy', emoji: '😆', label: '신나요', desc: '웃음이 계속 나와요', target: 2 },
-  { id: 'tired', emoji: '🫠', label: '조금 지쳤어요', desc: '쉼이 필요해요', target: 3 },
-  { id: 'calm', emoji: '🌊', label: '평온해요', desc: '마음이 잔잔해요', target: 4 },
-  { id: 'dreamy', emoji: '☁️', label: '몽글몽글', desc: '생각이 둥둥 떠다녀요', target: 6 },
-];
+const MOODS = AURA_MOODS;
 
 /* ── Reading ──────────────────────────────────────────── */
 
 function readAura(answers: DemoAnswers) {
-  const capture = getCapture(answers, 'face');
   const mood = MOODS.find((m) => m.id === getChoice(answers, 'mood')) ?? MOODS[4]!;
-  const seed = answersSeed(answers);
-  const warmth = capture?.stats.warmth ?? 50;
-  const brightness = capture?.stats.brightness ?? 55;
+  const choices = (answers.experienceProfile ?? {}) as Record<string, string>;
+  const selectedColors: Record<string, AuraId> = { dawn: 'violet', sun: 'yellow', forest: 'green' };
+  const id = selectedColors[choices.light] ?? SPECTRUM[Math.round(clamp(mood.target, 0, 6))]!;
+  const index = SPECTRUM.indexOf(id);
+  const second = SPECTRUM[index === 6 ? 5 : index + 1]!;
+  const intensity = choices.intensity === 'soft' ? 60 : choices.intensity === 'vivid' ? 95 : 80;
+  return { seed: answersSeed(answers), id, second, mood, profile: AURAS[id].profile, intensity };
+}
 
-  // 따뜻한 톤일수록 스펙트럼 앞쪽(레드), 어두울수록 뒤쪽(인디고·바이올렛)
-  const photoIdx = ((100 - warmth) / 100) * 6 + (brightness < 40 ? 1 : brightness > 70 ? -0.6 : 0);
-  const jitter = (seededRandom(seed, 'aura') - 0.5) * 1.2;
-  const index = Math.round(clamp(mood.target * 0.55 + photoIdx * 0.45 + jitter, 0, 6));
-  const id = SPECTRUM[index]!;
-  const secondIndex = index === 6 ? 5 : index === 0 ? 1 : seededRandom(seed, 'second') > 0.5 ? index + 1 : index - 1;
-  const second = SPECTRUM[secondIndex]!;
+/* ── AI 결과 ──────────────────────────────────────────── */
 
-  const aura = AURAS[id];
-  const profile = aura.profile.map((v, i) =>
-    Math.round(clamp(v + seededInt(seed, `p${i}`, -6, 6) + (i === 0 ? (brightness - 50) / 8 : 0), 35, 98))
+function isAiAura(v: unknown): v is AiAura {
+  const o = v as AiAura | null;
+  return (
+    !!o && o.observed === true && (AURA_IDS as readonly string[]).includes(o.main) && (AURA_IDS as readonly string[]).includes(o.second)
+    && typeof o.nickname === 'string' && typeof o.desc === 'string' && Array.isArray(o.keywords)
+    && Array.isArray(o.profile) && o.profile.length === PROFILE_LABELS.length && typeof o.intensity === 'number'
   );
-  const intensity = Math.round(clamp(70 + seededInt(seed, 'intensity', 0, 20) + (brightness - 50) / 10, 60, 99));
+}
 
-  return { seed, id, second, mood, profile, intensity };
+/** 화면·출력물이 그리는 오라 — AI 결과가 있으면 AI가 고른 색·글, 없으면(실패·얼굴 미인식) 사진 톤 + 기분 기반 고정 결과 */
+function auraView(answers: DemoAnswers, generated: unknown) {
+  const base = readAura(answers);
+  const ai = isAiAura(generated) ? generated : null;
+  const id = base.id;
+  const aura = AURAS[id];
+  return {
+    ...base,
+    id,
+    second: base.second,
+    aura: ai ? { ...aura, nickname: ai.nickname, desc: ai.desc, keywords: ai.keywords, charge: ai.charge } : aura,
+    profile: base.profile,
+    intensity: base.intensity,
+    moodLine: ai?.moodLine ?? null,
+    ai: !!ai,
+    retake: isNotObserved(generated) && getCapture(answers, 'face')?.source !== 'sample',
+  };
 }
 
 /* ── Aura art ──────────────────────────────────────────── */
 
-function auraLook(main: string, second: string): PhotoLook {
+function auraLook(main: string, second: string, intensity = 80): PhotoLook {
+  const strength = intensity / 100;
   return {
     // 바탕을 충분히 어둡게 눌러야 screen 글로우가 밝은 배경에서도 살아난다
     adjust: { brightness: 0.58, saturation: 0.4, contrast: 1.18 },
     paints: [
-      { x: 6, y: 50, rx: 34, ry: 62, color: main, alpha: 0.75, blend: 'color' },
-      { x: 94, y: 50, rx: 34, ry: 62, color: second, alpha: 0.75, blend: 'color' },
-      { x: 50, y: 20, rx: 60, ry: 30, color: main, alpha: 0.95, blend: 'screen' },
-      { x: 2, y: 55, rx: 32, ry: 60, color: main, alpha: 0.9, blend: 'screen' },
-      { x: 98, y: 45, rx: 32, ry: 60, color: second, alpha: 0.9, blend: 'screen' },
-      { x: 50, y: 104, rx: 72, ry: 28, color: second, alpha: 0.85, blend: 'screen' },
-      { x: 50, y: 46, rx: 30, ry: 34, color: main, alpha: 0.5, blend: 'soft-light' },
+      { x: 6, y: 50, rx: 34, ry: 62, color: main, alpha: 0.75 * strength, blend: 'color' },
+      { x: 94, y: 50, rx: 34, ry: 62, color: second, alpha: 0.75 * strength, blend: 'color' },
+      { x: 50, y: 20, rx: 60, ry: 30, color: main, alpha: 0.95 * strength, blend: 'screen' },
+      { x: 2, y: 55, rx: 32, ry: 60, color: main, alpha: 0.9 * strength, blend: 'screen' },
+      { x: 98, y: 45, rx: 32, ry: 60, color: second, alpha: 0.9 * strength, blend: 'screen' },
+      { x: 50, y: 104, rx: 72, ry: 28, color: second, alpha: 0.85 * strength, blend: 'screen' },
+      { x: 50, y: 46, rx: 30, ry: 34, color: main, alpha: 0.5 * strength, blend: 'soft-light' },
     ],
     grain: 14,
     vignette: 0.2,
@@ -351,10 +360,10 @@ function Spectrum({ id, second }: { id: AuraId; second: AuraId }) {
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
   const capture = getCapture(answers, 'face');
-  const { seed, id, second, mood, profile, intensity } = readAura(answers);
-  const aura = AURAS[id];
+  const view = auraView(answers, generated);
+  const { seed, id, second, mood, intensity, aura } = view;
   const secondAura = AURAS[second];
 
   return (
@@ -375,7 +384,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           />
           <ProcessedPhoto
             src={capture.image}
-            look={auraLook(aura.color, secondAura.color)}
+            look={auraLook(aura.color, secondAura.color, intensity)}
             className="relative aspect-[3/4] w-64 rounded-[2rem] border border-white/15 sm:w-72"
             alt={`${aura.ko} 오라 아트`}
             delayMs={1000}
@@ -386,28 +395,30 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
       )}
 
       <p className="max-w-md text-xs text-slate-400 [word-break:keep-all]">
-        오늘의 기분 <span className="font-semibold text-slate-200">{mood.emoji} {mood.label}</span> 에너지가 섞여{' '}
-        <span className="font-semibold" style={{ color: secondAura.color }}>{secondAura.ko}</span> 빛이 가장자리에 번지고 있어요
+        오늘의 기분 <span className="font-semibold text-slate-200">{mood.emoji} {mood.label}</span>{' '}
+        {view.moodLine ?? (
+          <>
+            선택한 색이 섞여 <span className="font-semibold" style={{ color: secondAura.color }}>{secondAura.ko}</span> 빛이 가장자리에 번지고 있어요
+          </>
+        )}
       </p>
 
       <Panel title="오라 스펙트럼">
         <Spectrum id={id} second={second} />
         <div className="mt-4 flex items-center justify-between border-t border-slate-800 pt-3 text-xs">
-          <span className="text-slate-400">오라 선명도</span>
-          <span className="font-semibold" style={{ color: aura.color }}>{intensity}%</span>
+          <span className="text-slate-400">선택한 빛의 강도</span>
+          <span className="font-semibold" style={{ color: aura.color }}>{intensity < 70 ? '은은하게' : intensity > 90 ? '선명하게' : '균형 있게'}</span>
         </div>
       </Panel>
 
-      <Panel title="에너지 프로필">
-        <ScoreBars color={aura.color} items={PROFILE_LABELS.map((label, i) => ({ label, value: profile[i]! }))} />
-      </Panel>
+      <p className="max-w-md text-xs leading-relaxed text-slate-400">직접 선택한 기분과 빛의 강도를 색채로 표현한 작품입니다. 에너지장이나 성격을 측정한 결과가 아닙니다.</p>
 
       <TraitChips title="오라 키워드" items={aura.keywords.map((k) => `#${k}`)} />
 
       <div className="grid w-full max-w-md grid-cols-2 gap-3">
         {[
-          { title: '찰떡 궁합 오라', key: aura.match, note: '함께 있으면 서로를 채워줘요' },
-          { title: '자극을 주는 오라', key: aura.spark, note: '새로운 영감을 불어넣어요' },
+          { title: '함께 쓸 색', key: aura.match, note: '팔레트에 다른 분위기를 더해요' },
+          { title: '포인트로 쓸 색', key: aura.spark, note: '작품에 시각적인 변화를 더해요' },
         ].map((item) => {
           const other = AURAS[item.key];
           return (
@@ -432,8 +443,15 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
       >
         <p className="text-xs text-slate-400">오늘의 오라 충전법</p>
         <p className="mt-1 text-sm font-semibold text-white">🔋 {aura.charge}</p>
-        <p className="mt-2 text-[11px] text-slate-500">친구와 함께 찍으면 두 사람의 오라 궁합도 볼 수 있어요 (행사 풀 버전)</p>
+        <p className="mt-2 text-[11px] text-slate-500">친구와 서로 다른 색을 골라 무드 아트를 비교해 보세요.</p>
       </div>
+
+      {view.ai && <p className="text-xs text-slate-500">사진을 바탕으로 직접 선택한 기분과 색을 담은 창작 초상화예요</p>}
+      {view.retake && (
+        <p className="max-w-md text-xs text-slate-500 [word-break:keep-all]">
+          얼굴이 또렷하게 보이지 않아 기분 기반 오라를 보여드렸어요. 정면에서 다시 찍으면 초상 사진을 더 또렷하게 담을 수 있어요.
+        </p>
+      )}
     </ResultShell>
   );
 }
@@ -448,37 +466,40 @@ export default defineDemo({
     analyzeEmoji: '🌈',
     analyzeDurationMs: 3600,
     analyzeImageStepId: 'face',
-    analyzeMessages: ['표정 에너지 측정 중', '감정 파장 스펙트럼 분해 중', '7가지 오라 유형과 비교 중', '오라 아트 채색 중'],
+    analyzeMessages: ['선택한 기분과 색 확인 중', '초상 주변에 빛의 레이어 구성 중', '무드 컬러 아트 완성 중'],
   },
   steps: [
     cameraStep({
       id: 'face',
-      title: '표정과 분위기를 읽어볼게요',
+      title: '무드 아트에 사용할 사진을 찍어요',
       subtitle: '편하게 미소 지으며 카메라를 바라봐 주세요',
       mode: 'face',
       subject: '표정',
-      scanLabels: ['얼굴·표정 영역 감지', '미소·눈빛 에너지 분석', '피부 톤 컬러 온도 추출', '주변 에너지장 스캔'],
-      readouts: (c) => [
-        { label: '컬러 온도', value: c.stats.warmth >= 55 ? '웜 에너지' : c.stats.warmth <= 45 ? '쿨 에너지' : '뉴트럴' },
-        { label: '표정 에너지', value: `${58 + (c.seed % 38)}%` },
-        { label: '분위기 밝기', value: c.stats.brightness > 55 ? '환함' : c.stats.brightness > 35 ? '은은함' : '차분함' },
-        { label: '감지된 파장', value: '7 스펙트럼' },
-      ],
+      scanLabels: ["초상 사진 준비","선택한 기분 확인","색채 레이어 준비","빛의 효과 구성"],
+      readouts: () => [{"label":"사진","value":"무드 아트에 사용"},{"label":"색채","value":"직접 선택한 기분을 표현"}],
     }),
     choiceStep({
       id: 'mood',
       title: '오늘 기분은 어떤가요?',
-      subtitle: '지금의 감정이 오라 색에 섞여 들어가요',
+      subtitle: '직접 고른 기분을 색채와 문장으로 표현해요',
       columns: 3,
       options: MOODS.map(({ id, emoji, label, desc }) => ({ id, emoji, label, desc })),
     }),
   ],
   computeResult: (answers) => readAura(answers).id,
   Result,
-  print: (answers) => {
+  generate: (answers) => {
+    const photo = getCapture(answers, 'face')?.image;
+    if (!photo) return Promise.resolve(null);
+    return requestDemoAi<unknown>(
+      'aura-reading',
+      { experienceProfile: answers.experienceProfile, photo, mood: readAura(answers).mood.id },
+      { validate: (d): d is unknown => isAiAura(d) || isNotObserved(d) }
+    );
+  },
+  print: (answers, _resultKey, generated) => {
     const capture = getCapture(answers, 'face');
-    const { seed, id, second, intensity } = readAura(answers);
-    const aura = AURAS[id];
+    const { seed, second, intensity, aura } = auraView(answers, generated);
     const secondAura = AURAS[second];
     return {
       kind: 'photo',
@@ -486,13 +507,13 @@ export default defineDemo({
         ? [
             {
               src: capture.image,
-              look: auraLook(aura.color, secondAura.color),
+              look: auraLook(aura.color, secondAura.color, intensity),
               overlay: <AuraPrintOverlay main={aura.color} second={secondAura.color} seed={seed} />,
             },
           ]
         : [],
       title: `${aura.ko} 오라 · ${aura.nickname}`,
-      caption: `${aura.keywords.map((k) => `#${k}`).join(' ')} · 오라 선명도 ${intensity}%`,
+      caption: `${aura.keywords.map((k) => `#${k}`).join(' ')} · 색채로 표현한 창작 무드 아트`,
       badge: `AURA · ${aura.label}`,
       paper: 'black',
     };

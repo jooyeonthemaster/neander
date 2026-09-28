@@ -4,6 +4,7 @@ import { Accordion } from '@/components/ui';
 import { ScrollReveal } from '@/components/animations';
 import { Link } from '@/i18n/navigation';
 import { QUOTE_HREF } from '@/lib/constants';
+import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -16,11 +17,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'faq' });
 
   return {
+    alternates: localeAlternates('/faq', locale),
     title: t('title'),
     description: t('subtitle'),
     openGraph: {
       title: t('title'),
       description: t('subtitle'),
+      images: [DEFAULT_OG_IMAGE],
     },
   };
 }

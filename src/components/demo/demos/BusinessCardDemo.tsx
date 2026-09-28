@@ -7,6 +7,7 @@ import type { DemoAnswers, DemoResultProps } from '@/types/demo';
 import {
   ProcessedPhoto,
   ResultShell,
+  TraitChips,
   answersSeed,
   cameraStep,
   choiceStep,
@@ -14,11 +15,13 @@ import {
   getCapture,
   getChoice,
   getFields,
+  requestDemoAi,
   seededPick,
   seededRandom,
   textStep,
   type PhotoLook,
 } from '../kit';
+import type { AiBusinessCard } from '@/data/demo-ai/business-card';
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -121,10 +124,42 @@ function infoOf(answers: DemoAnswers): CardInfo {
   };
 }
 
-function lookFor(design: DesignId, job: Job): PhotoLook {
+/** 명함 디자인별 사진 톤. AI 프로필 사진은 미니멀 명함에서 보정 없이 그대로 쓴다 */
+function lookFor(design: DesignId, job: Job, ai = false): PhotoLook {
+  if (design === 'minimal' && ai) return {};
   if (design === 'minimal') return { adjust: { saturation: 0.08, contrast: 1.12, brightness: 1.06 }, grain: 6 };
   if (design === 'bold') return { adjust: { contrast: 1.15 }, effect: { kind: 'duotone', dark: '#0f172a', light: job.accent } };
   return { adjust: { contrast: 1.2, brightness: 0.95 }, effect: { kind: 'duotone', dark: '#1c1917', light: '#f5d98b' }, vignette: 0.3 };
+}
+
+/* ── AI 결과 ───────────────────────────────────────────── */
+
+function isAiCard(v: unknown): v is AiBusinessCard {
+  const o = v as AiBusinessCard | null;
+  return (
+    !!o &&
+    typeof o.photo === 'string' &&
+    o.photo.startsWith('data:image/') &&
+    typeof o.tagline === 'string' &&
+    typeof o.impression === 'string' &&
+    Array.isArray(o.keywords) &&
+    o.keywords.every((k) => typeof k === 'string')
+  );
+}
+
+/** 화면·출력물이 그리는 명함 — AI 결과가 있으면 AI 프로필 사진·한 줄 소개, 없으면 촬영 사진·고정 문구 */
+function cardView(answers: DemoAnswers, generated: unknown) {
+  const info = infoOf(answers);
+  const capture = getCapture(answers, 'face');
+  if (!isAiCard(generated) || !capture) return { info, capture, src: capture?.image, ai: false as const };
+  return {
+    info: { ...info, tagline: generated.tagline },
+    capture,
+    src: generated.photo,
+    ai: true as const,
+    impression: generated.impression,
+    keywords: generated.keywords,
+  };
 }
 
 /* ── Job motifs ────────────────────────────────────────── */
@@ -200,8 +235,8 @@ function Motif({ jobId, color }: { jobId: JobId; color: string }) {
 
 /* ── Card designs ──────────────────────────────────────── */
 
-function CardFace({ design, info, src }: { design: DesignId; info: CardInfo; src: string }) {
-  const look = lookFor(design, info.job);
+function CardFace({ design, info, src, ai }: { design: DesignId; info: CardInfo; src: string; ai: boolean }) {
+  const look = lookFor(design, info.job, ai);
 
   if (design === 'minimal') {
     return (
@@ -225,7 +260,7 @@ function CardFace({ design, info, src }: { design: DesignId; info: CardInfo; src
 
   if (design === 'bold') {
     return (
-      <div className="relative flex h-full w-full bg-slate-950 text-left">
+      <div className="demo-dark-surface relative flex h-full w-full bg-slate-950 text-left">
         <div className="relative w-[40%] shrink-0" style={{ background: `linear-gradient(160deg, ${info.job.accent}, ${info.job.accent2})` }}>
           <ProcessedPhoto src={src} look={look} className="absolute inset-0 h-full w-full mix-blend-luminosity" imgClassName="object-[50%_35%]" alt={`${info.name} 볼드 명함 사진`} delayMs={500} />
           <span className="absolute bottom-2 left-2 rounded bg-black/50 px-1.5 py-0.5 text-[9px] font-bold text-white">
@@ -248,7 +283,7 @@ function CardFace({ design, info, src }: { design: DesignId; info: CardInfo; src
   }
 
   return (
-    <div className="relative flex h-full w-full items-center gap-4 bg-[#0c0a09] p-4 text-left sm:p-5" style={{ color: GOLD }}>
+    <div className="demo-dark-surface relative flex h-full w-full items-center gap-4 bg-[#0c0a09] p-4 text-left sm:p-5" style={{ color: GOLD }}>
       <div className="pointer-events-none absolute inset-2 rounded-lg border" style={{ borderColor: `${GOLD}55` }} aria-hidden="true" />
       <div className="relative shrink-0 rounded-xl p-[2px]" style={{ background: `linear-gradient(135deg, ${GOLD}, #7c5e1f, ${GOLD})` }}>
         <ProcessedPhoto src={src} look={look} className="aspect-[3/4] w-16 rounded-[10px] sm:w-28" imgClassName="object-[50%_35%]" alt={`${info.name} 프리미엄 명함 사진`} delayMs={500} />
@@ -309,7 +344,7 @@ function QrPattern({ seed, color }: { seed: number; color: string }) {
 
 function CardBack({ info }: { info: CardInfo }) {
   return (
-    <div className="flex h-full w-full items-center gap-4 bg-slate-900 p-4 text-left sm:p-5">
+    <div className="demo-dark-surface flex h-full w-full items-center gap-4 bg-slate-900 p-4 text-left sm:p-5">
       <div className="aspect-square h-[78%] shrink-0 rounded-lg bg-white p-1.5">
         <QrPattern seed={info.seed} color={info.job.accent} />
       </div>
@@ -429,7 +464,7 @@ function CardPrintOverlay({ info, src }: { info: CardInfo; src: string }) {
 
 /* ── Result ────────────────────────────────────────────── */
 
-function CardGallery({ info, src, color }: { info: CardInfo; src: string; color: string }) {
+function CardGallery({ info, src, color, ai }: { info: CardInfo; src: string; color: string; ai: boolean }) {
   const [picked, setPicked] = useState<DesignId>(DEFAULT_DESIGN);
   const [flipped, setFlipped] = useState(false);
   const pickedMeta = DESIGNS.find((d) => d.id === picked)!;
@@ -441,7 +476,7 @@ function CardGallery({ info, src, color }: { info: CardInfo; src: string; color:
   return (
     <div className="flex w-full max-w-md flex-col items-center gap-8">
       <div className="w-full space-y-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">AI가 디자인한 명함 3종 · 마음에 드는 걸 골라주세요</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">프로필을 담은 명함 디자인 3종 · 마음에 드는 걸 골라주세요</p>
         {DESIGNS.map((d, i) => {
           const on = d.id === picked;
           return (
@@ -470,7 +505,7 @@ function CardGallery({ info, src, color }: { info: CardInfo; src: string; color:
                   <span className="ml-1.5 font-normal text-slate-500">{d.desc}</span>
                 </span>
                 {on && (
-                  <span className="rounded-full px-2 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: color }}>
+                  <span className="demo-accent-surface rounded-full px-2 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: color }}>
                     ✓ 선택됨
                   </span>
                 )}
@@ -482,7 +517,7 @@ function CardGallery({ info, src, color }: { info: CardInfo; src: string; color:
                 )}
                 style={on ? ({ '--tw-ring-color': color } as React.CSSProperties) : undefined}
               >
-                <CardFace design={d.id} info={info} src={src} />
+                <CardFace design={d.id} info={info} src={src} ai={ai} />
               </div>
             </motion.div>
           );
@@ -508,7 +543,7 @@ function CardGallery({ info, src, color }: { info: CardInfo; src: string; color:
             transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
           >
             <div className="absolute inset-0 overflow-hidden rounded-xl shadow-2xl shadow-black/50 [backface-visibility:hidden]">
-              <CardFace key={picked} design={picked} info={info} src={src} />
+              <CardFace key={picked} design={picked} info={info} src={src} ai={ai} />
             </div>
             <div className="absolute inset-0 overflow-hidden rounded-xl shadow-2xl shadow-black/50 [backface-visibility:hidden] [transform:rotateY(180deg)]">
               <CardBack info={info} />
@@ -516,7 +551,7 @@ function CardGallery({ info, src, color }: { info: CardInfo; src: string; color:
           </motion.div>
         </div>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-[11px]">
-          <span className="text-slate-400">🖨️ 인쇄용 300dpi 파일 준비 완료 · 현장에서 즉석 출력돼요</span>
+          <span className="text-slate-400">🖨️ 현장에서는 인쇄용 파일로 즉석 출력할 수 있어요</span>
         </div>
         <p className="mt-2 text-[10px] text-slate-600">QR은 데모용 장식 패턴이에요. 실제 행사에선 스캔 가능한 디지털 명함 QR이 발급돼요.</p>
       </div>
@@ -524,26 +559,48 @@ function CardGallery({ info, src, color }: { info: CardInfo; src: string; color:
   );
 }
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
-  const capture = getCapture(answers, 'face');
-  const info = infoOf(answers);
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
+  const view = cardView(answers, generated);
+  const { info, capture, src } = view;
   const warm = (capture?.stats.warmth ?? 50) >= 50;
+  const impression = view.ai ? view.impression : warm ? '따뜻하고 친근한' : '또렷하고 시원한';
 
   return (
     <ResultShell
       eyebrow={`AI 명함 디자이너 · ${info.job.emoji} ${info.job.label}`}
       title={`“${info.tagline}”`}
-      description={`${info.name} 님의 ${warm ? '따뜻하고 친근한' : '또렷하고 시원한'} 인상과 ${info.job.label} 직무 키워드를 읽어 세상에 하나뿐인 명함 3종을 디자인했어요.`}
+      description={`${info.name} 님의 ${impression} 인상과 ${info.job.label} 직무 키워드를 읽어 세상에 하나뿐인 명함 3종을 디자인했어요.`}
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다시 디자인하기"
     >
-      {capture ? (
-        <CardGallery info={info} src={capture.image} color={pillarColor} />
+      {src ? (
+        <CardGallery info={info} src={src} color={pillarColor} ai={view.ai} />
       ) : (
         <p className="text-sm text-slate-400">사진이 없어 명함을 만들 수 없어요. 다시 촬영해 주세요.</p>
       )}
+      {view.ai && (
+        <>
+          <TraitChips title="AI가 읽은 인상 키워드" items={view.keywords} />
+          <p className="text-xs text-slate-500">프로필 사진과 한 줄 소개는 AI가 촬영한 사진으로 만들었어요</p>
+        </>
+      )}
     </ResultShell>
+  );
+}
+
+/* ── AI 생성 ──────────────────────────────────────────── */
+
+/** 분석 화면 동안 AI 프로필 사진·한 줄 소개를 받아 온다 (이미지 생성이라 10~20초). 이메일은 보내지 않는다 */
+function generate(answers: DemoAnswers): Promise<AiBusinessCard | null> {
+  const capture = getCapture(answers, 'face');
+  if (!capture) return Promise.resolve(null);
+  const fields = getFields<string>(answers, 'info');
+  const field = (id: string, max: number) => (fields[id] ?? '').trim().slice(0, max);
+  return requestDemoAi<AiBusinessCard>(
+    'business-card',
+    { experienceProfile: answers.experienceProfile, face: capture.image, name: field('name', 10), title: field('title', 18), company: field('company', 18), job: infoOf(answers).jobId },
+    { timeoutMs: 60_000, validate: isAiCard }
   );
 }
 
@@ -556,7 +613,7 @@ export default defineDemo({
     industryId: 'corporate',
     analyzeEmoji: '💼',
     analyzeDurationMs: 3500,
-    analyzeMessages: ['인상 키워드 추출 중', '직무 컬러 팔레트 생성 중', '레이아웃 3종 조판 중', '디지털 명함 QR 만드는 중'],
+    analyzeMessages: ['인상 키워드 추출 중', '직무 컬러 팔레트 생성 중', '레이아웃 3종 조판 중', '디지털 명함 QR 만드는 중', 'AI가 프로필 사진을 다듬고 있어요 · 10~20초 걸려요'],
   },
   steps: [
     cameraStep({
@@ -565,11 +622,8 @@ export default defineDemo({
       subtitle: '밝은 표정으로 정면을 바라봐 주세요',
       mode: 'face',
       subject: '얼굴',
-      scanLabels: ['얼굴 영역 분리', '인상 키워드 추출', '프로필 조명 보정', '레이아웃 후보 생성'],
-      readouts: (c) => [
-        { label: '인상 키워드', value: c.stats.warmth >= 50 ? '따뜻함 · 친근함' : '또렷함 · 신뢰감' },
-        { label: '추천 톤', value: c.stats.brightness > 55 ? '라이트 톤' : '딥 톤' },
-      ],
+      scanLabels: ["프로필 사진 준비","직무·소개 정보 확인","명함 레이아웃 준비","인쇄 구도 구성"],
+      readouts: () => [{"label":"프로필","value":"사진과 입력한 소개 사용"},{"label":"명함","value":"이름·역할의 가독성 우선"}],
     }),
     textStep({
       id: 'info',
@@ -592,15 +646,13 @@ export default defineDemo({
   ],
   computeResult: (answers) => infoOf(answers).jobId,
   Result,
-  print: (answers) => {
-    const capture = getCapture(answers, 'face');
-    const info = infoOf(answers);
+  generate,
+  print: (answers, _resultKey, generated) => {
+    const { info, src, ai } = cardView(answers, generated);
     const design = DESIGNS.find((d) => d.id === DEFAULT_DESIGN)!;
     return {
       kind: 'photo',
-      photos: capture
-        ? [{ src: capture.image, look: lookFor(DEFAULT_DESIGN, info.job), overlay: <CardPrintOverlay info={info} src={capture.image} /> }]
-        : [],
+      photos: src ? [{ src, look: lookFor(DEFAULT_DESIGN, info.job, ai), overlay: <CardPrintOverlay info={info} src={src} /> }] : [],
       title: info.name,
       caption: `${info.title} · ${info.company} · ${design.name} 명함`,
       paper: 'white',

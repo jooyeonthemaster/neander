@@ -1,5 +1,7 @@
 'use client';
 
+import { withParticle } from '@/lib/korean';
+
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -17,6 +19,7 @@ import {
   defineDemo,
   getCapture,
   getChoice,
+  requestDemoAi,
   seededInt,
   seededPick,
   seededRandom,
@@ -24,11 +27,14 @@ import {
   type CaptureData,
   type PhotoLook,
 } from '../kit';
+import { PALM_LINE_IDS, PALM_SHAPES } from '@/data/demo-ai/palm-reading';
+import type { AiPalmReading, PalmHand, PalmLineId } from '@/data/demo-ai/palm-reading';
+import { isNotObserved } from '@/data/demo-ai/photo-reading';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-type LineId = 'life' | 'head' | 'heart' | 'fate';
-type HandId = 'left' | 'right';
+type LineId = PalmLineId;
+type HandId = PalmHand;
 type Pt = [number, number];
 
 const LINES: Record<
@@ -38,7 +44,7 @@ const LINES: Record<
   life: {
     name: '생명선',
     color: '#f87171',
-    meaning: '체력 · 활력 · 회복력',
+    meaning: '휴식의 상징',
     title: '생명력 가득한 에너자이저 손금',
     texts: [
       '굵고 길게 뻗은 생명선이에요. 체력과 회복력이 좋아 바쁜 일정도 거뜬히 소화해요.',
@@ -49,7 +55,7 @@ const LINES: Record<
   head: {
     name: '두뇌선',
     color: '#60a5fa',
-    meaning: '사고방식 · 집중력 · 재능',
+    meaning: '탐구의 상징',
     title: '번뜩이는 전략가 손금',
     texts: [
       '길고 선명한 두뇌선이에요. 분석력과 집중력이 뛰어나 복잡한 문제도 술술 풀어내요.',
@@ -60,7 +66,7 @@ const LINES: Record<
   heart: {
     name: '감정선',
     color: '#f472b6',
-    meaning: '사랑 · 우정 · 감수성',
+    meaning: '연결의 상징',
     title: '마음이 따뜻한 로맨티스트 손금',
     texts: [
       '검지 쪽으로 힘차게 뻗은 감정선이에요. 사랑과 우정에 진심이고 표현도 솔직해요.',
@@ -71,7 +77,7 @@ const LINES: Record<
   fate: {
     name: '운명선',
     color: '#fbbf24',
-    meaning: '진로 · 성취 · 사회운',
+    meaning: '선택의 상징',
     title: '스스로 길을 여는 개척자 손금',
     texts: [
       '손목에서 곧게 올라가는 운명선이에요. 목표를 향해 흔들림 없이 나아가는 개척자예요.',
@@ -81,11 +87,11 @@ const LINES: Record<
   },
 };
 
-const LINE_ORDER: LineId[] = ['life', 'head', 'heart', 'fate'];
+const LINE_ORDER: LineId[] = [...PALM_LINE_IDS];
 
 const HANDS: Record<HandId, { label: string; tag: string; desc: string }> = {
-  left: { label: '왼손', tag: '타고난 운', desc: '왼손은 태어날 때부터 지닌 기질과 타고난 운을 보여줘요.' },
-  right: { label: '오른손', tag: '만들어갈 운', desc: '오른손은 노력과 선택으로 만들어갈 앞으로의 운을 보여줘요.' },
+  left: { label: '왼손', tag: '왼손 이야기', desc: '왼손 사진을 바탕으로 상징적인 이야기 지도를 만들었어요.' },
+  right: { label: '오른손', tag: '오른손 이야기', desc: '오른손 사진을 바탕으로 상징적인 이야기 지도를 만들었어요.' },
 };
 
 const HAND_SHAPES = [
@@ -197,9 +203,44 @@ function readPalm(answers: DemoAnswers) {
   };
 }
 
-function tierOf(strength: number): 0 | 1 | 2 {
-  return strength >= 84 ? 0 : strength >= 72 ? 1 : 2;
+/* ── AI 결과 ──────────────────────────────────────────── */
+
+function isAiPalm(v: unknown): v is AiPalmReading {
+  const o = v as AiPalmReading | null;
+  return (
+    !!o && o.observed === true && typeof o.title === 'string' && !!o.lines
+    && PALM_LINE_IDS.every((id) => typeof o.lines[id]?.strength === 'number' && typeof o.lines[id]?.text === 'string')
+    && (PALM_SHAPES as readonly string[]).includes(o.shape) && typeof o.mark?.name === 'string'
+  );
 }
+
+/**
+ * 화면·출력물이 그리는 손금 — AI 결과가 있으면 선명도·풀이·손 모양·표식을 AI 것으로 바꾼다.
+ * 손금 곡선(AR 연출)은 AI 여부와 관계없이 사진 시드로 그린다.
+ */
+function palmView(answers: DemoAnswers, generated: unknown) {
+  const base = readPalm(answers);
+  const ai = isAiPalm(generated) ? generated : null;
+  const lines = ai ? base.lines.map((line) => ({ ...line, strength: ai.lines[line.id].strength })) : base.lines;
+  const choices = (answers.experienceProfile ?? {}) as Record<string, string>;
+  const chapters: Record<string, LineId> = { change: 'fate', connection: 'heart', craft: 'head' };
+  const strongest = lines.find((line) => line.id === chapters[choices.chapter]) ?? lines[0]!;
+  const prompts: Record<LineId, string> = { life: '이 선은 쉬어 가는 리듬의 상징입니다. 오늘 나에게 편안했던 순간 하나를 떠올려 보세요. 건강이나 수명을 나타내지는 않습니다.', head: '이 선은 탐구의 상징입니다. 궁금한 질문 하나를 적고 새로운 방법으로 답을 찾아보세요. 지능이나 재능의 측정은 아닙니다.', heart: '이 선은 연결의 상징입니다. 고마운 사람에게 구체적인 감사 한 문장을 전해 보세요. 실제 관계를 예측하지 않습니다.', fate: '이 선은 선택의 상징입니다. 해보고 싶던 일의 첫 동작을 작게 정해 보세요. 미래는 선에 정해져 있지 않습니다.' };
+  return {
+    ...base,
+    lines,
+    strongest,
+    title: ai?.title ?? LINES[strongest.id].title,
+    texts: Object.fromEntries(
+      lines.map((line) => [line.id, ai?.lines[line.id].text ?? prompts[line.id]])
+    ) as Record<LineId, string>,
+    shape: ai ? { name: ai.shape, desc: ai.shapeDesc } : { name: base.shape.name, desc: '창작 지도의 색과 질감을 표현한 원소 모티프' },
+    mark: ai?.mark ?? { name: '이야기의 별', desc: '선택한 주제를 기념하는 창작 상징이며 사진에서 실제 검출한 표식은 아닙니다.' },
+    ai: !!ai,
+    retake: isNotObserved(generated) && getCapture(answers, 'palm')?.source !== 'sample',
+  };
+}
+
 
 /** 선명할수록 굵게 */
 function lineWidth(strength: number): number {
@@ -424,17 +465,18 @@ function PalmVisual({ capture, lines, color }: { capture: CaptureData; lines: Pa
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
   const capture = getCapture(answers, 'palm');
-  const { hand, lines, strongest, shape, mark } = readPalm(answers);
+  const view = palmView(answers, generated);
+  const { hand, lines, strongest, shape, mark } = view;
   const handMeta = HANDS[hand];
   const top = LINES[strongest.id];
 
   return (
     <ResultShell
       eyebrow={`AI 손금 리포트 · ${handMeta.label} (${handMeta.tag})`}
-      title={top.title}
-      description={`${handMeta.desc} 그중 ${top.name}이 가장 선명하게 읽혔어요.`}
+      title={view.title}
+      description={`${handMeta.desc} ${withParticle(top.name, '을/를')} 이번 이야기의 중심 모티프로 골랐어요.`}
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다른 손도 보기"
@@ -464,21 +506,12 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
                     <span className="text-[11px] font-normal text-slate-500">{meta.meaning}</span>
                   </p>
                   <span className="shrink-0 text-sm font-bold" style={{ color: meta.color }}>
-                    {line.strength}
+                    상징
                   </span>
-                </div>
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
-                  <motion.div
-                    className="h-full rounded-full"
-                    style={{ backgroundColor: meta.color }}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${line.strength}%` }}
-                    transition={{ type: 'spring', stiffness: 60, damping: 14, delay: 0.4 + i * 0.12 }}
-                  />
                 </div>
                 <p className="mt-2 text-xs leading-relaxed text-slate-400 [word-break:keep-all]">
                   <span className="mr-1 rounded bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-300">{handMeta.tag}</span>
-                  {meta.texts[tierOf(line.strength)]}
+                  {view.texts[line.id]}
                 </p>
               </motion.li>
             );
@@ -488,10 +521,17 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
 
       <InfoGrid
         items={[
-          { emoji: '🖐️', label: '손 모양', value: shape.name, desc: shape.desc },
-          { emoji: '✨', label: '특별한 표식', value: mark.name, desc: mark.desc },
+          { emoji: '🖐️', label: '이야기 속 원소', value: shape.name, desc: shape.desc },
+          { emoji: '✨', label: '창작 상징', value: mark.name, desc: mark.desc },
         ]}
       />
+
+      {view.ai && <p className="text-xs text-slate-500">손바닥 사진 위에 상징을 더한 오락용 창작 이야기예요</p>}
+      {view.retake && (
+        <p className="max-w-md text-xs text-slate-500 [word-break:keep-all]">
+          손바닥 주름이 잘 보이지 않아 기본 풀이를 보여드렸어요. 밝은 곳에서 손바닥을 펴고 다시 찍으면 사진을 더 또렷하게 남길 수 있어요.
+        </p>
+      )}
 
       <p className="max-w-md text-[11px] leading-relaxed text-slate-500 [word-break:keep-all]">
         손금은 재미로 보는 풀이예요. 손금보다 손으로 해내는 일이 운을 더 크게 바꿔요 ✋
@@ -510,17 +550,17 @@ export default defineDemo({
     analyzeEmoji: '🖐️',
     analyzeDurationMs: 3600,
     analyzeImageStepId: 'palm',
-    analyzeMessages: ['손바닥 주름 지도 그리는 중', '생명선·두뇌선 추적 중', '감정선·운명선 해석 중', 'AR 리포트 만드는 중'],
+    analyzeMessages: ['손바닥 사진 준비 중', '상징적인 선 그래픽 구성 중', '선택한 주제로 이야기 카드 작성 중'],
   },
   steps: [
     choiceStep({
       id: 'hand',
       title: '어느 손을 읽어볼까요?',
-      subtitle: '손금은 왼손과 오른손이 말해주는 운이 달라요',
+      subtitle: '찍기 편한 손을 골라주세요. 손에 따라 성격이나 운명이 달라지는 것은 아닙니다.',
       columns: 2,
       options: [
-        { id: 'left', emoji: '🤚', label: '왼손', desc: '타고난 운 · 선천적 기질' },
-        { id: 'right', emoji: '✋', label: '오른손', desc: '만들어갈 운 · 노력과 선택' },
+        { id: 'left', emoji: '🤚', label: '왼손', desc: '왼손으로 만드는 상징 지도' },
+        { id: 'right', emoji: '✋', label: '오른손', desc: '오른손으로 만드는 상징 지도' },
       ],
     }),
     cameraStep({
@@ -530,26 +570,30 @@ export default defineDemo({
       mode: 'hand',
       hand: (a) => getChoice(a, 'hand') as 'left' | 'right' | undefined,
       subject: '손바닥',
-      scanLabels: ['손바닥 윤곽 감지', '손가락 관절 21점 추적', '주름 에지 추출', '4대 손금 분류'],
-      readouts: (c) => [
-        { label: '손 모양', value: seededPick(c.seed, 'shape', HAND_SHAPES).name },
-        { label: '선 선명도', value: `${Math.round(clamp(62 + c.stats.contrast * 0.35, 0, 98))}%` },
-        { label: '인식된 주요선', value: '4개' },
-        { label: '보조선', value: `${3 + (c.seed % 5)}개` },
-      ],
+      scanLabels: ["손바닥 사진 준비","카드 방향 맞춤","상징 선 그래픽 준비","이야기 카드 구성"],
+      readouts: () => [{"label":"사진","value":"손바닥 포토 카드"},{"label":"표현","value":"측정이 아닌 상징 그래픽"}],
     }),
   ],
   computeResult: (answers) => readPalm(answers).strongest.id,
   Result,
-  print: (answers) => {
+  generate: (answers) => {
+    const photo = getCapture(answers, 'palm')?.image;
+    if (!photo) return Promise.resolve(null);
+    return requestDemoAi<unknown>(
+      'palm-reading',
+      { experienceProfile: answers.experienceProfile, photo, hand: getChoice(answers, 'hand') ?? 'left' },
+      { validate: (d): d is unknown => isAiPalm(d) || isNotObserved(d) }
+    );
+  },
+  print: (answers, _resultKey, generated) => {
     const capture = getCapture(answers, 'palm');
-    const { hand, lines, strongest } = readPalm(answers);
+    const { hand, lines, title } = palmView(answers, generated);
     const handMeta = HANDS[hand];
     return {
       kind: 'photo',
       photos: capture ? [{ src: capture.image, look: AR_LOOK, overlay: <PalmPrintOverlay lines={lines} /> }] : [],
-      title: LINES[strongest.id].title,
-      caption: `${handMeta.label}(${handMeta.tag}) · ${lines.map((line, i) => `${CIRCLED[i]}${LINES[line.id].name}`).join(' ')}`,
+      title,
+      caption: `오락용 상징 그래픽 · ${handMeta.label} · ${lines.map((line, i) => `${CIRCLED[i]}${LINES[line.id].name}`).join(' ')}`,
       badge: 'AR PALM',
       paper: 'black',
     };

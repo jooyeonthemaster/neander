@@ -1,0 +1,17 @@
+.experience-venue[data-program='ai-science-kiosk'] .demo-science-progress {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 3px;
+  padding: 9px 12px;
+  border: 1px solid var(--venue-accent);
+  border-radius: 8px;
+  color: var(--venue-ink);
+  background: color-mix(in srgb, var(--venue-accent) 8%, var(--venue-paper));
+}
+.experience-venue[data-program='ai-science-kiosk'] .demo-science-progress strong { font-size: 16px; }
+.experience-venue[data-program='ai-science-kiosk'] .demo-science-progress :is(span, small) { font-size: 13px; line-height: 1.45; }
+.experience-venue[data-program='ai-science-kiosk'] .demo-science-briefing summary { cursor: pointer; color: var(--venue-muted); font-size: 14px; }
+.experience-venue[data-program='ai-product-experience'] .product-chat-completion { display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 12px; color: var(--venue-muted); }
+.experience-venue[data-program='ai-product-experience'] .product-chat-completion [data-done='true'] { color: var(--venue-ink); font-weight: 700; }
+.experience-venue[data-program='ai-product-experience'] .product-chat-history-dock { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--venue-line); }
+.experience-venue[data-program='ai-product-experience'] .product-chat-history-dock button { min-height: 44px; }

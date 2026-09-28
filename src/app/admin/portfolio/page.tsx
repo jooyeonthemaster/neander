@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { Select } from '@/components/ui/Select'
 import {
   collection,
   doc,
@@ -34,7 +35,18 @@ import {
   PORTFOLIO_CATEGORY_LABELS,
   SERVICE_OPTIONS,
 } from '@/types/admin'
-import type { PortfolioItem } from '@/types/admin'
+import type { PortfolioImageMetadata, PortfolioItem } from '@/types/admin'
+import caseStudyCopy from '@/data/portfolio-case-studies.json'
+
+// 목적·실행·결과 입력칸. 비워 두면 공개 페이지는 저장소 문구(portfolio-case-studies.json)를 쓴다.
+const CASE_FIELDS = [
+  { key: 'objective', label: '목적' },
+  { key: 'execution', label: '실행' },
+  { key: 'outcome', label: '결과' },
+] as const
+
+type CaseField = `${(typeof CASE_FIELDS)[number]['key']}_${'ko' | 'en'}`
+const caseCopy = caseStudyCopy as Record<string, Partial<Record<CaseField, string>>>
 
 // ── Category badge colors ──────────────────────────────────
 const CATEGORY_COLORS: Record<PortfolioItem['category'], string> = {
@@ -79,14 +91,32 @@ function defaultForm(): FormData {
     year: new Date().getFullYear(),
     category: 'online',
     tags: [],
+    tags_ko: [],
+    tags_en: [],
     images: [],
+    image_metadata: {},
     thumbnail: '',
     services: [],
     client: '',
+    client_ko: '',
+    client_en: '',
     location: null,
+    location_ko: null,
+    location_en: null,
     is_featured: false,
     display_order: 0,
     is_published: false,
+    period: '',
+    period_ko: '',
+    period_en: '',
+    result_ko: '',
+    result_en: '',
+    objective_ko: '',
+    objective_en: '',
+    execution_ko: '',
+    execution_en: '',
+    outcome_ko: '',
+    outcome_en: '',
   }
 }
 
@@ -110,6 +140,7 @@ export default function PortfolioAdminPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<FormData>(defaultForm)
   const [tagsInput, setTagsInput] = useState('')
+  const [tagsEnInput, setTagsEnInput] = useState('')
   const [uploadingImage, setUploadingImage] = useState(false)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [validationErrors, setValidationErrors] = useState<string[]>([])
@@ -145,6 +176,7 @@ export default function PortfolioAdminPage() {
       items.length > 0 ? Math.max(...items.map((i) => i.display_order)) + 1 : 0
     setForm({ ...defaultForm(), display_order: nextOrder })
     setTagsInput('')
+    setTagsEnInput('')
     setValidationErrors([])
     setModalOpen(true)
   }
@@ -160,16 +192,36 @@ export default function PortfolioAdminPage() {
       year: item.year,
       category: item.category,
       tags: item.tags,
+      tags_ko: item.tags_ko ?? item.tags ?? [],
+      tags_en: item.tags_en ?? [],
       images: item.images,
+      image_metadata: item.image_metadata ?? {},
       thumbnail: item.thumbnail,
       services: item.services,
-      client: item.client,
-      location: item.location,
+      client: item.client_ko || item.client,
+      client_ko: item.client_ko || item.client,
+      client_en: item.client_en ?? '',
+      location: item.location_ko || item.location,
+      location_ko: item.location_ko || item.location,
+      location_en: item.location_en ?? null,
       is_featured: item.is_featured,
       display_order: item.display_order,
       is_published: item.is_published,
+      period: item.period_ko || item.period || '',
+      period_ko: item.period_ko || item.period || '',
+      period_en: item.period_en ?? '',
+      result_ko: item.result_ko ?? '',
+      result_en: item.result_en ?? '',
+      // 아직 CMS에 없으면 공개 페이지에 보이는 저장소 문구로 채워 둔다
+      objective_ko: item.objective_ko || caseCopy[item.slug]?.objective_ko || '',
+      objective_en: item.objective_en || caseCopy[item.slug]?.objective_en || '',
+      execution_ko: item.execution_ko || caseCopy[item.slug]?.execution_ko || '',
+      execution_en: item.execution_en || caseCopy[item.slug]?.execution_en || '',
+      outcome_ko: item.outcome_ko || caseCopy[item.slug]?.outcome_ko || '',
+      outcome_en: item.outcome_en || caseCopy[item.slug]?.outcome_en || '',
     })
-    setTagsInput(item.tags.join(', '))
+    setTagsInput((item.tags_ko ?? item.tags ?? []).join(', '))
+    setTagsEnInput((item.tags_en ?? []).join(', '))
     setValidationErrors([])
     setModalOpen(true)
   }
@@ -185,19 +237,36 @@ export default function PortfolioAdminPage() {
     setForm((prev) => ({
       ...prev,
       title_en: value,
-      slug: generateSlug(value),
+      slug: editingId ? prev.slug : generateSlug(value),
     }))
   }
 
   // ── Tags ──────────────────────────────────────────────────
   const handleTagsChange = (value: string) => {
     setTagsInput(value)
+    const tags = value.split(',').map((tag) => tag.trim()).filter(Boolean)
     setForm((prev) => ({
       ...prev,
-      tags: value
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean),
+      tags,
+      tags_ko: tags,
+    }))
+  }
+
+  const handleEnglishTagsChange = (value: string) => {
+    setTagsEnInput(value)
+    setForm((prev) => ({
+      ...prev,
+      tags_en: value.split(',').map((tag) => tag.trim()).filter(Boolean),
+    }))
+  }
+
+  const updateImageMetadata = (url: string, patch: Partial<PortfolioImageMetadata>) => {
+    setForm((prev) => ({
+      ...prev,
+      image_metadata: {
+        ...prev.image_metadata,
+        [url]: Object.fromEntries(Object.entries({ ...prev.image_metadata?.[url], ...patch }).filter(([, value]) => value !== undefined)),
+      },
     }))
   }
 
@@ -240,17 +309,16 @@ export default function PortfolioAdminPage() {
     }
   }
 
-  const handleRemoveImage = async (url: string) => {
-    try {
-      await deleteImage(url)
-    } catch {
-      // Storage delete may fail for already-deleted files – continue
-    }
+  const handleRemoveImage = (url: string) => {
+    // Defer Storage cleanup until saving so cancelling cannot remove a published image.
     setForm((prev) => {
       const newImages = prev.images.filter((u) => u !== url)
+      const metadata = { ...prev.image_metadata }
+      delete metadata[url]
       return {
         ...prev,
         images: newImages,
+        image_metadata: metadata,
         thumbnail:
           prev.thumbnail === url ? newImages[0] || '' : prev.thumbnail,
       }
@@ -278,7 +346,6 @@ export default function PortfolioAdminPage() {
     if (!form.title_en.trim()) errors.push('영어 제목을 입력하세요.')
     if (!form.description_ko.trim()) errors.push('한국어 설명을 입력하세요.')
     if (!form.description_en.trim()) errors.push('영어 설명을 입력하세요.')
-    if (form.images.length === 0) errors.push('이미지를 1개 이상 업로드하세요.')
     return errors
   }
 
@@ -304,6 +371,9 @@ export default function PortfolioAdminPage() {
           ...payload,
           updated_at: now,
         })
+        const previous = items.find((item) => item.id === editingId)
+        const removed = (previous?.images ?? []).filter((url) => !payload.images.includes(url) && url !== payload.thumbnail)
+        await cleanupUnusedImages(removed, editingId)
         showToast('포트폴리오가 수정되었습니다.')
       } else {
         await addDoc(collection(db, 'portfolio'), {
@@ -322,15 +392,23 @@ export default function PortfolioAdminPage() {
     }
   }
 
+  const cleanupUnusedImages = async (urls: string[], excludedId: string) => {
+    const candidates = [...new Set(urls)].filter((url) =>
+      url.startsWith('https://firebasestorage.googleapis.com/') &&
+      !items.some((item) => item.id !== excludedId && (item.thumbnail === url || item.images?.includes(url))),
+    )
+    await Promise.allSettled(candidates.map((url) => deleteImage(url)))
+  }
+
   // ── Delete ────────────────────────────────────────────────
   const handleDelete = async (id: string) => {
     const item = items.find((i) => i.id === id)
     if (!item) return
     setDeleting(id)
     try {
-      // Delete all images from Storage
-      await Promise.all(item.images.map((url) => deleteImage(url)))
       await deleteDoc(doc(db, 'portfolio', id))
+      // Published static assets are only unlinked; Storage failures must not block document deletion.
+      await cleanupUnusedImages([...item.images, item.thumbnail], id)
       showToast('포트폴리오가 삭제되었습니다.')
     } catch (err) {
       console.error(err)
@@ -588,7 +666,7 @@ export default function PortfolioAdminPage() {
               삭제 확인
             </h3>
             <p className="text-sm text-gray-500 mb-6">
-              이 포트폴리오를 삭제하시겠습니까? 모든 이미지도 함께 삭제됩니다.
+              이 포트폴리오를 삭제하시겠습니까? 다른 프로젝트에서 사용하지 않는 업로드 이미지도 함께 삭제됩니다.
               이 작업은 되돌릴 수 없습니다.
             </p>
             <div className="flex justify-end gap-3">
@@ -647,6 +725,7 @@ export default function PortfolioAdminPage() {
                     ))}
                   </ul>
                 </div>
+
               )}
 
               {/* ── Section: Basic info ──────────────────── */}
@@ -732,6 +811,74 @@ export default function PortfolioAdminPage() {
                     />
                   </label>
                 </div>
+                <label className="block mt-4">
+                  <span className="text-sm text-gray-600">진행 기간 (한국어, 선택사항)</span>
+                  <input
+                    type="text"
+                    value={form.period ?? ''}
+                    onChange={(e) => setForm((p) => ({ ...p, period: e.target.value, period_ko: e.target.value }))}
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
+                    placeholder="2026.09.04 – 09.07"
+                  />
+                </label>
+                <label className="block mt-4">
+                  <span className="text-sm text-gray-600">진행 기간 (English, 선택사항)</span>
+                  <input
+                    type="text"
+                    value={form.period_en ?? ''}
+                    onChange={(e) => setForm((p) => ({ ...p, period_en: e.target.value }))}
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
+                    placeholder="September 4–7, 2026"
+                  />
+                </label>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <label className="block">
+                    <span className="text-sm text-gray-600">주요 결과 (한국어, 선택사항)</span>
+                    <textarea
+                      rows={2}
+                      value={form.result_ko ?? ''}
+                      onChange={(e) => setForm((p) => ({ ...p, result_ko: e.target.value }))}
+                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-sm text-gray-600">주요 결과 (English, 선택사항)</span>
+                    <textarea
+                      rows={2}
+                      value={form.result_en ?? ''}
+                      onChange={(e) => setForm((p) => ({ ...p, result_en: e.target.value }))}
+                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
+                    />
+                  </label>
+                </div>
+
+                {/* 사례 서술: 목적 → 실행 → 결과 */}
+                <div className="mt-4 space-y-4">
+                  <p className="text-xs text-gray-500">
+                    사례 서술 (목적 → 실행 → 결과). 세 칸이 모두 채워져야 상세 페이지에 표시됩니다. 확인되지 않은 수치는 적지 마세요.
+                  </p>
+                  {CASE_FIELDS.map(({ key, label }) => (
+                    <div key={key} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {(['ko', 'en'] as const).map((lang) => {
+                        const field = `${key}_${lang}` as CaseField
+                        return (
+                          <label key={field} className="block">
+                            <span className="text-sm text-gray-600">
+                              {label} ({lang === 'ko' ? '한국어' : 'English'})
+                            </span>
+                            <textarea
+                              rows={2}
+                              value={form[field] ?? ''}
+                              onChange={(e) => setForm((p) => ({ ...p, [field]: e.target.value }))}
+                              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
+                            />
+                          </label>
+                        )
+                      })}
+                    </div>
+                  ))}
+                </div>
               </fieldset>
 
               {/* ── Section: Classification ──────────────── */}
@@ -742,34 +889,29 @@ export default function PortfolioAdminPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <label className="block">
                     <span className="text-sm text-gray-600">카테고리</span>
-                    <select
+                    <Select
+                      aria-label="카테고리"
                       value={form.category}
-                      onChange={(e) =>
+                      onValueChange={(value) =>
                         setForm((p) => ({
                           ...p,
-                          category: e.target.value as PortfolioItem['category'],
+                          category: value as PortfolioItem['category'],
                         }))
                       }
-                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition bg-white"
-                    >
-                      {Object.entries(PORTFOLIO_CATEGORY_LABELS).map(
-                        ([val, label]) => (
-                          <option key={val} value={val}>
-                            {label}
-                          </option>
-                        ),
-                      )}
-                    </select>
+                      className="mt-1"
+                      triggerClassName="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition bg-white"
+                      options={Object.entries(PORTFOLIO_CATEGORY_LABELS).map(([value, label]) => ({ value, label }))}
+                    />
                   </label>
                   <label className="block">
                     <span className="text-sm text-gray-600">연도</span>
                     <input
                       type="number"
-                      value={form.year}
+                      value={form.year ?? ''}
                       onChange={(e) =>
                         setForm((p) => ({
                           ...p,
-                          year: parseInt(e.target.value) || new Date().getFullYear(),
+                          year: e.target.value ? Number(e.target.value) : null,
                         }))
                       }
                       className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
@@ -793,7 +935,7 @@ export default function PortfolioAdminPage() {
 
                 <label className="block mt-4">
                   <span className="text-sm text-gray-600">
-                    태그 (쉼표로 구분)
+                    태그 (한국어, 쉼표로 구분)
                   </span>
                   <input
                     type="text"
@@ -801,6 +943,16 @@ export default function PortfolioAdminPage() {
                     onChange={(e) => handleTagsChange(e.target.value)}
                     className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
                     placeholder="향수, 팝업, 브랜딩"
+                  />
+                </label>
+                <label className="block mt-4">
+                  <span className="text-sm text-gray-600">태그 (English, 쉼표로 구분)</span>
+                  <input
+                    type="text"
+                    value={tagsEnInput}
+                    onChange={(e) => handleEnglishTagsChange(e.target.value)}
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
+                    placeholder="Perfume, Pop-up, Branding"
                   />
                 </label>
                 {form.tags.length > 0 && (
@@ -824,20 +976,30 @@ export default function PortfolioAdminPage() {
                 </legend>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <label className="block">
-                    <span className="text-sm text-gray-600">클라이언트</span>
+                    <span className="text-sm text-gray-600">클라이언트 (한국어)</span>
                     <input
                       type="text"
                       value={form.client}
                       onChange={(e) =>
-                        setForm((p) => ({ ...p, client: e.target.value }))
+                        setForm((p) => ({ ...p, client: e.target.value, client_ko: e.target.value }))
                       }
                       className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
                       placeholder="클라이언트명"
                     />
                   </label>
                   <label className="block">
+                    <span className="text-sm text-gray-600">클라이언트 (English, 선택사항)</span>
+                    <input
+                      type="text"
+                      value={form.client_en ?? ''}
+                      onChange={(e) => setForm((p) => ({ ...p, client_en: e.target.value }))}
+                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
+                      placeholder="Client name"
+                    />
+                  </label>
+                  <label className="block">
                     <span className="text-sm text-gray-600">
-                      장소 (선택사항)
+                      장소 (한국어, 선택사항)
                     </span>
                     <input
                       type="text"
@@ -846,10 +1008,21 @@ export default function PortfolioAdminPage() {
                         setForm((p) => ({
                           ...p,
                           location: e.target.value || null,
+                          location_ko: e.target.value || null,
                         }))
                       }
                       className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
                       placeholder="서울 성수동"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-sm text-gray-600">장소 (English, 선택사항)</span>
+                    <input
+                      type="text"
+                      value={form.location_en ?? ''}
+                      onChange={(e) => setForm((p) => ({ ...p, location_en: e.target.value || null }))}
+                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
+                      placeholder="Seoul, South Korea"
                     />
                   </label>
                 </div>
@@ -938,12 +1111,12 @@ export default function PortfolioAdminPage() {
               {/* ── Section: Images ──────────────────────── */}
               <fieldset>
                 <legend className="text-sm font-semibold text-gray-700 mb-3">
-                  이미지 관리 <span className="text-red-500">*</span>
+                  이미지 관리
                 </legend>
 
                 {/* Image grid */}
                 {form.images.length > 0 && (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     {form.images.map((url, idx) => (
                       <div
                         key={url}
@@ -953,11 +1126,12 @@ export default function PortfolioAdminPage() {
                             : 'border-gray-200'
                         }`}
                       >
-                        <div className="aspect-[4/3]">
+                        <div className="relative">
+                        <div className="aspect-[4/3] bg-gray-50">
                           <img
                             src={url}
                             alt={`이미지 ${idx + 1}`}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                           />
                         </div>
                         {/* Thumbnail badge */}
@@ -967,7 +1141,7 @@ export default function PortfolioAdminPage() {
                           </span>
                         )}
                         {/* Overlay actions */}
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+                        <div className="absolute inset-x-0 bottom-0 bg-black/60 px-2 py-2 flex items-center justify-center gap-2">
                           {/* Set thumbnail */}
                           {form.thumbnail !== url && (
                             <button
@@ -1008,6 +1182,44 @@ export default function PortfolioAdminPage() {
                           >
                             <X className="w-3.5 h-3.5" />
                           </button>
+                        </div>
+                        </div>
+                        <div className="space-y-3 bg-white p-3">
+                          <label className="block">
+                            <span className="text-xs text-gray-600">이미지 {idx + 1} 자료 유형</span>
+                            <Select
+                              aria-label={`이미지 ${idx + 1} 자료 유형`}
+                              value={form.image_metadata?.[url]?.kind ?? ''}
+                              onValueChange={(value) => updateImageMetadata(url, { kind: (value || undefined) as PortfolioImageMetadata['kind'] })}
+                              className="mt-1"
+                              triggerClassName="w-full rounded-lg border border-gray-300 bg-white px-2 py-2 text-sm focus:ring-2 focus:ring-gray-900 outline-none"
+                              options={[
+                                { value: '', label: '표시 안 함' },
+                                { value: 'photo', label: '사진' },
+                                { value: 'artwork', label: '제작물' },
+                                { value: 'screenshot', label: '화면 캡처' },
+                                { value: 'render', label: '렌더링' },
+                              ]}
+                            />
+                          </label>
+                          <label className="block">
+                            <span className="text-xs text-gray-600">이미지 {idx + 1} 설명 (한국어)</span>
+                            <textarea
+                              rows={2}
+                              value={form.image_metadata?.[url]?.caption_ko ?? ''}
+                              onChange={(e) => updateImageMetadata(url, { caption_ko: e.target.value })}
+                              className="mt-1 w-full rounded-lg border border-gray-300 px-2 py-2 text-sm focus:ring-2 focus:ring-gray-900 outline-none"
+                            />
+                          </label>
+                          <label className="block">
+                            <span className="text-xs text-gray-600">이미지 {idx + 1} 설명 (English)</span>
+                            <textarea
+                              rows={2}
+                              value={form.image_metadata?.[url]?.caption_en ?? ''}
+                              onChange={(e) => updateImageMetadata(url, { caption_en: e.target.value })}
+                              className="mt-1 w-full rounded-lg border border-gray-300 px-2 py-2 text-sm focus:ring-2 focus:ring-gray-900 outline-none"
+                            />
+                          </label>
                         </div>
                       </div>
                     ))}

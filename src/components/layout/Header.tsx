@@ -99,6 +99,15 @@ export default function Header() {
                 className="inline-block h-1.5 w-1.5 rounded-full bg-teal-500 transition-transform group-hover:scale-125 lg:h-2 lg:w-2"
                 aria-hidden="true"
               />
+              {/* 영문 사명만으로는 읽는 법을 모르는 분이 많아 한글 이름을 작게 붙인다 */}
+              <span
+                className={cn(
+                  'font-logo-ko ml-2 text-xs font-medium tracking-[0.12em] lg:text-[13px]',
+                  onDarkHero ? 'text-white/50' : 'text-neutral-400',
+                )}
+              >
+                네안데르
+              </span>
             </Link>
 
             {/* ── Center: Desktop Navigation ────────────────── */}

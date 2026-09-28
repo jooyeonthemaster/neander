@@ -1,11 +1,13 @@
 'use client';
 
 import type { ComponentProps } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { SOCIAL_LINKS, type SocialPlatform, QUOTE_HREF } from '@/lib/constants';
+import { CONTACT, SOCIAL_LINKS, type SocialPlatform, QUOTE_HREF } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/uiStore';
+import { PRODUCTS } from '@/data/products';
+import { SERVICE_TEXT } from '@/lib/quote/catalog';
 
 /* ─────────────────────────────────────────────────────────
    Footer
@@ -61,33 +63,29 @@ const socialIcons = {
 
 /* ── Footer link columns definition ──────────────────── */
 
-// 서비스 페이지의 5개 필라로 연결한다. (?pillar= 값은 services 페이지가 해석함)
-const SERVICE_LINKS = [
-  { labelKey: 'aiPhoto' as const, href: '/services?pillar=ai-photo' },
-  { labelKey: 'aiDiagnosis' as const, href: '/services?pillar=ai-diagnosis' },
-  { labelKey: 'aiFortune' as const, href: '/services?pillar=ai-fortune' },
-  { labelKey: 'aiCreative' as const, href: '/services?pillar=ai-creative' },
-  { labelKey: 'aiImmersive' as const, href: '/services?pillar=ai-immersive' },
-];
+// 판매 상품 6가지 (홈 'AI 체험' 섹션과 같은 목록·연결 주소)
+const SERVICE_LINKS = PRODUCTS.map((p) => ({ key: p.key, href: p.href }));
 
 // 실제 페이지가 있는 항목만 남긴다. (채용·블로그는 페이지가 생기면 다시 추가)
 const COMPANY_LINKS = [
   { labelKey: 'about' as const, href: '/about' },
   { labelKey: 'portfolio' as const, href: '/portfolio' },
+  { labelKey: 'insights' as const, href: '/insights' },
   { labelKey: 'press' as const, href: '/press' },
 ];
 
-// 이용약관·개인정보처리방침은 페이지가 준비되면 추가한다.
+// 개인정보처리방침은 하단 사업자 정보 줄에 둔다. 이용약관은 페이지가 준비되면 추가한다.
 const SUPPORT_LINKS = [
   { labelKey: 'contact' as const, href: '/contact' },
   { labelKey: 'quote' as const, href: QUOTE_HREF },
   { labelKey: 'faq' as const, href: '/faq' },
+  { labelKey: 'brochure' as const, href: '/brochure' },
   { labelKey: 'demo' as const, href: '/demo' },
 ];
 
 export default function Footer() {
   const t = useTranslations('footer');
-  const tPillars = useTranslations('services.pillars');
+  const locale = useLocale();
   const setCursorVariant = useUIStore((s) => s.setCursorVariant);
   const currentYear = new Date().getFullYear();
 
@@ -167,9 +165,9 @@ export default function Footer() {
               </h3>
               <ul className="flex flex-col gap-2.5">
                 {SERVICE_LINKS.map((link) => (
-                  <li key={link.labelKey}>
+                  <li key={link.key}>
                     <FooterLink href={link.href}>
-                      {tPillars(`${link.labelKey}.name`)}
+                      {SERVICE_TEXT[link.key].name[locale === 'en' ? 'en' : 'ko']}
                     </FooterLink>
                   </li>
                 ))}
@@ -221,6 +219,30 @@ export default function Footer() {
             </p>
             <p className="text-xs text-neutral-600">
               {t('companyInfo')}
+            </p>
+            <p className="text-xs text-neutral-600">
+              {t('businessInfo.address')}: {CONTACT.officeAddress[locale === 'en' ? 'en' : 'ko']}
+              {' | '}
+              {t('businessInfo.phone')}:{' '}
+              <a href={`tel:${CONTACT.phoneInternational}`} className="hover:text-teal-400">
+                {locale === 'en' ? CONTACT.phoneInternational : CONTACT.phone}
+              </a>
+              {' · '}
+              <a href={`tel:${CONTACT.mobileInternational}`} className="hover:text-teal-400">
+                {locale === 'en' ? CONTACT.mobileInternational : CONTACT.mobile}
+              </a>
+              {' | '}
+              {t('businessInfo.email')}:{' '}
+              <a href={`mailto:${CONTACT.email}`} className="hover:text-teal-400">
+                {CONTACT.email}
+              </a>
+            </p>
+            <p className="text-xs text-neutral-600">
+              {t('businessInfo.privacyOfficer')}: {t('businessInfo.privacyOfficerName')} ({CONTACT.email})
+              {' | '}
+              <Link href="/privacy" className="font-semibold text-neutral-400 hover:text-teal-400">
+                {t('privacyLink')}
+              </Link>
             </p>
           </div>
 

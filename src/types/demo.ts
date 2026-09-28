@@ -15,6 +15,8 @@ export interface DemoStepMeta {
   titleKey: string;
   subtitleKey: string;
   canProceed: (answers: DemoAnswers) => boolean;
+  /** Specific missing input shown next to the disabled next button. */
+  getBlockedReason?: (answers: DemoAnswers) => string | undefined;
 }
 
 /** Configuration for a single demo */
@@ -47,6 +49,9 @@ export interface DemoResultProps {
   pillarColor: string;
   /** config.printAfterReveal을 쓰는 데모가 결과를 공개한 순간 호출 — 출력이 시작된다 */
   onReveal?: () => void;
+  /** module.generate가 돌려준 AI 결과 (없거나 실패하면 undefined — 고정 결과로 그린다) */
+  generated?: unknown;
+  resultStatus?: 'ai' | 'example' | 'timeout' | 'error';
 }
 
 /** Full module export from each demo file */
@@ -56,5 +61,7 @@ export interface DemoModule {
   ResultComponent: React.ComponentType<DemoResultProps>;
   computeResult: (answers: DemoAnswers) => string;
   /** 결과를 현장 출력물(영수증 / 4×6 인화지)로 뽑을 내용 */
-  getPrint?: (answers: DemoAnswers, resultKey: string) => PrintSpec;
+  getPrint?: (answers: DemoAnswers, resultKey: string, generated?: unknown) => PrintSpec;
+  /** 분석 화면 동안 실제 AI 결과를 받아 온다. 실패하면 null — 고정 결과로 넘어간다 */
+  generate?: (answers: DemoAnswers) => Promise<unknown | null>;
 }

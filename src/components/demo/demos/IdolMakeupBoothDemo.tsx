@@ -8,25 +8,28 @@ import {
   InfoGrid,
   ProcessedPhoto,
   ResultShell,
-  ScoreBars,
+  Panel,
   TraitChips,
   cameraStep,
   choiceStep,
   defineDemo,
   getCapture,
   getChoice,
+  getFields,
   hashString,
+  requestDemoAi,
   seededInt,
   seededPick,
   seededRandom,
   type PhotoLook,
   type PhotoPaint,
 } from '../kit';
+import { IDOL_POSITIONS, isAiIdol, type AiIdol, type IdolConceptId, type IdolStageId } from '@/data/demo-ai/idol-makeup';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-type ConceptId = 'girlcrush' | 'lovely' | 'fresh' | 'dreamy' | 'retro';
-type StageId = 'stage' | 'studio' | 'album' | 'fansign';
+type ConceptId = IdolConceptId;
+type StageId = IdolStageId;
 
 interface Makeup {
   lip: string;
@@ -143,7 +146,7 @@ const STAGES: Record<StageId, { label: string; emoji: string; desc: string; tag:
 };
 
 const STAGE_NAMES = ['NEVI', 'LUZE', 'RIEL', 'SEVA', 'HAEL', 'MIRE', 'ZENA', 'LIVA', 'ORIN', 'YUVE', 'KAEL', 'ELIO'];
-const POSITIONS = ['메인보컬', '리드보컬', '메인댄서', '리드래퍼', '센터', '비주얼', '리더', '막내'];
+const POSITIONS = IDOL_POSITIONS;
 
 function getConcept(answers: DemoAnswers): ConceptId {
   const id = getChoice(answers, 'concept');
@@ -156,9 +159,16 @@ function getStage(answers: DemoAnswers): StageId {
 }
 
 /** 콘셉트 메이크업 + 무대 조명을 얼굴 랜드마크 위에 얹는다 */
-function idolLook(concept: Concept, stage: StageId): PhotoLook {
+function idolLook(concept: Concept, stage: StageId, brief: Record<string, string>): PhotoLook {
   const { eyeL, eyeR, cheekL, cheekR, lips } = FACE_POINTS;
-  const m = concept.makeup;
+  const strength = brief.intensity === 'soft' ? 0.55 : brief.intensity === 'stage' ? 1.2 : 0.85;
+  const base = concept.makeup;
+  const m = {
+    ...base,
+    shadowAlpha: Math.min(0.8, base.shadowAlpha * strength * (brief.focus === 'eyes' ? 1.15 : 0.85)),
+    blushAlpha: Math.min(0.8, base.blushAlpha * strength),
+    lipAlpha: Math.min(0.8, base.lipAlpha * strength * (brief.focus === 'lips' ? 1.15 : 0.85)),
+  };
   const paints: PhotoPaint[] = [];
   for (const eye of [eyeL, eyeR]) {
     paints.push({ x: eye.x, y: eye.y - 2.6, rx: 8, ry: 3.6, color: m.shadow, alpha: m.shadowAlpha, blend: m.shadowBlend });
@@ -191,19 +201,39 @@ function idolLook(concept: Concept, stage: StageId): PhotoLook {
   };
 }
 
-function profileOf(answers: DemoAnswers) {
+function profileOf(answers: DemoAnswers, ai?: AiIdol | null) {
   const capture = getCapture(answers, 'face');
   const conceptId = getConcept(answers);
   const seed = hashString(`${capture?.seed ?? 9}-${conceptId}`);
-  const name = seededPick(seed, 'name', STAGE_NAMES);
+  const name = ai?.stageName ?? seededPick(seed, 'name', STAGE_NAMES);
   const first = seededInt(seed, 'pos1', 0, POSITIONS.length - 1);
   const second = (first + seededInt(seed, 'pos2', 1, POSITIONS.length - 1)) % POSITIONS.length;
   return {
     seed,
     name,
-    positions: [POSITIONS[first]!, POSITIONS[second]!],
+    positions: ai?.positions ?? [POSITIONS[first]!, POSITIONS[second]!],
     cardNo: seededInt(seed, 'card', 1, 9),
     birthday: `${String(seededInt(seed, 'mm', 1, 12)).padStart(2, '0')}.${String(seededInt(seed, 'dd', 1, 28)).padStart(2, '0')}`,
+  };
+}
+
+/** 화면·출력물이 그리는 포토카드 — AI 결과가 있으면 AI가 변환한 사진과 문구, 없으면 필터 합성과 고정 문구 */
+function idolView(answers: DemoAnswers, generated: unknown) {
+  const ai = isAiIdol(generated) ? generated : null;
+  const capture = getCapture(answers, 'face');
+  const conceptId = getConcept(answers);
+  const concept = CONCEPTS[conceptId];
+  const stage = getStage(answers);
+  return {
+    ai: !!ai,
+    conceptId,
+    concept,
+    stage,
+    profile: profileOf(answers, ai),
+    caption: ai?.caption ?? concept.caption,
+    points: ai?.points ?? concept.points,
+    // AI 사진은 이미 메이크업·조명이 들어가 있으니 그대로 쓴다
+    photo: ai ? { src: ai.image, look: {} as PhotoLook } : capture ? { src: capture.image, look: idolLook(concept, stage, getFields<string>(answers, 'experienceProfile')) } : null,
   };
 }
 
@@ -241,11 +271,17 @@ function Sparkles({ seed }: { seed: number }) {
 
 function Photocard({
   src,
+  look,
+  caption,
+  points,
   concept,
   stage,
   profile,
 }: {
   src: string;
+  look: PhotoLook;
+  caption: string;
+  points: string[];
   concept: Concept;
   stage: StageId;
   profile: ReturnType<typeof profileOf>;
@@ -268,8 +304,8 @@ function Photocard({
             animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
             transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
           >
-            <div className="relative h-full w-full overflow-hidden rounded-[14px] bg-slate-900">
-              <ProcessedPhoto src={src} look={idolLook(concept, stage)} className="h-full w-full" alt={`${concept.label} 콘셉트 아이돌 포토카드`} delayMs={1100}>
+            <div className="demo-dark-surface relative h-full w-full overflow-hidden rounded-[14px] bg-slate-900">
+              <ProcessedPhoto src={src} look={look} className="h-full w-full" alt={`${concept.label} 콘셉트 아이돌 포토카드`} delayMs={0}>
                 <Sparkles seed={profile.seed} />
                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_30%,rgba(255,255,255,0.28)_45%,transparent_60%)] mix-blend-overlay" />
                 <div className="absolute left-2.5 top-2.5 flex items-center gap-1.5">
@@ -286,7 +322,7 @@ function Photocard({
                   <p className="text-[11px] font-semibold leading-snug [text-shadow:0_0_3px_#fff,0_0_6px_#fff] [word-break:keep-all]">
                     To. 나의 첫 팬 ♡
                     <br />
-                    {concept.caption}
+                    {caption}
                   </p>
                 </div>
                 <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-3 pb-2.5 pt-10 text-left">
@@ -310,7 +346,7 @@ function Photocard({
 
           {/* 뒷면 */}
           <div className={`${face} [transform:rotateY(180deg)] p-[5px]`} style={{ backgroundImage: concept.frame, backgroundSize: '300% 300%' }}>
-            <div className="flex h-full w-full flex-col justify-between rounded-[14px] bg-slate-950/90 p-4 text-left text-white">
+            <div className="demo-dark-surface flex h-full w-full flex-col justify-between rounded-[14px] bg-slate-950/90 p-4 text-left text-white">
               <div>
                 <p className="text-[9px] font-bold tracking-[0.3em] text-white/50">NEANDER ENT. PHOTOCARD</p>
                 <p className="mt-3 font-display text-3xl font-extrabold leading-none">{profile.name}</p>
@@ -319,9 +355,9 @@ function Photocard({
               <dl className="space-y-2 text-xs">
                 {[
                   ['콘셉트', `${concept.emoji} ${concept.label}`],
-                  ['생일', profile.birthday],
+                  ['데뷔일 (창작)', profile.birthday],
                   ['포토카드', `${STAGES[stage].label} 버전 · ${cardLabel(profile.cardNo)}`],
-                  ['메이크업', concept.points.slice(0, 2).join(', ')],
+                  ['메이크업', points.slice(0, 2).join(', ')],
                 ].map(([k, v]) => (
                   <div key={k} className="flex gap-3">
                     <dt className="w-14 shrink-0 text-white/45">{k}</dt>
@@ -380,9 +416,9 @@ function wrapWords(text: string, maxChars: number): string[] {
 }
 
 /** 결과 화면 포토카드 앞면(홀로 테두리·반짝이·팬사인·네임)을 출력물 위에 얹는다 */
-function PhotocardPrint({ concept, stage, profile }: { concept: Concept; stage: StageId; profile: ReturnType<typeof profileOf> }) {
+function PhotocardPrint({ concept, caption, stage, profile }: { concept: Concept; caption: string; stage: StageId; profile: ReturnType<typeof profileOf> }) {
   const frame = concept.frame.match(/#[0-9a-f]{6}/gi) ?? ['#ffffff'];
-  const message = ['To. 나의 첫 팬 ♡', ...wrapWords(concept.caption, 18)];
+  const message = ['To. 나의 첫 팬 ♡', ...wrapWords(caption, 18)];
   const sign = `${profile.name.charAt(0)}${profile.name.slice(1).toLowerCase()}♡`;
   // 화면 카드(256px 폭)의 스파클 배치를 같은 비율로 옮긴다
   const sparkles = Array.from({ length: 7 }, (_, i) => ({
@@ -475,26 +511,30 @@ const PAPER: Record<ConceptId, 'white' | 'cream' | 'black'> = { girlcrush: 'blac
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
-  const capture = getCapture(answers, 'face');
-  const conceptId = getConcept(answers);
-  const concept = CONCEPTS[conceptId];
-  const stage = getStage(answers);
-  const profile = profileOf(answers);
-  const stat = (salt: string) => seededInt(profile.seed, salt, 84, 99);
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
+  const { ai, concept, stage, profile, caption, points, photo } = idolView(answers, generated);
+  const brief = getFields<string>(answers, 'experienceProfile');
+  const intensity = brief.intensity === 'soft' ? '내추럴' : brief.intensity === 'stage' ? '스테이지' : '카메라 레디';
+  const focus = brief.focus === 'eyes' ? '눈매' : brief.focus === 'lips' ? '립 컬러' : '글로우';
 
   return (
     <ResultShell
       eyebrow={`${concept.label} 콘셉트 · 아이돌 데뷔 포토카드`}
       title={`${profile.name}, 데뷔를 축하해요!`}
-      description={`${concept.desc} 메이크업에 ${STAGES[stage].label} 조명을 더해 포토카드로 출력했어요. 카드를 뒤집어 프로필도 확인해 보세요.`}
+      description={
+        ai
+          ? `AI가 ${concept.label} 콘셉트 메이크업과 ${STAGES[stage].label} 배경을 입혀 포토카드로 출력했어요. 카드를 뒤집어 프로필도 확인해 보세요.`
+          : `원본 사진에 ${concept.label} 콘셉트의 색 보정과 프레임을 더한 예시예요. 카드를 뒤집어 프로필도 확인해 보세요.`
+      }
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다른 콘셉트로 변신"
     >
-      {capture && <Photocard src={capture.image} concept={concept} stage={stage} profile={profile} />}
+      {photo && (
+        <Photocard src={photo.src} look={photo.look} caption={caption} points={points} concept={concept} stage={stage} profile={profile} />
+      )}
 
-      <TraitChips title="AI가 적용한 메이크업·조명" items={concept.points} />
+      <TraitChips title={ai ? 'AI가 적용한 메이크업·조명' : '콘셉트 메이크업 아이디어'} items={points} />
 
       <InfoGrid
         items={[
@@ -505,15 +545,12 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         ]}
       />
 
-      <ScoreBars
-        color={pillarColor}
-        suffix="점"
-        items={[
-          { label: '카메라 흡입력', value: stat('camera') },
-          { label: '콘셉트 소화력', value: stat('concept') },
-          { label: '무대 장악력', value: stat('stage') },
-        ]}
-      />
+      {ai && <p className="text-xs text-slate-500">AI가 내 사진으로 직접 그린 포토카드예요</p>}
+
+      <Panel title="오늘의 메이크업 레시피">
+        <TraitChips items={[`${intensity} 강도`, `${focus} 포인트`, `${STAGES[stage].label} 조명`]} />
+        <p className="mt-3 text-xs leading-relaxed text-slate-400">활동명·포지션·데뷔일은 콘셉트를 위한 창작 설정이에요. 사진으로 외모나 무대 능력을 채점하지 않아요.</p>
+      </Panel>
     </ResultShell>
   );
 }
@@ -528,7 +565,8 @@ export default defineDemo({
     analyzeEmoji: '💖',
     analyzeDurationMs: 3600,
     analyzeImageStepId: 'face',
-    analyzeMessages: ['아이돌 메이크업 입히는 중', '무대 조명 세팅 중', '스테이지 네임 짓는 중', '포토카드 인쇄 중'],
+    // AI 사진 변환은 10~20초 — 마지막 문구가 남은 시간을 채운다
+    analyzeMessages: ['아이돌 메이크업 입히는 중', '헤어 스타일링 중', '무대 조명 세팅 중', '스테이지 네임 짓는 중', '포토카드 인쇄 중', '마지막 리터치 중… 거의 다 됐어요'],
   },
   steps: [
     choiceStep({
@@ -557,27 +595,32 @@ export default defineDemo({
       mode: 'face',
       subject: '얼굴',
       countdown: true,
-      scanLabels: ['얼굴 랜드마크 인식', '눈매·입술 영역 분리', '무대 조명 시뮬레이션', '아이돌 메이크업 레이어 합성'],
+      scanLabels: ['촬영 컷 준비', '선택한 메이크업 포인트 정리', '무대 조명 브리프 준비', '데뷔 카드 연출 준비'],
       readouts: (c) => [
-        { label: '포토제닉 지수', value: `${88 + (c.seed % 11)}%` },
-        { label: '베스트 앵글', value: seededPick(c.seed, 'angle', ['정면', '좌 15°', '우 15°']) },
-        { label: '매력 포인트', value: seededPick(c.seed, 'charm', ['눈웃음', '콧선', '미소 라인', '또렷한 눈매']) },
-        { label: '피부 톤', value: c.stats.warmth > 55 ? '웜' : c.stats.warmth < 45 ? '쿨' : '뉴트럴' },
+        { label: '촬영 소스', value: c.source === 'sample' ? '샘플 사진' : '나의 사진' },
+        { label: '사진 밝기', value: c.stats.brightness > 55 ? '밝은 편' : '차분한 편' },
+        { label: '촬영 팁', value: '눈·입술이 보이게' },
+        { label: '다음 작업', value: '메이크업 연출' },
       ],
     }),
   ],
   computeResult: (answers) => getConcept(answers),
   Result,
-  print: (answers) => {
+  generate: (answers) => {
     const capture = getCapture(answers, 'face');
-    const conceptId = getConcept(answers);
-    const concept = CONCEPTS[conceptId];
-    const stage = getStage(answers);
-    const profile = profileOf(answers);
+    if (!capture) return Promise.resolve(null);
+    return requestDemoAi<AiIdol>(
+      'idol-makeup-booth',
+      { experienceProfile: answers.experienceProfile, photo: capture.image, concept: getConcept(answers), stage: getStage(answers) },
+      { timeoutMs: 60_000, validate: isAiIdol }
+    );
+  },
+  print: (answers, _resultKey, generated) => {
+    const { conceptId, concept, stage, profile, caption, photo } = idolView(answers, generated);
     return {
       kind: 'photo',
-      photos: capture
-        ? [{ src: capture.image, look: idolLook(concept, stage), overlay: <PhotocardPrint concept={concept} stage={stage} profile={profile} /> }]
+      photos: photo
+        ? [{ src: photo.src, look: photo.look, overlay: <PhotocardPrint concept={concept} caption={caption} stage={stage} profile={profile} /> }]
         : [],
       title: `${profile.name}, 데뷔를 축하해요!`,
       caption: `${concept.label} 콘셉트 · ${STAGES[stage].label} 버전 · ${profile.positions.join(' · ')}`,

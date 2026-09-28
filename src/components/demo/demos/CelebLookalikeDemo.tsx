@@ -1,43 +1,17 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
-import { QUOTE_HREF } from '@/lib/constants';
-import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
-import type {
-  DemoAnswers,
-  DemoConfig,
-  DemoModule,
-  DemoStepProps,
-  DemoResultProps,
-} from '@/types/demo';
-import type { PrintSpec } from '../kit';
+import type { DemoAnswers, DemoConfig, DemoModule, DemoResultProps } from '@/types/demo';
+import { cameraStep, choiceStep, getCapture, getChoice, requestDemoAi, type PrintSpec } from '../kit';
+import { CELEB_FACE_SHAPES, CELEB_FEATURES, CELEB_FIELDS, CELEB_VIBES, type AiCelebLookalike } from '@/data/demo-ai/celeb';
+import { isNotObserved } from '@/data/demo-ai/photo-reading';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-const FACE_SHAPES = [
-  { id: 'oval', label: '계란형', vx: 50, vy: 55, rx: 38, ry: 50, isRect: false, isHeart: false },
-  { id: 'round', label: '둥근형', vx: 50, vy: 50, rx: 44, ry: 44, isRect: false, isHeart: false },
-  { id: 'square', label: '각진형', vx: 50, vy: 50, rx: 0, ry: 0, isRect: true, isHeart: false },
-  { id: 'heart', label: '하트형', vx: 50, vy: 52, rx: 0, ry: 0, isRect: false, isHeart: true },
-  { id: 'oblong', label: '긴형', vx: 50, vy: 55, rx: 32, ry: 55, isRect: false, isHeart: false },
-] as const;
-
-const FEATURES = [
-  { id: 'eyes', emoji: '\uD83D\uDC40', label: '눈', desc: '깊고 매력적인 눈매' },
-  { id: 'nose', emoji: '\uD83D\uDC43', label: '코', desc: '뚜렷한 콧날' },
-  { id: 'lips', emoji: '\uD83D\uDC44', label: '입술', desc: '매력적인 입술 라인' },
-  { id: 'jawline', emoji: '\uD83D\uDDFF', label: '턱라인', desc: '선명한 페이스라인' },
-] as const;
-
-const VIBES = [
-  { id: 'cute', emoji: '\uD83D\uDC30', label: '큐트', desc: '사랑스럽고 밝은 에너지', from: 'from-pink-400', to: 'to-rose-300' },
-  { id: 'cool', emoji: '\uD83D\uDE0E', label: '시크', desc: '도도하고 세련된 카리스마', from: 'from-slate-500', to: 'to-zinc-700' },
-  { id: 'elegant', emoji: '\uD83E\uDDA2', label: '우아', desc: '고급스럽고 기품 있는 무드', from: 'from-amber-200', to: 'to-rose-300' },
-  { id: 'charismatic', emoji: '\uD83D\uDD25', label: '카리스마', desc: '강렬하고 압도적인 존재감', from: 'from-red-500', to: 'to-orange-600' },
-] as const;
+const FACE_SHAPES = CELEB_FACE_SHAPES;
+const FEATURES = CELEB_FEATURES;
+const VIBES = CELEB_VIBES;
 
 type ResultKey = 'idol-visual' | 'actor-chic' | 'nation-sweetheart' | 'hiphop-icon'
   | 'action-star' | 'model-face' | 'classic-beauty' | 'runway-model';
@@ -46,11 +20,12 @@ type Scores = { face: number; feature: number; vibe: number };
 
 /** 결과 화면 · 출력물이 같은 순서와 이름으로 보여 주는 3가지 점수 */
 const SCORE_ITEMS: { key: keyof Scores; label: string }[] = [
-  { key: 'face', label: '얼굴형 일치도' },
-  { key: 'feature', label: '이목구비 유사도' },
+  { key: 'face', label: '얼굴형 참고 지수' },
+  { key: 'feature', label: '이목구비 참고 지수' },
   { key: 'vibe', label: '분위기 매칭' },
 ];
 
+/** AI를 쓸 수 없을 때 보여 주는 기본 유형 */
 const RESULTS: Record<ResultKey, {
   name: string; traits: string[]; desc: string;
   scores: Scores;
@@ -65,159 +40,49 @@ const RESULTS: Record<ResultKey, {
   'runway-model': { name: '런웨이 모델', traits: ['독특한 비율', '아티스틱한 무드', '하이패션 감성', '특별한 존재감'], desc: '하이패션 브랜드가 찾는 독특한 매력의 소유자! 개성 있는 비율과 아티스틱한 무드가 런웨이를 빛냅니다.', scores: { face: 86, feature: 89, vibe: 91 } },
 };
 
+/* ── Steps ─────────────────────────────────────────────── */
+
+const STEPS = [
+  cameraStep({
+    id: 'face',
+    title: '정면 얼굴을 보여주세요',
+    subtitle: '실존 인물 대신 헤어·의상·표정에서 셀럽 무드의 영감을 찾아요',
+    mode: 'face',
+    subject: '얼굴',
+    scanLabels: ['촬영 사진 준비', '사진 밝기 확인', '선택한 캐스팅 무드 준비', '스타일 비교 준비'],
+    readouts: (c) => [
+      { label: '사진 색감', value: c.stats.warmth >= 50 ? '따뜻한 조명' : '차가운 조명' },
+      { label: '참고 요소', value: '표정·헤어·스타일' },
+    ],
+  }),
+  choiceStep({
+    id: 'field',
+    title: '어떤 분야의 무드로 연출할까요?',
+    subtitle: '고른 분야에 어울리는 창작 캐스팅 콘셉트를 제안해요',
+    columns: 2,
+    options: CELEB_FIELDS.map((f) => ({ id: f.id, label: f.label, emoji: f.emoji, desc: f.desc })),
+  }),
+];
+
 /* ── Config ─────────────────────────────────────────────── */
 
 const config: DemoConfig = {
   id: 'celeb-lookalike',
   targetSlug: 'ai-celeb-lookalike',
   industryId: 'entertainment' as IndustryId,
-  analyzeEmoji: '\uD83C\uDF1F',
+  analyzeEmoji: '🌟',
   analyzeDurationMs: 3000,
-  steps: [
-    {
-      id: 'faceShape',
-      titleKey: '얼굴형을 선택해 주세요',
-      subtitleKey: '거울을 보고 가장 비슷한 형태를 골라주세요',
-      canProceed: (a) => !!a['faceShape'],
-    },
-    {
-      id: 'feature',
-      titleKey: '가장 자신 있는 이목구비는?',
-      subtitleKey: '주변에서 칭찬받는 부분을 골라주세요',
-      canProceed: (a) => !!a['feature'],
-    },
-    {
-      id: 'vibe',
-      titleKey: '당신에게서 느껴지는 분위기는?',
-      subtitleKey: '친구들이 말하는 당신의 첫인상은?',
-      canProceed: (a) => !!a['vibe'],
-    },
-  ],
+  analyzeMessages: ['선택한 캐스팅 분위기 확인', '헤어·의상·표정의 연출 참고', '셀럽 무드 카드 구성'],
+  analyzeImageStepId: 'face',
+  steps: STEPS.map((step) => step.meta),
 };
-
-/* ── Face Shape SVG ────────────────────────────────────── */
-
-function FaceShapeSvg({ shape }: { shape: (typeof FACE_SHAPES)[number] }) {
-  return (
-    <svg viewBox="0 0 100 110" className="h-16 w-16" fill="none">
-      {shape.isRect ? (
-        <rect
-          x="14" y="10" width="72" height="80" rx="14"
-          stroke="currentColor" strokeWidth="2.5"
-        />
-      ) : shape.isHeart ? (
-        <path
-          d="M50 95 C20 65 8 45 14 28 C20 12 35 10 50 26 C65 10 80 12 86 28 C92 45 80 65 50 95Z"
-          stroke="currentColor" strokeWidth="2.5"
-        />
-      ) : (
-        <ellipse
-          cx={shape.vx} cy={shape.vy} rx={shape.rx} ry={shape.ry}
-          stroke="currentColor" strokeWidth="2.5"
-        />
-      )}
-    </svg>
-  );
-}
-
-/* ── Step 1 : Face Shape ───────────────────────────────── */
-
-function StepFaceShape({ answers, onUpdate }: DemoStepProps) {
-  const selected = answers['faceShape'] as string | undefined;
-  return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-      {FACE_SHAPES.map((s) => (
-        <motion.button
-          key={s.id}
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.96 }}
-          onClick={() => onUpdate('faceShape', s.id)}
-          className={cn(
-            'flex flex-col items-center gap-3 rounded-2xl border p-4 transition-colors',
-            selected === s.id
-              ? 'border-teal-400 bg-teal-500/10 text-teal-400'
-              : 'border-slate-700 bg-slate-900/50 text-slate-500 hover:border-slate-600',
-          )}
-        >
-          <FaceShapeSvg shape={s} />
-          <span className="text-sm font-semibold text-slate-200">{s.label}</span>
-        </motion.button>
-      ))}
-    </div>
-  );
-}
-
-/* ── Step 2 : Feature ──────────────────────────────────── */
-
-function StepFeature({ answers, onUpdate }: DemoStepProps) {
-  const selected = answers['feature'] as string | undefined;
-  return (
-    <div className="grid grid-cols-2 gap-4">
-      {FEATURES.map((f) => (
-        <motion.button
-          key={f.id}
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.96 }}
-          onClick={() => onUpdate('feature', f.id)}
-          className={cn(
-            'flex flex-col items-center gap-2 rounded-2xl border p-5 transition-colors',
-            selected === f.id
-              ? 'border-teal-400 bg-teal-500/10'
-              : 'border-slate-700 bg-slate-900/50 hover:border-slate-600',
-          )}
-        >
-          <span className="text-3xl">{f.emoji}</span>
-          <p className="text-base font-semibold text-slate-100">{f.label}</p>
-          <p className="text-xs text-slate-400">{f.desc}</p>
-        </motion.button>
-      ))}
-    </div>
-  );
-}
-
-/* ── Step 3 : Vibe ─────────────────────────────────────── */
-
-function StepVibe({ answers, onUpdate }: DemoStepProps) {
-  const selected = answers['vibe'] as string | undefined;
-  return (
-    <div className="grid grid-cols-2 gap-4">
-      {VIBES.map((v) => (
-        <motion.button
-          key={v.id}
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.96 }}
-          onClick={() => onUpdate('vibe', v.id)}
-          className={cn(
-            'relative overflow-hidden rounded-2xl border p-5 text-left transition-colors',
-            selected === v.id
-              ? 'border-teal-400 ring-2 ring-teal-400/40'
-              : 'border-slate-700 hover:border-slate-600',
-          )}
-        >
-          <div className={cn('absolute inset-0 bg-gradient-to-br opacity-30', v.from, v.to)} />
-          <div className="relative flex flex-col items-center gap-2 text-center">
-            <span className="text-3xl">{v.emoji}</span>
-            <p className="text-base font-semibold text-white">{v.label}</p>
-            <p className="text-xs text-slate-300">{v.desc}</p>
-          </div>
-        </motion.button>
-      ))}
-    </div>
-  );
-}
 
 /* ── Compute Result ────────────────────────────────────── */
 
+/** AI가 없을 때는 직접 고른 캐스팅 무드로 창작 유형을 정한다. */
 function computeResult(answers: DemoAnswers): string {
-  const face = answers['faceShape'] as string | undefined;
-  const vibe = answers['vibe'] as string | undefined;
-
-  if (face === 'oval') return vibe === 'cute' ? 'idol-visual' : 'actor-chic';
-  if (face === 'round') return vibe === 'cute' ? 'nation-sweetheart' : 'hiphop-icon';
-  if (face === 'square') return vibe === 'charismatic' ? 'action-star' : 'model-face';
-  if (face === 'heart') return vibe === 'elegant' ? 'classic-beauty' : 'idol-visual';
-  if (face === 'oblong') return vibe === 'elegant' ? 'runway-model' : 'actor-chic';
-  return 'idol-visual';
+  const profile = answers.experienceProfile as Record<string, string> | undefined;
+  return profile?.castingMood === 'chic' ? 'runway-model' : profile?.castingMood === 'bright' ? 'idol-visual' : 'nation-sweetheart';
 }
 
 /* ── Score Bar ─────────────────────────────────────────── */
@@ -242,10 +107,68 @@ function ScoreBar({ label, value, color }: { label: string; value: number; color
   );
 }
 
-/* ── Result Component ──────────────────────────────────── */
+/* ── Result View ───────────────────────────────────────── */
 
 function lookalikeFor(resultKey: string) {
   return RESULTS[resultKey as ResultKey] ?? RESULTS['idol-visual'];
+}
+
+const isScore = (n: unknown) => typeof n === 'number' && n >= 0 && n <= 100;
+
+function isAiLookalike(v: unknown): v is AiCelebLookalike {
+  const o = v as AiCelebLookalike | null;
+  return !!o && o.observed === true && typeof o.name === 'string' && typeof o.desc === 'string' && !!o.scores
+    && isScore(o.scores.face) && isScore(o.scores.feature) && isScore(o.scores.vibe)
+    && Array.isArray(o.traits) && Array.isArray(o.celebs)
+    && o.celebs.every((c) => typeof c.name === 'string' && isScore(c.similarity) && typeof c.point === 'string');
+}
+
+/** 화면·출력물이 그리는 닮은꼴 — AI 결과가 있으면 그것, 없으면 기본 유형 */
+interface LookalikeView {
+  name: string;
+  desc: string;
+  scores: Scores;
+  traits: string[];
+  celebs: AiCelebLookalike['celebs'];
+  /** AI가 사진에서 읽은 얼굴형·돋보이는 이목구비·첫인상 (AI 결과에만) */
+  reading: { faceShape: string; feature: string; vibe: string } | null;
+  photo: string | undefined;
+  ai: boolean;
+  /** 카메라로 찍었는데 AI가 얼굴을 못 찾은 경우 — 다시 찍기 안내 */
+  retake: boolean;
+}
+
+function lookalikeView(answers: DemoAnswers, resultKey: string, generated: unknown): LookalikeView {
+  const capture = getCapture(answers, 'face');
+  if (isAiLookalike(generated)) {
+    return {
+      name: generated.name,
+      desc: generated.desc,
+      scores: generated.scores,
+      traits: generated.traits,
+      celebs: generated.celebs,
+      reading: {
+        faceShape: FACE_SHAPES.find((f) => f.id === generated.faceShape)?.label ?? '-',
+        feature: FEATURES.find((f) => f.id === generated.feature)?.label ?? '-',
+        vibe: VIBES.find((v) => v.id === generated.vibe)?.label ?? '-',
+      },
+      photo: capture?.image,
+      ai: true,
+      retake: false,
+    };
+  }
+  const d = lookalikeFor(resultKey);
+  return {
+    name: d.name,
+    desc: `직접 고른 캐스팅 분위기로 구성한 ${d.name} 예시예요. 다음 촬영에서 헤어·의상·표정을 바꿔 보며 나에게 편한 연출을 찾아보세요.`,
+    scores: d.scores,
+    traits: d.traits,
+    celebs: [],
+    reading: null,
+    photo: capture?.image,
+    ai: false,
+    retake: isNotObserved(generated) && capture?.source !== 'sample',
+  };
 }
 
 /** 3가지 점수 평균 — 출력물 헤드라인 */
@@ -253,9 +176,11 @@ function overallMatch(scores: Scores): number {
   return Math.round(SCORE_ITEMS.reduce((sum, item) => sum + scores[item.key], 0) / SCORE_ITEMS.length);
 }
 
-function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps) {
-  const tCommon = useTranslations('demos.common');
-  const data = lookalikeFor(resultKey);
+/* ── Result Component ──────────────────────────────────── */
+
+function ResultComponent({ answers, resultKey, onRestart, pillarColor, generated }: DemoResultProps) {
+  const data = lookalikeView(answers, resultKey, generated);
+  const top = data.celebs[0];
 
   return (
     <motion.div
@@ -265,8 +190,30 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
       className="flex flex-col items-center gap-8 text-center"
     >
       <p className="text-sm font-medium tracking-widest text-slate-400 uppercase">
-        당신의 셀럽 닮은꼴
+        당신의 셀럽 무드 캐스팅
       </p>
+
+      {/* 내 사진 ↔ 가장 닮은 셀럽 */}
+      {data.photo && (
+        <div className="flex items-center gap-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={data.photo}
+            alt="방금 찍은 사진"
+            className="h-24 w-24 rounded-full border-2 object-cover"
+            style={{ borderColor: pillarColor }}
+          />
+          {top && (
+            <>
+              <span className="text-2xl font-bold tabular-nums" style={{ color: pillarColor }}>{top.similarity}%</span>
+              <div className="flex h-24 w-24 flex-col items-center justify-center rounded-full border-2 border-dashed border-slate-600 bg-slate-800/60 px-2">
+                <span className="text-[10px] text-slate-400">추천 캐스팅 무드</span>
+                <span className="text-sm font-bold leading-tight text-white [word-break:keep-all]">{top.name}</span>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       <h2 className="text-3xl font-bold" style={{ color: pillarColor }}>
         {data.name}
@@ -274,6 +221,39 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
 
       <p className="max-w-sm text-sm leading-relaxed text-slate-300">{data.desc}</p>
 
+      {/* 닮은 셀럽 TOP 3 — AI 결과에만 있다 */}
+      {data.celebs.length > 0 && (
+        <div className="w-full max-w-sm">
+          <p className="mb-3 text-xs font-semibold tracking-wide text-slate-400 uppercase">
+            셀럽 무드 제안 {data.celebs.length}가지
+          </p>
+          <div className="space-y-2">
+            {data.celebs.map((c, i) => (
+              <div key={c.name} className="rounded-xl border border-slate-700 bg-slate-800/40 px-4 py-3 text-left">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-slate-100">
+                    <span className="mr-1.5 text-slate-500">{i + 1}</span>
+                    {c.name}
+                  </p>
+                  <span className="text-sm font-bold tabular-nums" style={{ color: pillarColor }}>{c.similarity}%</span>
+                </div>
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: pillarColor }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${c.similarity}%` }}
+                    transition={{ type: 'spring', stiffness: 60, damping: 14, delay: 0.2 + i * 0.1 }}
+                  />
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-slate-400">{c.point}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <p className="max-w-sm text-xs leading-relaxed text-slate-400">숫자는 스타일 비교를 위한 창작 참고 지수예요. 신원 판별이나 실제 닮을 확률을 의미하지 않아요.</p>
       {/* Score bars */}
       <div className="w-full max-w-sm space-y-4">
         {SCORE_ITEMS.map((item) => (
@@ -298,6 +278,21 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
         </div>
       </div>
 
+      {data.reading && (
+        <p className="text-xs text-slate-400">
+          AI가 읽은 얼굴 · {data.reading.faceShape} · 돋보이는 {data.reading.feature} · {data.reading.vibe} 무드
+        </p>
+      )}
+
+      {data.ai && (
+        <p className="-mt-4 text-xs text-slate-500">헤어·의상·표정을 참고한 창작 무드예요. 실존 인물과의 닮음이나 신원을 판단하지 않아요.</p>
+      )}
+      {data.retake && (
+        <p className="-mt-4 max-w-sm text-xs text-amber-300/80">
+          사진의 연출 요소를 확인하기 어려워 선택한 분위기의 예시를 보여드렸어요. 밝은 곳에서 다시 찍어 무드 카드를 만들어 보세요.
+        </p>
+      )}
+
       {/* Actions */}
       <div className="flex gap-3 pt-2">
         <motion.button
@@ -306,62 +301,71 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
           onClick={onRestart}
           className="rounded-xl border border-slate-700 px-6 py-3 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500"
         >
-          다시 진단하기
+          다른 무드로 체험
         </motion.button>
-        <Link
-          href={QUOTE_HREF}
-          className="rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
-          style={{ backgroundColor: pillarColor }}
-        >
-          {tCommon('ctaButton')}
-        </Link>
       </div>
     </motion.div>
   );
 }
 
-/* ── Export ─────────────────────────────────────────────── */
-
 /* ── Print ──────────────────────────────────────────────── */
 
-function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
-  const data = lookalikeFor(resultKey);
-  const face = FACE_SHAPES.find((f) => f.id === answers['faceShape']);
-  const feature = FEATURES.find((f) => f.id === answers['feature']);
-  const vibe = VIBES.find((v) => v.id === answers['vibe']);
+function getPrint(answers: DemoAnswers, resultKey: string, generated?: unknown): PrintSpec {
+  const data = lookalikeView(answers, resultKey, generated);
+  const top = data.celebs[0];
   return {
     kind: 'receipt',
-    eyebrow: '당신의 셀럽 닮은꼴',
+    eyebrow: '당신의 셀럽 무드 캐스팅',
     title: data.name,
     sections: [
-      { type: 'big', text: `${overallMatch(data.scores)}% MATCH` },
+      { type: 'big', text: top ? `${top.name} ${top.similarity}%` : `${overallMatch(data.scores)}% MATCH` },
+      ...(data.celebs.length > 0
+        ? [{ type: 'list' as const, title: `셀럽 무드 ${data.celebs.length}가지`, items: data.celebs.map((c) => `${c.name} · 창작 연출값 ${c.similarity}% · ${c.point}`) }]
+        : []),
       {
         type: 'bars',
-        title: '닮은꼴 분석',
+        title: '창작 무드 참고 지수',
         bars: SCORE_ITEMS.map((item) => ({ label: item.label, value: data.scores[item.key] })),
       },
-      {
-        type: 'rows',
-        title: '분석 포인트',
-        rows: [
-          { label: '얼굴형', value: face?.label ?? '-' },
-          { label: '자신 있는 곳', value: feature?.label ?? '-' },
-          { label: '첫인상', value: vibe?.label ?? '-' },
-        ],
-      },
+      ...(data.reading
+        ? [{
+            type: 'rows' as const,
+            title: 'AI가 읽은 얼굴',
+            rows: [
+              { label: '얼굴형', value: data.reading.faceShape },
+              { label: '돋보이는 곳', value: data.reading.feature },
+              { label: '첫인상', value: data.reading.vibe },
+            ],
+          }]
+        : []),
       { type: 'list', title: '공통 특성', items: data.traits },
       { type: 'text', text: data.desc },
     ],
-    footer: '닮은꼴은 재미로, 당신은 유일한 오리지널이에요',
+    footer: '숫자는 창작 스타일 참고 지수이며 신원 판별·실측 확률이 아니에요',
   };
 }
 
+/* ── AI 생성 ──────────────────────────────────────────── */
+
+function generate(answers: DemoAnswers): Promise<unknown> {
+  const photo = getCapture(answers, 'face')?.image;
+  if (!photo) return Promise.resolve(null);
+  return requestDemoAi<unknown>(
+    config.id,
+    { experienceProfile: answers.experienceProfile, photo, field: getChoice(answers, 'field') ?? 'all' },
+    { validate: (d): d is unknown => isAiLookalike(d) || isNotObserved(d) }
+  );
+}
+
+/* ── Export ─────────────────────────────────────────────── */
+
 const CelebLookalikeDemo: DemoModule = {
   config,
-  StepComponents: [StepFaceShape, StepFeature, StepVibe],
+  StepComponents: STEPS.map((step) => step.Component),
   ResultComponent,
   computeResult,
   getPrint,
+  generate,
 };
 
 export default CelebLookalikeDemo;

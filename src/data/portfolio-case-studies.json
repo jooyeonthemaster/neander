@@ -1,0 +1,338 @@
+{
+  "jimff-2026-ost-fair": {
+    "objective_ko": "제22회 제천국제음악영화제 OST페어에서 영화제의 이야기를 관객이 직접 참여하는 경험과 기념품으로 확장하고자 했습니다.",
+    "execution_ko": "AI 조향 체험과 영화제 게임 짐프러너를 개발해 키오스크로 운영하고, 영화제 굿즈로 디퓨저 키캡 키링을 제작했습니다.",
+    "outcome_ko": "OST페어 현장에서 AI 조향 체험과 짐프러너를 운영하고, 디퓨저 키캡 키링을 제작해 납품했습니다.",
+    "objective_en": "The 22nd JIMFF OST Fair wanted to extend the festival's story into hands-on experiences and keepsakes for its audience.",
+    "execution_en": "We developed an AI perfume experience and the festival game JIMFF Runner, ran them on kiosks, and produced diffuser keycap keyrings as festival merchandise.",
+    "outcome_en": "Operated the AI perfume experience and JIMFF Runner at the OST Fair, and produced and delivered diffuser keycap keyrings."
+  },
+  "pyeongtaek-ai-festa-2026": {
+    "objective_ko": "평택아트센터 AI 페스타에서 방문객이 AI 기술을 직접 조작하고 결과물을 받아 가는 체험을 제공하고자 했습니다.",
+    "execution_ko": "AI 조향사, 뮤직비디오 메이커, AI 포토부스, 미래가족 상상 콘텐츠를 키오스크 체험 부스로 구성했습니다.",
+    "outcome_ko": "AI 체험 4종을 기획하고 현장 부스를 운영해 방문객에게 체험 결과물을 제공했습니다.",
+    "objective_en": "The AI Festa at Pyeongtaek Art Center wanted visitors to operate AI technology themselves and take home the results.",
+    "execution_en": "We built kiosk booths for four experiences: an AI perfumer, a music video maker, an AI photo booth and a future-family imagination program.",
+    "outcome_en": "Planned four AI experiences and ran the booths on site, giving visitors their experience outputs."
+  },
+  "nflying-into-the-rem-md-2026": {
+    "objective_ko": "FNC엔터테인먼트는 엔플라잉 〈into REM〉 공연의 분위기를 팬이 간직할 수 있는 공식 향 MD로 전하고자 했습니다.",
+    "execution_ko": "서울·대구·부산·광주 공연별로 향을 달리 구성하고, 룸스프레이와 포토카드를 담은 필로우 사쉐 키링을 제작했습니다.",
+    "outcome_ko": "공연별 향 구성의 룸스프레이·사쉐 키링 공식 MD를 1·2차에 걸쳐 제작·납품했습니다.",
+    "objective_en": "FNC Entertainment wanted official fragrance merchandise that let fans keep the mood of N.Flying's 〈into REM〉 concerts.",
+    "execution_en": "We created a different scent for each concert city (Seoul, Daegu, Busan, Gwangju) and produced room sprays and pillow sachet keyrings packed with photo cards.",
+    "outcome_en": "Produced and delivered the official room spray and sachet keyring merchandise, with concert-specific scents, across two production runs."
+  },
+  "jongno-open-book-maru-2026": {
+    "objective_ko": "종로 열린 책마루는 야외도서관을 찾는 시민에게 독서와 연결된 참여 프로그램을 더하고자 했습니다.",
+    "execution_ko": "독서 취향에 맞춰 책과 차를 추천하는 AI 체험과, 향 레시피를 출력하는 조향 키오스크를 현장에 운영했습니다.",
+    "outcome_ko": "청운공원과 마로니에공원 야외도서관에서 독서 취향 추천과 향 레시피 출력 체험을 운영했습니다.",
+    "objective_en": "Jongno Open Book Maru wanted to add a reading-related participation program for visitors to its outdoor libraries.",
+    "execution_en": "We ran an AI experience that recommends books and teas by reading taste, plus a perfume kiosk that prints scent recipes.",
+    "outcome_en": "Operated reading-taste recommendations and printed scent-recipe experiences at the outdoor libraries in Cheongun Park and Marronnier Park."
+  },
+  "korea-grand-sale-2026": {
+    "objective_ko": "코리아그랜드세일은 플레이라운지 북촌을 찾은 방문객에게 참여형 맞춤 체험을 제공하고자 했습니다.",
+    "execution_ko": "이미지 분석으로 향을 추천하고, 참가자가 추천 향을 직접 시향·조향해 향수를 완성하는 프로그램을 구성했습니다.",
+    "outcome_ko": "플레이라운지 북촌에서 이미지 기반 향 추천과 현장 조향 프로그램을 운영했습니다.",
+    "objective_en": "Korea Grand Sale wanted to offer visitors to Play Lounge Bukchon a hands-on, personalized experience.",
+    "execution_en": "We designed a program that recommends scents through image analysis, then has participants smell and blend them into their own perfume.",
+    "outcome_en": "Ran image-based scent recommendations and an on-site perfume blending program at Play Lounge Bukchon."
+  },
+  "heukseok-popup-testbed-2025": {
+    "objective_ko": "흑석역 팝업 테스트베드에서 방문객이 향을 보고 맡고 만드는 체험형 공간을 선보이고자 했습니다.",
+    "execution_ko": "향료 오르간 기반 조향 체험에 AI 향 추천과 미디어아트 전시를 연결해 공간을 연출했습니다.",
+    "outcome_ko": "흑석역 팝업 공간에서 향수 전시와 조향 체험을 운영했습니다.",
+    "objective_en": "The Heukseok Station pop-up testbed aimed to present a space where visitors could see, smell and make fragrance.",
+    "execution_en": "We combined perfume blending at a fragrance organ with AI scent recommendations and a media art exhibition.",
+    "outcome_en": "Ran a fragrance exhibition and perfume blending experience in the Heukseok Station pop-up space."
+  },
+  "hurease-launch-2025": {
+    "objective_ko": "셀프케어 브랜드 HUREASE는 런칭 행사에서 방문객이 브랜드와 제품을 직접 경험하도록 하고자 했습니다.",
+    "execution_ko": "브랜드 체험존, 제품 테스트, 무드 공간과 시향 요소를 배치하고 안내물과 현장 운영을 함께 구성했습니다.",
+    "outcome_ko": "런칭 행사 공간을 기획하고 체험존·시향지·안내물을 제작해 현장을 운영했습니다.",
+    "objective_en": "Self-care brand HUREASE wanted guests at its launch event to experience the brand and products firsthand.",
+    "execution_en": "We laid out brand experience zones, product testing, a mood space and scent elements, along with signage and on-site operation.",
+    "outcome_en": "Planned the launch space, produced experience zones, scent strips and signage, and operated the event."
+  },
+  "seoul-writers-festival": {
+    "objective_ko": "2025 서울국제작가축제는 참가 도서의 이야기를 관객이 새로운 감각으로 만나는 전시를 원했습니다.",
+    "execution_ko": "참가 도서 29종의 향수와 책 시향지를 만들고, 이미지 기반 책·향 추천, 음성 내레이션, 필사 연동 인터랙션을 구성했습니다.",
+    "outcome_ko": "도서 29종의 향수와 시향지, 책·향·미디어 인터랙션을 갖춘 AI 북퍼퓸 전시를 제작했습니다.",
+    "objective_en": "The 2025 Seoul International Writers' Festival wanted an exhibition where audiences meet the featured books through a new sense.",
+    "execution_en": "We made perfumes and scent strips for 29 featured books, with image-based book and scent recommendations, voice narration and a transcription-linked interaction.",
+    "outcome_en": "Produced an AI book perfume exhibition with perfumes and scent strips for 29 books and book, scent and media interactions."
+  },
+  "namsangol-hanok-chwihyang-2025": {
+    "objective_ko": "남산골한옥마을은 〈취향〉 프로그램에서 방문객이 한옥 문화 속에서 향을 탐색하는 경험을 더하고자 했습니다.",
+    "execution_ko": "〈취향〉 프로그램과 공동 브랜딩한 시향지를 제작하고, 방문객이 자신만의 향수를 만드는 조향 체험을 구성했습니다.",
+    "outcome_ko": "공동 브랜딩 시향지를 제작하고 한옥마을 현장에서 조향 체험을 운영했습니다.",
+    "objective_en": "Namsangol Hanok Village wanted its 〈Chwihyang〉 program to let visitors explore fragrance within hanok culture.",
+    "execution_en": "We produced scent strips co-branded with the program and designed a blending experience where visitors make their own perfume.",
+    "outcome_en": "Produced co-branded scent strips and ran the perfume blending experience on site at the village."
+  },
+  "tourism-venture-week-2025": {
+    "objective_ko": "관광벤처 이음주간에서 향 체험을 관광 콘텐츠로 활용할 수 있는 가능성을 소개하고자 했습니다.",
+    "execution_ko": "이미지 기반으로 향을 추천하고, 방문객이 추천 향을 시향하고 조향하는 맞춤 향수 체험을 선보였습니다.",
+    "outcome_ko": "관광 행사 현장에서 맞춤 향수 조향 체험을 운영했습니다.",
+    "objective_en": "At Tourism Venture Connect Week, we aimed to show how a fragrance experience can serve as tourism content.",
+    "execution_en": "We presented a custom perfume experience that recommends scents from an image, then lets visitors smell and blend them.",
+    "outcome_en": "Ran a custom perfume blending experience on site at the tourism event."
+  },
+  "jecheon-music-film-festival": {
+    "objective_ko": "제21회 제천국제음악영화제는 관람객이 영화의 분위기를 향으로 경험하는 프로그램을 더하고자 했습니다.",
+    "execution_ko": "관람객 이미지에 어울리는 향을 추천해 현장에서 조향하는 AI 조향사 부스를 운영하고, 영화 모티프 시향지를 제작했습니다.",
+    "outcome_ko": "영화제 기간 AI 조향사 부스를 운영하고 영화의 분위기를 담은 시향지를 선보였습니다.",
+    "objective_en": "The 21st JIMFF wanted a program that let audiences experience the mood of films through scent.",
+    "execution_en": "We ran an AI perfumer booth that recommends a scent matched to each visitor's image and blends it on site, and produced film-inspired scent strips.",
+    "outcome_en": "Operated the AI perfumer booth during the festival and presented scent strips capturing the mood of the films."
+  },
+  "epson-oneday-class-2025": {
+    "objective_ko": "한국엡손은 참가자가 AI 향 추천을 활용해 직접 향수를 만드는 브랜드 원데이클래스를 열고자 했습니다.",
+    "execution_ko": "AI 향 추천 후 시향과 조향으로 이어지는 클래스 진행 과정과 체험 도구를 구성했습니다.",
+    "outcome_ko": "브랜드 원데이클래스를 진행해 참가자가 맞춤 향수를 완성하도록 했습니다.",
+    "objective_en": "Epson Korea wanted a branded one-day class where participants make their own perfume with AI scent recommendations.",
+    "execution_en": "We designed the class flow from AI scent recommendation to smelling and blending, along with the experience tools.",
+    "outcome_en": "Ran the branded one-day class, with participants completing their own custom perfumes."
+  },
+  "hahyunsang-elegy-2024": {
+    "objective_ko": "하현상의 EP 〈Elegy〉 발매를 기념해 수록곡의 이야기와 감정을 향으로 전하고자 했습니다.",
+    "execution_ko": "수록곡 6곡을 각각의 향으로 표현한 향수 컬렉션을 제작하고, 시향 경험을 담은 앨범 발매 기념 팝업을 구성했습니다.",
+    "outcome_ko": "향수 6종 컬렉션과 발매 기념 팝업을 선보였고, 관련 조향·미디어아트 체험도 운영했습니다.",
+    "objective_en": "To mark the release of Ha Hyun-sang's EP 〈Elegy〉, the project aimed to convey the stories and emotions of its songs through scent.",
+    "execution_en": "We created a perfume collection expressing each of the 6 tracks as a scent and staged a release pop-up built around smelling them.",
+    "outcome_en": "Presented a collection of 6 perfumes and a release pop-up, and ran related perfume and media art experiences."
+  },
+  "timeslip-epson-2024": {
+    "objective_ko": "TIMESLIP 전시에서 EPSON과 함께 관람객이 시각과 후각으로 공간을 경험하도록 하고자 했습니다.",
+    "execution_ko": "EPSON 투사 영상과 AC’SCENT 시향 요소를 하나의 관람 동선에 배치해 전시를 구성했습니다.",
+    "outcome_ko": "프로젝션과 시향 요소를 결합한 향·영상 전시를 선보였습니다.",
+    "objective_en": "At the TIMESLIP exhibition, the goal with EPSON was for visitors to experience the space through both sight and smell.",
+    "execution_en": "We placed EPSON projections and AC'SCENT scent elements along a single visitor route.",
+    "outcome_en": "Presented a scent and video exhibition combining projection with scent elements."
+  },
+  "yiyuksa-macho-exhibition": {
+    "objective_ko": "마초의사춘기와 함께 이육사 시인의 문학 전시에 어울리는 시각적 분위기를 만들고자 했습니다.",
+    "execution_ko": "꽃 설치물과 전시 공간에 영상을 투사하는 미디어아트 연출을 진행했습니다.",
+    "outcome_ko": "꽃 설치물과 프로젝션을 결합한 전시 공간 연출을 완성했습니다.",
+    "objective_en": "With Macho's Sachunki, the aim was to create a visual atmosphere suited to a literary exhibition on poet Yi Yuk-sa.",
+    "execution_en": "We produced media art that projects video onto flower installations and the exhibition space.",
+    "outcome_en": "Completed a spatial installation combining flower installations and projection."
+  },
+  "arterior-daily-waterfall-2023": {
+    "objective_ko": "아테리어는 지역 공간과 청년 예술인을 연결해, 카페 방문과 작품 감상이 함께 이루어지게 하고자 했습니다.",
+    "execution_ko": "서대문구 홍제천 카페폭포에 벽면 작품과 디지털 전시 요소를 배치하고 안내물과 홍보물을 제작했습니다.",
+    "outcome_ko": "카페폭포에서 〈일상의 폭포〉 전시를 1~3차에 걸쳐 선보였습니다.",
+    "objective_en": "ARTERIOR aimed to connect local spaces with young artists so that visiting a café and viewing art happen together.",
+    "execution_en": "At Cafe Pokpo by Hongjecheon in Seodaemun-gu, we installed wall artworks and digital exhibition elements and produced guides and promotional materials.",
+    "outcome_en": "Presented the 〈Everyday Waterfall〉 exhibition at Cafe Pokpo across three rounds."
+  },
+  "arterior-fave-exhibition-2023": {
+    "objective_ko": "아테리어는 페이브 매장에서 방문객이 일상적으로 머무는 공간 속에서 작품을 만나게 하고자 했습니다.",
+    "execution_ko": "매장의 벽면과 이용 동선에 맞춰 작가 작품을 배치하고 전시를 구성했습니다.",
+    "outcome_ko": "페이브 매장 공간에 맞춘 작품 배치와 전시를 선보였습니다.",
+    "objective_en": "ARTERIOR wanted Fave's visitors to encounter artwork within a space where they spend everyday time.",
+    "execution_en": "We arranged artists' works to fit the store's walls and customer flow.",
+    "outcome_en": "Presented an artwork display and exhibition tailored to the Fave store."
+  },
+  "arterior-1579-exhibition-2023": {
+    "objective_ko": "아테리어는 1579 공간에서 작품과 관람객이 만나는 자리를 만들고자 했습니다.",
+    "execution_ko": "벽면 전시와 영상 요소를 공간에 맞춰 배치하고 현장 행사를 함께 구성했습니다.",
+    "outcome_ko": "1579 공간에서 전시와 현장 행사를 선보였습니다.",
+    "objective_en": "ARTERIOR set out to create a place where artworks and visitors meet in the 1579 space.",
+    "execution_en": "We arranged wall displays and video elements to suit the space and organized an on-site event.",
+    "outcome_en": "Presented the exhibition and on-site event at 1579."
+  },
+  "arterior-artist-perfume-2023": {
+    "objective_ko": "아테리어 자체 프로젝트로 작가의 일러스트 작품을 향수와 굿즈로 확장하고자 했습니다.",
+    "execution_ko": "작품별 향을 만들고 포토카드·엽서·스티커로 패키지를 구성했으며, 제품 촬영과 홍보물을 제작했습니다.",
+    "outcome_ko": "작품 기반 향수와 아트워크 패키지·굿즈, 제품 사진과 홍보물을 완성했습니다.",
+    "objective_en": "As an in-house ARTERIOR project, we aimed to extend artists' illustrations into perfumes and goods.",
+    "execution_en": "We created a scent for each artwork, packaged them with photo cards, postcards and stickers, and produced product photography and promotional materials.",
+    "outcome_en": "Completed artwork-based perfumes, artwork packaging and goods, product photos and promotional materials."
+  },
+  "arterior-nokwon-exhibition-2023": {
+    "objective_ko": "녹원의 공간과 분위기를 방문 전의 고객에게 소개할 콘텐츠가 필요했습니다.",
+    "execution_ko": "공간의 가구와 소품, 빛과 색을 사진으로 기록하고 매장 소개용 홍보 영상을 구성했습니다.",
+    "outcome_ko": "녹원 공간 사진과 매장 소개 영상을 제작했습니다.",
+    "objective_en": "Nokwon needed content to introduce its space and atmosphere to prospective visitors.",
+    "execution_en": "We photographed the space's furniture, props, light and color, and put together a promotional video introducing the venue.",
+    "outcome_en": "Produced space photography and a venue introduction video for Nokwon."
+  },
+  "mujin-love-incense-2024": {
+    "objective_ko": "무진 생일 이벤트는 미공개 자작곡의 감정과 이미지를 팬들이 향으로 경험하도록 하고자 했습니다.",
+    "execution_ko": "곡을 테마로 한 향수 굿즈를 만들고, 팬들이 직접 조향하는 워크숍을 구성했습니다.",
+    "outcome_ko": "AC’SCENT 매장에서 자작곡 테마 향수와 팬 조향 워크숍을 선보였습니다.",
+    "objective_en": "Mujin's birthday event wanted fans to experience the emotion and imagery of his unreleased self-composed song through scent.",
+    "execution_en": "We created song-themed perfume goods and designed a workshop where fans blend perfume themselves.",
+    "outcome_en": "Presented the song-themed perfume and a fan blending workshop at an AC'SCENT store."
+  },
+  "newjeans-bunnies-fragrance": {
+    "objective_ko": "팬 주최 생일 이벤트는 뉴진스와 버니즈의 생일을 향으로 기념하는 경험을 만들고자 했습니다.",
+    "execution_ko": "아티스트의 취향을 반영한 향을 구성하고, 팬들이 매장에서 체험하는 조향 프로그램과 향 굿즈를 준비했습니다.",
+    "outcome_ko": "AC’SCENT 매장에서 팬 조향 이벤트를 운영하고 향 굿즈를 구성했습니다.",
+    "objective_en": "The fan-organized event wanted to celebrate the birthdays of NewJeans and Bunnies through fragrance.",
+    "execution_en": "We composed scents reflecting the artists' tastes and prepared an in-store blending program and fragrance goods for fans.",
+    "outcome_en": "Ran the fan blending event at an AC'SCENT store and put together fragrance goods."
+  },
+  "taeyang-down-to-earth-fragrance": {
+    "objective_ko": "태양달 팬 이벤트는 〈Down to Earth〉의 분위기를 팬들이 향으로 경험하도록 하고자 했습니다.",
+    "execution_ko": "태양이 조향과 네이밍에 참여한 향을 바탕으로, 팬들이 직접 향을 경험하고 조향하는 프로그램을 구성했습니다.",
+    "outcome_ko": "아티스트가 참여한 향과 팬 조향 체험으로 이루어진 향수 이벤트를 운영했습니다.",
+    "objective_en": "The Taeyangdal fan event wanted fans to experience the mood of 〈Down to Earth〉 through scent.",
+    "execution_en": "Building on a scent Taeyang helped blend and name, we designed a program where fans experience and blend it themselves.",
+    "outcome_en": "Ran a fragrance event built on the artist-involved scent and a fan blending experience."
+  },
+  "chungha-birthday-perfume-2025": {
+    "objective_ko": "청하 생일 이벤트는 향과 음악의 인상을 함께 담은 기념 굿즈를 팬들에게 전하고자 했습니다.",
+    "execution_ko": "시그니처 향수를 만들고, LP 플레이어를 모티프로 한 패키지를 디자인했습니다.",
+    "outcome_ko": "시그니처 향수와 LP 플레이어 모티프 패키지를 제작했습니다.",
+    "objective_en": "Chungha's birthday event wanted to give fans commemorative goods capturing both scent and music.",
+    "execution_en": "We created a signature perfume and designed packaging inspired by an LP player.",
+    "outcome_en": "Produced the signature perfume and LP-player-inspired packaging."
+  },
+  "limjungkyu-figure-diffuser": {
+    "objective_ko": "인물의 한 장면을 향과 함께 간직할 수 있는 입체 오브제로 표현하고자 했습니다.",
+    "execution_ko": "인물의 특징을 피규어 형태로 옮기고, 향을 담는 디퓨저 오브제로 구성했습니다.",
+    "outcome_ko": "인물 피규어와 디퓨저 오브제를 제작했습니다.",
+    "objective_en": "The aim was to capture a moment of the person as a 3D object that also holds a scent.",
+    "execution_en": "We translated the person's features into a figure and built it into a diffuser object that holds fragrance.",
+    "outcome_en": "Produced the portrait figure and diffuser object."
+  },
+  "acscent-clicker-diffuser-2026": {
+    "objective_ko": "AC’SCENT는 에그덕·헤드덕 캐릭터를 손으로 만지며 경험하는 작은 향 제품을 만들고자 했습니다.",
+    "execution_ko": "클리커 디퓨저의 제품 형태와 향 구성, 패키지를 함께 개발했습니다.",
+    "outcome_ko": "캐릭터 클리커 디퓨저와 제품 패키지를 완성했습니다.",
+    "objective_en": "AC'SCENT set out to make a small fragrance product that lets people experience the Eggduck and Headduck characters by hand.",
+    "execution_en": "We developed the clicker diffuser's form, scent composition and packaging together.",
+    "outcome_en": "Completed the character clicker diffusers and their product packaging."
+  },
+  "acscent-ppudeok": {
+    "objective_ko": "AC’SCENT는 캐릭터와 향수, 향 분석 결과물을 하나의 경험으로 묶은 제품을 만들고자 했습니다.",
+    "execution_ko": "뿌덕 캐릭터 향수의 제품 사진과 패키지, 매장 안내 요소를 연결해 구성했습니다.",
+    "outcome_ko": "뿌덕 캐릭터 향수 제품과 패키지, 매장 체험 구성을 완성했습니다.",
+    "objective_en": "AC'SCENT aimed to create a product that brings a character, a perfume and a scent analysis together as one experience.",
+    "execution_en": "We tied together product photography, packaging and in-store guidance for the Ppudeok character perfume.",
+    "outcome_en": "Completed the Ppudeok character perfume, its packaging and the in-store experience."
+  },
+  "acscent-saju-collection-2026": {
+    "objective_ko": "AC’SCENT는 사주와 오행이라는 하나의 테마를 여러 형태의 향 제품으로 경험하게 하고자 했습니다.",
+    "execution_ko": "목·화·토·금·수의 시각 요소를 향수와 키링 제품, 패키지, 리포트에 연결해 설계했습니다.",
+    "outcome_ko": "오행 테마의 향수·키링 제품과 패키지, 리포트를 구성했습니다.",
+    "objective_en": "AC'SCENT wanted one theme, saju and the Five Elements, to be experienced through several kinds of fragrance products.",
+    "execution_en": "We carried the visual motifs of wood, fire, earth, metal and water across perfumes, keyrings, packaging and reports.",
+    "outcome_en": "Developed Five Elements-themed perfumes, keyrings, packaging and reports."
+  },
+  "acscent-packaging-design": {
+    "objective_ko": "AC’SCENT는 매장 체험 이후에도 브랜드 경험이 이어지도록 제품 패키지를 통일하고자 했습니다.",
+    "execution_ko": "향수 병과 라벨, 단상자, 쇼핑백을 다양한 제품 규격과 굿즈 조합에 맞춰 디자인했습니다.",
+    "outcome_ko": "향수 병·라벨, 단상자·쇼핑백으로 이어지는 패키지 구성을 완성했습니다.",
+    "objective_en": "AC'SCENT wanted consistent product packaging so the brand experience continues after the store visit.",
+    "execution_en": "We designed bottles, labels, boxes and shopping bags to fit a range of product sizes and goods combinations.",
+    "outcome_en": "Completed a packaging system spanning bottles, labels, boxes and shopping bags."
+  },
+  "acscent-fandom-goods": {
+    "objective_ko": "팬 이벤트 주최팀은 행사별 테마를 담은 향 기념품과 매장 경험을 팬들에게 제공하고자 했습니다.",
+    "execution_ko": "행사 테마에 맞춰 향수, 레코드 모티프 디퓨저, 키링과 포토카드·시향지·안내물을 제작했습니다.",
+    "outcome_ko": "행사별 향 제품과 패키지, 인쇄 굿즈를 제작하고 매장에서 이벤트를 진행했습니다.",
+    "objective_en": "Fan-event organizers wanted to give fans fragrance keepsakes and an in-store experience built around each event's theme.",
+    "execution_en": "We produced perfumes, record-inspired diffusers, keyrings, photo cards, scent strips and guides to match each event's theme.",
+    "outcome_en": "Produced event-specific fragrance products, packaging and printed goods, and hosted the events in store."
+  },
+  "acscent-id": {
+    "objective_ko": "AC’SCENT는 이미지 분석을 바탕으로 방문객이 자신의 취향을 향수로 완성하는 매장을 만들고자 했습니다.",
+    "execution_ko": "향료 진열, 체험 도구, 디지털 분석 화면과 제품 구성을 연결해 맞춤 조향 동선을 설계했습니다.",
+    "outcome_ko": "홍대에 세 번째 매장 AC’SCENT ID를 열고 맞춤 조향 서비스를 운영하고 있습니다.",
+    "objective_en": "AC'SCENT wanted a store where visitors turn their personal taste into a perfume, guided by image analysis.",
+    "execution_en": "We linked fragrance displays, experience tools, digital analysis screens and products into a custom blending flow.",
+    "outcome_en": "Opened AC'SCENT ID, our third store, in Hongdae, where we run a custom perfume service."
+  },
+  "acscent-wau": {
+    "objective_ko": "AC’SCENT는 조향 체험에 미디어아트와 팬 이벤트를 더한 두 번째 매장을 만들고자 했습니다.",
+    "execution_ko": "홍대 와우산로 매장에 조향 공간, 미디어아트, 팬 이벤트 공간을 결합하고 행사 테마별 연출과 향 제품을 구성했습니다.",
+    "outcome_ko": "조향 체험·미디어아트·팬 이벤트를 운영하는 두 번째 매장을 열었습니다.",
+    "objective_en": "AC'SCENT set out to build a second store that adds media art and fan events to the perfume experience.",
+    "execution_en": "On Wausan-ro in Hongdae, we combined blending space, media art and fan event space, with visuals and fragrance products for each event theme.",
+    "outcome_en": "Opened our second store, running perfume blending, media art and fan events."
+  },
+  "acscent-sinchon": {
+    "objective_ko": "AC’SCENT는 향을 맡고 고르고 만드는 과정을 한 공간에서 경험하는 첫 매장을 만들고자 했습니다.",
+    "execution_ko": "신촌에 조향 체험, 제품 제작, 미디어아트 전시 연출을 한 공간 안에 구성했습니다.",
+    "outcome_ko": "AC’SCENT의 첫 매장을 구축하고 향수 체험과 전시를 운영했습니다.",
+    "objective_en": "AC'SCENT aimed to open a first store where smelling, choosing and making fragrance all happen in one space.",
+    "execution_en": "In Sinchon, we brought perfume blending, product making and media art exhibits into a single space.",
+    "outcome_en": "Built AC'SCENT's first store and ran fragrance experiences and exhibitions there."
+  },
+  "cross-the-line": {
+    "objective_ko": "한국콘텐츠진흥원 2022년 콘텐츠 임팩트 프로젝트로, 관람객이 작품 안을 이동하며 경험하는 전시를 선보이고자 했습니다.",
+    "execution_ko": "영상과 공간을 결합해 관람 동선 전체를 작품으로 구성했습니다.",
+    "outcome_ko": "몰입형 미디어아트 전시 〈CROSS THE LINE〉을 제작했습니다.",
+    "objective_en": "As a 2022 KOCCA Content Impact project, the goal was an exhibition visitors experience by moving through the work.",
+    "execution_en": "We combined video and space so the entire visitor route became part of the work.",
+    "outcome_en": "Produced the immersive media art exhibition 〈CROSS THE LINE〉."
+  },
+  "chungang-coming-of-age-perfume-2023": {
+    "objective_ko": "중앙대학교는 성년의 날을 맞은 학생들에게 기념이 되는 향수 선물을 전하고자 했습니다.",
+    "execution_ko": "행사에 맞춘 향수와 단상자, 포토카드, 스티커를 통일된 디자인으로 구성했습니다.",
+    "outcome_ko": "성년의 날 향수 기념품과 단상자·포토카드·스티커를 제작했습니다.",
+    "objective_en": "Chung-Ang University wanted to give students a memorable perfume gift for Coming-of-Age Day.",
+    "execution_en": "We created the perfume along with a box, photo cards and stickers in a unified design for the event.",
+    "outcome_en": "Produced the Coming-of-Age Day perfume gifts with boxes, photo cards and stickers."
+  },
+  "crackers-studio-sachets-2025": {
+    "objective_ko": "크래커스 스튜디오는 사계절을 테마로 한 자체 사쉐 제품을 만들고자 했습니다.",
+    "execution_ko": "Sweet Nap, After Rainwood, Sunset Coastline, Caramel Ember의 향 구성과 파우치 인쇄 도안, 제작 사양을 정리했습니다.",
+    "outcome_ko": "걸이용 사쉐 방향제 4종을 파우치 디자인과 함께 제작했습니다.",
+    "objective_en": "Crackers Studio wanted its own line of sachets themed on the four seasons.",
+    "execution_en": "We defined the scents for Sweet Nap, After Rainwood, Sunset Coastline and Caramel Ember, plus pouch print artwork and production specifications.",
+    "outcome_en": "Produced 4 hanging sachet fresheners together with their pouch designs."
+  },
+  "nodam-clicker-diffuser-2026": {
+    "objective_ko": "경기남부금연지원센터는 노담 캠페인 메시지를 일상에서 쓰는 캐릭터 제품으로 전하고자 했습니다.",
+    "execution_ko": "노담베어와 금연타이거 캐릭터를 클리커 디퓨저에 적용하고 본체 라벨과 스티커를 구성했습니다.",
+    "outcome_ko": "캠페인 캐릭터 클리커 디퓨저와 라벨·스티커를 제작해 납품했습니다.",
+    "objective_en": "The Gyeonggi Southern Tobacco Control Center wanted to carry its Nodam campaign message on an everyday character product.",
+    "execution_en": "We applied the Nodam Bear and Stop-smoking Tiger characters to clicker diffusers, with body labels and stickers.",
+    "outcome_en": "Produced and delivered the campaign's character clicker diffusers with labels and stickers."
+  },
+  "ewha-52-perfume-packaging": {
+    "objective_ko": "이화52번가는 지역의 이름을 담은 공동 브랜딩 향수 제품을 만들고자 했습니다.",
+    "execution_ko": "AC’SCENT 52 전용 로고를 만들고, ‘CUSTOM MADE · EWHA 52 STREET’ 문구를 담은 멀티 퍼퓸 패키지를 디자인했습니다.",
+    "outcome_ko": "전용 로고와 50ml 퍼퓸 패키지 디자인을 완성했습니다.",
+    "objective_en": "Ewha 52 Street wanted a co-branded perfume product carrying the name of the neighborhood.",
+    "execution_en": "We created a dedicated AC'SCENT 52 logo and designed multi-perfume packaging with the line 'CUSTOM MADE · EWHA 52 STREET'.",
+    "outcome_en": "Completed the dedicated logo and 50ml perfume packaging design."
+  },
+  "seoul-sachet-design": {
+    "objective_ko": "네안데르는 서울시 굿즈 공모전에 서울을 담은 향 기념품을 제안하고자 했습니다.",
+    "execution_ko": "향을 담는 작은 기념품의 형태와 그래픽을 여러 차례 발전시켰습니다.",
+    "outcome_ko": "사쉐 패키지 디자인을 공모 출품용 인쇄 디자인으로 정리했습니다.",
+    "objective_en": "Neander set out to propose a Seoul-themed fragrance souvenir for the Seoul city merchandise competition.",
+    "execution_en": "We developed the form and graphics of a small scented souvenir through several iterations.",
+    "outcome_en": "Finalized the sachet packaging as print-ready artwork for the competition entry."
+  },
+  "pixscent-ai-perfume-2024": {
+    "objective_ko": "네안데르는 이미지만으로 개인에게 맞는 향을 추천하는 맞춤 향수를 상품화하고자 했습니다.",
+    "execution_ko": "이미지 기반 향 추천 과정과 개인별 분석 리포트, 제품 패키지를 함께 개발했습니다.",
+    "outcome_ko": "텀블벅 크라우드펀딩 상품으로 맞춤 향수와 분석 리포트를 구성했습니다.",
+    "objective_en": "Neander aimed to turn image-based personal scent recommendation into a custom perfume product.",
+    "execution_en": "We developed the image-based recommendation process, individual analysis reports and product packaging together.",
+    "outcome_en": "Launched the custom perfume and analysis report as a Tumblbug crowdfunding product."
+  },
+  "kto-ai-perfume-class-2026": {
+    "objective_ko": "한국관광공사는 참가자가 AI로 향을 추천받아 직접 조향하는 클래스를 운영하고자 했습니다.",
+    "execution_ko": "QR 참여, 스타일·이미지 입력, 향 추천, 시향과 조향으로 이어지는 흐름을 화면 안내로 설계했습니다.",
+    "outcome_ko": "AI 조향 체험 흐름과 클래스 교안, 발표 자료를 제작했습니다.",
+    "objective_en": "The Korea Tourism Organization wanted a class where participants receive AI scent recommendations and blend their own perfume.",
+    "execution_en": "We designed an on-screen flow from QR entry and style or image input to scent recommendation, smelling and blending.",
+    "outcome_en": "Produced the AI perfume experience flow, class teaching materials and presentation slides."
+  },
+  "ansan-science-festival": {
+    "objective_ko": "2025 안산사이언스밸리 과학축제는 방문객에게 과학·기술을 체험 콘텐츠로 소개하는 행사입니다.",
+    "execution_ko": "한양대학교 ERICA에서 열린 과학축제에 참여했습니다.",
+    "outcome_ko": "과학축제 참여 기록을 아카이브로 정리했습니다.",
+    "objective_en": "The 2025 Ansan Science Valley Science Festival introduces science and technology to visitors through hands-on content.",
+    "execution_en": "We took part in the science festival held at Hanyang University ERICA.",
+    "outcome_en": "Archived our participation in the science festival."
+  }
+}

@@ -1,5 +1,6 @@
 import type { PortfolioItem } from '@/types/admin'
 import { applyPortfolioPreview } from '@/lib/portfolio-preview'
+import { publishedPortfolio } from '@/lib/portfolio-catalog'
 
 // 서버 컴포넌트에서 Firestore를 읽기 위한 REST 클라이언트.
 // portfolio 컬렉션은 공개 읽기 규칙이라 인증 없이 조회할 수 있고,
@@ -40,10 +41,10 @@ function decodeFields(fields: Record<string, FirestoreValue>): Record<string, un
 
 /**
  * 공개된 포트폴리오를 display_order 순으로 반환한다.
- * 프로젝트 ID가 없거나 요청이 실패하면 null을 반환하므로 호출부에서 정적 데이터로 대체한다.
+ * 요청 실패 시 검수된 공개 아카이브를 사용한다. 정상 응답은 CMS의 숨김/삭제를 존중한다.
  */
-export async function fetchPublishedPortfolio(revalidate = 300): Promise<PortfolioItem[] | null> {
-  if (!PROJECT_ID) return null
+export async function fetchPublishedPortfolio(revalidate = 300): Promise<PortfolioItem[]> {
+  if (!PROJECT_ID) return publishedPortfolio()
 
   const base = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/portfolio`
   const documents: FirestoreDocument[] = []
@@ -52,7 +53,7 @@ export async function fetchPublishedPortfolio(revalidate = 300): Promise<Portfol
   try {
     do {
       const url = `${base}?pageSize=300${pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : ''}`
-      const res = await fetch(url, { next: { revalidate } })
+      const res = await fetch(url, { next: { revalidate }, signal: AbortSignal.timeout(10000) })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const body = (await res.json()) as { documents?: FirestoreDocument[]; nextPageToken?: string }
       documents.push(...(body.documents ?? []))
@@ -60,13 +61,11 @@ export async function fetchPublishedPortfolio(revalidate = 300): Promise<Portfol
     } while (pageToken)
   } catch (error) {
     console.error('[fetchPublishedPortfolio] Firestore REST request failed:', error)
-    return null
+    return publishedPortfolio()
   }
 
   const items = documents
     .map((d) => ({ id: d.name.split('/').pop()!, ...decodeFields(d.fields ?? {}) }) as PortfolioItem)
-    .filter((item) => item.is_published !== false)
-    .sort((a, b) => a.display_order - b.display_order)
 
-  return await applyPortfolioPreview(items)
+  return publishedPortfolio(await applyPortfolioPreview(items))
 }

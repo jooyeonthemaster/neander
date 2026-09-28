@@ -3,29 +3,18 @@
 import { motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { QUOTE_HREF } from '@/lib/constants';
+import { getServiceContactHref } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type { DemoModule, DemoConfig, DemoAnswers, DemoStepProps, DemoResultProps } from '@/types/demo';
-import type { PrintSpec } from '../kit';
+import { requestDemoAi, type PrintSpec } from '../kit';
+import { COCKTAIL_MOODS, COCKTAIL_SPIRITS, COCKTAIL_COLORS, cocktailCopy, normalizeCocktailGarnish } from '@/data/demo-ai/cocktail';
+import type { AiCocktail, CocktailColor } from '@/data/demo-ai/cocktail';
 
 /* ── Static Data ─────────────────────────────────────── */
 
-const MOODS = [
-  { id: 'relaxed', emoji: '\u{1F33F}', label: '편안한 휴식', gradient: 'from-emerald-400 to-teal-500' },
-  { id: 'adventurous', emoji: '\u26A1', label: '새로운 모험', gradient: 'from-amber-400 to-orange-500' },
-  { id: 'romantic', emoji: '\u{1F339}', label: '로맨틱한 밤', gradient: 'from-rose-400 to-pink-500' },
-  { id: 'celebratory', emoji: '\u{1F389}', label: '축하 파티', gradient: 'from-violet-400 to-purple-500' },
-] as const;
-
-const SPIRITS = [
-  { id: 'vodka', emoji: '\u{1F378}', label: '보드카' },
-  { id: 'gin', emoji: '\u{1FAD2}', label: '진' },
-  { id: 'rum', emoji: '\u{1F3DD}\uFE0F', label: '럼' },
-  { id: 'whiskey', emoji: '\u{1F943}', label: '위스키' },
-  { id: 'tequila', emoji: '\u{1F335}', label: '데킬라' },
-  { id: 'nonalcohol', emoji: '\u{1F379}', label: '논알콜' },
-] as const;
+const MOODS = COCKTAIL_MOODS;
+const SPIRITS = COCKTAIL_SPIRITS;
 
 type CD = { name: string; gradient: string; ingredients: string[]; garnish: string; desc: string };
 
@@ -152,7 +141,7 @@ function FlavorStep({ answers, onUpdate }: DemoStepProps) {
     <div className="space-y-8">
       <div className="space-y-10 py-4">
         <FlavorSlider label="당도" labelMin="드라이" labelMax="스위트" value={f.sweetness} onChange={(v) => set('sweetness', v)} />
-        <FlavorSlider label="도수" labelMin="라이트" labelMax="스트롱" value={f.strength} onChange={(v) => set('strength', v)} />
+        <FlavorSlider label="베이스 강도" labelMin="라이트" labelMax="스트롱" value={f.strength} onChange={(v) => set('strength', v)} />
       </div>
     </div>
   );
@@ -194,9 +183,52 @@ function cocktailFor(resultKey: string): CD {
   return C[resultKey] ?? C['classic-blend']!;
 }
 
-function CocktailResult({ resultKey, onRestart, pillarColor }: DemoResultProps) {
-  const tCommon = useTranslations('demos.common');
+/** AI가 고른 색 → 잔 그라데이션 */
+const COLOR_GRADIENT: Record<CocktailColor, string> = {
+  clear: 'from-slate-100 to-cyan-200',
+  green: 'from-emerald-300 to-teal-500',
+  amber: 'from-amber-200 to-amber-500',
+  orange: 'from-amber-300 to-orange-500',
+  red: 'from-rose-400 to-red-600',
+  pink: 'from-rose-200 to-pink-500',
+  purple: 'from-violet-300 to-purple-600',
+  blue: 'from-cyan-300 to-blue-600',
+  brown: 'from-amber-300 to-yellow-900',
+  gold: 'from-amber-200 to-yellow-500',
+};
+
+function isAiCocktail(v: unknown): v is AiCocktail {
+  const o = v as AiCocktail | null;
+  return !!o && typeof o.name === 'string' && typeof o.story === 'string' && Array.isArray(o.ingredients)
+    && typeof o.garnish === 'string' && (COCKTAIL_COLORS as readonly string[]).includes(o.color);
+}
+
+/** 화면·출력물이 그리는 칵테일 — AI 결과가 있으면 그것, 없으면 고정 결과 */
+interface CocktailView { name: string; desc: string; ingredients: string[]; garnish: string; gradient: string; tagline?: string; method?: string; ai: boolean }
+
+function cocktailView(resultKey: string, generated: unknown, answers: DemoAnswers): CocktailView {
+  const profile = (answers.experienceProfile ?? {}) as Record<string, string>;
+  const garnish = ({ citrus: '레몬 또는 라임 필', herb: '가볍게 두드린 민트·바질', fruit: '레시피와 같은 제철 과일', minimal: '없음' } as Record<string, string>)[profile.garnish];
+  const method = ({ sparkling: '베이스와 주스를 얼음에 섞고 차가운 탄산수를 마지막에 더해 가볍게 저어요.', silky: '탄산을 제외한 재료를 얼음과 셰이크하고 걸러 차가운 잔에 담아요.', stirred: '재료를 얼음과 천천히 저어 차갑게 만든 뒤 큰 얼음 위에 따라요.' } as Record<string, string>)[profile.mouthfeel];
+  if (isAiCocktail(generated)) {
+    return {
+      name: generated.name, desc: cocktailCopy(generated.story), ingredients: generated.ingredients, garnish: normalizeCocktailGarnish(garnish ?? generated.garnish),
+      gradient: COLOR_GRADIENT[generated.color], tagline: generated.tagline ? cocktailCopy(generated.tagline) : undefined, method: method ?? cocktailCopy(generated.method ?? ''), ai: true,
+    };
+  }
   const d = cocktailFor(resultKey);
+  const flavor = getFlavor(answers);
+  const spirit = SPIRITS.find(s => s.id === answers.spirit);
+  const base = spirit?.id === 'nonalcohol' ? '차가운 허브 티 45ml' : `${spirit?.label ?? '보드카'} ${30 + Math.round(flavor.strength / FLAVOR_MAX * 15)}ml`;
+  const syrup = 5 + Math.round(flavor.sweetness / FLAVOR_MAX * 15);
+  const juice = ({ relaxed: '오이 주스 30ml', adventurous: '파인애플 주스 30ml', romantic: '리치 주스 30ml', celebratory: '화이트 포도 주스 30ml' } as Record<string, string>)[String(answers.mood)] ?? '사과 주스 30ml';
+  const ingredients = [base, juice, '레몬 또는 라임 주스 15ml', `심플 시럽 ${syrup}ml`, ...(profile.mouthfeel === 'sparkling' ? ['탄산수 60ml · 마지막에 추가'] : [])];
+  return { name: d.name, desc: d.desc, ingredients, garnish: garnish ?? d.garnish, gradient: d.gradient, method: method ?? '재료를 얼음과 셰이크하고 차가운 잔에 걸러 담아요.', ai: false };
+}
+
+function CocktailResult({ resultKey, answers, onRestart, pillarColor, generated }: DemoResultProps) {
+  const tCommon = useTranslations('demos.common');
+  const d = cocktailView(resultKey, generated, answers);
   return (
     <div className="space-y-8 text-center">
       <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
@@ -204,6 +236,11 @@ function CocktailResult({ resultKey, onRestart, pillarColor }: DemoResultProps) 
 
       <motion.h2 initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.15 }}
         className="font-display text-3xl font-bold text-white sm:text-4xl">{d.name}</motion.h2>
+
+      {d.tagline && (
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
+          className="-mt-5 text-sm text-slate-300">{d.tagline}</motion.p>
+      )}
 
       {/* Glass visual */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex justify-center py-4">
@@ -231,19 +268,30 @@ function CocktailResult({ resultKey, onRestart, pillarColor }: DemoResultProps) 
 
       {/* Garnish */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.65 }} className="space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">가니쉬</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">가니시</p>
         <p className="text-sm text-slate-300">{d.garnish}</p>
       </motion.div>
 
+      {d.method && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">만드는 법</p>
+          <p className="mx-auto max-w-sm text-sm leading-relaxed text-slate-300">{d.method}</p>
+        </motion.div>
+      )}
+
+      {d.ai && (
+        <p className="text-xs text-slate-500">AI가 당신의 답변으로 만든 레시피예요</p>
+      )}
+
       {/* Restart */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.75 }} className="flex flex-wrap justify-center gap-3 pt-4">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.75 }} className="demo-legacy-result-cta flex flex-wrap justify-center gap-3 pt-4">
         <button type="button" onClick={onRestart}
           className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-6 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400">
           다시 만들기
         </button>
         <Link
-          href={QUOTE_HREF}
-          className="inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+          href={getServiceContactHref('ai-cocktail-creator')}
+          className="demo-accent-surface inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
           style={{ backgroundColor: pillarColor }}
         >
           {tCommon('ctaButton')}
@@ -283,8 +331,8 @@ const config: DemoConfig = {
 
 /* ── Print — 바 주문 영수증 ─────────────────────────────── */
 
-function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
-  const d = cocktailFor(resultKey);
+function getPrint(answers: DemoAnswers, resultKey: string, generated?: unknown): PrintSpec {
+  const d = cocktailView(resultKey, generated, answers);
   const flavor = getFlavor(answers);
   const mood = MOODS.find((m) => m.id === answers['mood']);
   const spirit = SPIRITS.find((s) => s.id === answers['spirit']);
@@ -310,14 +358,26 @@ function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
         bars: [
           { label: '당도', value: toBar(flavor.sweetness) },
           // 목테일은 도수가 없으니 빼고 찍는다
-          ...(noAlcohol ? [] : [{ label: '도수', value: toBar(flavor.strength) }]),
+          ...(noAlcohol ? [] : [{ label: '베이스 강도', value: toBar(flavor.strength) }]),
         ],
       },
       { type: 'list', title: '레시피', items: d.ingredients },
-      { type: 'rows', rows: [{ label: '가니쉬', value: d.garnish }] },
+      { type: 'rows', rows: [{ label: '가니시', value: d.garnish }] },
+      ...(d.method ? [{ type: 'text' as const, title: '만드는 순서', text: d.method }] : []),
     ],
     footer: noAlcohol ? '알콜 없이도 충분히 근사한 한 잔이에요' : '마신 뒤에는 운전대를 잡지 마세요',
   };
+}
+
+/* ── AI 생성 ──────────────────────────────────────────── */
+
+function generate(answers: DemoAnswers): Promise<AiCocktail | null> {
+  const flavor = getFlavor(answers);
+  return requestDemoAi<AiCocktail>(
+    config.id,
+    { experienceProfile: answers.experienceProfile, mood: answers['mood'], spirit: answers['spirit'], ...flavor },
+    { validate: isAiCocktail }
+  );
 }
 
 const cocktailCreatorDemo: DemoModule = {
@@ -326,6 +386,7 @@ const cocktailCreatorDemo: DemoModule = {
   ResultComponent: CocktailResult,
   computeResult,
   getPrint,
+  generate,
 };
 
 export default cocktailCreatorDemo;

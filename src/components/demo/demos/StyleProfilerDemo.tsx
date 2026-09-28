@@ -3,7 +3,7 @@
 import { motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { QUOTE_HREF } from '@/lib/constants';
+import { getServiceContactHref } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type {
@@ -13,32 +13,14 @@ import type {
   DemoStepProps,
   DemoResultProps,
 } from '@/types/demo';
-import type { PrintSpec } from '../kit';
+import { requestDemoAi, type PrintSpec } from '../kit';
+import { STYLE_ITEM_EMOJIS, STYLE_OCCASIONS, STYLE_PALETTES, STYLE_VIBES, type AiStyle } from '@/data/demo-ai/style';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-const VIBES = [
-  { id: 'minimal', label: '미니멀', gradient: ['#E0E0E0', '#9E9E9E'], desc: '깔끔하고 정돈된 실루엣', emoji: '🤍' },
-  { id: 'street', label: '스트릿', gradient: ['#FF6B35', '#F7C948'], desc: '자유롭고 트렌디한 무드', emoji: '🔥' },
-  { id: 'classic', label: '클래식', gradient: ['#2C3E50', '#8B7355'], desc: '시간이 지나도 변하지 않는 품격', emoji: '🏛️' },
-  { id: 'romantic', label: '로맨틱', gradient: ['#F8BBD0', '#E1BEE7'], desc: '부드럽고 여성스러운 분위기', emoji: '🌸' },
-  { id: 'avantgarde', label: '아방가르드', gradient: ['#000000', '#FF0000'], desc: '파격적이고 실험적인 표현', emoji: '🎭' },
-] as const;
-
-const PALETTES = [
-  { id: 'monochrome', label: '모노크롬', colors: ['#000000', '#333333', '#666666', '#999999', '#FFFFFF'] },
-  { id: 'earth', label: '어스톤', colors: ['#8D6E63', '#A1887F', '#BCAAA4', '#795548', '#D7CCC8'] },
-  { id: 'pastel', label: '파스텔', colors: ['#F8BBD0', '#B3E5FC', '#C8E6C9', '#FFF9C4', '#E1BEE7'] },
-  { id: 'bold', label: '볼드', colors: ['#F44336', '#2196F3', '#FFEB3B', '#4CAF50', '#9C27B0'] },
-  { id: 'neutral', label: '뉴트럴', colors: ['#EFEBE9', '#D7CCC8', '#BCAAA4', '#8D6E63', '#3E2723'] },
-] as const;
-
-const OCCASIONS = [
-  { id: 'daily', label: '데일리', emoji: '☀️', desc: '편안한 일상 스타일' },
-  { id: 'work', label: '출근', emoji: '💼', desc: '프로페셔널한 오피스룩' },
-  { id: 'date', label: '데이트', emoji: '💝', desc: '특별한 만남을 위한 스타일' },
-  { id: 'event', label: '행사', emoji: '🎭', desc: '파티 & 이벤트 드레스업' },
-] as const;
+const VIBES = STYLE_VIBES;
+const PALETTES = STYLE_PALETTES;
+const OCCASIONS = STYLE_OCCASIONS;
 
 type ArchetypeKey = 'nordic-minimalist' | 'modern-essentialist' | 'urban-trendsetter'
   | 'timeless-elegance' | 'neo-classic' | 'soft-romantic' | 'creative-disruptor';
@@ -157,15 +139,17 @@ const config: DemoConfig = {
 function StepVibe({ answers, onUpdate }: DemoStepProps) {
   const selected = answers['vibe'] as string | undefined;
   return (
-    <div className="grid gap-3">
+    <div className="demo-choice-grid grid gap-3">
       {VIBES.map((v) => (
         <motion.button
           key={v.id}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => onUpdate('vibe', v.id)}
+          type="button"
+          aria-pressed={selected === v.id}
           className={cn(
-            'overflow-hidden rounded-2xl border text-left transition-colors',
+            'demo-choice demo-custom-choice demo-style-vibe overflow-hidden rounded-2xl border text-left transition-colors',
             selected === v.id
               ? 'border-blue-500 bg-blue-500/10'
               : 'border-slate-700 bg-slate-900/50 hover:border-slate-600',
@@ -206,7 +190,7 @@ function StepPalette({ answers, onUpdate }: DemoStepProps) {
       <p className="mb-4 text-right text-sm font-medium text-slate-400">
         {selected.length}/2
       </p>
-      <div className="grid gap-3">
+      <div className="demo-choice-grid grid gap-3">
         {PALETTES.map((p) => {
           const active = selected.includes(p.id);
           return (
@@ -215,8 +199,10 @@ function StepPalette({ answers, onUpdate }: DemoStepProps) {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => toggle(p.id)}
+              type="button"
+              aria-pressed={active}
               className={cn(
-                'flex items-center justify-between rounded-2xl border px-5 py-4 text-left transition-colors',
+                'demo-choice demo-custom-choice demo-palette-choice flex items-center justify-between rounded-2xl border px-5 py-4 text-left transition-colors',
                 active
                   ? 'border-blue-500 bg-blue-500/10'
                   : 'border-slate-700 bg-slate-900/50 hover:border-slate-600',
@@ -248,15 +234,17 @@ function StepPalette({ answers, onUpdate }: DemoStepProps) {
 function StepOccasion({ answers, onUpdate }: DemoStepProps) {
   const selected = answers['occasion'] as string | undefined;
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="demo-choice-grid grid grid-cols-2 gap-4">
       {OCCASIONS.map((o) => (
         <motion.button
           key={o.id}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => onUpdate('occasion', o.id)}
+          type="button"
+          aria-pressed={selected === o.id}
           className={cn(
-            'flex flex-col items-center gap-2 rounded-2xl border px-4 py-6 text-center transition-colors',
+            'demo-choice demo-custom-choice demo-occasion-choice flex flex-col items-center gap-2 rounded-2xl border px-4 py-6 text-center transition-colors',
             selected === o.id
               ? 'border-blue-500 bg-blue-500/10'
               : 'border-slate-700 bg-slate-900/50 hover:border-slate-600',
@@ -297,33 +285,53 @@ function archetypeFor(resultKey: string): ArchetypeData {
   return RESULTS[resultKey as ArchetypeKey] ?? RESULTS['modern-essentialist'];
 }
 
-function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps) {
+const HEX = /^#[0-9A-F]{6}$/;
+
+function isAiStyle(v: unknown): v is AiStyle {
+  const o = v as AiStyle | null;
+  return !!o && typeof o.name === 'string' && typeof o.desc === 'string'
+    && Array.isArray(o.tags) && o.tags.every((t) => typeof t === 'string')
+    && Array.isArray(o.colors) && o.colors.every((c) => typeof c === 'string' && HEX.test(c))
+    && Array.isArray(o.wardrobe) && o.wardrobe.every((w) => !!w && typeof w.item === 'string' && typeof w.why === 'string'
+      && (STYLE_ITEM_EMOJIS as readonly string[]).includes(w.emoji));
+}
+
+/** 화면·출력물이 그리는 아키타입 — AI 결과가 있으면 그것, 없으면 고정 결과 */
+function archetypeView(resultKey: string, generated: unknown): ArchetypeData & { ai: boolean } {
+  if (isAiStyle(generated)) {
+    const { name, tags, wardrobe, colors, desc } = generated;
+    return { name, tags, wardrobe, colors, desc, ai: true };
+  }
+  return { ...archetypeFor(resultKey), ai: false };
+}
+
+function ResultComponent({ resultKey, onRestart, pillarColor, generated }: DemoResultProps) {
   const tCommon = useTranslations('demos.common');
-  const data = archetypeFor(resultKey);
+  const data = archetypeView(resultKey, generated);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="flex flex-col items-center gap-8 text-center"
+      className="demo-custom-result flex flex-col items-center gap-8 text-center"
     >
       {/* Label */}
-      <p className="text-sm font-medium tracking-widest text-slate-400 uppercase">
+      <p className="demo-custom-result-eyebrow text-sm font-medium tracking-widest text-slate-400 uppercase">
         당신의 스타일 아키타입
       </p>
 
       {/* Archetype name */}
-      <h2 className="text-3xl font-bold" style={{ color: pillarColor }}>
+      <h2 className="demo-custom-result-title text-3xl font-bold" style={{ color: `var(--venue-accent, ${pillarColor})` }}>
         {data.name}
       </h2>
 
       {/* Tags */}
       <div className="flex flex-wrap justify-center gap-2">
-        {data.tags.map((tag) => (
+        {data.tags.map((tag, i) => (
           <span
-            key={tag}
-            className="rounded-full border border-blue-500/30 bg-blue-500/15 px-3 py-1 text-sm text-blue-300"
+            key={`${i}-${tag}`}
+            className="demo-result-tag rounded-full border border-blue-500/30 bg-blue-500/15 px-3 py-1 text-sm text-blue-300"
           >
             {tag}
           </span>
@@ -339,9 +347,9 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
           추천 컬러 팔레트
         </p>
         <div className="flex justify-center gap-3">
-          {data.colors.map((hex) => (
+          {data.colors.map((hex, i) => (
             <div
-              key={hex}
+              key={`${i}-${hex}`}
               className={cn(
                 'h-9 w-9 rounded-full shadow-md',
                 hex === '#FFFFFF' && 'border border-slate-600',
@@ -358,10 +366,10 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
           추천 워드로브
         </p>
         <div className="grid grid-cols-3 gap-3">
-          {data.wardrobe.map((w) => (
+          {data.wardrobe.map((w, i) => (
             <div
-              key={w.item}
-              className="flex flex-col items-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/50 px-3 py-5"
+              key={`${i}-${w.item}`}
+              className="demo-result-item flex flex-col items-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/50 px-3 py-5"
             >
               <span className="text-2xl">{w.emoji}</span>
               <p className="text-sm font-semibold text-slate-100">{w.item}</p>
@@ -371,20 +379,24 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
         </div>
       </div>
 
+      {data.ai && (
+        <p className="text-xs text-slate-500">AI가 당신의 답변으로 분석한 스타일이에요</p>
+      )}
+
       {/* Actions */}
-      <div className="flex gap-3 pt-2">
+      <div className="demo-legacy-result-cta flex gap-3 pt-2">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onRestart}
-          className="rounded-xl border border-slate-700 px-6 py-3 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500"
+          className="demo-secondary-action rounded-xl border border-slate-700 px-6 py-3 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500"
         >
-          다시 진단하기
+          다시 취향 고르기
         </motion.button>
         <Link
-          href={QUOTE_HREF}
-          className="rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
-          style={{ backgroundColor: pillarColor }}
+          href={getServiceContactHref('ai-style-profiler')}
+          className="demo-primary-action demo-accent-surface rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
+          style={{ backgroundColor: `var(--venue-accent, ${pillarColor})` }}
         >
           {tCommon('ctaButton')}
         </Link>
@@ -397,8 +409,8 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
 
 /* ── Print — 스타일 태그 영수증 ─────────────────────────── */
 
-function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
-  const data = archetypeFor(resultKey);
+function getPrint(answers: DemoAnswers, resultKey: string, generated?: unknown): PrintSpec {
+  const data = archetypeView(resultKey, generated);
   const palette = (answers['palette'] as string[] | undefined) ?? [];
   const vibe = VIBES.find((v) => v.id === answers['vibe']);
   const occasion = OCCASIONS.find((o) => o.id === answers['occasion']);
@@ -426,12 +438,23 @@ function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
   };
 }
 
+/* ── AI 생성 ──────────────────────────────────────────── */
+
+function generate(answers: DemoAnswers): Promise<AiStyle | null> {
+  return requestDemoAi<AiStyle>(
+    config.id,
+    { experienceProfile: answers.experienceProfile, vibe: answers['vibe'], palette: answers['palette'], occasion: answers['occasion'] },
+    { validate: isAiStyle }
+  );
+}
+
 const StyleProfilerDemo: DemoModule = {
   config,
   StepComponents: [StepVibe, StepPalette, StepOccasion],
   ResultComponent,
   computeResult,
   getPrint,
+  generate,
 };
 
 export default StyleProfilerDemo;

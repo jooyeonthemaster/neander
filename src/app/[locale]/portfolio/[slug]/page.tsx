@@ -1,12 +1,15 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { portfolioProjects } from '@/data/portfolio';
 import { services } from '@/data/services';
 import { fetchPublishedPortfolio } from '@/lib/firebase/rest';
+import { PortfolioGallery } from '@/components/portfolio/PortfolioGallery';
+import type { PortfolioImageMetadata, PortfolioItem } from '@/types/admin';
+import caseStudyCopy from '@/data/portfolio-case-studies.json';
 import { ScrollReveal } from '@/components/animations';
 import { Badge } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
+import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
 
 // 관리자 페이지에서 수정한 내용이 5분 안에 반영되도록 ISR 적용
 export const revalidate = 300;
@@ -19,81 +22,62 @@ interface CaseStudy {
   slug: string;
   title: string;
   description: string;
-  date: string;
+  date: string | null;
   category: 'online' | 'offline' | 'service' | 'ip';
   tags: string[];
   heroImage: string;
   images: string[];
+  imageMetadata?: Record<string, PortfolioImageMetadata>;
   client: string;
   location: string;
   services: string[];
   result: string | null;
+  story: { objective: string; execution: string; outcome: string } | null;
 }
 
-// Firestore(관리자 CMS)를 우선 사용하고, 읽기에 실패하면 정적 데이터로 대체한다.
-// 초기 7개 프로젝트는 번역 파일에 있는 날짜·태그·결과 문구를 보조로 사용한다.
-async function getCaseStudies(locale: string): Promise<CaseStudy[]> {
-  const t = await getTranslations({ locale, namespace: 'portfolio' });
-  const items = await fetchPublishedPortfolio();
+type CaseCopy = Partial<Pick<PortfolioItem,
+  'objective_ko' | 'objective_en' | 'execution_ko' | 'execution_en' | 'outcome_ko' | 'outcome_en'>>;
 
-  const legacy = (slug: string) => {
-    const project = portfolioProjects.find((p) => p.slug === slug);
-    if (!project) return null;
-    const key = `projects.${project.titleKey}`;
-    return {
-      project,
-      title: t(`${key}.title`),
-      description: t(`${key}.description`),
-      date: t(`${key}.date`),
-      tags: t.raw(`${key}.tags`) as string[],
-      result: t(`${key}.result`),
-    };
+// 목적 → 실행 → 결과. 관리자 화면(Firestore)에 입력한 값이 있으면 우선하고, 없으면 저장소 문구를 쓴다.
+function caseStory(item: PortfolioItem, locale: string): CaseStudy['story'] {
+  const fromCms: CaseCopy = item;
+  const fromRepo: CaseCopy = (caseStudyCopy as Record<string, CaseCopy>)[item.slug] ?? {};
+  const pick = (field: 'objective' | 'execution' | 'outcome') => {
+    const ko = fromCms[`${field}_ko`] || fromRepo[`${field}_ko`] || '';
+    const en = fromCms[`${field}_en`] || fromRepo[`${field}_en`] || '';
+    return locale === 'ko' ? ko : en || ko;
   };
+  const story = { objective: pick('objective'), execution: pick('execution'), outcome: pick('outcome') };
+  return story.objective && story.execution && story.outcome ? story : null;
+}
 
-  if (!items || items.length === 0) {
-    return portfolioProjects.map((project) => {
-      const l = legacy(project.slug)!;
-      return {
-        slug: project.slug,
-        title: l.title,
-        description: l.description,
-        date: l.date,
-        category: project.category,
-        tags: l.tags,
-        heroImage: project.image,
-        images: project.images,
-        client: project.client,
-        location: project.location,
-        services: project.services,
-        result: l.result,
-      };
-    });
-  }
-
-  return items.map((item) => {
-    const l = legacy(item.slug);
+// The shared loader supplies the reviewed catalog and published CMS updates.
+async function getCaseStudies(locale: string): Promise<CaseStudy[]> {
+  const items = await fetchPublishedPortfolio();
+  return (items ?? []).map((item) => {
     const result = locale === 'ko' ? item.result_ko : item.result_en;
     return {
       slug: item.slug,
-      title: locale === 'ko' ? item.title_ko : item.title_en,
-      description: locale === 'ko' ? item.description_ko : item.description_en,
-      date: item.period || l?.date || String(item.year),
+      title: locale === 'ko' ? item.title_ko : item.title_en || item.title_ko,
+      description: locale === 'ko' ? item.description_ko : item.description_en || item.description_ko,
+      date: (locale === 'ko' ? item.period_ko : item.period_en) || item.period || (item.year ? String(item.year) : null),
       category: item.category,
-      tags: l?.tags ?? item.tags ?? [],
+      tags: (locale === 'ko' ? item.tags_ko : item.tags_en) ?? item.tags ?? [],
       heroImage: item.thumbnail || item.images?.[0] || '',
       images: item.images ?? [],
-      client: item.client,
-      location: item.location ?? '',
+      imageMetadata: item.image_metadata,
+      client: (locale === 'ko' ? item.client_ko : item.client_en) || item.client,
+      location: (locale === 'ko' ? item.location_ko : item.location_en) || item.location || '',
       services: item.services ?? [],
-      result: result || l?.result || null,
+      result: result || null,
+      story: caseStory(item, locale),
     };
   });
 }
 
 export async function generateStaticParams() {
   const items = await fetchPublishedPortfolio();
-  const slugs = items && items.length > 0 ? items.map((i) => i.slug) : portfolioProjects.map((p) => p.slug);
-  return slugs.map((slug) => ({ slug }));
+  return (items ?? []).map((item) => ({ slug: item.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -102,12 +86,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!study) return {};
 
   return {
+    alternates: localeAlternates(`/portfolio/${slug}`, locale),
     title: study.title,
     description: study.description,
     openGraph: {
       title: study.title,
       description: study.description,
-      ...(study.heroImage ? { images: [study.heroImage] } : {}),
+      images: study.heroImage ? [study.heroImage] : [DEFAULT_OG_IMAGE],
     },
   };
 }
@@ -124,6 +109,7 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
   }
 
   const project = studies[currentIndex];
+  const story = project.story;
   const t = await getTranslations({ locale, namespace: 'portfolio' });
   const tServices = await getTranslations({ locale, namespace: 'services' });
   const tCommon = await getTranslations({ locale, namespace: 'common' });
@@ -208,9 +194,9 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
                 <Badge variant="teal" className="bg-teal-500/20 text-teal-300">
                   {t(`filterCategories.${project.category}`)}
                 </Badge>
-                <span className="text-sm text-slate-400">
+                {project.date && <span className="text-sm text-slate-400">
                   {project.date}
-                </span>
+                </span>}
               </div>
 
               {/* Title */}
@@ -249,8 +235,33 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
                 </div>
               </ScrollReveal>
 
-              {/* Result highlight */}
-              {project.result && (
+              {/* 목적 → 실행 → 결과 */}
+              {story ? (
+                <ScrollReveal delay={0.15}>
+                  <ol className="mt-10 grid gap-4 sm:grid-cols-3">
+                    {(['objective', 'execution', 'outcome'] as const).map((step, i) => (
+                      <li
+                        key={step}
+                        className={
+                          step === 'outcome'
+                            ? 'rounded-2xl border border-teal-100 bg-teal-50 p-6'
+                            : 'rounded-2xl border border-slate-200 bg-white p-6'
+                        }
+                      >
+                        <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-teal-700">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-teal-600 text-xs text-white">
+                            {i + 1}
+                          </span>
+                          {t(`detail.${step}`)}
+                        </h2>
+                        <p className="text-base leading-relaxed text-slate-700">
+                          {story[step]}
+                        </p>
+                      </li>
+                    ))}
+                  </ol>
+                </ScrollReveal>
+              ) : project.result && (
                 <ScrollReveal delay={0.15}>
                   <div className="mt-10 rounded-2xl border border-teal-100 bg-teal-50 p-6 sm:p-8">
                     <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-teal-700">
@@ -264,30 +275,13 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
               )}
 
               {/* Image gallery */}
-              {project.images.length > 0 && (
-                <ScrollReveal delay={0.2}>
-                  <div className="mt-12">
-                    <h2 className="mb-6 text-xl font-bold text-slate-900">
-                      {t('detail.gallery')}
-                    </h2>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {project.images.map((imgSrc, i) => (
-                        <div
-                          key={i}
-                          className="aspect-video overflow-hidden rounded-xl border border-slate-200 bg-slate-100"
-                        >
-                          <img
-                            src={imgSrc}
-                            alt={`${project.title} - ${i + 1}`}
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </ScrollReveal>
-              )}
+              <PortfolioGallery
+                images={project.images}
+                metadata={project.imageMetadata}
+                title={project.title}
+                locale={locale}
+                heading={t('detail.gallery')}
+              />
             </div>
 
             {/* Sidebar metadata */}
@@ -310,23 +304,23 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
                         </dd>
                       </div>
 
-                      <div>
+                      {project.date && <div>
                         <dt className="text-xs font-medium uppercase tracking-wider text-slate-400">
                           {t('detail.date')}
                         </dt>
                         <dd className="mt-1 text-sm font-medium text-slate-900">
                           {project.date}
                         </dd>
-                      </div>
+                      </div>}
 
-                      <div>
+                      {project.location && <div>
                         <dt className="text-xs font-medium uppercase tracking-wider text-slate-400">
                           {t('detail.location')}
                         </dt>
                         <dd className="mt-1 text-sm font-medium text-slate-900">
                           {project.location}
                         </dd>
-                      </div>
+                      </div>}
 
                       <div>
                         <dt className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-400">

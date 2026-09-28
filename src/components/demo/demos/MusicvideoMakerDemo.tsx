@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { withParticle } from '@/lib/korean';
 import type { DemoAnswers, DemoResultProps } from '@/types/demo';
 import {
   InfoGrid,
@@ -14,12 +15,16 @@ import {
   defineDemo,
   getCapture,
   getChoice,
+  getFields,
   renderLook,
+  requestDemoAi,
   seededInt,
   seededPick,
   seededRandom,
   type PhotoLook,
 } from '../kit';
+import { MV_GROOVE_IDS, MV_GROOVES, type AiMusicvideo, type MvGroove } from '@/data/demo-ai/musicvideo';
+import { MediaFit } from '../MediaFit';
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -234,12 +239,90 @@ function track(answers: DemoAnswers) {
   return { seed, effect, genre, title };
 }
 
+/** AI가 비트를 고르지 않았을 때 장르별 킥 패턴 (예전 규칙 그대로) */
+function grooveOf(genre: GenreId): MvGroove {
+  if (genre === 'rock') return 'rock';
+  if (genre === 'ballad' || genre === 'lofi') return 'half-time';
+  if (genre === 'citypop') return 'syncopated';
+  return 'four-on-floor';
+}
+
+function isAiMusicvideo(v: unknown): v is AiMusicvideo {
+  const o = v as AiMusicvideo | null;
+  return (
+    !!o &&
+    typeof o.title === 'string' &&
+    Array.isArray(o.lyrics) &&
+    o.lyrics.length >= 4 &&
+    o.lyrics.every((l) => typeof l === 'string') &&
+    Array.isArray(o.scenes) &&
+    o.scenes.every((c) => typeof c?.name === 'string' && typeof c.image === 'string' && c.image.startsWith('data:image/')) &&
+    !!o.beat &&
+    typeof o.beat.bpm === 'number' &&
+    typeof o.beat.key === 'number' &&
+    (MV_GROOVE_IDS as string[]).includes(o.beat.groove)
+  );
+}
+
+/** 컷 하나 — 방문객 사진에 룩을 입히거나(look), AI가 새로 만든 컷(image) */
+interface Cut {
+  name: string;
+  look?: PhotoLook;
+  image?: string;
+}
+
+/** 화면·출력물이 함께 쓰는 MV — AI 결과가 있으면 그것, 없으면 고정 프리셋 */
+interface MvView {
+  seed: number;
+  effectId: EffectId;
+  genreId: GenreId;
+  title: string;
+  lyrics: string[];
+  cuts: Cut[];
+  bpm: number;
+  duration: number;
+  groove: MvGroove;
+  /** 베이스 조옮김 (반음) */
+  key: number;
+  ai: boolean;
+}
+
+function mvView(answers: DemoAnswers, generated?: unknown): MvView {
+  const { seed, effect: effectId, genre: genreId, title } = track(answers);
+  const effect = EFFECTS[effectId];
+  const genre = GENRES[genreId];
+  const energy = getFields<string>(answers, 'experienceProfile').editEnergy;
+  const duration = energy === 'gentle' ? 24 : energy === 'balanced' ? 20 : 15;
+  const cuts: Cut[] = effect.looks.map((look, i) => ({ name: effect.lookNames[i]!, look }));
+  if (!isAiMusicvideo(generated)) {
+    return { seed, effectId, genreId, title, duration, lyrics: genre.lyrics, cuts, bpm: genre.bpm, groove: grooveOf(genreId), key: 0, ai: false };
+  }
+  // AI 컷은 벌스·코러스 자리에 (한 장뿐이면 코러스), 인트로·아웃트로는 방문객 사진 그대로
+  const slots = generated.scenes.length >= 2 ? [1, 2] : [2];
+  generated.scenes.slice(0, 2).forEach((scene, i) => {
+    cuts[slots[i]!] = { name: scene.name, image: scene.image };
+  });
+  return {
+    seed,
+    effectId,
+    genreId,
+    title: generated.title,
+    lyrics: generated.lyrics.slice(0, 4),
+    cuts,
+    bpm: genre.bpm,
+    duration,
+    groove: generated.beat.groove,
+    key: generated.beat.key,
+    ai: true,
+  };
+}
+
 /* ── Beat synth (Web Audio, 사용자가 켰을 때만) ─────────── */
 
-function scheduleBeat(ctx: AudioContext, noise: AudioBuffer, when: number, step: number, genre: GenreId, bar: number) {
+function scheduleBeat(ctx: AudioContext, noise: AudioBuffer, when: number, step: number, genre: GenreId, bar: number, groove: MvGroove, key: number) {
   const out = ctx.destination;
   const soft = genre === 'ballad' || genre === 'lofi';
-  const kickSteps = genre === 'rock' ? [0, 3, 4] : soft ? [0, 5] : genre === 'citypop' ? [0, 3, 6] : [0, 2, 4, 6];
+  const kickSteps: readonly number[] = MV_GROOVES[groove];
 
   if (kickSteps.includes(step)) {
     const osc = ctx.createOscillator();
@@ -279,7 +362,7 @@ function scheduleBeat(ctx: AudioContext, noise: AudioBuffer, when: number, step:
     src.stop(when + 0.06);
   }
   if (step % 2 === 0) {
-    const root = GENRES[genre].roots[bar % 4] ?? 55;
+    const root = (GENRES[genre].roots[bar % 4] ?? 55) * Math.pow(2, key / 12);
     const osc = ctx.createOscillator();
     osc.type = 'triangle';
     osc.frequency.value = root * (step === 4 ? 2 : 1);
@@ -318,7 +401,10 @@ function NeonGridLines({ time }: { time: number }) {
   );
 }
 
-function EffectOverlay({ effect, frame, time, seed }: { effect: EffectId; frame: string; time: number; seed: number }) {
+function EffectOverlay({ effect, frame, time, seed, calm }: { effect: EffectId; frame: string; time: number; seed: number; calm: boolean }) {
+  if (calm) {
+    return <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/10" aria-hidden="true" />;
+  }
   if (effect === 'cyber') {
     return (
       <>
@@ -426,11 +512,6 @@ function EffectOverlay({ effect, frame, time, seed }: { effect: EffectId; frame:
           transition={{ duration: 0.9 + i * 0.4, repeat: Infinity, repeatDelay: 0.8 }}
         />
       ))}
-      <motion.div
-        className="pointer-events-none absolute inset-0 bg-white"
-        animate={{ opacity: [0, 0.06, 0, 0.04, 0] }}
-        transition={{ duration: 0.4, repeat: Infinity, repeatDelay: 0.3 }}
-      />
       <div className="absolute inset-x-0 top-0 h-[7%] bg-black" />
       <div className="absolute inset-x-0 bottom-0 h-[7%] bg-black" />
     </>
@@ -443,9 +524,9 @@ const PRINT_SANS = 'Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sa
 const PRINT_MONO = 'ui-monospace, Menlo, monospace';
 
 /** 컷 한 장의 이펙트 장식 + 가사 자막 — 화면 플레이어 오버레이를 그 컷 시점으로 멈춘 모습 */
-function CutPrint({ effect, cut, lyric, seed }: { effect: EffectId; cut: number; lyric: string; seed: number }) {
+function CutPrint({ effect, cut, lyric, seed, cutSeconds = CUT }: { effect: EffectId; cut: number; lyric: string; seed: number; cutSeconds?: number }) {
   // 컷 가운데 시점
-  const time = cut * CUT + CUT / 2;
+  const time = cut * cutSeconds + cutSeconds / 2;
   const rgb = (text: string, x: number, y: number, size: number, anchor: 'start' | 'end' = 'start') => (
     <g fontFamily={PRINT_MONO} fontSize={size} fontWeight="700" textAnchor={anchor}>
       <text x={x + 2.4} y={y} fill="#f43f5e">
@@ -566,9 +647,12 @@ const PAPER: Record<EffectId, 'white' | 'cream' | 'black'> = { cyber: 'black', v
 
 /* ── Player ────────────────────────────────────────────── */
 
-function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor: string }) {
+function MvPlayer({ answers, view, pillarColor }: { answers: DemoAnswers; view: MvView; pillarColor: string }) {
   const capture = getCapture(answers, 'shot');
-  const { seed, effect: effectId, genre: genreId, title } = track(answers);
+  const reduceMotion = useReducedMotion();
+  const gentle = getFields<string>(answers, 'experienceProfile').editEnergy === 'gentle';
+  const { seed, effectId, genreId, title, lyrics, cuts, bpm, groove, key, duration } = view;
+  const cutSeconds = duration / 4;
   const effect = EFFECTS[effectId];
   const genre = GENRES[genreId];
   const src = capture?.image ?? '';
@@ -579,15 +663,15 @@ function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor:
   const [soundOn, setSoundOn] = useState(false);
   const audioRef = useRef<{ ctx: AudioContext; noise: AudioBuffer } | null>(null);
 
-  const ended = time >= DURATION;
+  const ended = time >= duration;
   const running = playing && !ended && frames !== null;
 
   // 4개 컷의 룩을 한 번에 렌더링
   useEffect(() => {
     if (!src) return;
     let alive = true;
-    Promise.all(effect.looks.map((look) => renderLook(src, look)))
-      .catch(() => effect.looks.map(() => src))
+    Promise.all(cuts.map((c) => c.image ?? (c.look ? renderLook(src, c.look) : src)))
+      .catch(() => cuts.map((c) => c.image ?? src))
       .then((urls) => {
         if (!alive) return;
         setFrames(urls);
@@ -596,7 +680,7 @@ function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor:
     return () => {
       alive = false;
     };
-  }, [src, effect]);
+  }, [src, cuts]);
 
   // 재생 시계
   useEffect(() => {
@@ -606,30 +690,30 @@ function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor:
     const tick = (now: number) => {
       const dt = (now - last) / 1000;
       last = now;
-      setTime((prev) => Math.min(DURATION, prev + dt));
+      setTime((prev) => Math.min(duration, prev + dt));
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [running]);
+  }, [running, duration]);
 
   // 비트 스케줄러 (8분음표 단위)
   useEffect(() => {
     const audio = audioRef.current;
     if (!running || !soundOn || !audio) return;
     const { ctx, noise } = audio;
-    const stepDur = 60 / genre.bpm / 2;
+    const stepDur = 60 / bpm / 2;
     let step = 0;
     let nextAt = ctx.currentTime + 0.05;
     const timer = window.setInterval(() => {
       while (nextAt < ctx.currentTime + 0.15) {
-        scheduleBeat(ctx, noise, nextAt, step % 8, genreId, Math.floor(step / 8));
+        scheduleBeat(ctx, noise, nextAt, step % 8, genreId, Math.floor(step / 8), groove, key);
         nextAt += stepDur;
         step++;
       }
     }, 40);
     return () => window.clearInterval(timer);
-  }, [running, soundOn, genre.bpm, genreId]);
+  }, [running, soundOn, bpm, genreId, groove, key]);
 
   useEffect(() => {
     return () => {
@@ -660,17 +744,18 @@ function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor:
     } else setPlaying((p) => !p);
   };
 
-  const cut = Math.min(3, Math.floor(time / CUT));
-  const local = Math.min(1, (time - cut * CUT) / CUT);
+  const cut = Math.min(3, Math.floor(time / cutSeconds));
+  const local = Math.min(1, (time - cut * cutSeconds) / cutSeconds);
   const bars = Array.from({ length: 18 }, (_, i) => ({
     peak: seededInt(seed, `eq${i}`, 35, 100),
     low: seededInt(seed, `eql${i}`, 10, 35),
   }));
-  const beat = 60 / genre.bpm;
+  const beat = 60 / bpm;
 
   return (
     <div className="flex w-full max-w-md flex-col items-center gap-4">
       {/* 9:16 플레이어 */}
+      <MediaFit width={252} height={448} reserve={8}>
       <div className="relative aspect-[9/16] w-[252px] overflow-hidden rounded-[1.75rem] border border-slate-700 bg-black shadow-2xl shadow-black/60">
         {!frames && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
@@ -680,7 +765,7 @@ function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor:
               animate={{ rotate: 360 }}
               transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
             />
-            <p className="text-xs text-slate-400">AI 이펙트 렌더링 중…</p>
+            <p className="text-xs text-slate-400">미리보기 표시 준비 중…</p>
           </div>
         )}
 
@@ -690,7 +775,7 @@ function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor:
             className="absolute inset-0 transition-opacity duration-300"
             style={{ opacity: i === cut ? 1 : 0 }}
           >
-            <div className="h-full w-full" style={{ transform: kenBurns(i, i === cut ? local : 0), transformOrigin: '50% 32%' }}>
+            <div className="h-full w-full" style={{ transform: reduceMotion ? 'none' : kenBurns(i, i === cut ? local : 0), transformOrigin: '50% 32%' }}>
               <motion.img
                 src={url}
                 alt={i === cut ? `${effect.label} 뮤직비디오 컷 ${i + 1}` : ''}
@@ -705,18 +790,7 @@ function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor:
 
         {frames && (
           <>
-            <EffectOverlay effect={effectId} frame={frames[cut] ?? src} time={time} seed={seed} />
-            {/* 컷 전환 플래시 */}
-            <AnimatePresence>
-              <motion.div
-                key={cut}
-                className={cn('pointer-events-none absolute inset-0', effectId === 'noir' ? 'bg-black' : 'bg-white')}
-                initial={{ opacity: time > 0.2 ? 0.7 : 0 }}
-                animate={{ opacity: 0 }}
-                transition={{ duration: 0.35 }}
-              />
-            </AnimatePresence>
-
+            <EffectOverlay effect={effectId} frame={frames[cut] ?? src} time={time} seed={seed} calm={!!reduceMotion || gentle || !running} />
             {/* 상단 워터마크 */}
             <div className="absolute inset-x-3 top-3 flex items-center justify-between">
               <span className="rounded-full bg-black/45 px-2 py-0.5 text-[9px] font-bold tracking-[0.25em] text-white backdrop-blur-sm">
@@ -735,15 +809,15 @@ function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor:
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.3 }}
-                className="absolute inset-x-3 bottom-16 text-center text-sm font-bold text-white [word-break:keep-all]"
+                className="demo-mv-frame-lyric absolute inset-x-3 bottom-16 text-center text-sm font-bold text-white [word-break:keep-all]"
                 style={{ textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}
               >
-                ♪ {genre.lyrics[cut]}
+                ♪ {lyrics[cut]}
               </motion.p>
             </AnimatePresence>
 
             {/* 곡 정보 */}
-            <div className="absolute inset-x-3 bottom-3 flex items-center gap-2 rounded-xl bg-black/50 px-2.5 py-1.5 backdrop-blur-sm">
+            <div className="demo-mv-frame-track absolute inset-x-3 bottom-3 flex items-center gap-2 rounded-xl bg-black/50 px-2.5 py-1.5 backdrop-blur-sm">
               <motion.span
                 className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/40 text-[10px]"
                 animate={running ? { rotate: 360 } : { rotate: 0 }}
@@ -754,7 +828,7 @@ function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor:
               <div className="min-w-0 text-left">
                 <p className="truncate text-[11px] font-bold text-white">{title}</p>
                 <p className="truncate text-[9px] text-white/70">
-                  YOU · {genre.label} · {genre.bpm} BPM
+                  YOU · {genre.label} · {bpm} BPM
                 </p>
               </div>
             </div>
@@ -782,9 +856,16 @@ function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor:
           </>
         )}
       </div>
+      </MediaFit>
+
+      <div className="demo-mv-caption hidden" data-demo-page-atomic>
+        <p className="font-bold">{title}</p>
+        <p>♪ {lyrics[cut]}</p>
+        <p>{genre.label} · {bpm} BPM</p>
+      </div>
 
       {/* 컨트롤 바 */}
-      <div className="w-full max-w-[320px] space-y-2.5">
+      <div className="demo-mv-controls w-full max-w-[320px] space-y-2.5" data-demo-page-atomic>
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -797,13 +878,13 @@ function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor:
             {running ? '❚❚' : ended ? '↻' : '▶'}
           </button>
           <div className="relative h-1.5 flex-1 rounded-full bg-slate-800">
-            <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${(time / DURATION) * 100}%`, backgroundColor: pillarColor }} />
+            <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${(time / duration) * 100}%`, backgroundColor: pillarColor }} />
             {[1, 2, 3].map((c) => (
               <span key={c} className="absolute top-1/2 h-3 w-0.5 -translate-y-1/2 rounded bg-slate-500" style={{ left: `${c * 25}%` }} />
             ))}
           </div>
           <span className="shrink-0 whitespace-nowrap text-right font-mono text-[11px] text-slate-400">
-            {formatTime(time)} / 0:15
+            {formatTime(time)} / {formatTime(duration)}
           </span>
         </div>
 
@@ -838,7 +919,7 @@ function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor:
           </button>
         </div>
         <p className="text-center text-[11px] text-slate-500">
-          데모는 대표 컷 한 장으로 만든 미리보기예요 · 실제 부스는 15초 영상을 촬영해요
+          대표 사진으로 구성한 {duration}초 미리보기예요 · 현장 영상 길이는 운영 구성에 따라 정해요
         </p>
       </div>
 
@@ -850,7 +931,7 @@ function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor:
               key={move.name}
               type="button"
               onClick={() => {
-                setTime(i * CUT + 0.01);
+                setTime(i * cutSeconds + 0.01);
                 setPlaying(true);
               }}
               disabled={!frames}
@@ -875,10 +956,13 @@ function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor:
                   />
                 )}
                 <span className="absolute left-1 top-1 rounded bg-black/60 px-1 font-mono text-[8px] text-white">
-                  {formatTime(i * CUT)}
+                  {formatTime(i * cutSeconds)}
                 </span>
               </div>
-              <p className="mt-1.5 truncate text-[10px] font-semibold text-slate-200">{effect.lookNames[i]}</p>
+              <p className="mt-1.5 truncate text-[10px] font-semibold text-slate-200">
+                {cuts[i]?.image && <span style={{ color: pillarColor }}>AI </span>}
+                {cuts[i]?.name}
+              </p>
               <p className="truncate text-[9px] text-slate-500">{move.name}</p>
             </button>
           ))}
@@ -890,31 +974,55 @@ function MvPlayer({ answers, pillarColor }: { answers: DemoAnswers; pillarColor:
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
-  const { effect: effectId, genre: genreId, title } = track(answers);
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
+  // 컷 렌더링·비트 스케줄러가 view에 반응하므로 같은 입력이면 같은 객체를 쓴다
+  const view = useMemo(() => mvView(answers, generated), [answers, generated]);
+  const { effectId, genreId, title, bpm, ai } = view;
   const effect = EFFECTS[effectId];
   const genre = GENRES[genreId];
+  const aiCuts = view.cuts.filter((c) => c.image).length;
 
   return (
     <ResultShell
       eyebrow={`${effect.label} × ${genre.label}`}
       title={`"${title}" 뮤직비디오 완성!`}
-      description="AI가 컷을 나누고 이펙트를 입힌 뒤, 비트에 맞춰 편집했어요. 플레이어를 눌러 재생·정지할 수 있어요."
+      description={
+        ai
+          ? aiCuts > 0
+            ? `AI가 당신이 주인공인 새 컷 ${aiCuts}장을 만들고 가사를 붙여 비트에 맞춰 편집했어요. 플레이어를 눌러 재생·정지할 수 있어요.`
+            : 'AI가 곡 제목과 가사를 만들고, 대표 사진에 선택한 필터를 더해 프리뷰를 구성했어요.'
+          : '선택한 프리셋과 편집 리듬으로 대표 사진을 4컷으로 구성했어요. 플레이어를 눌러 재생·정지할 수 있어요.'
+      }
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다른 이펙트로 찍기"
     >
-      <MvPlayer answers={answers} pillarColor={pillarColor} />
+      <MvPlayer answers={answers} view={view} pillarColor={pillarColor} />
 
       <InfoGrid
         items={[
-          { emoji: '🎬', label: '영상 길이', value: '15초 숏폼', desc: '컷 전환 4회 · 비트 싱크' },
+          { emoji: '🎬', label: '영상 길이', value: `${view.duration}초 프리뷰`, desc: '선택한 리듬에 맞춘 4컷' },
           { emoji: '📱', label: '출력 사이즈', value: '9:16 세로형', desc: '릴스·쇼츠 업로드용' },
-          { emoji: '🎵', label: 'BGM', value: `${genre.label} ${genre.bpm} BPM`, desc: genre.desc },
+          { emoji: '🎵', label: 'BGM', value: `${genre.label} ${bpm} BPM`, desc: genre.desc },
           { emoji: '📲', label: '다운로드', value: 'QR 코드 전송', desc: '실제 부스에서 바로 저장해요' },
         ]}
       />
+
+      {ai && <p className="text-xs text-slate-500">AI가 사진을 보고 {withParticle(aiCuts > 0 ? '곡 제목·가사·MV 컷' : '곡 제목·가사', '을/를')} 만들었어요</p>}
     </ResultShell>
+  );
+}
+
+/* ── AI 생성 ──────────────────────────────────────────── */
+
+function generate(answers: DemoAnswers): Promise<AiMusicvideo | null> {
+  const capture = getCapture(answers, 'shot');
+  if (!capture) return Promise.resolve(null);
+  const { effect, genre } = track(answers);
+  return requestDemoAi<AiMusicvideo>(
+    'musicvideo-maker',
+    { experienceProfile: answers.experienceProfile, shot: capture.image, effect, genre },
+    { timeoutMs: 60_000, validate: isAiMusicvideo }
   );
 }
 
@@ -928,20 +1036,20 @@ export default defineDemo({
     analyzeEmoji: '🎬',
     analyzeDurationMs: 3600,
     analyzeImageStepId: 'shot',
-    analyzeMessages: ['인물과 배경 분리 중', 'AI 이펙트 입히는 중', 'BGM 비트 분석 중', '컷 편집·싱크 맞추는 중'],
+    analyzeMessages: ['인물과 배경 분리 중', '곡 제목과 가사 쓰는 중', 'AI가 MV 컷 연출하는 중', '당신이 주인공인 새 컷 그리는 중', 'AI 이펙트 입히는 중', '컷 편집·비트 싱크 맞추는 중'],
   },
   steps: [
     cameraStep({
       id: 'shot',
       title: '뮤직비디오 대표 컷을 찍어요',
-      subtitle: '실제 부스에선 15초 영상을 찍지만, 데모에선 대표 컷 한 장으로 체험해요',
+      subtitle: '대표 사진 한 장으로 선택한 편집 리듬에 맞는 15~24초 프리뷰를 만들어요',
       mode: 'portrait',
       subject: '대표 컷',
       countdown: true,
-      scanLabels: ['인물 영역 분리', '포즈·동작 추적', '배경 매팅', '컷 구도 분석'],
+      scanLabels: ['대표 사진 준비', '선택한 이야기 정리', '배경 연출 준비', '컷 구도 준비'],
       readouts: (c) => [
-        { label: '무대 존재감', value: `${70 + (c.seed % 29)}%` },
-        { label: '조명 무드', value: c.stats.contrast > 45 ? '드라마틱' : '소프트' },
+        { label: '촬영 방식', value: '대표 사진 한 장' },
+        { label: '사진 대비', value: c.stats.contrast > 45 ? '강한 편' : '부드러운 편' },
       ],
     }),
     choiceStep({
@@ -975,25 +1083,27 @@ export default defineDemo({
     return `${effect}-${genre}`;
   },
   Result,
-  print: (answers) => {
+  generate,
+  print: (answers, _resultKey, generated) => {
     const capture = getCapture(answers, 'shot');
-    const { seed, effect: effectId, genre: genreId, title } = track(answers);
+    const { seed, effectId, genreId, title, lyrics, cuts, bpm, duration } = mvView(answers, generated);
+    const cutSeconds = duration / 4;
     const effect = EFFECTS[effectId];
     const genre = GENRES[genreId];
     return {
       kind: 'photo',
       // 결과 화면의 AI 스토리보드 4컷 그대로
       photos: capture
-        ? effect.looks.map((look, i) => ({
-            src: capture.image,
-            look,
-            label: `${formatTime(i * CUT)} ${effect.lookNames[i]}`,
-            overlay: <CutPrint effect={effectId} cut={i} lyric={genre.lyrics[i] ?? ''} seed={seed} />,
+        ? cuts.map((c, i) => ({
+            src: c.image ?? capture.image,
+            look: c.image ? undefined : c.look,
+            label: `${formatTime(i * cutSeconds)} ${c.name}`,
+            overlay: <CutPrint effect={effectId} cut={i} lyric={lyrics[i] ?? ''} seed={seed} cutSeconds={cutSeconds} />,
           }))
         : [],
       title: `“${title}”`,
-      caption: `${effect.label} × ${genre.label} · ${genre.bpm} BPM · 4컷 스토리보드`,
-      badge: '15초 숏폼',
+      caption: `${effect.label} × ${genre.label} · ${bpm} BPM · 4컷 스토리보드`,
+      badge: `${duration}초 프리뷰`,
       paper: PAPER[effectId],
     };
   },

@@ -13,138 +13,33 @@ import {
   getChoice,
   getFields,
   seededInt,
+  requestDemoAi,
   sliderStep,
 } from '../kit';
+import {
+  BARISTA_AROMAS,
+  BARISTA_BEANS,
+  BARISTA_BREWS,
+  BARISTA_HABITS,
+  BARISTA_ROASTS,
+  BARISTA_TASTE_SLIDERS,
+  baristaServing,
+  resolveBaristaBrew,
+  type AiBaristaMatch,
+  type BaristaAromaId,
+  type BaristaBrewId,
+  type BaristaHabitId,
+  type BaristaTaste,
+} from '@/data/demo-ai/barista';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-type Habit = 'espresso' | 'americano' | 'latte' | 'drip' | 'coldbrew' | 'sweet';
-type Aroma = 'fruit' | 'floral' | 'chocolate' | 'nutty';
-type Taste = { acid: number; bitter: number; nutty: number; sweet: number; body: number };
+type Habit = BaristaHabitId;
+type Aroma = BaristaAromaId;
+type Taste = BaristaTaste;
 
-interface Bean {
-  name: string;
-  flag: string;
-  region: string;
-  process: string;
-  altitude: string;
-  profile: Taste;
-  aroma: Aroma;
-  notes: string[];
-  /** 0(라이트) ~ 7(이탈리안) */
-  roast: number;
-  story: string;
-}
-
-const BEANS: Record<string, Bean> = {
-  yirgacheffe: {
-    name: '에티오피아 예가체프',
-    flag: '🇪🇹',
-    region: '에티오피아 · 게데오',
-    process: '워시드',
-    altitude: '1,800–2,200m',
-    profile: { acid: 85, bitter: 20, nutty: 20, sweet: 60, body: 30 },
-    aroma: 'floral',
-    notes: ['자스민', '레몬', '홍차'],
-    roast: 1,
-    story: '커피의 고향 에티오피아의 고지대에서 자라, 꽃향기와 레몬 같은 산뜻한 산미가 돋보여요.',
-  },
-  kenya: {
-    name: '케냐 AA',
-    flag: '🇰🇪',
-    region: '케냐 · 니에리',
-    process: '워시드',
-    altitude: '1,500–2,100m',
-    profile: { acid: 90, bitter: 30, nutty: 15, sweet: 55, body: 55 },
-    aroma: 'fruit',
-    notes: ['블랙커런트', '자몽', '와인'],
-    roast: 2,
-    story: '큰 생두 등급(AA)의 케냐 원두로, 베리류의 선명한 산미와 주스 같은 질감이 매력이에요.',
-  },
-  geisha: {
-    name: '파나마 게이샤',
-    flag: '🇵🇦',
-    region: '파나마 · 보케테',
-    process: '워시드',
-    altitude: '1,600–1,800m',
-    profile: { acid: 75, bitter: 10, nutty: 10, sweet: 75, body: 25 },
-    aroma: 'floral',
-    notes: ['베르가못', '자스민', '복숭아'],
-    roast: 0,
-    story: '홍차처럼 섬세한 질감과 화려한 꽃향으로 스페셜티 대회에서 사랑받는 품종이에요.',
-  },
-  colombia: {
-    name: '콜롬비아 수프리모',
-    flag: '🇨🇴',
-    region: '콜롬비아 · 우일라',
-    process: '워시드',
-    altitude: '1,500–1,900m',
-    profile: { acid: 55, bitter: 45, nutty: 55, sweet: 60, body: 55 },
-    aroma: 'chocolate',
-    notes: ['캐러멜', '밀크초콜릿', '사과'],
-    roast: 3,
-    story: '산미·단맛·바디가 고르게 균형 잡힌, 누구에게나 편안한 클래식 원두예요.',
-  },
-  costarica: {
-    name: '코스타리카 따라주',
-    flag: '🇨🇷',
-    region: '코스타리카 · 따라주',
-    process: '허니',
-    altitude: '1,200–1,900m',
-    profile: { acid: 60, bitter: 30, nutty: 40, sweet: 80, body: 45 },
-    aroma: 'fruit',
-    notes: ['꿀', '살구', '흑설탕'],
-    roast: 3,
-    story: '과육을 일부 남긴 채 말리는 허니 가공 덕분에 꿀 같은 단맛이 은은하게 올라와요.',
-  },
-  brazil: {
-    name: '브라질 산토스',
-    flag: '🇧🇷',
-    region: '브라질 · 미나스제라이스',
-    process: '내추럴',
-    altitude: '800–1,300m',
-    profile: { acid: 25, bitter: 50, nutty: 85, sweet: 55, body: 60 },
-    aroma: 'nutty',
-    notes: ['땅콩', '헤이즐넛', '코코아'],
-    roast: 4,
-    story: '산미가 적고 고소한 견과 향이 풍부해서 블렌딩의 베이스로 가장 많이 쓰여요.',
-  },
-  guatemala: {
-    name: '과테말라 안티구아',
-    flag: '🇬🇹',
-    region: '과테말라 · 안티구아',
-    process: '워시드',
-    altitude: '1,500–1,700m',
-    profile: { acid: 45, bitter: 65, nutty: 50, sweet: 45, body: 75 },
-    aroma: 'chocolate',
-    notes: ['다크초콜릿', '스모키', '오렌지 필'],
-    roast: 5,
-    story: '화산 토양에서 자라 스모키한 향과 묵직한 초콜릿 풍미가 특징이에요.',
-  },
-  mandheling: {
-    name: '인도네시아 만델링',
-    flag: '🇮🇩',
-    region: '인도네시아 · 수마트라',
-    process: '습식 탈곡',
-    altitude: '1,100–1,500m',
-    profile: { acid: 15, bitter: 80, nutty: 45, sweet: 35, body: 95 },
-    aroma: 'chocolate',
-    notes: ['허브', '흙내음', '다크초콜릿'],
-    roast: 6,
-    story: '낮은 산미와 진하고 묵직한 바디감으로 강배전 커피 애호가들이 즐겨 찾는 원두예요.',
-  },
-};
-
-const ROASTS = [
-  { name: '라이트', color: '#c8a27a' },
-  { name: '시나몬', color: '#b07d4f' },
-  { name: '미디엄', color: '#95633a' },
-  { name: '하이', color: '#7a4b2a' },
-  { name: '시티', color: '#5f3920' },
-  { name: '풀시티', color: '#482a17' },
-  { name: '프렌치', color: '#331d10' },
-  { name: '이탈리안', color: '#20120a' },
-];
+const BEANS = BARISTA_BEANS;
+const ROASTS = BARISTA_ROASTS;
 
 const PERSONAS: Record<keyof Taste, { name: string; emoji: string; desc: string }> = {
   acid: { name: '산미 탐험가', emoji: '🍋', desc: '밝고 화사한 과일 향을 좇는 타입' },
@@ -156,7 +51,7 @@ const PERSONAS: Record<keyof Taste, { name: string; emoji: string; desc: string 
 
 const BALANCED = { name: '밸런스 올라운더', emoji: '⚖️', desc: '어느 한쪽에 치우치지 않은 균형 잡힌 맛을 좋아하는 타입' };
 
-type BrewId = 'pourover' | 'frenchpress' | 'espresso' | 'latte' | 'coldbrew';
+type BrewId = BaristaBrewId;
 
 interface Recipe {
   name: string;
@@ -212,7 +107,7 @@ function recipeFor(brew: BrewId, roast: number): Recipe {
         temp: `${hot}°C`,
         time: '0:28',
         grind: '아주 가늘게 (밀가루)',
-        steps: ['포터필터에 18g을 고르게 담고 탬핑', '25~30초 동안 36ml 추출', '크레마가 살아 있을 때 바로 마시기'],
+        steps: ['포터필터에 18g을 고르게 담고 탬핑', '25~30초 동안 36g 추출', '크레마가 살아 있을 때 바로 마시기'],
       };
     case 'latte':
       return {
@@ -248,17 +143,24 @@ function brewRatio(recipe: Recipe): string {
   return recipe.name === '콜드브루' ? '1:10' : `1:${(recipe.water / recipe.beans).toFixed(recipe.water % recipe.beans ? 1 : 0)}`;
 }
 
+function selectedBrew(answers: DemoAnswers, fallback: BrewId): BrewId {
+  const profile = (answers.experienceProfile ?? {}) as Record<string, string>;
+  return resolveBaristaBrew(profile.brewTool, getChoice(answers, 'habit'), fallback);
+}
+
+function sessionRecipe(answers: DemoAnswers, brew: BrewId, roast: number): Recipe {
+  const recipe = recipeFor(selectedBrew(answers, brew), roast);
+  const profile = (answers.experienceProfile ?? {}) as Record<string, string>;
+  if (profile.temperature === 'iced' && selectedBrew(answers, brew) === 'pourover') {
+    return { ...recipe, name: '아이스 핸드드립', waterLabel: '물+얼음 총량', steps: ['서버에 얼음 90g을 넣고 원두 15g 준비', '뜨거운 물 150g을 나누어 추출', '얼음을 녹이며 섞기 · 총 물과 얼음 240g'] };
+  }
+  return recipe;
+}
+
 /* ── Matching ─────────────────────────────────────────── */
 
 function match(answers: DemoAnswers) {
-  const t = getFields<number>(answers, 'taste');
-  const user: Taste = {
-    acid: t.acid ?? 50,
-    bitter: t.bitter ?? 50,
-    nutty: t.nutty ?? 50,
-    sweet: t.sweet ?? 50,
-    body: t.body ?? 50,
-  };
+  const user = userTaste(answers);
   const habit = (getChoice(answers, 'habit') as Habit | undefined) ?? 'americano';
   const aroma = (getChoice(answers, 'aroma') as Aroma | undefined) ?? 'chocolate';
 
@@ -287,11 +189,48 @@ function match(answers: DemoAnswers) {
   else if (habit === 'drip') brew = 'pourover';
   else brew = user.body >= 60 || roast >= 5 ? 'frenchpress' : 'pourover';
 
+  brew = selectedBrew(answers, brew);
+
   const keys = Object.keys(user) as (keyof Taste)[];
   const top = keys.reduce((a, b) => (user[b] > user[a] ? b : a), 'acid');
   const spread = Math.max(...keys.map((k) => user[k])) - Math.min(...keys.map((k) => user[k]));
   const matchRate = Math.round(clamp(100 - best / 2.6, 72, 98));
   return { key: bestKey, bean, roast, brew, user, persona: spread < 15 ? BALANCED : PERSONAS[top], matchRate, habit };
+}
+
+function userTaste(answers: DemoAnswers): Taste {
+  const t = getFields<number>(answers, 'taste');
+  return { acid: t.acid ?? 50, bitter: t.bitter ?? 50, nutty: t.nutty ?? 50, sweet: t.sweet ?? 50, body: t.body ?? 50 };
+}
+
+/* ── AI 결과 ──────────────────────────────────────────── */
+
+function isAiBarista(v: unknown): v is AiBaristaMatch {
+  const o = v as AiBaristaMatch | null;
+  return !!o && typeof o.bean === 'string' && o.bean in BEANS && Number.isInteger(o.roast) && o.roast >= 0 && o.roast <= 7
+    && (BARISTA_BREWS as readonly string[]).includes(o.brew) && !!o.persona && typeof o.persona.name === 'string'
+    && typeof o.matchRate === 'number' && typeof o.story === 'string';
+}
+
+/** 화면·출력물이 그리는 매칭 — AI 결과가 있으면 그것(원두는 고정 목록), 없으면 규칙 기반 매칭 */
+function baristaView(answers: DemoAnswers, generated: unknown) {
+  const m = match(answers);
+  const profile = (answers.experienceProfile ?? {}) as Record<string, string>;
+  if (!isAiBarista(generated)) return { ...m, story: m.bean.story, ...baristaServing(m.brew, profile.temperature), ai: false };
+  const bean = BEANS[generated.bean]!;
+  const brew = selectedBrew(answers, generated.brew);
+  return {
+    ...m,
+    key: generated.bean,
+    bean,
+    roast: generated.roast,
+    brew,
+    persona: generated.persona,
+    matchRate: generated.matchRate,
+    story: generated.story,
+    ...baristaServing(brew, profile.temperature),
+    ai: true,
+  };
 }
 
 /* ── Parts ─────────────────────────────────────────────── */
@@ -356,17 +295,17 @@ function BrewCup({ color }: { color: string }) {
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
-  const { bean, roast, brew, user, persona, matchRate } = match(answers);
-  const recipe = recipeFor(brew, roast);
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
+  const { bean, roast, brew, user, persona, matchRate, story, tip, cup, ai } = baristaView(answers, generated);
+  const recipe = sessionRecipe(answers, brew, roast);
   const serial = String(seededInt(answersSeed(answers), 'card', 1, 9999)).padStart(4, '0');
   const ratio = brewRatio(recipe);
 
   return (
     <ResultShell
-      eyebrow="AI 바리스타의 추천"
+      eyebrow={ai ? 'AI 바리스타의 추천' : '답변으로 매칭한 원두 예시'}
       title={bean.name}
-      description={`${persona.emoji} ${persona.name} · 취향 일치도 ${matchRate}%. ${bean.story}`}
+      description={`${persona.emoji} ${persona.name} · ${story}`}
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다시 테스트하기"
@@ -376,7 +315,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         initial={{ opacity: 0, y: 20, rotate: 1.5 }}
         animate={{ opacity: 1, y: 0, rotate: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative w-full max-w-md overflow-hidden rounded-3xl border border-amber-900/50 bg-gradient-to-br from-[#2a1b12] via-[#1f140e] to-[#140d09] p-5 text-left shadow-2xl shadow-black/50"
+        className="demo-dark-surface relative w-full max-w-md overflow-hidden rounded-3xl border border-amber-900/50 bg-gradient-to-br from-[#2a1b12] via-[#1f140e] to-[#140d09] p-5 text-left shadow-2xl shadow-black/50"
       >
         {/* 커피 자국 */}
         <svg className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 opacity-20" viewBox="0 0 100 100" aria-hidden="true">
@@ -393,7 +332,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
             <p className="text-xs text-amber-100/60">{persona.desc}</p>
           </div>
           <div className="rounded-2xl border border-amber-200/20 bg-amber-200/10 px-3 py-2 text-center">
-            <p className="font-display text-2xl font-extrabold text-amber-200">{matchRate}%</p>
+            <p className="font-display text-2xl font-extrabold text-amber-200">{matchRate}/100</p>
             <p className="text-[9px] text-amber-100/60">취향 일치</p>
           </div>
         </div>
@@ -487,6 +426,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
 
       {/* 레시피 카드 */}
       <Panel title={`추천 추출 레시피 · ${recipe.name}`}>
+        <p className="mb-3 text-xs leading-relaxed text-slate-400">사용 도구를 우선해 레시피를 정했어요. 평소 마시는 스타일은 원두와 로스팅에 반영해요.</p>
         <div className="flex items-center gap-3">
           <BrewCup color={ROASTS[Math.min(7, roast + 1)]!.color} />
           <div>
@@ -496,12 +436,13 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
             <p className="mt-0.5 text-xs text-slate-400">
               분쇄도 {recipe.grind} · 비율 {ratio}
             </p>
+            <p className="mt-1 text-xs text-slate-400">준비할 잔 · {cup}</p>
           </div>
         </div>
         <div className="mt-4 grid grid-cols-4 gap-2 text-center">
           {[
             { label: '원두', value: `${recipe.beans}`, unit: 'g' },
-            { label: recipe.waterLabel, value: `${recipe.water}`, unit: 'ml' },
+            { label: recipe.waterLabel, value: `${recipe.water}`, unit: 'g' },
             { label: '온도', value: recipe.temp.replace(/[^0-9]/g, ''), unit: recipe.temp.includes('우유') ? '°C 우유' : recipe.temp.includes('실온') ? '°C 실온' : '°C' },
             { label: '시간', value: recipe.time, unit: '' },
           ].map((m) => (
@@ -517,7 +458,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         <ol className="mt-4 space-y-2 border-t border-slate-800 pt-4">
           {recipe.steps.map((s, i) => (
             <li key={s} className="flex gap-3 text-sm text-slate-300">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white" style={{ backgroundColor: pillarColor }}>
+              <span className="demo-accent-surface flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white" style={{ backgroundColor: pillarColor }}>
                 {i + 1}
               </span>
               {s}
@@ -525,6 +466,14 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           ))}
         </ol>
       </Panel>
+
+      {tip && (
+        <p className="max-w-md rounded-xl border border-amber-900/40 bg-amber-950/20 px-4 py-3 text-sm text-amber-100/80 [word-break:keep-all]">
+          💡 {tip}
+        </p>
+      )}
+
+      {ai && <p className="-mt-2 text-xs text-slate-500">AI 바리스타가 당신의 답변으로 고른 원두와 레시피예요</p>}
 
       <p className="max-w-md text-xs text-slate-500 [word-break:keep-all]">
         ☕ 실제 부스에서는 추천 원두로 내린 커피를 바로 시음하고, 이 프로필 카드를 출력해 가져갈 수 있어요.
@@ -535,14 +484,16 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
 
 /* ── Export ─────────────────────────────────────────────── */
 
+const DEMO_ID = 'barista-matching';
+
 export default defineDemo({
   config: {
-    id: 'barista-matching',
+    id: DEMO_ID,
     targetSlug: 'ai-barista-matching',
     industryId: 'fnb',
     analyzeEmoji: '☕',
     analyzeDurationMs: 3200,
-    analyzeMessages: ['취향 프로필 벡터화 중', '원두 데이터 100여 종 비교 중', '로스팅 포인트 계산 중', '추출 레시피 설계 중'],
+    analyzeMessages: ['향과 맛의 선호를 원두 후보와 비교', '사용 도구에 맞는 추출 방식 선택', '한 잔의 레시피와 주문 문장 준비'],
   },
   steps: [
     choiceStep({
@@ -550,51 +501,39 @@ export default defineDemo({
       title: '평소 커피를 어떻게 마시나요?',
       subtitle: '가장 자주 마시는 스타일을 골라주세요',
       columns: 3,
-      options: [
-        { id: 'espresso', emoji: '☕', label: '에스프레소', desc: '진하고 짧게' },
-        { id: 'americano', emoji: '🥤', label: '아메리카노', desc: '깔끔하게 매일' },
-        { id: 'latte', emoji: '🥛', label: '라떼', desc: '우유와 부드럽게' },
-        { id: 'drip', emoji: '🫖', label: '핸드드립', desc: '향을 음미하며' },
-        { id: 'coldbrew', emoji: '🧊', label: '콜드브루', desc: '차갑고 부드럽게' },
-        { id: 'sweet', emoji: '🍯', label: '달달한 커피', desc: '시럽·바닐라 추가' },
-      ],
+      options: BARISTA_HABITS.map((o) => ({ ...o })),
     }),
     sliderStep({
       id: 'taste',
       title: '좋아하는 맛의 균형을 알려주세요',
       subtitle: '슬라이더로 취향을 표시하면 AI가 원두와 비교해요',
-      sliders: [
-        { id: 'acid', emoji: '🍋', label: '산미', left: '부드럽게', right: '새콤하게' },
-        { id: 'bitter', emoji: '🌑', label: '쓴맛', left: '연하게', right: '진하게' },
-        { id: 'nutty', emoji: '🥜', label: '고소함', left: '은은하게', right: '듬뿍' },
-        { id: 'sweet', emoji: '🍯', label: '단맛', left: '드라이하게', right: '달콤하게' },
-        { id: 'body', emoji: '🥛', label: '바디', left: '가볍게', right: '묵직하게' },
-      ],
+      sliders: BARISTA_TASTE_SLIDERS.map((o) => ({ ...o })),
     }),
     choiceStep({
       id: 'aroma',
       title: '가장 끌리는 향은?',
       subtitle: '원두의 테이스팅 노트와 매칭돼요',
       columns: 2,
-      options: [
-        { id: 'fruit', emoji: '🍓', label: '과일', desc: '베리·시트러스' },
-        { id: 'floral', emoji: '🌸', label: '꽃', desc: '자스민·베르가못' },
-        { id: 'chocolate', emoji: '🍫', label: '초콜릿', desc: '카카오·캐러멜' },
-        { id: 'nutty', emoji: '🌰', label: '견과', desc: '아몬드·헤이즐넛' },
-      ],
+      options: BARISTA_AROMAS.map((o) => ({ ...o })),
     }),
   ],
   computeResult: (answers) => match(answers).key,
   Result,
-  print: (answers) => {
-    const { bean, roast, brew, persona, matchRate } = match(answers);
-    const recipe = recipeFor(brew, roast);
+  generate: (answers) =>
+    requestDemoAi<AiBaristaMatch>(
+      DEMO_ID,
+      { experienceProfile: answers.experienceProfile, habit: getChoice(answers, 'habit'), aroma: getChoice(answers, 'aroma'), taste: userTaste(answers), brewTool: (answers.experienceProfile as Record<string, string> | undefined)?.brewTool },
+      { validate: isAiBarista }
+    ),
+  print: (answers, _resultKey, generated) => {
+    const { bean, roast, brew, persona, matchRate, tip, cup, ai } = baristaView(answers, generated);
+    const recipe = sessionRecipe(answers, brew, roast);
     return {
       kind: 'receipt',
-      eyebrow: 'AI 바리스타의 추천',
+      eyebrow: ai ? 'AI 바리스타의 추천' : '답변으로 매칭한 원두 예시',
       title: bean.name,
       sections: [
-        { type: 'big', title: '취향 일치도', text: `${matchRate}% MATCH` },
+        { type: 'big', title: '데모 취향 비교 지표', text: `${matchRate}/100` },
         {
           type: 'rows',
           title: '커피 프로필',
@@ -623,14 +562,17 @@ export default defineDemo({
           title: `레시피 · ${recipe.name}`,
           rows: [
             { label: '원두', value: `${recipe.beans}g` },
-            { label: recipe.waterLabel, value: `${recipe.water}ml` },
+            { label: recipe.waterLabel, value: `${recipe.water}g` },
             { label: '비율', value: brewRatio(recipe) },
             { label: '온도', value: recipe.temp },
             { label: '시간', value: recipe.time },
             { label: '분쇄', value: recipe.grind },
+            { label: '잔', value: cup },
           ],
         },
         { type: 'list', title: '추출 순서', items: recipe.steps },
+        { type: 'text', title: '선택 반영 기준', text: '사용 도구를 우선해 레시피를 정하고, 평소 마시는 스타일은 원두와 로스팅에 반영했어요.' },
+        ...(tip ? [{ type: 'text' as const, title: '바리스타 팁', text: tip }] : []),
       ],
       footer: '오늘의 한 잔이 취향에 꼭 맞기를 바라요',
     };

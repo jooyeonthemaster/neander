@@ -60,6 +60,12 @@ export interface NewsArticle {
 
 export type NewsArticleInput = Omit<NewsArticle, 'id' | 'created_at' | 'updated_at'>
 
+export interface PortfolioImageMetadata {
+  caption_ko?: string
+  caption_en?: string
+  kind?: 'photo' | 'artwork' | 'screenshot' | 'render'
+}
+
 /** 포트폴리오 프로젝트 */
 export interface PortfolioItem {
   id: string
@@ -68,22 +74,38 @@ export interface PortfolioItem {
   description_ko: string
   description_en: string
   slug: string
-  year: number
+  year: number | null
   category: 'online' | 'offline' | 'service' | 'ip'
   tags: string[]
+  tags_ko?: string[]
+  tags_en?: string[]
   images: string[]        // Firebase Storage URLs
+  image_metadata?: Record<string, PortfolioImageMetadata>
   thumbnail: string       // 대표 이미지 URL
   services: string[]
   client: string
+  client_ko?: string
+  client_en?: string
   location: string | null
+  location_ko?: string | null
+  location_en?: string | null
   is_featured: boolean
   display_order: number
   is_published: boolean
   /** 상세 페이지에 표시할 기간 (예: "2026.09.04 – 09.07"). 없으면 year 사용 */
   period?: string
+  period_ko?: string
+  period_en?: string
   /** 상세 페이지 Result 박스 문구. 없으면 박스를 숨김 */
   result_ko?: string
   result_en?: string
+  /** 사례 서술 (목적 → 실행 → 결과). 비어 있으면 src/data/portfolio-case-studies.json을 쓴다 */
+  objective_ko?: string
+  objective_en?: string
+  execution_ko?: string
+  execution_en?: string
+  outcome_ko?: string
+  outcome_en?: string
   created_at: string
   updated_at: string
 }

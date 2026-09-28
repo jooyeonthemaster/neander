@@ -6,7 +6,7 @@
    defineDemo({ config, steps: [cameraStep(...), choiceStep(...)], ... })
    ───────────────────────────────────────────────────────── */
 
-import { useEffect } from 'react';
+import { useEffect, type CSSProperties } from 'react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import type {
@@ -38,8 +38,10 @@ export function defineDemo(opts: {
   steps: DemoStepDef[];
   computeResult: (answers: DemoAnswers) => string;
   Result: React.ComponentType<DemoResultProps>;
-  /** 결과 출력물 — 영수증(receipt) 또는 4×6 인화 사진(photo) */
-  print?: (answers: DemoAnswers, resultKey: string) => PrintSpec;
+  /** 결과 출력물 — 영수증(receipt) 또는 4×6 인화 사진(photo). generated는 generate가 돌려준 AI 결과 */
+  print?: (answers: DemoAnswers, resultKey: string, generated?: unknown) => PrintSpec;
+  /** 분석 화면 동안 실제 AI 결과를 받아 온다 (kit의 requestDemoAi). 실패하면 null */
+  generate?: (answers: DemoAnswers) => Promise<unknown | null>;
 }): DemoModule {
   return {
     config: { ...opts.config, steps: opts.steps.map((s) => s.meta) },
@@ -47,6 +49,7 @@ export function defineDemo(opts: {
     ResultComponent: opts.Result,
     computeResult: opts.computeResult,
     getPrint: opts.print,
+    generate: opts.generate,
   };
 }
 
@@ -117,26 +120,25 @@ export function choiceStep(
     };
 
     return (
-      <div>
+      <div className="demo-choice-step" data-choice-count={opts.options.length}>
         {opts.multi && (
-          <p className="mb-4 text-center text-xs text-slate-500">
+          <p className="demo-choice-instruction mb-4 text-center text-xs text-slate-500">
             최대 {opts.multi.max}개 선택 · <span className="text-teal-400">{getChoices(answers, opts.id).length}</span>/
             {opts.multi.max}
           </p>
         )}
-        <div className={cn('grid gap-3 sm:gap-4', GRID_COLS[opts.columns ?? 2])}>
+        <div className={cn('demo-choice-grid grid gap-3 sm:gap-4', GRID_COLS[opts.columns ?? 2])} data-choice-columns={opts.columns ?? 2}>
           {opts.options.map((option) => {
             const isSelected = selected.includes(option.id);
             return (
               <motion.button
                 key={option.id}
                 type="button"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
+                whileTap={{ scale: 0.99 }}
                 onClick={() => toggle(option.id)}
                 aria-pressed={isSelected}
                 className={cn(
-                  'relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl border p-4 text-center transition-colors sm:p-5',
+                  'demo-choice relative flex min-h-11 flex-col items-center gap-2 overflow-hidden rounded-2xl border p-4 text-center transition-colors sm:p-5',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400',
                   isSelected
                     ? 'border-teal-400 bg-teal-500/10 ring-1 ring-teal-400/40'
@@ -145,21 +147,23 @@ export function choiceStep(
               >
                 {option.swatch && (
                   <span
-                    className="mb-1 h-10 w-full rounded-lg border border-white/10"
+                    className="demo-choice-swatch mb-1 h-10 w-full rounded-lg border border-white/10"
                     style={{ background: option.swatch }}
                     aria-hidden="true"
                   />
                 )}
-                {option.emoji && <span className="text-3xl leading-none">{option.emoji}</span>}
-                <span className="text-sm font-semibold text-slate-100 sm:text-base">{option.label}</span>
-                {option.desc && <span className="text-xs leading-relaxed text-slate-400">{option.desc}</span>}
-                {isSelected && (
-                  <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-teal-400 text-slate-950">
+                {option.emoji && <span className="demo-choice-emoji text-3xl leading-none" aria-hidden="true">{option.emoji}</span>}
+                <span className="demo-choice-copy flex flex-col gap-1.5">
+                  <span className="demo-choice-label text-sm font-semibold text-slate-100 sm:text-base">{option.label}</span>
+                  {option.desc && <span className="demo-choice-description text-xs leading-relaxed text-slate-400">{option.desc}</span>}
+                </span>
+                <span aria-hidden="true" className={cn('demo-choice-marker absolute right-2 top-2 h-5 w-5 items-center justify-center rounded-full', isSelected ? 'flex bg-teal-400 text-slate-950' : 'hidden')}>
+                  {isSelected && (
                     <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                       <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
                     </svg>
-                  </span>
-                )}
+                  )}
+                </span>
               </motion.button>
             );
           })}
@@ -197,7 +201,7 @@ export function textStep(opts: StepCopy & { fields: TextField[] }): DemoStepDef 
     const update = (fieldId: string, value: string) => onUpdate(opts.id, { ...values, [fieldId]: value });
 
     return (
-      <div className="mx-auto max-w-md space-y-4">
+      <div className="demo-text-step mx-auto max-w-md space-y-4">
         {opts.fields.map((field) => {
           const inputId = `${opts.id}-${field.id}`;
           const common = {
@@ -206,16 +210,16 @@ export function textStep(opts: StepCopy & { fields: TextField[] }): DemoStepDef 
             placeholder: field.placeholder,
             maxLength: field.maxLength ?? 40,
             className:
-              'w-full rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-3 text-sm text-white placeholder:text-slate-600 transition-colors focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-400',
+              'demo-field w-full rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-3 text-sm text-white placeholder:text-slate-500 transition-colors focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-400',
           };
           return (
-            <div key={field.id} className="text-left">
-              <label htmlFor={inputId} className="mb-1.5 flex items-center justify-between text-xs font-medium text-slate-400">
+            <div key={field.id} data-demo-page-start className="demo-field-group text-left">
+              <label htmlFor={inputId} className="demo-field-label mb-1.5 flex items-center justify-between text-xs font-medium text-slate-400">
                 <span>
                   {field.label}
                   {field.optional && <span className="ml-1 text-slate-600">(선택)</span>}
                 </span>
-                <span className="text-slate-600">
+                <span className="demo-field-count text-slate-600">
                   {(values[field.id] ?? '').length}/{field.maxLength ?? 40}
                 </span>
               </label>
@@ -271,18 +275,18 @@ export function sliderStep(opts: StepCopy & { sliders: SliderField[] }): DemoSte
     }, [hasValues, onUpdate]);
 
     return (
-      <div className="mx-auto max-w-md space-y-7">
+      <div className="demo-slider-step mx-auto max-w-md space-y-7">
         {opts.sliders.map((slider) => {
           const value = values[slider.id] ?? slider.defaultValue ?? 50;
           const inputId = `${opts.id}-${slider.id}`;
           return (
-            <div key={slider.id}>
-              <label htmlFor={inputId} className="mb-3 flex items-center justify-between">
+            <div key={slider.id} data-demo-page-start className="demo-slider-group">
+              <label htmlFor={inputId} className="demo-slider-label mb-3 flex items-center justify-between">
                 <span className="text-sm font-semibold text-slate-100">
                   {slider.emoji && <span className="mr-1.5">{slider.emoji}</span>}
                   {slider.label}
                 </span>
-                <span className="font-mono text-xs text-teal-300">{value}</span>
+                <span className="demo-slider-value font-mono text-xs text-teal-300">{value}</span>
               </label>
               <input
                 id={inputId}
@@ -292,9 +296,10 @@ export function sliderStep(opts: StepCopy & { sliders: SliderField[] }): DemoSte
                 step={5}
                 value={value}
                 onChange={(e) => onUpdate(opts.id, { ...values, [slider.id]: Number(e.target.value) })}
-                className="w-full cursor-pointer accent-teal-400"
+                className="demo-slider w-full cursor-pointer accent-teal-400"
+                style={{ '--demo-slider-value': `${value}%` } as CSSProperties}
               />
-              <div className="mt-1.5 flex justify-between text-[11px] text-slate-500">
+              <div className="demo-slider-endpoints mt-1.5 flex justify-between text-[11px] text-slate-500">
                 <span>{slider.left}</span>
                 <span>{slider.right}</span>
               </div>

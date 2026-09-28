@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Link } from '@/i18n/navigation';
 import { FitToViewport, ScrollReveal, StaggerChildren, StaggerItem } from '@/components/animations';
@@ -85,10 +86,10 @@ export function FlagshipStore() {
       {/* Divider line from previous section */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
 
-      <FitToViewport className="container-wide py-16 lg:py-0">
+      <FitToViewport className="container-wide py-16 lg:py-0 lg-short:max-w-[68rem]">
         {/* Section header */}
-        <ScrollReveal className="text-center mb-10 lg:mb-[3.5vh]">
-          <span className="inline-flex items-center gap-2 mb-5 lg:mb-[1.6vh] px-4 py-1.5 rounded-full border border-teal-600/20 bg-teal-500/[0.06] text-[11px] font-semibold uppercase tracking-[0.25em] text-teal-600">
+        <ScrollReveal className="text-center mb-10 lg:mb-[3.5vh] lg-short:mb-2">
+          <span className="inline-flex items-center gap-2 mb-5 lg:mb-[1.6vh] lg-short:mb-1 px-4 py-1.5 rounded-full border border-teal-600/20 bg-teal-500/[0.06] text-[11px] font-semibold uppercase tracking-[0.25em] text-teal-600">
             <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
             {t('badge')}
           </span>
@@ -101,10 +102,11 @@ export function FlagshipStore() {
         </ScrollReveal>
 
         {/* ── Store cards (2 columns) ──────────────────────── */}
-        <StaggerChildren staggerDelay={0.1} className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 mb-8 lg:mb-[3vh]">
+        <StaggerChildren staggerDelay={0.1} className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 mb-8 lg:mb-[3vh] lg-short:mb-3">
           {/* AC'SCENT ID */}
           <StaggerItem>
             <StoreCard
+              imageSrc="/images/flagship/acscent-id.webp"
               icon={<FlaskIcon />}
               name={t('stores.accentId.nameEn')}
               nameKo={t('stores.accentId.name')}
@@ -123,6 +125,7 @@ export function FlagshipStore() {
           {/* AC'SCENT WOW */}
           <StaggerItem>
             <StoreCard
+              imageSrc="/images/flagship/acscent-wow.webp"
               icon={<SparklesIcon />}
               name={t('stores.accentWow.nameEn')}
               nameKo={t('stores.accentWow.name')}
@@ -179,6 +182,7 @@ export function FlagshipStore() {
 
 /* ── Store Card Component (light theme) ────────────────── */
 function StoreCard({
+  imageSrc,
   icon,
   name,
   nameKo,
@@ -188,6 +192,7 @@ function StoreCard({
   mapUrl,
   mapLabel,
 }: {
+  imageSrc: string;
   icon: React.ReactNode;
   name: string;
   nameKo: string;
@@ -213,6 +218,16 @@ function StoreCard({
       {/* Top accent bar */}
       <div className="h-1 w-full bg-teal-500 transition-all duration-500 group-hover:h-1.5" aria-hidden="true" />
 
+      <div className="relative aspect-[3/2] shrink-0 overflow-hidden bg-neutral-100">
+        <Image
+          src={imageSrc}
+          alt=""
+          fill
+          sizes="(min-width: 1280px) 610px, (min-width: 1024px) 50vw, calc(100vw - 48px)"
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.025] motion-reduce:transition-none"
+        />
+      </div>
+
       {/* Hover glow */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
@@ -222,10 +237,10 @@ function StoreCard({
         aria-hidden="true"
       />
 
-      <div className="relative flex flex-col h-full p-6 sm:p-7 lg-short:p-5">
+      <div className="relative flex flex-1 flex-col p-6 sm:p-7 lg-short:p-4">
         {/* Icon + Name */}
-        <div className="flex items-start gap-4 mb-4 lg-short:mb-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-500/[0.08] text-teal-600 ring-1 ring-teal-500/20 transition-all duration-500 group-hover:scale-110 group-hover:bg-teal-500/[0.12]">
+        <div className="flex items-start gap-4 mb-4 lg-short:mb-2">
+          <div className="flex h-12 w-12 lg-short:h-10 lg-short:w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/[0.08] text-teal-600 ring-1 ring-teal-500/20 transition-all duration-500 group-hover:scale-110 group-hover:bg-teal-500/[0.12]">
             {icon}
           </div>
           <div>
@@ -242,12 +257,12 @@ function StoreCard({
         </p>
 
         {/* Detail */}
-        <p className="text-sm text-neutral-700 leading-relaxed mb-4 flex-1">
+        <p className="text-sm text-neutral-700 leading-relaxed mb-4 lg-short:mb-2 flex-1">
           {detail}
         </p>
 
         {/* Feature tags */}
-        <div className="flex flex-wrap gap-2 mb-5 lg-short:mb-4">
+        <div className="flex flex-wrap gap-2 mb-5 lg-short:mb-3">
           {features.map((feature) => (
             <span
               key={feature}

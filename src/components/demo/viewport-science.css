@@ -1,0 +1,109 @@
+/* Keep the experiment and its controls together; explanations advance separately. */
+.experience-venue[data-fit-viewport] .demo-science-bench {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 3px 1px;
+  break-inside: avoid;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-diagram > svg[role='img'] {
+  display: block;
+  height: min(130px, calc(var(--demo-available-height, 320px) * .4));
+  width: 100%;
+  margin-inline: auto;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-bench--physics .demo-science-diagram > svg {
+  height: min(115px, calc(var(--demo-available-height, 320px) * .34));
+}
+
+.experience-venue[data-fit-viewport] .demo-science-diagram > svg:not([role='img']) {
+  height: 26px;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-launch-controls {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-launch-controls > button {
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-launch-controls > div > label + label {
+  margin-top: 8px;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-bench :is(label, label > span, label > span > span),
+.experience-venue[data-fit-viewport] .demo-science-solution > p:not(.text-2xl),
+.experience-venue[data-fit-viewport] .demo-science-substances > button {
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-bench input[type='range'] {
+  display: block;
+  height: 24px;
+  margin: 0;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-beaker {
+  display: grid;
+  grid-template-columns: 94px minmax(0, 1fr);
+  min-height: 134px;
+  padding: 8px;
+  gap: 6px 8px;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-beaker > svg {
+  width: 94px;
+  height: 114px;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-solution > p + p {
+  margin-top: 4px;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-solution > .text-2xl {
+  font-size: 24px;
+  line-height: 1.25;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-concentration {
+  grid-column: 1 / -1;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-substances > button {
+  min-height: 44px;
+  padding: 8px 12px;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-bench--earth > label > span {
+  flex-wrap: wrap;
+  column-gap: 10px;
+  row-gap: 4px;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-bench--earth > label > span > span:nth-child(2) {
+  order: -1;
+  width: 100%;
+  font-weight: 700;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-readings,
+.experience-venue[data-fit-viewport] .demo-science-observation,
+.experience-venue[data-fit-viewport] .demo-science-result-section {
+  width: 100%;
+  min-width: 0;
+}
+
+.experience-venue[data-fit-viewport] .demo-science-readings svg {
+  max-height: 110px;
+}

@@ -3,6 +3,7 @@
 import { motion } from 'motion/react';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
+import { ExperienceImage } from '@/components/services/ExperienceImage';
 
 interface RelatedExperience {
   slug: string;
@@ -46,11 +47,10 @@ export function ExperienceDetailClient({ related, viewDetailLabel }: Props) {
                 'group-focus-visible:ring-2 group-focus-visible:ring-teal-500 group-focus-visible:ring-offset-2'
               )}
             >
-              {/* Top accent bar */}
-              <div
-                className="h-1 w-full transition-all duration-300 group-hover:h-1.5"
-                style={{ backgroundColor: exp.pillarColor }}
-                aria-hidden="true"
+              <ExperienceImage
+                slug={exp.slug}
+                name={exp.name}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
               />
 
               <div className="flex flex-col flex-1 p-5 sm:p-6">

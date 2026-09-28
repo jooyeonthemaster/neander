@@ -1,0 +1,17 @@
+/* Locally served OFL fonts. Only faces used by the open program are fetched. */
+@font-face { font-family: 'Gowun Batang'; src: url('/fonts/programs/GowunBatang-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Gowun Batang'; src: url('/fonts/programs/GowunBatang-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Gowun Dodum'; src: url('/fonts/programs/GowunDodum-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Jua'; src: url('/fonts/programs/Jua-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Do Hyeon'; src: url('/fonts/programs/DoHyeon-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Black Han Sans'; src: url('/fonts/programs/BlackHanSans-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Gugi'; src: url('/fonts/programs/Gugi-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Song Myung'; src: url('/fonts/programs/SongMyung-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Gaegu'; src: url('/fonts/programs/Gaegu-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Gaegu'; src: url('/fonts/programs/Gaegu-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Sunflower'; src: url('/fonts/programs/Sunflower-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Nanum Myeongjo'; src: url('/fonts/programs/NanumMyeongjo-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Nanum Myeongjo'; src: url('/fonts/programs/NanumMyeongjo-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'IBM Plex Sans KR'; src: url('/fonts/programs/IBMPlexSansKR-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'IBM Plex Sans KR'; src: url('/fonts/programs/IBMPlexSansKR-SemiBold.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Hahmlet'; src: url('/fonts/programs/Hahmlet-Variable.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }

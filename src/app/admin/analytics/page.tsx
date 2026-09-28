@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { Select } from '@/components/ui/Select'
+import { DatePicker } from '@/components/ui/DatePicker'
+import { Checkbox } from '@/components/ui/Checkbox'
 import { Check, ChevronLeft, ChevronRight, Copy, Download, Loader2, RefreshCw } from 'lucide-react'
 import AdminHeader from '../components/AdminHeader'
 import KpiGrid from './components/KpiGrid'
@@ -13,7 +16,8 @@ import { BarList, BarListCard, type BarListItem } from './components/BarList'
 import { cityName, countryName, formatNumber, formatPercent, langName, pageName, regionName } from './components/format'
 import { downloadCsv } from './components/csv'
 import { useAnalyticsReport, VISITOR_FILTERS, type DrillTarget, type VisitorFilter } from './useAnalyticsReport'
-import { splitSourceKey, type Counter, type StatMap, type Summary } from '@/lib/analytics/aggregate'
+import { emptyQuoteStats, splitSourceKey, type Counter, type StatMap, type Summary } from '@/lib/analytics/aggregate'
+import QuoteFunnel from './components/QuoteFunnel'
 import {
   addDays,
   formatDuration,
@@ -210,8 +214,7 @@ function OptOutToggle() {
 
   return (
     <label className="flex cursor-pointer items-start gap-3 text-sm">
-      <input
-        type="checkbox"
+      <Checkbox
         checked={optedOut}
         onChange={(e) => {
           setAnalyticsOptOut(e.target.checked)
@@ -339,56 +342,53 @@ export default function AdminAnalyticsPage() {
           </button>
 
           {mode === 'day' && (
-            <input
-              type="date"
+            <DatePicker
               value={anchor}
               max={today}
-              onChange={(e) => e.target.value && setAnchor(e.target.value)}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900"
+              onChange={(value) => value && setAnchor(value)}
+              className="w-44"
+              inputClassName="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900"
               aria-label="날짜 선택"
             />
           )}
           {mode === 'month' && (
-            <input
-              type="month"
+            <DatePicker
+              mode="month"
               value={anchor.slice(0, 7)}
               max={today.slice(0, 7)}
-              onChange={(e) => e.target.value && setAnchor(`${e.target.value}-01`)}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900"
+              onChange={(value) => value && setAnchor(`${value}-01`)}
+              className="w-40"
+              inputClassName="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900"
               aria-label="월 선택"
             />
           )}
           {mode === 'year' && (
-            <select
+            <Select
               value={anchor.slice(0, 4)}
-              onChange={(e) => setAnchor(`${e.target.value}-01-01`)}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900"
+              onValueChange={(value) => setAnchor(`${value}-01-01`)}
+              className="w-32"
+              triggerClassName="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900"
               aria-label="연도 선택"
-            >
-              {years.map((year) => (
-                <option key={year} value={year}>
-                  {year}년
-                </option>
-              ))}
-            </select>
+              options={years.map((year) => ({ value: String(year), label: `${year}년` }))}
+            />
           )}
           {mode === 'range' && (
             <div className="flex items-center gap-1.5">
-              <input
-                type="date"
+              <DatePicker
                 value={anchor}
                 max={today}
-                onChange={(e) => e.target.value && setRange(e.target.value, rangeEnd)}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900"
+                onChange={(value) => value && setRange(value, rangeEnd)}
+                className="w-44"
+                inputClassName="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900"
                 aria-label="시작 날짜"
               />
               <span className="text-gray-400">~</span>
-              <input
-                type="date"
+              <DatePicker
                 value={rangeEnd}
                 max={today}
-                onChange={(e) => e.target.value && setRange(anchor, e.target.value)}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900"
+                onChange={(value) => value && setRange(anchor, value)}
+                className="w-44"
+                inputClassName="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900"
                 aria-label="종료 날짜"
               />
             </div>
@@ -550,6 +550,8 @@ export default function AdminAnalyticsPage() {
               <ConversionProfile summary={summary} />
             </BarListCard>
           </div>
+
+          <QuoteFunnel stats={summary.quote ?? emptyQuoteStats()} />
 
           <div className="grid gap-6 lg:grid-cols-3">
             <BarListCard title="행동" description="방문자가 사이트에서 한 일 (발생 횟수)">

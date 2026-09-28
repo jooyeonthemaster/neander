@@ -16,96 +16,76 @@ import {
   getFields,
   seededInt,
   sliderStep,
+  requestDemoAi,
   type DemoStepDef,
 } from '../kit';
+import {
+  TASTE_DNA_ADVENTURES,
+  TASTE_DNA_BASES,
+  TASTE_DNA_SPICE_LEVELS,
+  TASTE_DNA_TASTES,
+  TASTE_DNA_TEXTURES,
+  formatTasteTypeName,
+  tasteSpiceScore,
+  type AdventureId,
+  type AiTasteDna,
+  type TasteDnaBase,
+  type TasteDnaRec,
+  type TextureId,
+} from '@/data/demo-ai/taste-dna';
 
 /* ── Data ──────────────────────────────────────────────── */
 
-type TasteId = 'sweet' | 'salty' | 'sour' | 'bitter' | 'umami';
-
-const TASTES: { id: TasteId; label: string; emoji: string; color: string; left: string; right: string; code: string }[] = [
-  { id: 'sweet', label: '단맛', emoji: '🍯', color: '#f472b6', left: '덜 달게', right: '달콤할수록 좋아', code: 'SW' },
-  { id: 'salty', label: '짠맛', emoji: '🧂', color: '#38bdf8', left: '싱겁게', right: '짭짤하게', code: 'SA' },
-  { id: 'sour', label: '신맛', emoji: '🍋', color: '#facc15', left: '새콤한 건 별로', right: '시큼할수록 좋아', code: 'SO' },
-  { id: 'bitter', label: '쓴맛', emoji: '☕', color: '#a78bfa', left: '쓴 건 싫어요', right: '쌉싸름한 게 좋아', code: 'BI' },
-  { id: 'umami', label: '감칠맛', emoji: '🍄', color: '#fb923c', left: '담백하게', right: '진하고 깊게', code: 'UM' },
-];
-
-const SPICE_LEVELS = [
-  { label: '맵찔이', desc: '후추만 뿌려도 매워요', emoji: '🥛' },
-  { label: '순한맛', desc: '살짝 칼칼한 정도가 좋아요', emoji: '🌱' },
-  { label: '보통맛', desc: '떡볶이는 기본이죠', emoji: '🌶️' },
-  { label: '매운맛', desc: '땀이 나야 먹은 것 같아요', emoji: '🔥' },
-  { label: '지옥맛', desc: '매울수록 행복해져요', emoji: '🌋' },
-];
-
-type TextureId = 'crispy' | 'chewy' | 'soft' | 'creamy';
+const TASTES = TASTE_DNA_TASTES;
+const SPICE_LEVELS = TASTE_DNA_SPICE_LEVELS;
 
 const TEXTURES: Record<TextureId, { label: string; emoji: string; desc: string; intensity: number; pick: Rec }> = {
   crispy: {
-    label: '바삭',
-    emoji: '🍗',
-    desc: '튀김·크래커·누룽지',
+    ...TASTE_DNA_TEXTURES.crispy,
     intensity: 88,
     pick: { emoji: '🍤', name: '새우튀김 & 누룽지칩', why: '씹는 소리까지 맛있는 바삭 조합' },
   },
   chewy: {
-    label: '쫄깃',
-    emoji: '🍡',
-    desc: '떡·생면·젤리',
+    ...TASTE_DNA_TEXTURES.chewy,
     intensity: 72,
     pick: { emoji: '🍡', name: '쫄면 & 인절미', why: '탄력 있는 식감을 두 번 즐겨요' },
   },
   soft: {
-    label: '부드러운',
-    emoji: '🍮',
-    desc: '푸딩·계란찜·두부',
+    ...TASTE_DNA_TEXTURES.soft,
     intensity: 38,
     pick: { emoji: '🍮', name: '뚝배기 계란찜 & 연두부', why: '입에서 사르르 녹는 포근함' },
   },
   creamy: {
-    label: '크리미',
-    emoji: '🧀',
-    desc: '크림 파스타·치즈·라테',
+    ...TASTE_DNA_TEXTURES.creamy,
     intensity: 56,
     pick: { emoji: '🍝', name: '까르보나라 & 부라타', why: '진하고 매끄러운 크림 텍스처' },
   },
 };
 
-type AdventureId = 'classic' | 'curious' | 'explorer' | 'pioneer';
-
 const ADVENTURE: Record<AdventureId, { label: string; emoji: string; desc: string; value: number; suffix: string; pick: Rec; drink: Rec }> = {
   classic: {
-    label: '늘 먹던 맛',
-    emoji: '🏠',
-    desc: '검증된 단골 메뉴가 최고',
+    ...TASTE_DNA_ADVENTURES.classic,
     value: 18,
     suffix: '수호자',
     pick: { emoji: '🍲', name: '집밥 된장찌개', why: '익숙함이 주는 안정감이 1순위' },
     drink: { emoji: '🍚', name: '살얼음 식혜', why: '실패 없는 전통 디저트 음료' },
   },
   curious: {
-    label: '가끔은 새롭게',
-    emoji: '👀',
-    desc: '후기가 좋으면 도전해요',
+    ...TASTE_DNA_ADVENTURES.curious,
     value: 46,
     suffix: '미식가',
     pick: { emoji: '🌮', name: '비리아 타코', why: '살짝 새로운 한 입으로 기분 전환' },
     drink: { emoji: '🫖', name: '진저 콤부차', why: '톡 쏘는 발효차로 가볍게 도전' },
   },
   explorer: {
-    label: '신메뉴 먼저',
-    emoji: '🧭',
-    desc: '처음 보는 메뉴부터 시켜요',
+    ...TASTE_DNA_ADVENTURES.explorer,
     value: 76,
     suffix: '탐험가',
     pick: { emoji: '🫓', name: '에티오피아 인제라', why: '발효 빵으로 떠나는 미식 여행' },
     drink: { emoji: '🟣', name: '페루 치차 모라다', why: '보라 옥수수로 만든 이국적인 음료' },
   },
   pioneer: {
-    label: '세상 모든 맛',
-    emoji: '🚀',
-    desc: '곤충 요리도 한 입은 먹어봐요',
+    ...TASTE_DNA_ADVENTURES.pioneer,
     value: 96,
     suffix: '개척자',
     pick: { emoji: '🦗', name: '귀뚜라미 단백질 쿠키', why: '미래 식량까지 섭렵하는 개척 정신' },
@@ -113,13 +93,9 @@ const ADVENTURE: Record<AdventureId, { label: string; emoji: string; desc: strin
   },
 };
 
-interface Rec {
-  emoji: string;
-  name: string;
-  why: string;
-}
+type Rec = TasteDnaRec;
 
-type BaseId = TasteId | 'fire' | 'balance';
+type BaseId = TasteDnaBase;
 
 const BASES: Record<BaseId, { prefix: string; emoji: string; desc: string; tint: string; foods: Rec[]; drinks: Rec[] }> = {
   sweet: {
@@ -258,7 +234,7 @@ function analyze(answers: DemoAnswers) {
   const sorted = [...tastes].sort((a, b) => b.value - a.value);
   const top = sorted[0]!;
   const spread = top.value - sorted[sorted.length - 1]!.value;
-  const spiceScore = spice * 25;
+  const spiceScore = tasteSpiceScore(spice);
 
   let base: BaseId = top.id;
   if (spice >= 3 && spiceScore >= top.value) base = 'fire';
@@ -269,21 +245,11 @@ function analyze(answers: DemoAnswers) {
 
   const axes = [
     ...tastes.map((t) => ({ id: t.id as string, label: t.label, emoji: t.emoji, color: t.color, value: t.value })),
-    { id: 'spice', label: '매운맛', emoji: '🌶️', color: AXIS_COLORS.spice, value: Math.max(6, spiceScore) },
+    { id: 'spice', label: '매운맛 내성', emoji: '🌶️', color: AXIS_COLORS.spice, value: spiceScore },
     { id: 'texture', label: `식감·${texture.label}`, emoji: texture.emoji, color: AXIS_COLORS.texture, value: texture.intensity },
     { id: 'adventure', label: '모험 지수', emoji: '🧭', color: AXIS_COLORS.adventure, value: adventure.value },
   ];
 
-  const codeParts = [
-    `${top.code}${String(Math.min(99, top.value)).padStart(2, '0')}`,
-    `${sorted[1]!.code}${String(Math.min(99, sorted[1]!.value)).padStart(2, '0')}`,
-    `SP${spice}`,
-    ({ crispy: 'CS', chewy: 'CH', soft: 'SF', creamy: 'CM' } as const)[textureId] ?? 'CS',
-    adventureId.slice(0, 2).toUpperCase(),
-  ];
-  const code = codeParts.join('·');
-
-  const rarity = (seededInt(seed, 'rarity', 21, 94) / 10).toFixed(1);
   const serial = String(seededInt(seed, 'serial', 1, 9999)).padStart(4, '0');
 
   // 유형 추천 3개 + 식감·모험 성향 맞춤 1개씩
@@ -291,7 +257,53 @@ function analyze(answers: DemoAnswers) {
   const drinks = [...data.drinks, adventure.drink];
   const hashtags = ['#미각DNA', `#${name.replace(/\s/g, '')}`, `#${texture.label}파`];
 
-  return { base, data, name, tastes, spice, texture, textureId, adventure, adventureId, axes, code, codeParts, rarity, serial, foods, drinks, hashtags };
+  return { base, data, name, tastes, spice, texture, textureId, adventure, adventureId, axes, serial, foods, drinks, hashtags, mission: adventure.pick, ai: false };
+}
+
+/* ── AI 결과 ──────────────────────────────────────────── */
+
+const isRec = (v: unknown) => {
+  const o = v as Rec | null;
+  return !!o && typeof o.emoji === 'string' && typeof o.name === 'string' && typeof o.why === 'string';
+};
+const isRecList = (v: unknown) => Array.isArray(v) && v.length > 0 && v.every(isRec);
+
+function isAiTasteDna(v: unknown): v is AiTasteDna {
+  const o = v as AiTasteDna | null;
+  return !!o && (TASTE_DNA_BASES as readonly string[]).includes(o.base) && typeof o.name === 'string' && typeof o.desc === 'string'
+    && isRecList(o.foods) && isRecList(o.drinks) && isRec(o.mission) && Array.isArray(o.hashtags);
+}
+
+/** 화면·출력물이 그리는 분석 — 축 수치는 답변 그대로, 유형·해설·추천은 AI 결과가 있으면 그것 */
+function tasteDnaView(answers: DemoAnswers, generated: unknown) {
+  const r = analyze(answers);
+  const result = !isAiTasteDna(generated) ? r : {
+    ...r,
+    base: generated.base,
+    data: { ...BASES[generated.base], desc: generated.desc },
+    name: formatTasteTypeName(generated.name),
+    foods: generated.foods,
+    drinks: generated.drinks,
+    mission: generated.mission,
+    hashtags: ['#미각DNA', ...generated.hashtags.map((h) => `#${h}`)],
+    ai: true,
+  };
+  const profile = (answers.experienceProfile ?? {}) as Record<string, string>;
+  if (profile.menuStyle !== 'plant') return result;
+  const primary: Record<string, Rec> = {
+    sweet: { emoji: '🍠', name: '군고구마와 구운 견과', why: '자연스러운 단맛과 바삭한 대비' },
+    salty: { emoji: '🥔', name: '허브 감자구이', why: '소금과 허브로 만드는 선명한 풍미' },
+    sour: { emoji: '🍋', name: '레몬 병아리콩 샐러드', why: '산뜻한 산미와 콩의 고소함' },
+    bitter: { emoji: '🥬', name: '루콜라·자몽 샐러드', why: '잎채소와 자몽의 쌉쌀한 조합' },
+    umami: { emoji: '🍄', name: '버섯·두부 덮밥', why: '버섯과 간장으로 감칠맛을 살려요' },
+    fire: { emoji: '🌶️', name: '매콤한 두부 채소볶음', why: '선택한 매운맛에 맞춰 고추 양 조절' },
+  };
+  const first = primary[result.base] ?? { emoji: '🥗', name: '구운 채소 곡물 볼', why: '여러 맛이 균형을 이루는 한 접시' };
+  return { ...result,
+    foods: [first, { emoji: '🫘', name: r.textureId === 'crispy' ? '바삭한 병아리콩' : '부드러운 두부 구이', why: '선호 식감을 식물성 재료에 연결해요' }],
+    drinks: [{ emoji: '🍋', name: '레몬 민트 에이드', why: '상큼한 산미로 한 입을 정리해요' }, { emoji: '🍵', name: '따뜻한 보리차', why: '고소한 향으로 음식의 맛을 이어가요' }],
+    mission: { emoji: '🌿', name: `${first.name}에 새로운 허브 한 가지`, why: '소스와 육수도 식물성인지 확인하고 익숙한 메뉴에서 한 가지만 바꿔요' },
+  };
 }
 
 /* ── Spice step (custom) ──────────────────────────────── */
@@ -322,7 +334,7 @@ function SpiceStep({ answers, onUpdate }: DemoStepProps) {
           <motion.div
             className="h-full rounded-full"
             style={{ background: 'linear-gradient(90deg, #fde68a, #fb923c, #ef4444, #991b1b)' }}
-            animate={{ width: `${level === null ? 0 : 8 + (level / 4) * 92}%` }}
+            animate={{ width: `${level === null ? 0 : tasteSpiceScore(level)}%` }}
             transition={{ type: 'spring', stiffness: 90, damping: 16 }}
           />
         </div>
@@ -465,13 +477,13 @@ function DnaHelix({ axes }: { axes: { color: string; value: number }[] }) {
 
 /* ── Result ────────────────────────────────────────────── */
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
-  const r = analyze(answers);
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
+  const r = tasteDnaView(answers, generated);
   const { foods, drinks } = r;
 
   return (
     <ResultShell
-      eyebrow="AI 미각 DNA 분석 결과"
+      eyebrow={r.ai ? 'AI 미각 DNA 분석 결과' : '답변으로 구성한 미각 취향 예시'}
       title={`${r.data.emoji} ${r.name}`}
       description={r.data.desc}
       pillarColor={pillarColor}
@@ -483,7 +495,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         initial={{ opacity: 0, y: 24, rotate: -1.5 }}
         animate={{ opacity: 1, y: 0, rotate: 0 }}
         transition={{ duration: 0.7, ease: 'easeOut' }}
-        className="relative w-full max-w-sm overflow-hidden rounded-[28px] border border-white/10 p-5 text-left shadow-2xl shadow-black/50"
+        className="demo-dark-surface relative w-full max-w-sm overflow-hidden rounded-[28px] border border-white/10 p-5 text-left shadow-2xl shadow-black/50"
         style={{
           background: `radial-gradient(120% 70% at 100% 0%, ${r.data.tint}40, transparent 60%), radial-gradient(90% 60% at 0% 100%, #6366f140, transparent 60%), linear-gradient(165deg, #0f172a, #020617)`,
         }}
@@ -502,13 +514,9 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           <span className="mr-2">{r.data.emoji}</span>
           {r.name}
         </p>
-        <p className="mt-2 font-mono text-xs tracking-wider" style={{ color: r.data.tint }}>
-          DNA · {r.code}
-        </p>
-
         <div className="mt-4 grid grid-cols-3 gap-2">
           {[
-            { k: '매운맛', v: `${r.spice}/4`, e: '🌶️' },
+            { k: '매운맛 내성', v: `${tasteSpiceScore(r.spice)}/100`, e: '🌶️' },
             { k: '최애 식감', v: r.texture.label, e: r.texture.emoji },
             { k: '모험 지수', v: `${r.adventure.value}%`, e: '🧭' },
           ].map((s) => (
@@ -524,12 +532,12 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           {r.hashtags.map((tag) => (
             <span key={tag}>{tag}</span>
           ))}
-          <span className="ml-auto text-white/40">상위 {r.rarity}% 희귀 유형</span>
+          <span className="ml-auto text-white/40">자가 보고 취향 카드</span>
         </div>
       </motion.div>
 
       {/* 8가지 축 범례 */}
-      <Panel title="8가지 미각 축 · 염기쌍 해독">
+      <Panel title="8가지 취향 축 · 나의 선택">
         <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
           {r.axes.map((a) => (
             <div key={a.id} className="flex items-center gap-2 text-xs">
@@ -541,7 +549,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
             </div>
           ))}
         </div>
-        <p className="mt-3 text-[11px] text-slate-500">색은 미각 축, 막대 굵기는 강도를 뜻해요</p>
+        <p className="mt-3 text-[11px] text-slate-500">색은 취향 축, 숫자는 선택한 선호도를 뜻해요. 유전자나 미각 능력 측정값이 아니에요.</p>
       </Panel>
 
       <Panel title="5미(味) 밸런스">
@@ -550,7 +558,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
           className="mt-2"
           color={pillarColor}
           items={[
-            { label: '🌶️ 매운맛 내성', value: r.spice * 25 },
+            { label: '🌶️ 매운맛 내성', value: tasteSpiceScore(r.spice) },
             { label: '🧭 새로운 맛 도전 지수', value: r.adventure.value },
           ]}
         />
@@ -588,31 +596,35 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         className="flex w-full max-w-md items-center gap-4 rounded-2xl border p-4 text-left"
         style={{ borderColor: `${pillarColor}55`, background: `linear-gradient(120deg, ${pillarColor}1f, transparent)` }}
       >
-        <span className="text-4xl leading-none">{r.adventure.pick.emoji}</span>
+        <span className="text-4xl leading-none">{r.mission.emoji}</span>
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: pillarColor }}>
             이번 주 미각 도전 미션
           </p>
-          <p className="mt-0.5 text-sm font-bold text-white">{r.adventure.pick.name}</p>
+          <p className="mt-0.5 text-sm font-bold text-white">{r.mission.name}</p>
           <p className="text-xs text-slate-400 [word-break:keep-all]">
-            {r.adventure.pick.why} · 모험 지수 {r.adventure.value}% 맞춤
+            {r.mission.why} · 모험 지수 {r.adventure.value}% 맞춤
           </p>
         </div>
       </div>
+
+      {r.ai && <p className="text-xs text-slate-500">AI가 당신의 답변으로 해석한 미각 유형과 추천이에요</p>}
     </ResultShell>
   );
 }
 
 /* ── Export ─────────────────────────────────────────────── */
 
+const DEMO_ID = 'taste-dna';
+
 export default defineDemo({
   config: {
-    id: 'taste-dna',
+    id: DEMO_ID,
     targetSlug: 'ai-taste-dna',
     industryId: 'fnb',
     analyzeEmoji: '🧬',
     analyzeDurationMs: 3400,
-    analyzeMessages: ['미각 데이터 8개 축 정규화 중', '염기서열 매핑 중', '미각 유형 클러스터링 중', '맞춤 메뉴 찾는 중'],
+    analyzeMessages: ['좋아하는 맛과 식감 정리', '식사 장면과 메뉴 범위 반영', '다음 한 입 미션 작성'],
   },
   steps: [
     sliderStep({
@@ -648,24 +660,35 @@ export default defineDemo({
   ],
   computeResult: (answers) => analyze(answers).base,
   Result,
-  print: (answers) => {
+  generate: (answers) => {
     const r = analyze(answers);
+    return requestDemoAi<AiTasteDna>(
+      DEMO_ID,
+      { experienceProfile: answers.experienceProfile,
+        taste: Object.fromEntries(r.tastes.map((t) => [t.id, t.value])),
+        spice: r.spice,
+        texture: r.textureId,
+        adventure: r.adventureId,
+      },
+      { validate: isAiTasteDna }
+    );
+  },
+  print: (answers, _resultKey, generated) => {
+    const r = tasteDnaView(answers, generated);
     return {
       kind: 'receipt',
-      eyebrow: 'AI 미각 DNA 분석 결과',
+      eyebrow: r.ai ? 'AI 미각 DNA 분석 결과' : '답변으로 구성한 미각 취향 예시',
       title: r.name,
       sections: [
-        // 영수증 폭에 맞춰 코드를 두 줄로 나눈다
-        { type: 'big', title: 'DNA CODE', text: `${r.codeParts.slice(0, 2).join('·')}\n${r.codeParts.slice(2).join('·')}` },
+        { type: 'text', title: '나의 취향 요약', text: `매운맛 내성 ${tasteSpiceScore(r.spice)}/100 · ${r.texture.label} 식감 · 새로운 맛 도전 ${r.adventure.value}/100` },
         { type: 'bars', title: '8가지 미각 축', bars: r.axes.map((a) => ({ label: a.label, value: a.value })) },
         {
           type: 'rows',
           title: '미각 프로필',
           rows: [
-            { label: '매운맛', value: `${r.spice}단계 · ${SPICE_LEVELS[r.spice]?.label ?? '보통맛'}` },
+            { label: '매운맛 내성', value: `${tasteSpiceScore(r.spice)}/100 · ${SPICE_LEVELS[r.spice]?.label ?? '보통맛'}` },
             { label: '최애 식감', value: r.texture.label },
             { label: '모험 지수', value: `${r.adventure.value}%` },
-            { label: '희귀도', value: `상위 ${r.rarity}%` },
           ],
         },
         { type: 'text', title: '유형 해설', text: r.data.desc },
@@ -674,10 +697,10 @@ export default defineDemo({
           title: '맞춤 추천',
           items: [
             `음식 · ${r.foods[0]!.name}`,
-            `음식 · ${r.texture.pick.name}`,
+            `음식 · ${r.foods[r.foods.length - 1]!.name}`,
             `음료 · ${r.drinks[0]!.name}`,
-            `음료 · ${r.adventure.drink.name}`,
-            `도전 · ${r.adventure.pick.name}`,
+            `음료 · ${r.drinks[r.drinks.length - 1]!.name}`,
+            `도전 · ${r.mission.name}`,
           ],
         },
       ],

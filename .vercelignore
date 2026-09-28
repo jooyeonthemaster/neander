@@ -1,0 +1,4 @@
+# Original working photography stays local; the reviewed WebP archive is deployed.
+public/images/*NEANDER LAB/**
+**/.DS_Store
+scripts/backups/**

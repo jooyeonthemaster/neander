@@ -310,6 +310,12 @@ export const EVENT_LABELS: Record<string, string> = {
   click_tel: '전화번호 클릭',
   click_email: '이메일 주소 클릭',
   click_outbound: '외부 링크 클릭',
+  brochure_request: '회사소개서 요청',
+  quote_view: '온라인 견적 진입',
+  quote_preset: '견적 시나리오 선택',
+  quote_step: '견적 단계 진행',
+  quote_pdf: '가견적서 PDF 발급',
+  quote_request: '확정 견적 요청',
 }
 
 export const INQUIRY_KIND_LABELS: Record<string, string> = {

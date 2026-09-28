@@ -3,35 +3,18 @@
 import { motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { QUOTE_HREF } from '@/lib/constants';
+import { getServiceContactHref } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { IndustryId } from '@/data/experiences';
 import type { DemoModule, DemoConfig, DemoAnswers, DemoStepProps, DemoResultProps } from '@/types/demo';
-import type { PrintSpec } from '../kit';
+import { requestDemoAi, type PrintSpec } from '../kit';
+import { TEAM_COMM_STYLES, TEAM_EMOJIS, TEAM_ROLES, TEAM_STRESS_RESPONSES, type AiTeam } from '@/data/demo-ai/team';
 
 /* ── Static Data ─────────────────────────────────────── */
 
-const ROLES = [
-  { id: 'leader', emoji: '\u{1F981}', title: '\uB9AC\uB354', desc: '\uBC29\uD5A5\uC744 \uC81C\uC2DC\uD558\uACE0 \uD300\uC744 \uC774\uB044\uB2E4' },
-  { id: 'mediator', emoji: '\u{1F54A}\uFE0F', title: '\uC870\uC728\uC790', desc: '\uAC08\uB4F1\uC744 \uD574\uACB0\uD558\uACE0 \uC870\uD654\uB97C \uB9CC\uB4E0\uB2E4' },
-  { id: 'analyst', emoji: '\u{1F50D}', title: '\uBD84\uC11D\uAC00', desc: '\uB370\uC774\uD130\uB85C \uCD5C\uC801\uC758 \uB2F5\uC744 \uCC3E\uB294\uB2E4' },
-  { id: 'creator', emoji: '\u{1F4A1}', title: '\uD06C\uB9AC\uC5D0\uC774\uD130', desc: '\uC0C8\uB85C\uC6B4 \uC544\uC774\uB514\uC5B4\uB97C \uB9CC\uB4E4\uC5B4\uB0B8\uB2E4' },
-  { id: 'executor', emoji: '\u26A1', title: '\uC2E4\uD589\uC790', desc: '\uACC4\uD68D\uC744 \uBE60\uB974\uACE0 \uC815\uD655\uD558\uAC8C \uC2E4\uD589\uD55C\uB2E4' },
-] as const;
-
-const COMM_STYLES = [
-  { id: 'direct', emoji: '\u{1F4AC}', title: '\uC9C1\uC124\uC801', desc: '\uD575\uC2EC\uB9CC \uAC04\uACB0\uD558\uAC8C \uC804\uB2EC' },
-  { id: 'diplomatic', emoji: '\u{1F91D}', title: '\uC678\uAD50\uC801', desc: '\uC0C1\uB300\uC758 \uAC10\uC815\uC744 \uACE0\uB824\uD558\uBA70 \uC804\uB2EC' },
-  { id: 'dataDriven', emoji: '\u{1F4CA}', title: '\uB370\uC774\uD130 \uC911\uC2EC', desc: '\uC218\uCE58\uC640 \uADFC\uAC70\uB85C \uC124\uB4DD' },
-  { id: 'storytelling', emoji: '\u{1F4D6}', title: '\uC2A4\uD1A0\uB9AC\uD154\uB9C1', desc: '\uC774\uC57C\uAE30\uC640 \uBE44\uC720\uB85C \uACF5\uAC10 \uC720\uB3C4' },
-] as const;
-
-const STRESS_RESPONSES = [
-  { id: 'charge', emoji: '\u{1F3C3}', title: '\uB3CC\uC9C4', desc: '\uC77C\uB2E8 \uBD80\uB52A\uD788\uBA70 \uD574\uACB0\uD55C\uB2E4' },
-  { id: 'plan', emoji: '\u{1F4CB}', title: '\uACC4\uD68D \uC218\uB9BD', desc: '\uC6B0\uC120\uC21C\uC704\uB97C \uC7AC\uC815\uB9AC\uD55C\uB2E4' },
-  { id: 'collaborate', emoji: '\u{1F932}', title: '\uD611\uC5C5', desc: '\uD300\uC6D0\uC5D0\uAC8C \uB3C4\uC6C0\uC744 \uC694\uCCAD\uD55C\uB2E4' },
-  { id: 'reflect', emoji: '\u{1F9D8}', title: '\uC131\uCC30', desc: '\uD55C \uBC1C \uBB3C\uB7EC\uC11C\uC11C \uC0DD\uAC01\uD55C\uB2E4' },
-] as const;
+const ROLES = TEAM_ROLES;
+const COMM_STYLES = TEAM_COMM_STYLES;
+const STRESS_RESPONSES = TEAM_STRESS_RESPONSES;
 
 type ResultKey = 'commander' | 'diplomat-leader' | 'harmony-maker' | 'data-strategist'
   | 'strategic-thinker' | 'visionary' | 'innovator' | 'action-hero' | 'reliable-anchor';
@@ -224,9 +207,26 @@ function archetypeFor(resultKey: string): ResultData {
   return RESULTS[resultKey as ResultKey] ?? RESULTS['strategic-thinker'];
 }
 
-function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps) {
+const isStrings = (v: unknown): v is string[] => Array.isArray(v) && v.every((t) => typeof t === 'string');
+
+function isAiTeam(v: unknown): v is AiTeam {
+  const o = v as AiTeam | null;
+  return !!o && typeof o.name === 'string' && typeof o.desc === 'string' && typeof o.partner === 'string'
+    && (TEAM_EMOJIS as readonly string[]).includes(o.emoji) && isStrings(o.strengths) && isStrings(o.challenges);
+}
+
+/** 화면·출력물이 그리는 아키타입 — AI 결과가 있으면 그것, 없으면 고정 결과 */
+function archetypeView(resultKey: string, generated: unknown): ResultData & { ai: boolean } {
+  if (isAiTeam(generated)) {
+    const { name, emoji, desc, strengths, challenges, partner } = generated;
+    return { name, emoji, desc, strengths, challenges, partner, ai: true };
+  }
+  return { ...archetypeFor(resultKey), ai: false };
+}
+
+function ResultComponent({ resultKey, onRestart, pillarColor, generated }: DemoResultProps) {
   const tCommon = useTranslations('demos.common');
-  const d = archetypeFor(resultKey);
+  const d = archetypeView(resultKey, generated);
 
   return (
     <motion.div
@@ -272,8 +272,8 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
             Strengths
           </p>
           <ul className="space-y-2">
-            {d.strengths.map((s) => (
-              <li key={s} className="flex items-start gap-2 text-sm text-slate-300">
+            {d.strengths.map((s, i) => (
+              <li key={`${i}-${s}`} className="flex items-start gap-2 text-sm text-slate-300">
                 <svg className="mt-0.5 h-4 w-4 shrink-0 text-green-400" fill="none" viewBox="0 0 16 16" aria-hidden="true">
                   <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -289,8 +289,8 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
             Challenges
           </p>
           <ul className="space-y-2">
-            {d.challenges.map((c) => (
-              <li key={c} className="flex items-start gap-2 text-sm text-slate-300">
+            {d.challenges.map((c, i) => (
+              <li key={`${i}-${c}`} className="flex items-start gap-2 text-sm text-slate-300">
                 <svg className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" fill="none" viewBox="0 0 16 16" aria-hidden="true">
                   <path d="M8 4v5m0 2.5v.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
@@ -318,12 +318,16 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
         </div>
       </motion.div>
 
+      {d.ai && (
+        <p className="text-xs text-slate-500">지금의 자기 보고를 바탕으로 한 대화 제안입니다. 팀 역량이나 고정된 성격을 측정한 결과가 아닙니다.</p>
+      )}
+
       {/* Actions */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6 }}
-        className="flex gap-3 pt-2"
+        className="demo-legacy-result-cta flex gap-3 pt-2"
       >
         <button
           type="button"
@@ -333,8 +337,8 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
           {'\uB2E4\uC2DC \uC9C4\uB2E8\uD558\uAE30'}
         </button>
         <Link
-          href={QUOTE_HREF}
-          className="rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
+          href={getServiceContactHref('ai-team-chemistry')}
+          className="demo-accent-surface rounded-xl px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-105"
           style={{ backgroundColor: pillarColor }}
         >
           {tCommon('ctaButton')}
@@ -348,8 +352,8 @@ function ResultComponent({ resultKey, onRestart, pillarColor }: DemoResultProps)
 
 /* ── Print ───────────────────────────────────────────── */
 
-function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
-  const d = archetypeFor(resultKey);
+function getPrint(answers: DemoAnswers, resultKey: string, generated?: unknown): PrintSpec {
+  const d = archetypeView(resultKey, generated);
   const role = ROLES.find((r) => r.id === answers['role']);
   const comm = COMM_STYLES.find((c) => c.id === answers['communication']);
   const stress = STRESS_RESPONSES.find((s) => s.id === answers['stress']);
@@ -376,12 +380,23 @@ function getPrint(answers: DemoAnswers, resultKey: string): PrintSpec {
   };
 }
 
+/* ── AI 생성 ──────────────────────────────────────────── */
+
+function generate(answers: DemoAnswers): Promise<AiTeam | null> {
+  return requestDemoAi<AiTeam>(
+    config.id,
+    { experienceProfile: answers.experienceProfile, role: answers['role'], communication: answers['communication'], stress: answers['stress'] },
+    { validate: isAiTeam }
+  );
+}
+
 const TeamChemistryDemo: DemoModule = {
   config,
   StepComponents: [StepRole, StepCommunication, StepStress],
   ResultComponent,
   computeResult,
   getPrint,
+  generate,
 };
 
 export default TeamChemistryDemo;

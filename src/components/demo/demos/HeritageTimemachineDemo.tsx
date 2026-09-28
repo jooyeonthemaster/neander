@@ -13,11 +13,13 @@ import {
   defineDemo,
   getCapture,
   getChoice,
+  requestDemoAi,
   seededInt,
   seededRandom,
   type DemoStepDef,
   type PhotoLook,
 } from '../kit';
+import type { AiHeritage } from '@/data/demo-ai/heritage';
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -119,7 +121,7 @@ const SITES: Record<SiteId, Site> = {
       { year: '1794', text: '화성 축성 시작', era: 'hs-1794' },
       { year: '1795', text: '정조, 을묘원행', era: 'hs-1795' },
       { year: '1796', text: '화성 완공', era: 'hs-1796' },
-      { year: '1975', text: '의궤를 바탕으로 복원 시작' },
+      { year: '1964', text: '의궤를 참고한 복원·재건 시작' },
       { year: '1997', text: '유네스코 세계유산 등재' },
     ],
   },
@@ -523,6 +525,16 @@ function TravelerBackdrop({ siteId, sky }: { siteId: SiteId; sky: SkyId }) {
   );
 }
 
+/** AI 기념사진용 액자 — 이미 장면 속에 인물이 그려져 있으니 배경 합성 대신 테두리만 얹는다 */
+function SouvenirFrame() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400">
+      <rect x="4" y="4" width="292" height="392" rx="6" fill="none" stroke="#d4a64a" strokeWidth="8" />
+      <rect x="13" y="13" width="274" height="374" rx="3" fill="none" stroke="#fde68a" strokeWidth="1.5" opacity="0.85" />
+    </svg>
+  );
+}
+
 /* ── Era step (선택한 문화재에 따라 시대가 바뀐다) ───────── */
 
 function EraStep({ answers, onUpdate }: DemoStepProps) {
@@ -547,7 +559,7 @@ function EraStep({ answers, onUpdate }: DemoStepProps) {
               onClick={() => onUpdate('era', era.id)}
               aria-pressed={isSelected}
               className={cn(
-                'relative overflow-hidden rounded-2xl border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400',
+                'demo-dark-surface relative overflow-hidden rounded-2xl border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400',
                 isSelected ? 'border-teal-400 ring-1 ring-teal-400/40' : 'border-slate-700 hover:border-slate-600'
               )}
               style={{ background: `linear-gradient(160deg, ${sky.stops[0]}, ${sky.stops[2]}66 70%, #0f172a)` }}
@@ -568,7 +580,7 @@ const eraStep: DemoStepDef = {
   meta: {
     id: 'era',
     titleKey: '어느 시대로 떠나볼까요?',
-    subtitleKey: '고른 시대의 모습으로 AI가 문화유산을 복원해요',
+    subtitleKey: '선택한 시대에서 영감을 받은 AI 상상 장면을 만들어요',
     canProceed: (a) => getSite(a).eras.some((e) => e.id === getChoice(a, 'era')),
   },
   Component: EraStep,
@@ -631,7 +643,7 @@ function Narration({ text, color, onPlayed }: { text: string; color: string; onP
           whileTap={{ scale: 0.95 }}
           onClick={toggle}
           disabled={state === 'unsupported'}
-          className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
+          className="demo-accent-surface inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
           style={{ backgroundColor: color }}
         >
           {state === 'speaking' ? (
@@ -669,12 +681,19 @@ function Narration({ text, color, onPlayed }: { text: string; color: string; onP
 
 /* ── Result ────────────────────────────────────────────── */
 
-/** 결과 화면과 출력물이 함께 쓰는 여행 정보 */
-function tripOf(answers: DemoAnswers) {
+function isAiHeritage(v: unknown): v is AiHeritage {
+  const o = v as AiHeritage | null;
+  return !!o && typeof o.image === 'string' && o.image.startsWith('data:image/') && typeof o.narration === 'string' && typeof o.outfit === 'string';
+}
+
+/** 결과 화면과 출력물이 함께 쓰는 여행 정보 — AI 결과가 있으면 AI 기념사진·해설을 함께 */
+function tripOf(answers: DemoAnswers, generated?: unknown) {
   const picked = getChoice(answers, 'site') as SiteId | undefined;
   const siteId: SiteId = picked && SITES[picked] ? picked : 'gyeongbok';
   const era = getEra(answers);
+  const ai = isAiHeritage(generated) ? generated : null;
   return {
+    ai,
     siteId,
     site: SITES[siteId],
     era,
@@ -686,9 +705,9 @@ function tripOf(answers: DemoAnswers) {
   };
 }
 
-function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
+function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps) {
   const uid = useId().replace(/:/g, '');
-  const { siteId, site, era, sky, capture, serial, when } = tripOf(answers);
+  const { ai, siteId, site, era, sky, capture, serial, when } = tripOf(answers, generated);
 
   const [restored, setRestored] = useState(true);
   const [active, setActive] = useState<number | null>(null);
@@ -702,14 +721,15 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
   };
 
   const complete = visited.length === site.hotspots.length;
-  const narration = `${site.intro} 지금 우리는 ${when}, ${era.label}의 ${site.label}에 와 있어요. ${era.desc} 시간 여행자인 당신도 이 장면 속에 함께 서 있어요.`;
+  const narration = ai?.narration ?? `${site.intro} 지금 우리는 ${when}, ${era.label}의 ${site.label}에 와 있어요. ${era.desc} 시간 여행자인 당신도 이 장면 속에 함께 서 있어요.`;
   const hotspot = active === null ? null : site.hotspots[active];
 
   return (
     <ResultShell
+      coreCount={ai ? 2 : 1}
       eyebrow="AI 문화유산 타임머신"
       title={`${era.year} · ${site.label}`}
-      description={`${era.label}의 모습을 AI가 복원하고, 그 시대에 당신을 배치했어요.`}
+      description={`${era.label}에서 영감을 받은 상상 장면에 당신을 배치했어요. 고증된 원형 복원과는 달라요.`}
       pillarColor={pillarColor}
       onRestart={onRestart}
       restartLabel="다른 시대로 떠나기"
@@ -757,24 +777,33 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
             onClick={() => setRestored((r) => !r)}
             className="absolute right-3 top-3 rounded-full bg-black/55 px-3 py-1 text-[11px] font-medium text-teal-200 backdrop-blur-sm transition-colors hover:bg-black/75"
           >
-            {restored ? '복원 전 보기' : 'AI 복원 보기'}
+            {restored ? '빛바랜 연출 보기' : '컬러 연출 보기'}
           </button>
 
           {/* 시간 여행자 */}
-          {capture && (
+          {(ai || capture) && (
             <motion.div
               initial={{ opacity: 0, y: 20, scale: 0.8 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ delay: 2.4, type: 'spring', stiffness: 120, damping: 14 }}
               className="absolute bottom-3 right-3 w-[19%]"
             >
-              <ProcessedPhoto
-                src={capture.image}
-                look={sky.look}
-                className="aspect-[3/4] w-full rounded-t-full border-2 border-amber-200/90 shadow-lg shadow-black/60"
-                alt="시간 여행자로 배치된 내 사진"
-                delayMs={2600}
-              />
+              {ai ? (
+                <div className="aspect-[3/4] w-full overflow-hidden rounded-t-full border-2 border-amber-200/90 shadow-lg shadow-black/60">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- AI가 만든 data URL */}
+                  <img src={ai.image} alt="시대 장면 속 시간 여행자" className="h-full w-full object-cover object-[50%_20%]" />
+                </div>
+              ) : (
+                capture && (
+                  <ProcessedPhoto
+                    src={capture.image}
+                    look={sky.look}
+                    className="aspect-[3/4] w-full rounded-t-full border-2 border-amber-200/90 shadow-lg shadow-black/60"
+                    alt="시간 여행자로 배치된 내 사진"
+                    delayMs={2600}
+                  />
+                )
+              )}
               <p className="mt-1 rounded-full bg-amber-200 px-1 py-0.5 text-center text-[9px] font-bold text-amber-950">시간 여행자</p>
             </motion.div>
           )}
@@ -824,7 +853,25 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         </div>
       </div>
 
+      {/* AI 시간 여행 기념사진 */}
+      {ai && (
+        <motion.figure
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="w-full max-w-xs rounded-2xl p-1.5 shadow-2xl shadow-black/50"
+          style={{ background: 'linear-gradient(135deg, #fde68a, #b45309 50%, #fde68a)' }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- AI가 만든 data URL */}
+          <img src={ai.image} alt={`${when} ${site.label}에 선 시간 여행자`} className="aspect-[3/4] w-full rounded-xl object-cover" />
+          <figcaption className="px-2 pb-1 pt-2 text-center text-xs font-semibold text-amber-950">
+            {when} {site.label} · {ai.outfit}
+          </figcaption>
+        </motion.figure>
+      )}
+
       <Narration text={narration} color={pillarColor} onPlayed={markListened} />
+      {ai && <p className="-mt-4 text-xs text-slate-500">기념사진과 해설은 AI가 당신의 사진으로 만들었어요</p>}
 
       {/* 연표 */}
       <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/60 p-5 text-left">
@@ -844,7 +891,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
                   </span>
                   {t.text}
                   {current && (
-                    <span className="ml-2 rounded-full px-2 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: pillarColor }}>
+                    <span className="demo-accent-surface ml-2 rounded-full px-2 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: pillarColor }}>
                       지금 여기
                     </span>
                   )}
@@ -855,13 +902,18 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         </ol>
       </div>
 
-      {/* 교육 인증 */}
+      <p className="w-full max-w-md text-xs leading-relaxed text-slate-400">
+        {ai ? '기념사진과 해설은 AI 창작이에요.' : '선택한 장소로 구성한 창작 체험 예시예요.'} 실제 문화유산의 역사와 보존 정보는{' '}
+        <a href="https://whc.unesco.org/en/statesparties/kr" target="_blank" rel="noreferrer" className="underline underline-offset-4">UNESCO의 한국 세계유산 안내</a>에서 확인할 수 있어요.
+      </p>
+
+      {/* 탐험 기록 */}
       <div
-        className="relative w-full max-w-md overflow-hidden rounded-2xl border-4 border-double p-5 text-left"
+        className="demo-dark-surface relative w-full max-w-md overflow-hidden rounded-2xl border-4 border-double p-5 text-left"
         style={{ borderColor: '#d4a64a', background: 'linear-gradient(160deg, #1c1917, #0f172a)' }}
       >
         <p className="text-[10px] font-bold tracking-[0.3em] text-amber-300/80">NEANDER HERITAGE ACADEMY</p>
-        <p className="mt-1 text-lg font-bold text-white">🎓 시간 여행 교육 인증</p>
+        <p className="mt-1 text-lg font-bold text-white">🎓 시간 여행 탐험 기록</p>
         <p className="mt-1 text-xs text-slate-400">
           {site.label} {site.hanja} · {era.year} {era.label} 탐험 과정 · No. HT-{serial}
         </p>
@@ -882,7 +934,7 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
               className="absolute bottom-4 right-4 flex h-20 w-20 flex-col items-center justify-center rounded-full border-[3px] border-red-500 text-center font-bold text-red-500"
             >
               <span className="text-[10px] leading-none">NEANDER</span>
-              <span className="text-sm leading-tight">인증<br />완료</span>
+              <span className="text-sm leading-tight">탐험<br />완료</span>
             </motion.div>
           ) : (
             <motion.span key="pending" exit={{ opacity: 0 }} className="absolute bottom-5 right-5 rounded-full border border-dashed border-slate-600 px-3 py-1 text-[10px] text-slate-500">
@@ -892,6 +944,19 @@ function Result({ answers, onRestart, pillarColor }: DemoResultProps) {
         </AnimatePresence>
       </div>
     </ResultShell>
+  );
+}
+
+/* ── AI 생성 ──────────────────────────────────────────── */
+
+/** 분석 화면 동안 AI 기념사진·해설을 받아 온다 (이미지 생성이라 10~20초) */
+function generate(answers: DemoAnswers): Promise<AiHeritage | null> {
+  const { siteId, era, capture } = tripOf(answers);
+  if (!capture) return Promise.resolve(null);
+  return requestDemoAi<AiHeritage>(
+    'heritage-timemachine',
+    { experienceProfile: answers.experienceProfile, photo: capture.image, site: siteId, era: era.id },
+    { timeoutMs: 60_000, validate: isAiHeritage }
   );
 }
 
@@ -909,13 +974,13 @@ export default defineDemo({
     analyzeEmoji: '⏳',
     analyzeDurationMs: 3800,
     analyzeImageStepId: 'photo',
-    analyzeMessages: ['시간 좌표 설정 중', '사료·의궤 기반 원형 복원 중', '시대 하늘과 빛 재현 중', '시간 여행자 배치 중'],
+    analyzeMessages: ['시간 좌표 설정 중', '문화유산을 참고한 창작 장면 준비 중', '시대 하늘과 빛 재현 중', '시간 여행자 배치 중', 'AI가 그 시대 기념사진을 그리고 있어요 · 10~20초 걸려요'],
   },
   steps: [
     choiceStep({
       id: 'site',
-      title: '어떤 문화유산을 복원해 볼까요?',
-      subtitle: 'AI가 사료를 바탕으로 옛 모습을 되살려요',
+      title: '어떤 문화유산으로 시간 여행을 할까요?',
+      subtitle: '알려진 역사와 문화유산에서 영감을 받은 상상 장면을 만들어요',
       columns: 2,
       options: (Object.keys(SITES) as SiteId[]).map((id) => ({
         id,
@@ -937,13 +1002,17 @@ export default defineDemo({
   ],
   computeResult,
   Result,
-  print: (answers) => {
-    const { siteId, site, era, sky, capture, serial, when } = tripOf(answers);
+  generate,
+  print: (answers, _resultKey, generated) => {
+    const { ai, siteId, site, era, sky, capture, serial, when } = tripOf(answers, generated);
+    const label = `${site.label} · ${era.year} ${era.label}`;
     return {
       kind: 'photo',
-      photos: capture
-        ? [{ src: capture.image, look: sky.look, label: `${site.label} · ${era.year} ${era.label}`, overlay: <TravelerBackdrop siteId={siteId} sky={era.sky} /> }]
-        : [],
+      photos: ai
+        ? [{ src: ai.image, label, overlay: <SouvenirFrame /> }]
+        : capture
+          ? [{ src: capture.image, look: sky.look, label, overlay: <TravelerBackdrop siteId={siteId} sky={era.sky} /> }]
+          : [],
       title: `${era.year} · ${site.label}`,
       caption: `${site.label} ${site.hanja} · ${when} ${era.label} · ${sky.label}의 장면`,
       badge: `HT-${serial}`,
