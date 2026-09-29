@@ -51,7 +51,7 @@ export default async function PressPage({ params }: Props) {
 
         {/* Teal glow */}
         <div
-          className="absolute right-0 top-0 h-[600px] w-[600px] -translate-y-1/4 translate-x-1/4 rounded-full bg-teal-500/8 blur-[100px]"
+          className="absolute right-0 top-0 h-[600px] w-[600px] -translate-y-1/4 translate-x-1/4 rounded-full bg-teal-500/8 blur-[100px] transform-gpu"
           aria-hidden="true"
         />
 

@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, useInView } from 'motion/react';
+import { motion } from 'motion/react';
+import { useRevealed } from '@/components/animations';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
@@ -44,8 +44,7 @@ function getGridPath(level: number): string {
 
 export function ScentRadarChart({ scores, className }: ScentRadarChartProps) {
   const t = useTranslations('scentQuiz');
-  const ref = useRef<SVGSVGElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-20px' });
+  const [ref, isInView] = useRevealed<SVGSVGElement>('-20px');
 
   // Build data polygon path
   const dataPoints = AXES.map((axis, i) => {

@@ -1,18 +1,30 @@
 import {
   COMMON, CUSTOM, CUSTOM_DEV, CUSTOM_DEV_TEXT, CUSTOM_TERMS, KIOSK, MEDIA_ART, OPTION_TEXT, PERFUME, PHOTO_BOOTH, SERVICE_TEXT, SPACE,
-  type BoothCustom, type KioskCustom, type Lang, type RegionKey, type ServiceKey,
+  type BoothBuild, type BoothCustom, type KioskCustom, type Lang, normalizeRegion, type RegionKey, type ServiceKey,
 } from './catalog';
+import { getPhotoBoothTemplates, normalizePhotoBoothTemplateSlugs } from './photo-booth-templates';
+import { formatKioskNumbers, getKioskAssignments, getKioskExperience, groupKioskAssignments, normalizeKioskExperienceSlugs } from './kiosk-experiences';
+import { formatSpaceArea, formatSpaceAreaEquivalent, normalizePyeong, type AreaUnit } from './space-area';
 
 /* ─────────────────────────────────────────────────────────
    견적 계산 엔진 — 화면과 PDF가 같은 결과를 내도록 순수 함수로 둔다.
    ───────────────────────────────────────────────────────── */
 
-export interface PerfumeOptions { guests: number; volume: '10ml' | '50ml'; extraTeams: number; customScent: boolean; premiumPackaging: boolean; /** 전용 디자인 단박스 (300명 이상) — premiumPackaging 대신 */ customBox?: boolean; /** 분석용 AI 키오스크 대수 (0 = QR 웹 분석) */ analysisKiosks?: number }
-export interface PhotoBoothOptions { booths: number; extraStyles: number; extraPrintRolls: number; photocard: boolean; wrapping: boolean; customStyles?: number; custom?: BoothCustom }
-export interface KioskOptions { mode: 'event' | 'monthly'; kiosks: number; months: number; printer: boolean; extraContents: number; custom?: KioskCustom; experienceSlug?: string }
-export interface MediaArtOptions { grade: 'standard' | 'premium' | 'fullCustom'; extraSensors: number }
-export interface SpaceOptions { size: 'booth3x3' | 'booth6x3' | 'large'; pyeong: number; photoZone: boolean; lighting: boolean }
-export interface CustomOptions { scope: 'standard' | 'large'; consulting: boolean; maintenanceMonths: number }
+export interface PerfumeOptions { guests: number; volume: '10ml' | '50ml'; extraTeams: number; /** 자동 증원 전 고객이 선택한 추가 팀 수. 자동 증원이 필요할 때만 저장한다. */ requestedExtraTeams?: number; customScent: boolean; premiumPackaging: boolean; /** 전용 디자인 단박스 (300명 이상) — premiumPackaging 대신 */ customBox?: boolean; /** 분석용 AI 키오스크 대수 (0 = QR 웹 분석) */ analysisKiosks?: number }
+export interface PhotoBoothOptions { booths: number; extraStyles: number; extraPrintRolls: number; photocard: boolean; wrapping: boolean; customStyles?: number; custom?: BoothCustom; /** Chosen existing demo templates; omitted for legacy quantity-only estimates. */ templateSlugs?: string[] }
+export interface KioskOptions { mode: 'event' | 'monthly'; kiosks: number; months: number; printer: boolean; extraContents: number; custom?: KioskCustom; experienceSlug?: string; /** One experience per kiosk, in kiosk-number order. Empty slots are undecided. */ experienceSlugs?: string[] }
+export interface MediaArtOptions { grade: 'standard' | 'premium' | 'fullCustom'; extraSensors: number; sensorType?: 'image' | 'depth' }
+export interface SpaceOptions {
+  size: 'booth3x3' | 'booth6x3' | 'large'; pyeong: number; areaUnit?: AreaUnit; photoZone: boolean; lighting: boolean;
+  /** 부스 구조. 비우면 조립식 천 부스 — 나무 가벽을 고를 때만 저장해 예전 견적과 모양이 같다 */
+  build?: BoothBuild;
+}
+
+/** 부스(3×3·6×3) 금액 — 구조에 따라 */
+export function boothPrice(size: 'booth3x3' | 'booth6x3', build: BoothBuild = 'fabric'): number {
+  return build === 'wood' ? SPACE.woodBooth[size] : SPACE[size];
+}
+export interface CustomOptions { scope: 'standard' | 'large'; consulting: boolean; maintenanceMonths: number; pgIntegration?: boolean }
 
 export type QuoteItem =
   | { key: 'acscent'; options: PerfumeOptions }
@@ -59,6 +71,39 @@ const clampInt = (value: unknown, min: number, max: number, fallback: number) =>
   return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
 };
 
+/** Perfume participants are the total across all operating days, not per day.
+ * Keep the customer's team preference separate from automatic capacity increases,
+ * so reducing guests or extending the schedule can release automatic teams. */
+export function getPerfumeStaffing(options: Pick<PerfumeOptions, 'guests' | 'extraTeams' | 'requestedExtraTeams'>, schedule: Pick<QuoteInput, 'days' | 'hoursPerDay'>) {
+  const guests = clampInt(options.guests, PERFUME.minGuests, 5000, 100);
+  const days = clampInt(schedule.days, 1, 60, 1);
+  const hoursPerDay = clampInt(schedule.hoursPerDay, 1, 14, COMMON.baseHours);
+  const capacityPerTeam = PERFUME.guestsPerTeamHour * hoursPerDay * days;
+  const requiredTeams = Math.ceil(guests / capacityPerTeam);
+  const minimumTeams = Math.max(PERFUME.includedTeams, requiredTeams);
+  const requestedExtraTeams = clampInt(options.requestedExtraTeams ?? options.extraTeams, 0, Number.MAX_SAFE_INTEGER - PERFUME.includedTeams, 0);
+  const teams = Math.max(minimumTeams, PERFUME.includedTeams + requestedExtraTeams);
+  return {
+    days, hoursPerDay, capacityPerTeam, minimumTeams, teams, requestedExtraTeams,
+    automaticTeams: teams - PERFUME.includedTeams - requestedExtraTeams,
+    capacity: teams * capacityPerTeam,
+    requiresConsultation: teams > PERFUME.standardTeams,
+  };
+}
+
+/** Resolve teams in the stored/UI model as well as pricing, keeping SVG headcount
+ * and summaries in sync. Legacy extraTeams remain the customer's preference. */
+export function normalizePerfumeStaffing(input: QuoteInput): QuoteInput {
+  return { ...input, items: input.items.map((item) => {
+    if (item.key !== 'acscent') return item;
+    const staffing = getPerfumeStaffing(item.options, input);
+    const options = { ...item.options, extraTeams: staffing.teams - PERFUME.includedTeams };
+    if (staffing.automaticTeams > 0) options.requestedExtraTeams = staffing.requestedExtraTeams;
+    else delete options.requestedExtraTeams;
+    return { ...item, options };
+  }) };
+}
+
 export function defaultOptions(key: ServiceKey, attendees = 100): QuoteItem {
   switch (key) {
     case 'acscent':
@@ -68,18 +113,18 @@ export function defaultOptions(key: ServiceKey, attendees = 100): QuoteItem {
     case 'rental':
       return { key, options: { mode: 'event', kiosks: 1, months: 1, printer: false, extraContents: 0, custom: 'none' } };
     case 'mediaArt':
-      return { key, options: { grade: 'standard', extraSensors: 0 } };
+      return { key, options: { grade: 'standard', extraSensors: 0, sensorType: 'image' } };
     case 'spatialDesign':
       return { key, options: { size: 'booth3x3', pyeong: 10, photoZone: false, lighting: false } };
     case 'custom':
-      return { key, options: { scope: 'standard', consulting: false, maintenanceMonths: 0 } };
+      return { key, options: { scope: 'standard', consulting: false, maintenanceMonths: 0, pgIntegration: false } };
   }
 }
 
 /** 외부 입력(요청 본문·저장된 값)을 안전한 범위로 정리한다 */
 export function sanitizeInput(raw: unknown): QuoteInput {
   const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
-  const region: RegionKey = r.region === 'central' || r.region === 'south' ? r.region : 'capital';
+  const region: RegionKey = normalizeRegion(r.region);
   const items: QuoteItem[] = [];
   const seen = new Set<string>();
   for (const it of Array.isArray(r.items) ? r.items.slice(0, 6) : []) {
@@ -93,54 +138,66 @@ export function sanitizeInput(raw: unknown): QuoteInput {
         items.push({ key, options: {
           guests: clampInt(o.guests, PERFUME.minGuests, 5000, 100),
           volume: o.volume === '50ml' ? '50ml' : '10ml',
-          extraTeams: clampInt(o.extraTeams, 0, 10, 0),
+          extraTeams: clampInt(o.extraTeams, 0, Number.MAX_SAFE_INTEGER - PERFUME.includedTeams, 0),
+          ...(o.requestedExtraTeams === undefined ? {} : { requestedExtraTeams: clampInt(o.requestedExtraTeams, 0, Number.MAX_SAFE_INTEGER - PERFUME.includedTeams, 0) }),
           customScent: o.customScent === true,
           premiumPackaging: o.premiumPackaging === true && o.customBox !== true,
           customBox: o.customBox === true && clampInt(o.guests, PERFUME.minGuests, 5000, 100) >= PERFUME.customBox.minGuests,
           analysisKiosks: clampInt(o.analysisKiosks, 0, KIOSK.maxKiosks, 0),
         } });
         break;
-      case 'photoBooth':
+      case 'photoBooth': {
+        const templateSlugs = o.templateSlugs === undefined ? undefined : normalizePhotoBoothTemplateSlugs(o.templateSlugs);
         items.push({ key, options: {
           booths: clampInt(o.booths, 1, PHOTO_BOOTH.maxBooths, 1),
-          extraStyles: clampInt(o.extraStyles, 0, 20, 0),
+          extraStyles: templateSlugs === undefined ? clampInt(o.extraStyles, 0, 20, 0) : Math.max(0, templateSlugs.length - PHOTO_BOOTH.includedStyles),
           extraPrintRolls: clampInt(o.extraPrintRolls, 0, 50, 0),
           photocard: false, // 포토카드 출력 옵션은 없앴다 (예전 저장본·링크 호환용 필드)
           wrapping: o.wrapping === true,
           customStyles: clampInt(o.customStyles, 0, 10, 0),
           custom: o.custom === 'flow' || o.custom === 'dedicated' ? o.custom : 'none',
+          ...(templateSlugs === undefined ? {} : { templateSlugs }),
         } });
         break;
-      case 'rental':
+      }
+      case 'rental': {
+        const kiosks = clampInt(o.kiosks, 1, KIOSK.maxKiosks, 1);
+        const experienceSlugs = o.experienceSlugs === undefined ? undefined : normalizeKioskExperienceSlugs(o.experienceSlugs, kiosks);
         items.push({ key, options: {
           mode: o.mode === 'monthly' ? 'monthly' : 'event',
-          kiosks: clampInt(o.kiosks, 1, KIOSK.maxKiosks, 1),
+          kiosks,
           months: clampInt(o.months, 1, 24, 1),
           printer: o.printer === true,
-          extraContents: clampInt(o.extraContents, 0, 10, 0),
+          extraContents: experienceSlugs === undefined ? clampInt(o.extraContents, 0, 10, 0) : 0,
           // 예전 저장값(branding: true)은 브랜드 적용으로 읽는다
           custom: o.custom === 'brand' || o.custom === 'content' || o.custom === 'dedicated' ? o.custom : o.branding === true ? 'brand' : 'none',
-          experienceSlug: typeof o.experienceSlug === 'string' ? o.experienceSlug.slice(0, 60) : undefined,
+          experienceSlug: experienceSlugs === undefined ? (typeof o.experienceSlug === 'string' ? o.experienceSlug.slice(0, 60) : undefined) : experienceSlugs[0] || undefined,
+          ...(experienceSlugs === undefined ? {} : { experienceSlugs }),
         } });
         break;
+      }
       case 'mediaArt':
         items.push({ key, options: {
           grade: o.grade === 'premium' || o.grade === 'fullCustom' ? o.grade : 'standard',
           extraSensors: clampInt(o.extraSensors, 0, 10, 0),
+          sensorType: o.sensorType === 'depth' ? 'depth' : 'image',
         } });
         break;
       case 'spatialDesign':
         items.push({ key, options: {
           size: o.size === 'booth6x3' || o.size === 'large' ? o.size : 'booth3x3',
-          pyeong: clampInt(o.pyeong, 10, 500, 10),
+          pyeong: normalizePyeong(o.pyeong),
+          ...(o.areaUnit === 'sqm' || o.areaUnit === 'pyeong' ? { areaUnit: o.areaUnit } : {}),
           photoZone: o.photoZone === true,
           lighting: o.lighting === true,
+          ...(o.build === 'wood' ? { build: 'wood' as const } : {}),
         } });
         break;
       case 'custom':
         items.push({ key, options: {
           scope: o.scope === 'large' ? 'large' : 'standard',
           consulting: o.consulting === true,
+          pgIntegration: o.pgIntegration === true,
           maintenanceMonths: clampInt(o.maintenanceMonths, 0, 36, 0),
         } });
         break;
@@ -148,7 +205,7 @@ export function sanitizeInput(raw: unknown): QuoteInput {
         items.push(base);
     }
   }
-  return {
+  return normalizePerfumeStaffing({
     eventType: typeof r.eventType === 'string' ? r.eventType.slice(0, 40) : 'other',
     eventDate: typeof r.eventDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.eventDate) ? r.eventDate : '',
     days: clampInt(r.days, 1, 60, 1),
@@ -158,7 +215,7 @@ export function sanitizeInput(raw: unknown): QuoteInput {
     extraStaff: clampInt(r.extraStaff, 0, 30, 0),
     setupDayBefore: r.setupDayBefore === true,
     items,
-  };
+  });
 }
 
 const won = (n: number, lang: Lang) =>
@@ -199,13 +256,14 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
         lines.push({ service: 'acscent', label: name('acscent'), detail: L(
           `${o.volume} · ${o.guests}명 × ${won(cost.unit, lang)}${billedNote}`,
           `${o.volume} · ${o.guests} guests × ${won(cost.unit, lang)}${billedNote}`), amount: cost.amount });
-        const teams = 1 + o.extraTeams;
+        const staffing = getPerfumeStaffing(o, input);
+        const teams = staffing.teams;
         const travel = PERFUME.teamTravel[input.region];
         lines.push({ service: 'acscent', label: L('조향 팀 출장비', 'Perfumer team travel'), detail: L(
           `조향사 1 + 조수 1 · ${teams}팀 × ${days}일 × ${won(travel, lang)}`,
           `1 perfumer + 1 assistant · ${teams} team(s) × ${days} day(s) × ${won(travel, lang)}`), amount: travel * teams * days });
-        // 최소 금액 (수도권 99만원, 지방은 출장비 차이만큼 더함)
-        const minimum = PERFUME.minimumCharge + (travel - PERFUME.teamTravel.capital);
+        // 최소 금액 (서울 99만원, 다른 지역은 출장비 차이만큼 더함)
+        const minimum = PERFUME.minimumCharge + (travel - PERFUME.teamTravel.seoul);
         const perfumeSubtotal = cost.amount + travel * teams * days;
         if (perfumeSubtotal < minimum) {
           lines.push({ service: 'acscent', label: L('최소 금액 보정', 'Minimum charge adjustment'), detail: L(
@@ -236,25 +294,29 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
             `${ak}대 × ${extraDays}일 × ${won(PERFUME.analysisKioskExtraDay, lang)}`, `${ak} × ${extraDays} day(s) × ${won(PERFUME.analysisKioskExtraDay, lang)}`),
             amount: PERFUME.analysisKioskExtraDay * ak * extraDays });
         }
-        const capacity = teams * PERFUME.guestsPerTeamHour * input.hoursPerDay * days;
-        if (o.guests > capacity) {
-          const needTeams = Math.ceil(o.guests / (PERFUME.guestsPerTeamHour * input.hoursPerDay * days));
+        if (staffing.requiresConsultation) {
           warnings.push(L(
-            `AI 향수 체험: ${teams}팀으로는 운영 시간 안에 약 ${capacity}명까지 가능합니다. ${o.guests}명이면 조향 팀 ${needTeams}팀을 권장합니다.`,
-            `AI Perfume: ${teams} team(s) can serve about ${capacity} guests in the hours set. For ${o.guests} guests we recommend ${needTeams} teams.`));
+            `AI 향수 체험: 조향 ${teams}팀을 선택했습니다. 기본 운영 규모(${PERFUME.standardTeams}팀)를 초과해 상담이 필요합니다. 선택한 팀 수의 출장비를 가견적에 반영했으며, 인력 배치·운영 계획과 최종 금액은 상담 후 확정합니다.`,
+            `AI Perfume: ${teams} perfumer teams selected. This exceeds our standard ${PERFUME.standardTeams}-team setup and requires consultation. Travel fees for all selected teams are included in this estimate; staffing, the operating plan and final price will be confirmed after consultation.`));
         }
         break;
       }
       case 'photoBooth': {
         const o = item.options;
+        const templates = getPhotoBoothTemplates(o.templateSlugs);
+        const extraStyles = o.templateSlugs === undefined ? o.extraStyles : Math.max(0, templates.length - PHOTO_BOOTH.includedStyles);
+        const templateDetail = templates.length ? L(` · 선택한 기존 템플릿: ${templates.map((template) => template.name.ko).join(', ')}`, ` · Selected existing templates: ${templates.map((template) => template.name.en).join(', ')}`) : '';
         const first = PHOTO_BOOTH.firstBooth + PHOTO_BOOTH.extraBooth * (o.booths - 1);
         lines.push({ service: 'photoBooth', label: name('photoBooth'), detail: L(
           `${o.booths}대 · 1일차 (AI 스타일 ${PHOTO_BOOTH.includedStyles}종·인화 ${PHOTO_BOOTH.printsPerRoll}장·프레임 1종·운송·설치 포함, 운영 인력 별도)`,
-          `${o.booths} booth(s) · day 1 (2 AI styles, ${PHOTO_BOOTH.printsPerRoll} prints, 1 frame, delivery & setup; staff not included)`), amount: first });
+          `${o.booths} booth(s) · day 1 (2 AI styles, ${PHOTO_BOOTH.printsPerRoll} prints, 1 frame, delivery & setup; staff not included)`) + templateDetail, amount: first });
         if (extraDays) lines.push({ service: 'photoBooth', label: L('포토부스 추가 운영일', 'Photo booth extra days'), detail: L(
           `${o.booths}대 × ${extraDays}일 × ${won(PHOTO_BOOTH.extraDayPerBooth, lang)}`,
           `${o.booths} booth(s) × ${extraDays} day(s) × ${won(PHOTO_BOOTH.extraDayPerBooth, lang)}`), amount: PHOTO_BOOTH.extraDayPerBooth * o.booths * extraDays });
-        if (o.extraStyles) lines.push({ service: 'photoBooth', label: L('AI 스타일 추가', 'Extra AI styles'), detail: L(`${o.extraStyles}종`, `${o.extraStyles}`), amount: PHOTO_BOOTH.extraStyle * o.extraStyles });
+        if (extraStyles) lines.push({ service: 'photoBooth',
+          label: o.templateSlugs === undefined ? L('AI 스타일 추가', 'Extra AI styles') : L('기존 AI 템플릿 추가', 'Additional existing AI templates'),
+          detail: o.templateSlugs === undefined ? L(`${extraStyles}종`, `${extraStyles}`) : L(`${extraStyles}종 × ${won(PHOTO_BOOTH.extraStyle, lang)} · 기본 ${PHOTO_BOOTH.includedStyles}종 초과분`, `${extraStyles} × ${won(PHOTO_BOOTH.extraStyle, lang)} beyond the ${PHOTO_BOOTH.includedStyles} included styles`),
+          amount: PHOTO_BOOTH.extraStyle * extraStyles });
         if (o.extraPrintRolls) lines.push({ service: 'photoBooth', label: L('인화 추가', 'Extra prints'), detail: L(`${o.extraPrintRolls}롤 (${o.extraPrintRolls * PHOTO_BOOTH.printsPerRoll}장)`, `${o.extraPrintRolls} roll(s) (${o.extraPrintRolls * PHOTO_BOOTH.printsPerRoll} prints)`), amount: PHOTO_BOOTH.extraPrintRoll * o.extraPrintRolls });
         if (o.wrapping) lines.push({ service: 'photoBooth', label: L('부스 랩핑', 'Booth wrapping'), detail: '', amount: PHOTO_BOOTH.wrapping * o.booths });
         if (o.customStyles) {
@@ -278,14 +340,20 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
       }
       case 'rental': {
         const o = item.options;
+        const assigned = o.experienceSlugs !== undefined;
+        // 같은 체험을 운영하는 기기는 묶는다 — '1–2번 키오스크: A / 3–4번 키오스크: B'
+        const assignmentDetail = assigned ? ' · ' + groupKioskAssignments(getKioskAssignments(o)).map(({ slug, kiosks }) => {
+          const experience = getKioskExperience(slug);
+          return L(`${formatKioskNumbers(kiosks, 'ko')} 키오스크: ${experience?.name.ko ?? '상담 후 결정'}`, `${formatKioskNumbers(kiosks, 'en')}: ${experience?.name.en ?? 'Decide later'}`);
+        }).join(' / ') : '';
         if (o.mode === 'monthly') {
           lines.push({ service: 'rental', label: L('AI 키오스크 상시 운영', 'AI Kiosk ongoing operation'), detail: L(
             `${o.kiosks}대 × ${o.months}개월 × ${won(KIOSK.monthlyPerKiosk, lang)} (콘텐츠 월 1회 교체 포함)`,
-            `${o.kiosks} kiosk(s) × ${o.months} month(s) × ${won(KIOSK.monthlyPerKiosk, lang)} (monthly content refresh)`), amount: KIOSK.monthlyPerKiosk * o.kiosks * o.months });
+            `${o.kiosks} kiosk(s) × ${o.months} month(s) × ${won(KIOSK.monthlyPerKiosk, lang)} (monthly content refresh)`) + assignmentDetail, amount: KIOSK.monthlyPerKiosk * o.kiosks * o.months });
         } else {
           lines.push({ service: 'rental', label: name('rental'), detail: L(
-            `${o.kiosks}대 · 1일차 (기존 체험 1종 그대로 운영·카메라·운반·설치 포함, 운영 인력 별도)`,
-            `${o.kiosks} kiosk(s) · day 1 (1 existing experience as-is, camera, delivery & setup; staff not included)`), amount: KIOSK.firstKiosk + KIOSK.extraKiosk * (o.kiosks - 1) });
+            `${o.kiosks}대 · 1일차 (${assigned ? '대당 ' : ''}기존 체험 1종 그대로 운영·카메라·운반·설치 포함, 운영 인력 별도)`,
+            `${o.kiosks} kiosk(s) · day 1 (1 existing experience${assigned ? ' per kiosk' : ''} as-is, camera, delivery & setup; staff not included)`) + assignmentDetail, amount: KIOSK.firstKiosk + KIOSK.extraKiosk * (o.kiosks - 1) });
           if (extraDays) lines.push({ service: 'rental', label: L('키오스크 추가 운영일', 'Kiosk extra days'), detail: L(
             `${o.kiosks}대 × ${extraDays}일 × ${won(KIOSK.extraDayPerKiosk, lang)}`,
             `${o.kiosks} kiosk(s) × ${extraDays} day(s) × ${won(KIOSK.extraDayPerKiosk, lang)}`), amount: KIOSK.extraDayPerKiosk * o.kiosks * extraDays });
@@ -297,29 +365,36 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
           devAmount += CUSTOM_DEV.kiosk[o.custom];
           lead = Math.max(lead, CUSTOM_DEV.leadDays[o.custom]);
         }
-        if (o.extraContents) lines.push({ service: 'rental', label: L('체험 콘텐츠 추가', 'Extra experiences'), detail: L(`${o.extraContents}종`, `${o.extraContents}`), amount: KIOSK.extraContent * o.extraContents });
+        if (!assigned && o.extraContents) lines.push({ service: 'rental', label: L('체험 콘텐츠 추가', 'Extra experiences'), detail: L(`${o.extraContents}종`, `${o.extraContents}`), amount: KIOSK.extraContent * o.extraContents });
         break;
       }
       case 'mediaArt': {
         const o = item.options;
+        const sensorType = o.sensorType === 'depth' ? 'depth' : 'image';
+        const cameraName = sensorType === 'depth' ? L('3D 카메라', '3D camera') : L('이미지 카메라', 'Image camera');
         lines.push({ service: 'mediaArt', label: L('미디어 아트 콘텐츠 제작', 'Media art production'), detail: `${OPTION_TEXT.production[o.grade][lang]} · ${L('1회', 'one-time')}`, amount: MEDIA_ART.production[o.grade] });
         lines.push({ service: 'mediaArt', label: L('미디어 아트 장비·운영', 'Media art equipment & operation'), detail: L(
-          `${days}일 (프로젝터 1대·센서 1세트·운영 1인)`, `${days} day(s) (1 projector, 1 sensor set, 1 operator)`),
+          `${days}일 (프로젝터 1대·${cameraName} 1세트·운영 1인)`, `${days} day(s) (1 projector, 1 ${cameraName.toLowerCase()} set, 1 operator)`),
           amount: MEDIA_ART.operationFirstDay + MEDIA_ART.operationExtraDay * extraDays });
-        if (o.extraSensors) lines.push({ service: 'mediaArt', label: L('모션 센서 추가', 'Extra motion sensors'), detail: L(`${o.extraSensors}세트`, `${o.extraSensors} set(s)`), amount: MEDIA_ART.extraSensor * o.extraSensors });
+        if (sensorType === 'depth') lines.push({ service: 'mediaArt', label: L('3D 카메라로 변경', '3D camera upgrade'), detail: L('기본 1세트 · 장비 대여·연동·현장 보정 · 행사당 1회', 'Included set · rental, integration & calibration · once per event'), amount: MEDIA_ART.depthCameraUpgrade });
+        if (o.extraSensors) lines.push({ service: 'mediaArt', label: L('움직임 감지 카메라 추가', 'Extra motion cameras'), detail: L(`${cameraName} ${o.extraSensors}세트 · 대여·연동·보정 · 행사당 1회`, `${cameraName} × ${o.extraSensors} · rental, integration & calibration · once per event`), amount: MEDIA_ART.extraSensorByType[sensorType] * o.extraSensors });
         break;
       }
       case 'spatialDesign': {
         const o = item.options;
         if (o.size === 'large') {
+          const area = `${formatSpaceArea(o, lang)}${o.areaUnit === 'sqm' ? ` (${formatSpaceAreaEquivalent(o, lang)})` : ''}`;
           lines.push({ service: 'spatialDesign', label: name('spatialDesign'), detail: L(
-            `팝업·공간 약 ${o.pyeong}평 × 평당 ${won(SPACE.perPyeong, lang)}부터 · 실측 후 확정`,
-            `About ${o.pyeong} pyeong × from ${won(SPACE.perPyeong, lang)} per pyeong · confirmed after site survey`),
-            amount: SPACE.perPyeong * o.pyeong, tbd: true });
+            `팝업·공간 약 ${area} · 평당 ${won(SPACE.perPyeong, lang)}부터 · 예상 제작비 · 실측 후 확정`,
+            `About ${area} · from ${won(SPACE.perPyeong, lang)} per pyeong · estimated construction cost · confirmed after site survey`),
+            amount: Math.round(SPACE.perPyeong * normalizePyeong(o.pyeong)) });
         } else {
-          lines.push({ service: 'spatialDesign', label: name('spatialDesign'), detail: L(
-            `${OPTION_TEXT.space[o.size].ko} · 디자인·구조물·그래픽·기본 조명·설치·철수`,
-            `${OPTION_TEXT.space[o.size].en} · design, structure, graphics, basic lighting, install & teardown`), amount: SPACE[o.size] });
+          lines.push({ service: 'spatialDesign', label: name('spatialDesign'), detail: o.build === 'wood'
+            ? L(`${OPTION_TEXT.space[o.size].ko} · ${OPTION_TEXT.boothBuild.wood.ko} · 디자인·가벽 제작·마감·바닥·기본 조명·설치·철거`,
+              `${OPTION_TEXT.space[o.size].en} · ${OPTION_TEXT.boothBuild.wood.en} · design, wall build & finish, flooring, basic lighting, install & teardown`)
+            : L(`${OPTION_TEXT.space[o.size].ko} · ${OPTION_TEXT.boothBuild.fabric.ko} · 디자인·천 그래픽·바닥·기본 조명·설치·철수`,
+              `${OPTION_TEXT.space[o.size].en} · ${OPTION_TEXT.boothBuild.fabric.en} · design, fabric graphics, flooring, basic lighting, install & teardown`),
+            amount: boothPrice(o.size, o.build) });
         }
         if (o.photoZone) lines.push({ service: 'spatialDesign', label: L('포토존 디자인', 'Photo zone design'), detail: '', amount: SPACE.photoZone });
         if (o.lighting) lines.push({ service: 'spatialDesign', label: L('커스텀 조명', 'Custom lighting'), detail: '', amount: SPACE.lighting });
@@ -329,6 +404,7 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
         const o = item.options;
         lines.push({ service: 'custom', label: name('custom'), detail: `${OPTION_TEXT.scope[o.scope][lang]} · ${L('1회 개발비', 'one-time')}`, amount: CUSTOM.scope[o.scope] });
         if (o.consulting) lines.push({ service: 'custom', label: L('기획 컨설팅', 'Planning consultation'), detail: '', amount: CUSTOM.consulting });
+        if (o.pgIntegration) lines.push({ service: 'custom', label: L('PG 연결', 'Payment gateway integration'), detail: L('결제 연동 개발 1회 · PG 가입비·결제 수수료 별도', 'One-time integration · provider signup and transaction fees excluded'), amount: CUSTOM.pgIntegration });
         if (o.maintenanceMonths) lines.push({ service: 'custom', label: L('유지보수', 'Maintenance'), detail: L(`${o.maintenanceMonths}개월 × ${won(CUSTOM.maintenancePerMonth, lang)}`, `${o.maintenanceMonths} month(s) × ${won(CUSTOM.maintenancePerMonth, lang)}`), amount: CUSTOM.maintenancePerMonth * o.maintenanceMonths });
         break;
       }
@@ -355,12 +431,12 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
       `기본 ${COMMON.baseHours}시간 초과 ${extraHours}시간 × ${days}일 × ${won(COMMON.extraHourPerDay, lang)}`,
       `${extraHours} h beyond ${COMMON.baseHours} h × ${days} day(s) × ${won(COMMON.extraHourPerDay, lang)}`), amount: COMMON.extraHourPerDay * extraHours * days });
   }
-  // 지방 운송비 (행사당 1회): 용달이 필요한 상품이 있으면 용달 기준, 키오스크만 있으면 직접 운반 기준
+  // 지역 운송비 (행사당 1회): 용달이 필요한 상품이 있으면 용달 기준, 키오스크만 있으면 직접 운반 기준
   const needsTruck = input.items.some((i) => i.key === 'photoBooth' || i.key === 'spatialDesign' || i.key === 'mediaArt');
   const hasKiosk = input.items.some((i) => i.key === 'rental');
   const travel = needsTruck ? COMMON.travel[input.region] : hasKiosk ? KIOSK.travel[input.region] : 0;
   if (travel > 0) {
-    lines.push({ service: 'common', label: L('지방 운송비', 'Regional transport'), detail: L('설치·철수 운송, 행사당 1회', 'setup & teardown transport, once per event'), amount: travel });
+    lines.push({ service: 'common', label: L('지역 운송비', 'Regional transport'), detail: L('설치·철수 운송, 행사당 1회', 'setup & teardown transport, once per event'), amount: travel });
   }
 
   // 긴급 제작: 행사 일자가 필요한 준비 기간보다 가까우면 개발비의 30%
@@ -383,10 +459,10 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
   return { lines, supply, vat, total: supply + vat, warnings, notes };
 }
 
-/** 서비스별 시작가 (옵션 최소, 1일, 수도권) — 서비스 페이지·스펙 카드용 */
+/** 서비스별 시작가 (옵션 최소, 1일, 서울) — 서비스 페이지·스펙 카드용 */
 export function startingPrice(key: ServiceKey): number {
   switch (key) {
-    case 'acscent': return Math.max(PERFUME.minimumCharge, PERFUME.tiers[0].unit['10ml'] * PERFUME.minGuests + PERFUME.teamTravel.capital);
+    case 'acscent': return Math.max(PERFUME.minimumCharge, PERFUME.tiers[0].unit['10ml'] * PERFUME.minGuests + PERFUME.teamTravel.seoul);
     case 'photoBooth': return PHOTO_BOOTH.firstBooth;
     case 'rental': return KIOSK.firstKiosk;
     case 'mediaArt': return MEDIA_ART.production.standard + MEDIA_ART.operationFirstDay;

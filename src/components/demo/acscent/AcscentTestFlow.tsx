@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { smoothScrollTo } from '@/lib/smooth-scroll';
 import { motion, AnimatePresence } from 'motion/react';
 import { TEST_FRAGRANCES, type TestFragrance, type NoteOption } from '@/data/acscent-types';
 
@@ -86,7 +87,7 @@ export function AcscentTestFlow({ onComplete }: Props) {
     setAxisScores(newScores);
     setAnswers({ ...INITIAL_ANSWERS });
     setFragranceIdx((i) => i + 1);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    smoothScrollTo(0);
   }, [canProceed, fragrance, answers, axisScores, isLast, onComplete]);
 
   return (

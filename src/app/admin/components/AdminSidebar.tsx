@@ -14,12 +14,14 @@ import {
   Inbox,
   ExternalLink,
   ChartColumn,
+  MousePointerClick,
 } from 'lucide-react'
 
 const navItems = [
   { href: '/admin', label: '대시보드', icon: LayoutDashboard },
   { href: '/admin/inquiries', label: '문의함', icon: Inbox },
   { href: '/admin/analytics', label: '유입 분석', icon: ChartColumn },
+  { href: '/admin/quote-analytics', label: '견적 행동 분석', icon: MousePointerClick },
   { href: '/admin/portfolio', label: '포트폴리오 관리', icon: FolderOpen },
   { href: '/admin/news', label: '뉴스/프레스 관리', icon: Newspaper },
   { href: '/admin/popups', label: '팝업 관리', icon: Megaphone },

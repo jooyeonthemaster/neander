@@ -1,0 +1,615 @@
+{
+  "version": 1,
+  "description": "Editable vector illustration assets shared with the interactive quote preview. Transparent canvas; no embedded or external raster resources.",
+  "generator": "scripts/export-quote-illustrations.tsx",
+  "palette": {
+    "background": "#f7f5f0",
+    "paper": "#fffdf8",
+    "teal": "#22969b",
+    "tealLight": "#bfe3df",
+    "tealDark": "#267478",
+    "navy": "#263b45",
+    "coral": "#ed997a",
+    "ochre": "#d7ae5d",
+    "ink": "#253b43",
+    "line": "#647b7f",
+    "shadow": "#dde2db",
+    "wood": "#775743",
+    "woodLight": "#ac8968",
+    "silver": "#d7dfdf",
+    "silverDark": "#a4b1b4"
+  },
+  "coordinateSystem": "Each glyph has its ground contact at (0, 0); the viewBox includes stroke and shadow margins.",
+  "assetCount": 19,
+  "assets": [
+    {
+      "id": "kiosk",
+      "src": "/images/quote-preview/vector/kiosk.svg",
+      "category": "equipment",
+      "label": {
+        "ko": "분석 키오스크",
+        "en": "Analysis kiosk"
+      },
+      "viewBox": [
+        -38,
+        -171,
+        79,
+        184
+      ],
+      "width": 79,
+      "height": 184,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 38,
+        "canvasY": 171
+      },
+      "bytes": 2180,
+      "sha256": "e294ae2258cf5f2537ee9956a52041ed384fe504ec5b78b7a2ee9672d5ef4e5e",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "perfume-10ml-brand",
+      "src": "/images/quote-preview/vector/perfume-10ml-brand.svg",
+      "category": "product",
+      "label": {
+        "ko": "10ml 브랜드 패키지",
+        "en": "10ml brand packaging"
+      },
+      "viewBox": [
+        -66,
+        -137,
+        136,
+        153
+      ],
+      "width": 136,
+      "height": 153,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 66,
+        "canvasY": 137
+      },
+      "bytes": 1656,
+      "sha256": "828d9d59136b0761449907a7ac327114720f4235aac1386e27e9aa4b0ba1a511",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "perfume-10ml-custom",
+      "src": "/images/quote-preview/vector/perfume-10ml-custom.svg",
+      "category": "product",
+      "label": {
+        "ko": "10ml 전용 디자인 패키지",
+        "en": "10ml custom packaging"
+      },
+      "viewBox": [
+        -66,
+        -137,
+        136,
+        153
+      ],
+      "width": 136,
+      "height": 153,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 66,
+        "canvasY": 137
+      },
+      "bytes": 1670,
+      "sha256": "e55a1dfa295a8d71bcba6e82e70644f23cb8ccbf5708f82a2b96ae9e0db93932",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "perfume-10ml-none",
+      "src": "/images/quote-preview/vector/perfume-10ml-none.svg",
+      "category": "product",
+      "label": {
+        "ko": "10ml 향수 병",
+        "en": "10ml bottle"
+      },
+      "viewBox": [
+        -66,
+        -137,
+        136,
+        153
+      ],
+      "width": 136,
+      "height": 153,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 66,
+        "canvasY": 137
+      },
+      "bytes": 1175,
+      "sha256": "9cabf5441d56d8a54fe2105dc5a69df0dd707e2171fb9f24f062af6206b856a2",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "perfume-50ml-brand",
+      "src": "/images/quote-preview/vector/perfume-50ml-brand.svg",
+      "category": "product",
+      "label": {
+        "ko": "50ml 브랜드 패키지",
+        "en": "50ml brand packaging"
+      },
+      "viewBox": [
+        -66,
+        -137,
+        136,
+        153
+      ],
+      "width": 136,
+      "height": 153,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 66,
+        "canvasY": 137
+      },
+      "bytes": 1674,
+      "sha256": "3378090cc9fada47fd88b320fe298dfab3a0022b785f630f3ffcdf1a056ee92e",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "perfume-50ml-custom",
+      "src": "/images/quote-preview/vector/perfume-50ml-custom.svg",
+      "category": "product",
+      "label": {
+        "ko": "50ml 전용 디자인 패키지",
+        "en": "50ml custom packaging"
+      },
+      "viewBox": [
+        -66,
+        -137,
+        136,
+        153
+      ],
+      "width": 136,
+      "height": 153,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 66,
+        "canvasY": 137
+      },
+      "bytes": 1688,
+      "sha256": "8b2466d164f80a55911e8dbd4a12e7e6f8200abedae27d3b180d1994c4f996b9",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "perfume-50ml-none",
+      "src": "/images/quote-preview/vector/perfume-50ml-none.svg",
+      "category": "product",
+      "label": {
+        "ko": "50ml 향수 병",
+        "en": "50ml bottle"
+      },
+      "viewBox": [
+        -66,
+        -137,
+        136,
+        153
+      ],
+      "width": 136,
+      "height": 153,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 66,
+        "canvasY": 137
+      },
+      "bytes": 1193,
+      "sha256": "01274defa5eeaa6a5b248d0c7364d82428f78eb1d51558290a0ce173a1774589",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "perfumery-counter",
+      "src": "/images/quote-preview/vector/perfumery-counter.svg",
+      "category": "furniture",
+      "label": {
+        "ko": "조향 테이블과 원료",
+        "en": "Perfumery table and ingredients"
+      },
+      "viewBox": [
+        -111,
+        -116,
+        228,
+        130
+      ],
+      "width": 228,
+      "height": 130,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 111,
+        "canvasY": 116
+      },
+      "bytes": 6356,
+      "sha256": "60fbf36f4749632ccff25abb3c342410b92b8d93d4ca1b2bebc9de5894668e53",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "photo-booth",
+      "src": "/images/quote-preview/vector/photo-booth.svg",
+      "category": "equipment",
+      "label": {
+        "ko": "행사 포토부스",
+        "en": "Event photo booth"
+      },
+      "viewBox": [
+        -49,
+        -190,
+        104,
+        205
+      ],
+      "width": 104,
+      "height": 205,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 49,
+        "canvasY": 190
+      },
+      "bytes": 1586,
+      "sha256": "fe68b8437f8803b027f7909037f77708a8a5877545a634f5d726227200c81ae2",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "photo-booth-wrapped",
+      "src": "/images/quote-preview/vector/photo-booth-wrapped.svg",
+      "category": "equipment",
+      "label": {
+        "ko": "브랜드 래핑 포토부스",
+        "en": "Photo booth with brand wrapping"
+      },
+      "viewBox": [
+        -49,
+        -190,
+        104,
+        205
+      ],
+      "width": 104,
+      "height": 205,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 49,
+        "canvasY": 190
+      },
+      "bytes": 1725,
+      "sha256": "63697eda6514af709415ddc67624b4244e5bf042cb0efb59c6d11414721d844f",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "plant",
+      "src": "/images/quote-preview/vector/plant.svg",
+      "category": "furniture",
+      "label": {
+        "ko": "공간 연출용 화분",
+        "en": "Decorative plant"
+      },
+      "viewBox": [
+        -41,
+        -110,
+        83,
+        123
+      ],
+      "width": 83,
+      "height": 123,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 41,
+        "canvasY": 110
+      },
+      "bytes": 1265,
+      "sha256": "a3329be421010e6185861c90426e4013b0885435ccde0688e133bb7502f1033c",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "portrait-custom",
+      "src": "/images/quote-preview/vector/portrait-custom.svg",
+      "category": "portrait",
+      "label": {
+        "ko": "맞춤 보태니컬 스타일 예시",
+        "en": "Custom botanical style example"
+      },
+      "viewBox": [
+        -64,
+        -150,
+        132,
+        164
+      ],
+      "width": 132,
+      "height": 164,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 64,
+        "canvasY": 150
+      },
+      "bytes": 1791,
+      "sha256": "eb9202fe6f39f711067acf39684f7e65f8eccadb61191f674618aa2ed5c5b9cc",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "portrait-ready",
+      "src": "/images/quote-preview/vector/portrait-ready.svg",
+      "category": "portrait",
+      "label": {
+        "ko": "기존 스타일 변환 예시",
+        "en": "Ready-made style example"
+      },
+      "viewBox": [
+        -64,
+        -150,
+        132,
+        164
+      ],
+      "width": 132,
+      "height": 164,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 64,
+        "canvasY": 150
+      },
+      "bytes": 1683,
+      "sha256": "8e32ffe6d00742b888cc09e215cb07f7499d07ccd6d3d417987607e8fd73f00a",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "portrait-source",
+      "src": "/images/quote-preview/vector/portrait-source.svg",
+      "category": "portrait",
+      "label": {
+        "ko": "변환 전 인물 예시",
+        "en": "Source portrait example"
+      },
+      "viewBox": [
+        -64,
+        -150,
+        132,
+        164
+      ],
+      "width": 132,
+      "height": 164,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 64,
+        "canvasY": 150
+      },
+      "bytes": 1421,
+      "sha256": "e3155f1254fb498ecabbd851e4696950b444a5150ba4355d5ab277cf500febb5",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "receipt-printer",
+      "src": "/images/quote-preview/vector/receipt-printer.svg",
+      "category": "equipment",
+      "label": {
+        "ko": "영수증형 프린터",
+        "en": "Receipt printer"
+      },
+      "viewBox": [
+        -30,
+        -47,
+        63,
+        60
+      ],
+      "width": 63,
+      "height": 60,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 30,
+        "canvasY": 47
+      },
+      "bytes": 1064,
+      "sha256": "8ee0369c7e9563cd0a7ebe6e8703845c78a90faa982c2b9b002800af596fd75f",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "team-1",
+      "src": "/images/quote-preview/vector/team-1.svg",
+      "category": "staff",
+      "label": {
+        "ko": "조향사와 보조 한 팀 · 스타일 1",
+        "en": "Perfumer and assistant · variation 1"
+      },
+      "viewBox": [
+        -74,
+        -163,
+        148,
+        178
+      ],
+      "width": 148,
+      "height": 178,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 74,
+        "canvasY": 163
+      },
+      "bytes": 4105,
+      "sha256": "58f62bae0fd349eb707bf5ed8c07c9822fae977e717f6a244da56f2b47317cfe",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "team-2",
+      "src": "/images/quote-preview/vector/team-2.svg",
+      "category": "staff",
+      "label": {
+        "ko": "조향사와 보조 한 팀 · 스타일 2",
+        "en": "Perfumer and assistant · variation 2"
+      },
+      "viewBox": [
+        -74,
+        -163,
+        148,
+        178
+      ],
+      "width": 148,
+      "height": 178,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 74,
+        "canvasY": 163
+      },
+      "bytes": 4032,
+      "sha256": "9c99ca364f6eddd4bc39d37b30ee777051634cee05f920457e25456bd3c24304",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "team-3",
+      "src": "/images/quote-preview/vector/team-3.svg",
+      "category": "staff",
+      "label": {
+        "ko": "조향사와 보조 한 팀 · 스타일 3",
+        "en": "Perfumer and assistant · variation 3"
+      },
+      "viewBox": [
+        -74,
+        -163,
+        148,
+        178
+      ],
+      "width": 148,
+      "height": 178,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 74,
+        "canvasY": 163
+      },
+      "bytes": 4186,
+      "sha256": "927da321e609326ec11a038da40cfc4885fc76172a4cd5d320481946d3981261",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    },
+    {
+      "id": "team-4",
+      "src": "/images/quote-preview/vector/team-4.svg",
+      "category": "staff",
+      "label": {
+        "ko": "조향사와 보조 한 팀 · 스타일 4",
+        "en": "Perfumer and assistant · variation 4"
+      },
+      "viewBox": [
+        -74,
+        -163,
+        148,
+        178
+      ],
+      "width": 148,
+      "height": 178,
+      "anchor": {
+        "kind": "bottom-center",
+        "svgX": 0,
+        "svgY": 0,
+        "canvasX": 74,
+        "canvasY": 163
+      },
+      "bytes": 3921,
+      "sha256": "fe0940c5d55efac6c90e5d3ddd0acf3ee933f68cf0c5987eb3c9c3e4c471b8a7",
+      "provenance": {
+        "kind": "code-authored-vector-illustration",
+        "component": "src/components/quote-preview/illustrations/VectorPrimitives.tsx",
+        "componentSha256": "e5eaff1fc769460a78f95683b6dda43fc131683ab2145b07ee9bbb6ad8e72da6"
+      }
+    }
+  ]
+}

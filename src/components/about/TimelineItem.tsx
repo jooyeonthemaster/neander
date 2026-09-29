@@ -3,6 +3,7 @@
 import { useId, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { useRevealed } from '@/components/animations';
 
 interface TimelineItemProps {
   title: string;
@@ -31,12 +32,13 @@ export function TimelineItem({
 
   // 보여줄 내용이 없으면 팝오버를 띄우지 않는다
   const hasDetail = Boolean(description || image);
+  const [revealRef, revealed] = useRevealed<HTMLDivElement>('-60px');
 
   return (
     <motion.div
+      ref={revealRef}
       initial={{ opacity: 0, x: isLeft ? -40 : 40 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
+      animate={revealed ? { opacity: 1, x: 0 } : undefined}
       transition={{
         delay,
         duration: 0.5,

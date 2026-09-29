@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Suspense } from 'react';
 import { Check, ChevronDown, Info } from 'lucide-react';
 import { setRequestLocale } from 'next-intl/server';
-import { QuoteStudio } from '@/components/quote-studio/QuoteStudio';
+import { VisualQuoteStudio } from '@/components/quote-preview/QuotePreviewLab';
 import { PricingGuide } from '@/components/services/PricingGuide';
 import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
 
@@ -57,7 +57,7 @@ export default async function QuotePage({ params }: Props) {
   return (
     <div className="bg-[#f6f8fa]">
       <section className="pb-7 pt-8 sm:pb-8 sm:pt-10" aria-labelledby="quote-title">
-        <div className="container-wide flex items-center justify-between gap-8">
+        <div className="mx-auto w-full max-w-[96rem] px-4 sm:px-6 flex items-center justify-between gap-8">
           <div>
             <p className="text-xs font-semibold tracking-wide text-teal-700">{c.eyebrow}</p>
             <h1 id="quote-title" className="mt-2.5 font-display text-[2rem] font-extrabold leading-tight tracking-[-0.045em] text-slate-900 sm:text-[2.5rem]">{c.title}</h1>
@@ -89,16 +89,16 @@ export default async function QuotePage({ params }: Props) {
         </div>
       </section>
 
-      <section className="pb-8 sm:pb-10" aria-label={locale === 'en' ? 'Build your estimate' : '견적 구성하기'}>
-        <div className="container-wide">
+      <section className="pb-8 text-pretty sm:pb-10 [&_button]:scroll-mb-28 [&_input]:scroll-mb-28 [&_textarea]:scroll-mb-28 [&_img]:scroll-mb-28" aria-label={locale === 'en' ? 'Build your estimate' : '견적 구성하기'}>
+        <div className="mx-auto w-full max-w-[96rem] px-4 sm:px-6">
           {/* 주소의 ?preset= · ?service= 를 읽으므로 Suspense로 감싼다 */}
           <Suspense fallback={<div role="status" className="flex min-h-80 items-center justify-center rounded-[28px] border border-slate-100 bg-white text-sm text-slate-500">{c.loading}</div>}>
-            <QuoteStudio />
+            <VisualQuoteStudio />
           </Suspense>
         </div>
       </section>
 
-      <div className="container-wide pb-14 sm:pb-20">
+      <div className="mx-auto w-full max-w-[96rem] px-4 sm:px-6 pb-14 sm:pb-20">
         <details className="group rounded-2xl border border-slate-200/70 bg-white">
           <summary className="flex cursor-pointer list-none items-center gap-3 rounded-2xl px-5 py-5 outline-none transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-teal-500 sm:px-6 [&::-webkit-details-marker]:hidden">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500"><Info size={18} aria-hidden="true" /></span>

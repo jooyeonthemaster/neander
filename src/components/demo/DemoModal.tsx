@@ -18,11 +18,13 @@ import './demo-modal.css';
 interface DemoModalProps {
   slug: string;
   onClose: () => void;
+  /** Keep an embedded demo inside its parent flow instead of navigating away. */
+  returnLabel?: string;
 }
 
 const noopSubscribe = () => () => {};
 
-export function DemoModal({ slug, onClose }: DemoModalProps) {
+export function DemoModal({ slug, onClose, returnLabel }: DemoModalProps) {
   // ?demo= 링크로 들어오면 서버 렌더에서도 불리므로, document가 있는 브라우저에서만 그린다
   const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const t = useTranslations('services');
@@ -60,7 +62,10 @@ export function DemoModal({ slug, onClose }: DemoModalProps) {
   // Esc로 닫기 (전체 화면 중에는 브라우저가 먼저 전체 화면을 끝낸다)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !document.fullscreenElement) onClose();
+      if (e.key === 'Escape' && !e.defaultPrevented && !document.fullscreenElement) {
+        e.preventDefault();
+        onClose();
+      }
       if (e.key !== 'Tab') return;
       const panel = panelRef.current;
       if (!panel) return;
@@ -131,6 +136,7 @@ export function DemoModal({ slug, onClose }: DemoModalProps) {
             onClose={onClose}
             closeLabel={tDemo('stage.close')}
             detailHref={`/services/${slug}`}
+            returnLabel={returnLabel}
             labels={{
               back: tDemo('common.back'),
               next: tDemo('common.next'),

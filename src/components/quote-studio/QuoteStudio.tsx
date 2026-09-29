@@ -11,22 +11,29 @@ import { AnimatePresence, MotionConfig, animate, motion, useMotionValue, useRedu
 import { ArrowDown, ArrowLeft, ArrowRight, Check as CheckIcon, ChevronDown, ChevronRight, FileDown, FileText, LayoutTemplate, Plus, ShieldCheck, SlidersHorizontal, Sparkles, Trash2, X } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
+import { isValidEmail } from '@/lib/email';
+import { smoothScrollIntoView } from '@/lib/smooth-scroll';
 import { trackEvent } from '@/lib/analytics/tracker';
+import { recordQuote, recordQuoteScreen, recordQuoteTotal, startQuoteJourney } from '@/lib/analytics/quote-journey';
 import { createInquiry } from '@/lib/firebase/inquiries';
 import { experiences, getExperienceBySlug } from '@/data/experiences';
 import { PRODUCTS } from '@/data/products';
 import { QUOTE_PRESET_IMAGES } from '@/data/quote-preset-images';
 import {
-  ESTIMATE_DISCLAIMER, EVENT_TYPES, REGION_NOTE, REGIONS, SERVICE_ORDER, SERVICE_TEXT,
+  COMMON, ESTIMATE_DISCLAIMER, EVENT_TYPES, REGION_NOTE, REGIONS, SERVICE_ORDER, SERVICE_TEXT,
   type Lang, type RegionKey, type ServiceKey,
 } from '@/lib/quote/catalog';
 import {
-  calculateQuote, defaultOptions, sanitizeInput, serviceForExperience, startingPrice,
-  type QuoteInput, type QuoteItem,
+  calculateQuote, defaultOptions, normalizePerfumeStaffing, sanitizeInput, serviceForExperience, startingPrice,
+  type QuoteInput, type QuoteItem, type QuoteResult, type SpaceOptions,
 } from '@/lib/quote/engine';
+import { loadPreviewFlow, normalizePreviewInput, QUOTE_PREVIEW_FLOW_STORAGE_KEY } from '@/lib/quote-preview/flow-storage';
+import { getKioskAssignments } from '@/lib/quote/kiosk-experiences';
 import { QUOTE_PRESETS } from '@/lib/quote/presets';
 import { QUOTE_COPY } from './copy';
 import { Check, Field, Segmented, Stepper, inputClass } from './QuoteControls';
+import { RegionMap } from './RegionMap';
+import { EventInfoSummary } from './EventInfoSummary';
 import { QuoteOptions, type QuoteOptionsSetter } from './QuoteOptions';
 import { optionSummary } from './option-summary';
 import { QUOTE_STORAGE_KEY, addEstimateHistory, estimateHref, loadEstimateHistory, type EstimateHistoryItem } from './history';
@@ -41,16 +48,22 @@ import { QUOTE_STORAGE_KEY, addEstimateHistory, estimateHref, loadEstimateHistor
 const STORAGE_KEY = QUOTE_STORAGE_KEY;
 
 const BLANK: QuoteInput = {
-  eventType: 'popup', eventDate: '', days: 1, hoursPerDay: 6, attendees: 100, region: 'capital', extraStaff: 0, items: [],
+  eventType: 'popup', eventDate: '', days: 1, hoursPerDay: 6, attendees: 100, region: 'seoul', extraStaff: 0, items: [],
 };
 
-function loadSaved(): QuoteInput | null {
+function loadSaved(previewMode: boolean): QuoteInput | null {
   try {
+    if (previewMode) return loadPreviewFlow(window.localStorage);
     const raw = window.localStorage.getItem(STORAGE_KEY);
     return raw ? sanitizeInput(JSON.parse(raw)) : null;
   } catch {
     return null;
   }
+}
+
+/** 시작 구성을 화면에 맞게 정리한다 — 템플릿 카드의 가격도 이 결과로 계산해야 들어간 뒤 금액과 맞는다 */
+function startingInput(input: QuoteInput, visual: boolean): QuoteInput {
+  return visual ? normalizePreviewInput(input) : normalizePerfumeStaffing(input);
 }
 
 const won = (n: number, lang: Lang) => (lang === 'ko' ? `${n.toLocaleString('ko-KR')}원` : `KRW ${n.toLocaleString('en-US')}`);
@@ -83,7 +96,7 @@ function OptionsPopover({ itemKey, top, caretLeft, reducedMotion, onClose, onHei
   }, [itemKey, onClose]);
   useEffect(() => {
     // 열린 팝오버가 화면 아래로 잘리면 보이도록 살짝 내려 준다
-    const timer = window.setTimeout(() => ref.current?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'nearest' }), 320);
+    const timer = window.setTimeout(() => smoothScrollIntoView(ref.current, { block: 'nearest' }), 320);
     return () => window.clearTimeout(timer);
   }, [reducedMotion]);
   return (
@@ -119,7 +132,28 @@ function AnimatedAmount({ value, lang, className, testId }: { value: number; lan
 
 /* ── 본체 ───────────────────────────────────────────── */
 
-export function QuoteStudio() {
+export interface QuoteExperienceEditorProps {
+  input: QuoteInput;
+  quote: QuoteResult;
+  lang: Lang;
+  activeKey: ServiceKey | null;
+  onActiveKeyChange: (key: ServiceKey | null) => void;
+  onToggleItem: (key: ServiceKey) => void;
+  onOptionsChange: QuoteOptionsSetter;
+  onPerfumeSpaceChange: (size: SpaceOptions['size'] | null) => void;
+  kioskExperiences: { value: string; label: string }[];
+}
+
+export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwork }: {
+  mode?: 'live' | 'preview';
+  renderExperienceEditor?: (props: QuoteExperienceEditorProps) => ReactNode;
+  renderArtwork?: (key: ServiceKey, presetId?: string) => ReactNode;
+} = {}) {
+  // previewMode: 실험 페이지 — 기록·발급·접수를 하지 않고 따로 저장한다
+  // visual: 체험 편집 화면(미리보기) — 키오스크를 기기별 체험으로 다루는 구성 규칙을 따른다
+  const previewMode = mode === 'preview';
+  const visual = !!renderExperienceEditor;
+  const storageKey = previewMode ? QUOTE_PREVIEW_FLOW_STORAGE_KEY : STORAGE_KEY;
   const locale = useLocale();
   const lang: Lang = locale === 'en' ? 'en' : 'ko';
   const c = QUOTE_COPY[lang];
@@ -158,17 +192,20 @@ export function QuoteStudio() {
   }, [activeOptions, cardGrid, input.items.length]);
   const [furthestStep, setFurthestStep] = useState(0);
   const [contact, setContact] = useState({ name: '', email: '', company: '', phone: '', note: '', consent: false });
+  const [emailError, setEmailError] = useState(false);
+  const emailRef = useRef<HTMLInputElement>(null);
   const summaryRef = useRef<HTMLElement>(null);
   const focusStep = useRef<number | null>(null);
   const clearedSearch = useRef<string | null>(null);
   const reducedMotion = useReducedMotion();
 
   const track = useCallback((name: string, label?: string) => {
+    if (previewMode) return;
     const key = `${name}:${label ?? ''}`;
     if (tracked.current.has(key)) return;
     tracked.current.add(key);
     trackEvent(name, label);
-  }, []);
+  }, [previewMode]);
 
   // 처음: ?preset= → ?service= → 저장된 견적 순으로 불러온다
   useEffect(() => {
@@ -181,7 +218,7 @@ export function QuoteStudio() {
     const serviceParam = searchParams.get('service');
     const itemParam = searchParams.get('item') as ServiceKey | null;
     const preset = QUOTE_PRESETS.find((p) => p.id === presetParam);
-    let next: QuoteInput = loadSaved() ?? BLANK;
+    let next: QuoteInput = loadSaved(previewMode) ?? BLANK;
     if (preset) {
       next = structuredClone(preset.input);
       setPresetId(preset.id);
@@ -197,10 +234,12 @@ export function QuoteStudio() {
         next = { ...next, items: [...next.items, item] };
       } else if (key === 'rental') {
         // 이미 AI 키오스크가 담겨 있으면 들어온 체험으로 바꿔 준다
-        next = { ...next, items: next.items.map((i) => (i.key === 'rental' ? { ...i, options: { ...i.options, experienceSlug: serviceParam } } : i)) };
+        next = { ...next, items: next.items.map((i) => (i.key === 'rental' ? { ...i, options: { ...i.options, experienceSlug: serviceParam,
+          ...(visual ? { experienceSlugs: [serviceParam, ...getKioskAssignments(i.options).slice(1)] } : {}),
+        } } : i)) };
       }
     }
-    setInput(next);
+    setInput(startingInput(next, visual));
     // 시나리오·상품·체험을 들고 왔으면 행사 조건(2단계)부터, 아니면 처음부터
     const initialStep = preset || serviceParam || itemParam ? 1 : 0;
     setStep(initialStep);
@@ -209,18 +248,19 @@ export function QuoteStudio() {
     setActiveOptions(next.items[0]?.key ?? null);
     setReady(true);
     track('quote_view', preset ? `preset:${preset.id}` : itemParam ? `item:${itemParam}` : serviceParam ? `service:${serviceParam}` : undefined);
-  }, [searchParams, track]);
+  }, [searchParams, track, previewMode, visual]);
 
   useEffect(() => {
     if (!ready) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(input));
+      window.localStorage.setItem(storageKey, JSON.stringify(input));
     } catch {
       // 저장할 수 없는 환경이면 무시한다
     }
-  }, [input, ready]);
+  }, [input, ready, storageKey]);
 
   const quote = useMemo(() => calculateQuote(input, lang), [input, lang]);
+
 
   const STEP_KEYS = ['scenario', 'conditions', 'experiences', 'form'] as const;
   const goTo = (next: number) => {
@@ -234,43 +274,71 @@ export function QuoteStudio() {
     // 새 단계의 맨 위가 보이게 한다
     requestAnimationFrame(() => {
       const el = topRef.current;
-      if (el) el.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'start' });
+      smoothScrollIntoView(el, { block: 'start' });
     });
   };
   const update = (patch: Partial<QuoteInput>) => {
-    setInput((prev) => ({ ...prev, ...patch }));
+    for (const [field, value] of Object.entries(patch)) recordQuote('e', field, String(value));
+    setInput((prev) => normalizePerfumeStaffing({ ...prev, ...patch }));
     setStatus('idle');
   };
   const applyPreset = (id: string | null) => {
     const preset = QUOTE_PRESETS.find((p) => p.id === id);
     setPresetId(id);
-    setInput(preset ? structuredClone(preset.input) : { ...BLANK });
+    recordQuote('p', id ?? 'blank');
+    const next = preset ? structuredClone(preset.input) : { ...BLANK };
+    setInput(startingInput(next, visual));
     setActiveOptions(preset?.input.items[0]?.key ?? null);
     setStatus('idle');
-    trackEvent('quote_preset', id ?? 'blank');
+    if (!previewMode) trackEvent('quote_preset', id ?? 'blank');
     goTo(1);
   };
   const showStartView = (view: 'choose' | 'templates') => {
     focusStep.current = 0;
     setStartView(view);
   };
-  const toEstimate = () => goTo(input.items.length > 0 ? 3 : 2);
+  const toEstimate = () => {
+    if (visual && step < 2) { if (step > 0) moveForward(); return; }
+    goTo(input.items.length > 0 ? 3 : 2);
+  };
   const hasItem = (key: ServiceKey) => input.items.some((i) => i.key === key);
   const toggleItem = (key: ServiceKey) => {
     const removing = hasItem(key);
-    setInput((prev) => prev.items.some((item) => item.key === key)
-      ? { ...prev, items: prev.items.filter((i) => i.key !== key) }
-      : { ...prev, items: [...prev.items, defaultOptions(key, prev.attendees)] });
+    recordQuote(removing ? '-' : '+', key);
+    setInput((prev) => {
+      const next = prev.items.some((item) => item.key === key)
+        ? { ...prev, items: prev.items.filter((i) => i.key !== key) }
+        : { ...prev, items: [...prev.items, defaultOptions(key, prev.attendees)] };
+      return visual && key === 'rental' ? normalizePreviewInput(next) : normalizePerfumeStaffing(next);
+    });
     setActiveOptions(removing ? null : key);
     setStatus('idle');
     if (!removing) track('quote_step', `add_${key}`);
   };
   const setOptions: QuoteOptionsSetter = (key, patch) => {
+    for (const [field, value] of Object.entries(patch)) recordQuote('s', key, `${field}=${Array.isArray(value) ? value.join(',') : String(value)}`);
     setStatus('idle');
-    setInput((prev) => ({
-      ...prev,
-      items: prev.items.map((i) => (i.key === key ? ({ ...i, options: { ...i.options, ...patch } } as QuoteItem) : i)),
-    }));
+    setInput((prev) => {
+      // A direct team edit changes the customer's preference. Other edits keep
+      // that preference so automatically added teams can fall back when possible.
+      const optionsPatch = key === 'acscent' && 'extraTeams' in patch ? { ...patch, requestedExtraTeams: patch.extraTeams } : patch;
+      const next = { ...prev, items: prev.items.map((i) => (i.key === key ? ({ ...i, options: { ...i.options, ...optionsPatch } } as QuoteItem) : i)) };
+      return visual && key === 'rental' ? normalizePreviewInput(next) : normalizePerfumeStaffing(next);
+    });
+  };
+
+  const setPerfumeSpace = (size: SpaceOptions['size'] | null) => {
+    recordQuote('s', 'acscent', `space=${size ?? 'none'}`);
+    setInput((previous) => {
+      if (!size) return { ...previous, items: previous.items.filter((item) => item.key !== 'spatialDesign') };
+      const existing = previous.items.find((item) => item.key === 'spatialDesign');
+      const space = existing ?? defaultOptions('spatialDesign');
+      if (space.key !== 'spatialDesign') return previous;
+      const updated: QuoteItem = { key: 'spatialDesign', options: { ...space.options, size } };
+      return { ...previous, items: existing ? previous.items.map((item) => item.key === 'spatialDesign' ? updated : item) : [...previous.items, updated] };
+    });
+    setActiveOptions('acscent');
+    setStatus('idle');
   };
 
   const kioskExperiences = useMemo(
@@ -287,7 +355,7 @@ export function QuoteStudio() {
   const [history, setHistory] = useState<EstimateHistoryItem[]>([]);
   const [doneLink, setDoneLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  useEffect(() => { setHistory(loadEstimateHistory()); }, []);
+  useEffect(() => { if (!previewMode) setHistory(loadEstimateHistory()); }, [previewMode]);
   const canClearQuote = input.items.length > 0 || input.eventType !== BLANK.eventType
     || input.eventDate !== BLANK.eventDate || input.days !== BLANK.days
     || input.hoursPerDay !== BLANK.hoursPerDay || input.attendees !== BLANK.attendees
@@ -310,7 +378,7 @@ export function QuoteStudio() {
 
     // 주소 변경보다 먼저 비운 내용을 저장해 새로고침해도 다시 담기지 않게 한다.
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(empty));
+      window.localStorage.setItem(storageKey, JSON.stringify(empty));
     } catch {
       // 저장이 막혀 있어도 현재 화면은 비울 수 있다.
     }
@@ -331,6 +399,7 @@ export function QuoteStudio() {
   };
 
   async function saveInquiry(form: { name: string; email: string; company: string; phone: string; note: string }, subject: string, estimate?: { no: string; token: string | null }) {
+    if (previewMode) return;
     // 담당자가 보는 수신함은 한국어로 남긴다 (영문 화면에서 보낸 견적도)
     const ko = calculateQuote(input, 'ko');
     const expName = (slug: string) => kioskExperiences.find((e) => e.value === slug)?.label;
@@ -382,7 +451,7 @@ export function QuoteStudio() {
 
   // 발급한 가견적서를 이 브라우저 목록에 남기고, 완료 화면에 다시 보기 링크를 띄운다
   const rememberEstimate = (no: string, token: string | null) => {
-    if (!token) return;
+    if (previewMode || !token) return;
     const names = input.items.map((i) => SERVICE_TEXT[i.key].name[lang]).join(' · ');
     addEstimateHistory({ no, issuedAt: new Date().toISOString(), total: quote.total, token, summary: names });
     setHistory(loadEstimateHistory());
@@ -402,8 +471,21 @@ export function QuoteStudio() {
       note: String(fd.get('note') ?? '').trim(),
     };
     if (input.items.length === 0) { setStatus('error'); setMessage(c.needItems); return; }
-    if (!form.name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email) || fd.get('consent') !== 'on') {
+    if (form.email && !isValidEmail(form.email)) {
+      recordQuote('x', 'invalid');
+      setEmailError(true); emailRef.current?.focus();
+      setStatus('idle'); return;
+    }
+    if (!form.name || !form.email || fd.get('consent') !== 'on') {
+      recordQuote('x', 'invalid');
       setStatus('error'); setMessage(c.required); return;
+    }
+    if (previewMode) {
+      setStatus('done');
+      setMessage(lang === 'ko'
+        ? '4단계까지 구성을 확인했어요. 실험용 확인이 완료되었으며, 입력한 정보는 전송하거나 저장하지 않았어요.'
+        : 'You have reviewed all four steps. This test is complete; your contact details were not sent or saved.');
+      return;
     }
     setStatus(action);
     try {
@@ -426,6 +508,7 @@ export function QuoteStudio() {
         a.remove();
         setTimeout(() => URL.revokeObjectURL(url), 30_000);
         trackEvent('quote_pdf', no);
+        recordQuote('x', 'pdf');
         // 수신함 기록은 PDF 발급을 막지 않는다
         saveInquiry(form, `가견적서 발급 ${no}`, { no, token }).then(() => trackEvent('inquiry_submit', 'quote')).catch(() => {});
         rememberEstimate(no, token);
@@ -440,20 +523,31 @@ export function QuoteStudio() {
         await saveInquiry(form, issued?.no ? `확정 견적 요청 ${issued.no}` : '확정 견적 요청', issued ?? undefined);
         if (issued?.no) rememberEstimate(issued.no, issued.token);
         trackEvent('quote_request');
+        recordQuote('x', 'request');
         trackEvent('inquiry_submit', 'quote');
         setStatus('done'); setMessage(c.requestDone);
       }
     } catch {
+      recordQuote('x', 'error');
       setStatus('error'); setMessage(c.error);
     }
   }
+
+  // 견적 행동 기록 (실험 페이지 제외) — 화면이 그려진 뒤 시작해 떠날 때 끝낸다
+  const [studioEl, setStudioEl] = useState<HTMLDivElement | null>(null);
+  useEffect(() => (studioEl && !previewMode ? startQuoteJourney(studioEl) : undefined), [studioEl, previewMode]);
+  const screen = step === 0 ? (startView === 'templates' ? 'templates' : 'start')
+    : step === 1 ? (conditionsPage === 1 ? 'cond2' : 'cond1')
+    : step === 2 ? 'experiences' : status === 'done' ? 'done' : 'form';
+  useEffect(() => { if (studioEl) recordQuoteScreen(screen); }, [studioEl, screen]);
+  useEffect(() => { if (studioEl) recordQuoteTotal(quote.total); }, [studioEl, quote.total]);
 
   const selectedPreset = QUOTE_PRESETS.find((preset) => preset.id === presetId);
   const selectedPresetImage = selectedPreset ? QUOTE_PRESET_IMAGES[selectedPreset.id] : undefined;
   const selectedImage = selectedPresetImage?.src || PRODUCT_BY_KEY[input.items[0]?.key ?? 'acscent'].image;
   const stepHeadings = [startView === 'templates' ? c.templateTitle : c.step1, conditionsPage === 1 ? c.step2b : c.step2, c.step3, c.step4];
-  const stepHints = [startView === 'templates' ? c.templateHint : c.step1Hint, conditionsPage === 1 ? c.step2bHint : (lang === 'ko' ? '아직 정해지지 않았다면 대략 선택해도 괜찮아요.' : 'An approximate answer is fine. You can change it later.'), c.step3Hint, c.step4Hint];
-  const scrollToTop = () => requestAnimationFrame(() => topRef.current?.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'start' }));
+  const stepHints = [startView === 'templates' ? c.templateHint : c.step1Hint, conditionsPage === 1 ? c.step2bHint : (lang === 'ko' ? '아직 정해지지 않았다면 대략 선택해도 괜찮아요.' : 'An approximate answer is fine. You can change it later.'), renderExperienceEditor ? (lang === 'ko' ? '체험을 담고 옵션을 바꾸며 우리 행사의 모습을 미리 살펴보세요.' : 'Choose experiences and explore how your event could look as you adjust the options.') : c.step3Hint, previewMode ? (lang === 'ko' ? '고른 구성으로 견적서 받기 화면을 확인해 보세요. 이 페이지에서는 실제 발급이나 상담 접수가 이루어지지 않아요.' : 'Try the final estimate step with your choices. This experiment does not issue documents or submit inquiries.') : c.step4Hint];
+  const scrollToTop = () => requestAnimationFrame(() => smoothScrollIntoView(topRef.current, { block: 'start' }));
   const moveForward = () => {
     if (step === 0) return;
     if (step === 1 && conditionsPage === 0) {
@@ -464,7 +558,7 @@ export function QuoteStudio() {
       return;
     }
     if (step < 3) goTo(step + 1);
-    else topRef.current?.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'start' });
+    else smoothScrollIntoView(topRef.current, { block: 'start' });
   };
   const nextLabel = step === 1
     ? (conditionsPage === 0 ? c.next : (lang === 'ko' ? '체험 고르기' : 'Choose experiences'))
@@ -485,8 +579,10 @@ export function QuoteStudio() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div data-testid="quote-studio" className={cn('grid min-w-0 grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-7 lg:pb-0', step > 0 && 'pb-28')}>
-        <div ref={topRef} className="min-w-0 scroll-mt-28 rounded-[28px] bg-white p-5 shadow-[0_4px_32px_-16px_rgba(15,23,42,0.12)] sm:p-8">
+      <div ref={setStudioEl} data-testid="quote-studio" data-mode={mode} className={cn('grid min-w-0 grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-5 lg:pb-0', step > 0 && 'pb-28')}>
+        <div ref={topRef} className={cn('min-w-0 scroll-mt-28 rounded-[28px] bg-white p-4 shadow-[0_4px_32px_-16px_rgba(15,23,42,0.12)] sm:p-6 xl:p-7',
+          // 1~3단계는 데스크톱에서 같은 높이(2단계 기준)로 — 단계를 오가도 카드 크기가 출렁이지 않는다.
+          step < 3 && 'lg:flex lg:min-h-[var(--quote-intro-h)] lg:flex-col [--quote-intro-h:766px]')}>
           <nav aria-label={lang === 'ko' ? '견적 만들기 단계' : 'Estimate steps'}>
             <ol className="mb-9 grid grid-cols-4 gap-2 sm:gap-4">
               {c.stepLabels.map((label, index) => {
@@ -513,6 +609,7 @@ export function QuoteStudio() {
 
           <AnimatePresence mode="wait" initial={false}>
             <motion.section key={step === 0 ? `start-${startView}` : step === 1 ? `1-${conditionsPage}` : step} data-quote-page={step === 1 ? conditionsPage + 1 : undefined} data-quote-step={step} data-quote-start-view={step === 0 ? startView : undefined} aria-labelledby={`q-step${step + 1}`}
+              className={cn(step < 3 && 'lg:flex lg:flex-1 lg:flex-col')}
               initial={{ opacity: 0, y: reducedMotion ? 0 : 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: reducedMotion ? 0 : -6 }}
               transition={{ duration: reducedMotion ? 0 : 0.22, ease: softEase }}
               onAnimationComplete={(definition) => {
@@ -551,7 +648,7 @@ export function QuoteStudio() {
                     </button>
                   )}
                   {startView === 'choose' ? (
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:flex-1">
                       <motion.button type="button" data-testid="quote-start-blank" onClick={() => applyPreset(null)} whileHover={reducedMotion ? undefined : { y: -3 }} whileTap={reducedMotion ? undefined : { scale: 0.985 }}
                         className="group grid h-full grid-cols-[48px_1fr] gap-x-4 rounded-[24px] border border-slate-200/80 bg-slate-50/70 p-5 text-left transition-colors hover:border-teal-200 hover:bg-teal-50/40 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 sm:flex sm:flex-col sm:p-7">
                         <span className="row-span-2 flex size-12 items-center justify-center rounded-[18px] bg-white text-slate-600 shadow-sm sm:mb-6 sm:size-14"><SlidersHorizontal className="size-6" aria-hidden="true" /></span>
@@ -570,21 +667,22 @@ export function QuoteStudio() {
                     <button type="button" data-testid="quote-back-to-start" onClick={() => showStartView('choose')} className="mb-4 inline-flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600">
                       <ArrowLeft className="size-4" aria-hidden="true" />{c.backToStart}
                     </button>
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:flex-1 lg:auto-rows-fr lg:gap-3">
                     {QUOTE_PRESETS.map((preset) => {
                       const thumbnail = QUOTE_PRESET_IMAGES[preset.id];
                       return (
                         <motion.button key={preset.id} type="button" data-testid={`quote-preset-${preset.id}`} onClick={() => applyPreset(preset.id)} aria-pressed={presetId === preset.id}
                           whileHover={reducedMotion ? undefined : { y: -3 }} whileTap={reducedMotion ? undefined : { scale: 0.985 }}
-                          className="group overflow-hidden rounded-[20px] bg-slate-50 text-left ring-1 ring-slate-100 transition-shadow hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600">
-                          <span className="relative block aspect-[2.2/1] overflow-hidden bg-slate-100">
-                            <Image src={thumbnail.src} alt={thumbnail.caption[lang]} fill sizes="(min-width: 1280px) 360px, (min-width: 640px) 40vw, 90vw" style={{ objectPosition: thumbnail.objectPosition }} className="object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transform-none" />
-                            <span className="absolute bottom-2 left-3 rounded-full bg-black/60 px-2 py-1 text-[9px] text-white">{thumbnail.caption[lang]}</span>
+                          className="group overflow-hidden rounded-[20px] bg-slate-50 text-left ring-1 ring-slate-100 transition-shadow hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+                          {/* 데스크톱에선 그림을 왼쪽에 두는 가로 카드 — 네 개가 한 화면(2단계 높이)에 스크롤 없이 들어간다. */}
+                          <span className="relative block aspect-[2.2/1] overflow-hidden bg-slate-100 lg:flex lg:aspect-auto lg:h-full lg:items-center">
+                            {renderArtwork ? renderArtwork(preset.input.items[0]?.key ?? 'acscent', preset.id) : <Image src={thumbnail.src} alt={thumbnail.caption[lang]} fill sizes="(min-width: 1280px) 360px, (min-width: 640px) 40vw, 90vw" style={{ objectPosition: thumbnail.objectPosition }} className="object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transform-none" />}
+                            <span className="absolute bottom-2 left-3 rounded-full bg-black/60 px-2 py-1 text-[9px] text-white">{renderArtwork ? (lang === 'ko' ? '행사 구성 일러스트' : 'Illustrative event setup') : thumbnail.caption[lang]}</span>
                           </span>
-                          <span className="block p-4">
+                          <span className="block p-4 lg:flex lg:flex-col lg:justify-center">
                             <span className="flex items-center justify-between gap-2 text-base font-bold text-slate-900">{preset.title[lang]}<ChevronRight className="size-4 shrink-0 text-slate-400" aria-hidden="true" /></span>
                             <span className="mt-1.5 block min-h-[2lh] text-xs leading-relaxed text-slate-500">{preset.caption[lang]}</span>
-                            <span className="mt-3 block text-sm font-bold tabular-nums text-teal-700">{manwon(calculateQuote(preset.input, lang).supply, lang)} <span className="text-[10px] font-normal text-slate-400">{lang === 'ko' ? '부가세 별도' : 'excl. VAT'}</span></span>
+                            <span className="mt-3 block text-sm font-bold tabular-nums text-teal-700">{manwon(calculateQuote(startingInput(preset.input, visual), lang).supply, lang)} <span className="text-[10px] font-normal text-slate-400">{lang === 'ko' ? '부가세 별도' : 'excl. VAT'}</span></span>
                           </span>
                         </motion.button>
                       );
@@ -592,40 +690,57 @@ export function QuoteStudio() {
                     </div>
                     </>
                   )}
-                  <p className="mt-5 flex items-center gap-2 text-xs text-slate-400"><ShieldCheck className="size-4 shrink-0" aria-hidden="true" />{lang === 'ko' ? '연락처를 입력하지 않아도 금액을 확인할 수 있어요.' : 'See prices without sharing your contact details.'}</p>
+                  <p className="mt-5 flex items-center gap-2 text-xs text-slate-400 lg:mt-auto lg:pt-5"><ShieldCheck className="size-4 shrink-0" aria-hidden="true" />{lang === 'ko' ? '연락처를 입력하지 않아도 금액을 확인할 수 있어요.' : 'See prices without sharing your contact details.'}</p>
                 </>
               )}
 
               {step === 1 && (
                 <>
-                  {input.items.length > 0 && (
-                    <div className="mb-7 flex items-center gap-4 rounded-2xl bg-slate-50 p-3">
-                      <div className="relative size-16 shrink-0 overflow-hidden rounded-xl"><Image src={selectedImage} alt="" fill sizes="64px" style={{ objectPosition: selectedPresetImage?.objectPosition }} className="object-cover" /></div>
-                      <div className="min-w-0"><p className="text-xs text-slate-500">{lang === 'ko' ? '이 구성으로 시작해요' : 'Your starting point'}</p><p className="mt-1 text-sm font-semibold text-slate-800">{selectedPreset?.title[lang] ?? input.items.map((item) => SERVICE_TEXT[item.key].name[lang]).join(' · ')}</p></div>
-                    </div>
-                  )}
-                  <p className="mb-6 text-xs font-semibold text-teal-700">{lang === 'ko' ? `행사 정보 ${conditionsPage + 1}/2` : `Event details ${conditionsPage + 1}/2`}</p>
+                  {/* 페이지 번호와 '시작 구성'을 한 줄에 — 구성이 있어도 2단계 높이가 늘지 않는다. */}
+                  <div className="mb-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                    <p className="text-xs font-semibold text-teal-700">{lang === 'ko' ? `행사 정보 ${conditionsPage + 1}/2` : `Event details ${conditionsPage + 1}/2`}</p>
+                    {input.items.length > 0 && (
+                      <div className="-my-3 flex min-w-0 items-center gap-2.5 rounded-full bg-slate-50 py-1 pl-1 pr-3.5">
+                        <div className="relative size-8 shrink-0 overflow-hidden rounded-full bg-slate-100">{renderArtwork ? renderArtwork(input.items[0]?.key ?? 'acscent', selectedPreset?.id) : <Image src={selectedImage} alt="" fill sizes="32px" style={{ objectPosition: selectedPresetImage?.objectPosition }} className="object-cover" />}</div>
+                        <p className="min-w-0 truncate text-xs text-slate-500">{lang === 'ko' ? '이 구성으로 시작해요' : 'Starting point'} · <b className="font-semibold text-slate-800">{selectedPreset?.title[lang] ?? input.items.map((item) => SERVICE_TEXT[item.key].name[lang]).join(' · ')}</b></p>
+                      </div>
+                    )}
+                  </div>
                   {conditionsPage === 0 ? (
-                  <div className="grid gap-x-5 gap-y-7 sm:grid-cols-2">
-                    <Field label={c.eventType}><Select id="q-type" aria-label={c.eventType} value={input.eventType} onValueChange={(value) => update({ eventType: value })} triggerClassName={inputClass} options={EVENT_TYPES.map((event) => ({ value: event.key, label: event.label[lang] }))} /></Field>
-                    <Field label={c.attendees} hint={lang === 'ko' ? '행사 전체 기간에 방문할 인원이에요.' : 'Total guests across all event days.'}><Stepper id="q-attendees" value={input.attendees} min={1} max={100000} step={50} suffix={lang === 'ko' ? '명' : 'guests'} onChange={(value) => update({ attendees: value })} /></Field>
-                    <Field label={c.days}><Stepper id="q-days" value={input.days} min={1} max={60} suffix={lang === 'ko' ? '일' : 'days'} onChange={(value) => update({ days: value })} /></Field>
-                    <Field label={c.region} hint={REGION_NOTE[lang]}><Segmented name={c.region} value={input.region} onChange={(value) => update({ region: value as RegionKey })} options={REGIONS.map((region) => ({ value: region.key, label: region.label[lang] }))} /></Field>
+                  <div className="@container">
+                  <div className="grid gap-x-5 gap-y-7 @3xl:grid-cols-2">
+                    {/* 왼쪽: 행사 유형 · 기간 · 인원을 세로로. 오른쪽: 지도에서 행사 지역을 고른다.
+                        지도 옆 권역 버튼은 키보드로 고르는 길이자 지도 범례다.
+                        두 열은 입력 영역이 768px 이상일 때만 — 오른쪽 요약 칸이 붙어 좁아지면
+                        버튼 글자가 서너 줄로 꺾여서, 그때는 입력칸 아래로 지도를 쌓는다. */}
+                    <div className="flex min-w-0 flex-col gap-y-7">
+                      <Field label={c.eventType}><Select id="q-type" aria-label={c.eventType} value={input.eventType} onValueChange={(value) => update({ eventType: value })} triggerClassName={inputClass} options={EVENT_TYPES.map((event) => ({ value: event.key, label: event.label[lang] }))} /></Field>
+                      <Field label={c.days}><Stepper id="q-days" value={input.days} min={1} max={60} suffix={lang === 'ko' ? '일' : 'days'} onChange={(value) => update({ days: value })} /></Field>
+                      <Field label={c.attendees} hint={lang === 'ko' ? '행사 전체 기간에 방문할 인원이에요.' : 'Total guests across all event days.'}><Stepper id="q-attendees" value={input.attendees} min={1} max={100000} step={50} suffix={lang === 'ko' ? '명' : 'guests'} onChange={(value) => update({ attendees: value })} /></Field>
+                    </div>
+                    <Field label={c.region} hint={REGION_NOTE[lang]}>
+                      <RegionMap value={input.region} lang={lang} onChange={(value) => update({ region: value })}>
+                        <Segmented name={c.region} columns={2} value={input.region} onChange={(value) => update({ region: value as RegionKey })} options={REGIONS.map((region) => ({ value: region.key, label: region.label[lang] }))} />
+                      </RegionMap>
+                    </Field>
+                  </div>
                   </div>
                   ) : (
                   <div className="grid gap-x-5 gap-y-7 sm:grid-cols-2">
                     <Field label={c.eventDate} hint={lang === 'ko' ? '정해지지 않았다면 비워 두어도 괜찮아요.' : 'Leave blank if not decided yet.'}><DatePicker id="q-date" locale={lang} value={input.eventDate} onChange={(value) => update({ eventDate: value })} inputClassName={inputClass} /></Field>
-                    <Field label={c.hours} hint={c.hoursHint}><Stepper id="q-hours" value={input.hoursPerDay} min={1} max={14} onChange={(value) => update({ hoursPerDay: value })} /></Field>
-                    <Field label={c.staff} hint={c.staffHint}><Stepper id="q-staff" value={input.extraStaff} min={0} max={30} onChange={(value) => update({ extraStaff: value })} /></Field>
-                    <Field label={c.setup} hint={c.setupHint}><Check id="q-setup" checked={input.setupDayBefore === true} onChange={(value) => update({ setupDayBefore: value })} label={c.setupLabel} /></Field>
+                    <Field label={c.hours} hint={c.hoursHint} price={{ amount: COMMON.extraHourPerDay, per: lang === 'ko' ? '6시간 넘으면 시간당' : 'per extra hour', after: lang === 'ko' ? '/일' : '/day' }}><Stepper id="q-hours" value={input.hoursPerDay} min={1} max={14} onChange={(value) => update({ hoursPerDay: value })} /></Field>
+                    <Field label={c.staff} hint={c.staffHint} price={{ amount: COMMON.staffPerDay, per: lang === 'ko' ? '1명당' : 'per person', after: lang === 'ko' ? '/일' : '/day' }}><Stepper id="q-staff" value={input.extraStaff} min={0} max={30} onChange={(value) => update({ extraStaff: value })} /></Field>
+                    <Field label={c.setup} hint={c.setupHint} price={{ amount: COMMON.setupDayBefore }}><Check id="q-setup" checked={input.setupDayBefore === true} onChange={(value) => update({ setupDayBefore: value })} label={c.setupLabel} /></Field>
                   </div>
                   )}
+                  <div aria-hidden="true" className="hidden lg:block lg:flex-1" />
                   {nav()}
                 </>
               )}
 
               {step === 2 && (
                 <>
+                  {renderExperienceEditor ? renderExperienceEditor({ input, quote, lang, activeKey: activeOptions, onActiveKeyChange: setActiveOptions, onToggleItem: toggleItem, onOptionsChange: setOptions, onPerfumeSpaceChange: setPerfumeSpace, kioskExperiences }) : <>
                   <div ref={setCardGrid} style={{ marginBottom: popoverOverflow }} className="relative grid grid-cols-1 gap-4 min-[480px]:grid-cols-2">
                     {SERVICE_ORDER.map((key) => {
                       const product = PRODUCT_BY_KEY[key];
@@ -683,11 +798,13 @@ export function QuoteStudio() {
                                   className="flex size-9 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700"><X className="size-4" aria-hidden="true" /></button>
                               </div>
                             </div>
-                            <QuoteOptions item={activeItem} lang={lang} c={c} kioskExperiences={kioskExperiences} setOptions={setOptions} />
+                            <QuoteOptions item={activeItem} schedule={input} lang={lang} c={c} kioskExperiences={kioskExperiences} setOptions={setOptions} />
                           </OptionsPopover>
                         )}
                   </div>
                   <p className="mt-3 text-xs text-slate-400">{lang === 'ko' ? '시작가는 부가세 별도예요. 담은 체험을 다시 누르면 빠지고, 옵션은 \'옵션 정하기\'에서 바꿀 수 있어요.' : 'Starting prices exclude VAT. Tap a selected experience again to remove it; use “Set options” to adjust it.'}</p>
+                  </>}
+                  <div aria-hidden="true" className="hidden lg:block lg:flex-1" />
                   {nav(input.items.length > 0)}
                 </>
               )}
@@ -697,10 +814,10 @@ export function QuoteStudio() {
                   <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-900">{ESTIMATE_DISCLAIMER[lang]}</p>
                   <div className="mb-7 flex items-center gap-4 rounded-2xl bg-teal-50/80 p-4">
                     <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white text-teal-600"><FileText className="size-6" aria-hidden="true" /></span>
-                    <div><p className="text-sm font-semibold text-teal-900">{lang === 'ko' ? '내부 검토용 견적서가 필요하신가요?' : 'Need an estimate to share with your team?'}</p><p className="mt-1 text-xs leading-relaxed text-teal-700">{lang === 'ko' ? '이름과 이메일을 적으면 PDF를 바로 받을 수 있어요.' : 'Enter your name and email to download a PDF.'}</p></div>
+                    <div><p className="text-sm font-semibold text-teal-900">{previewMode ? (lang === 'ko' ? '마지막 단계도 미리 경험해 보세요' : 'Try the final step') : (lang === 'ko' ? '내부 검토용 견적서가 필요하신가요?' : 'Need an estimate to share with your team?')}</p><p className="mt-1 text-xs leading-relaxed text-teal-700">{previewMode ? (lang === 'ko' ? '입력과 완료 화면을 확인하는 실험이에요. 연락처는 이 화면에서만 사용해요.' : 'Test the form and confirmation. Contact details stay on this screen.') : (lang === 'ko' ? '이름과 이메일을 적으면 PDF를 바로 받을 수 있어요.' : 'Enter your name and email to download a PDF.')}</p></div>
                   </div>
                   {status === 'done' ? (
-                    <div className="rounded-2xl bg-teal-50 p-6 text-sm leading-relaxed text-teal-900" role="status">
+                    <div data-testid={previewMode ? 'quote-preview-complete' : undefined} className="rounded-2xl bg-teal-50 p-6 text-sm leading-relaxed text-teal-900" role="status">
                       <CheckIcon className="mb-3 size-7 text-teal-600" aria-hidden="true" />{message}
                       {doneLink && (
                         <div className="mt-4 space-y-2">
@@ -717,16 +834,20 @@ export function QuoteStudio() {
                     <form onSubmit={onSubmit} noValidate className="space-y-5">
                       <div className="grid gap-5 sm:grid-cols-2">
                         <Field label={`${c.name} *`}><input id="q-name" name="name" autoComplete="name" required maxLength={60} value={contact.name} onChange={(e) => setContact({ ...contact, name: e.target.value })} className={inputClass} /></Field>
-                        <Field label={`${c.email} *`}><input id="q-email" name="email" type="email" autoComplete="email" required maxLength={200} value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} className={inputClass} /></Field>
+                        <Field label={`${c.email} *`}><input ref={emailRef} id="q-email" name="email" type="email" autoComplete="email" required maxLength={200} value={contact.email} aria-invalid={emailError || undefined}
+                          onChange={(e) => { setContact({ ...contact, email: e.target.value }); if (emailError && isValidEmail(e.target.value)) setEmailError(false); }}
+                          onBlur={(e) => setEmailError(e.target.value.trim() !== '' && !isValidEmail(e.target.value))}
+                          className={cn(inputClass, emailError && 'border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-red-500/10')} />
+                          {emailError && <p role="alert" data-testid="quote-email-error" className="text-xs font-medium text-red-600">{c.invalidEmail}</p>}</Field>
                         <Field label={c.company}><input id="q-company" name="company" autoComplete="organization" maxLength={80} value={contact.company} onChange={(e) => setContact({ ...contact, company: e.target.value })} className={inputClass} /></Field>
                         <Field label={c.phone}><input id="q-phone" name="phone" type="tel" autoComplete="tel" maxLength={40} value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} className={inputClass} /></Field>
                       </div>
                       <Field label={c.message}><textarea id="q-note" name="note" rows={3} maxLength={1000} value={contact.note} onChange={(e) => setContact({ ...contact, note: e.target.value })} className={cn(inputClass, 'h-auto py-3')} /></Field>
-                      <label className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-xs leading-relaxed text-slate-500"><Checkbox name="consent" required checked={contact.consent} onChange={(e) => setContact({ ...contact, consent: e.target.checked })} className="mt-0.5 size-4" /><span>{c.consent} <Link href="/privacy" className="font-medium text-teal-700 underline underline-offset-2">{c.privacy}</Link></span></label>
+                      <label data-track="consent" className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-xs leading-relaxed text-slate-500"><Checkbox name="consent" required checked={contact.consent} onChange={(e) => setContact({ ...contact, consent: e.target.checked })} className="mt-0.5 size-4" /><span>{c.consent} <Link href="/privacy" className="font-medium text-teal-700 underline underline-offset-2">{c.privacy}</Link></span></label>
                       {status === 'error' && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-600" role="alert">{message}</p>}
                       <div className="flex flex-col gap-3">
-                        <button type="submit" value="pdf" disabled={status === 'pdf' || status === 'request'} className={primaryButton}><FileDown className="size-4" aria-hidden="true" />{status === 'pdf' ? c.pdfBusy : c.pdf}</button>
-                        <button type="submit" value="request" disabled={status === 'pdf' || status === 'request'} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-slate-100 px-5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-200 disabled:opacity-60">{status === 'request' ? c.requestBusy : c.request}<ArrowRight className="size-4" aria-hidden="true" /></button>
+                        <button type="submit" value="pdf" disabled={status === 'pdf' || status === 'request'} className={primaryButton}><FileDown className="size-4" aria-hidden="true" />{previewMode ? (lang === 'ko' ? '견적서 받기 흐름 확인 (실험)' : 'Try the estimate flow (test)') : status === 'pdf' ? c.pdfBusy : c.pdf}</button>
+                        <button type="submit" value="request" disabled={status === 'pdf' || status === 'request'} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-slate-100 px-5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-200 disabled:opacity-60">{previewMode ? (lang === 'ko' ? '상담 요청 흐름 확인 (실험)' : 'Try the inquiry flow (test)') : status === 'request' ? c.requestBusy : c.request}<ArrowRight className="size-4" aria-hidden="true" /></button>
                       </div>
                     </form>
                   )}
@@ -737,6 +858,8 @@ export function QuoteStudio() {
           </AnimatePresence>
         </div>
 
+        {/* 오른쪽 「지금까지 고른 견적」은 모든 단계에 둔다. 합계는 여기 한 곳에서만 보여 준다
+            (3단계에서 이 칸을 숨기고 합계를 본문·아래 막대에 따로 두었더니 칸이 사라진 것처럼 보였다) */}
         <aside ref={summaryRef} className="min-w-0 scroll-mt-28 lg:sticky lg:top-28" aria-label={c.sheetTitle}>
           <div className="overflow-hidden rounded-[28px] bg-white p-6 shadow-[0_4px_32px_-16px_rgba(15,23,42,0.12)]">
             <div className="flex items-center justify-between gap-3">
@@ -749,9 +872,10 @@ export function QuoteStudio() {
                 <Trash2 className="size-3.5" aria-hidden="true" />{c.clearQuote}
               </button>
             </div>
+            {step >= 2 && <EventInfoSummary input={input} lang={lang} c={c} update={update} onOpenDetails={() => goTo(1)} />}
             {input.items.length === 0 ? (
-              <div className="py-8 text-center">
-                <div className="mb-5 flex justify-center -space-x-3" aria-hidden="true">{(['acscent', 'photoBooth', 'rental'] as const).map((key, index) => <div key={key} className={cn('relative size-20 overflow-hidden rounded-2xl border-4 border-white shadow-sm', index === 0 ? '-rotate-12' : index === 2 ? 'rotate-12' : 'z-10 -translate-y-2')}><Image src={PRODUCT_BY_KEY[key].image} alt="" fill sizes="80px" className="object-cover" /></div>)}</div>
+              <div className={cn('text-center', step >= 2 ? 'py-6' : 'py-8')}>
+                <div className={cn('mb-5 flex justify-center -space-x-3', step >= 2 && 'hidden')} aria-hidden="true">{(['acscent', 'photoBooth', 'rental'] as const).map((key, index) => <div key={key} className={cn('relative size-20 overflow-hidden rounded-2xl border-4 border-white shadow-sm', index === 0 ? '-rotate-12' : index === 2 ? 'rotate-12' : 'z-10 -translate-y-2')}>{renderArtwork ? renderArtwork(key) : <Image src={PRODUCT_BY_KEY[key].image} alt="" fill sizes="80px" className="object-cover" />}</div>)}</div>
                 <p className="text-sm font-semibold text-slate-700">{lang === 'ko' ? '어떤 경험을 함께 만들까요?' : 'What will you create?'}</p><p className="mx-auto mt-2 max-w-52 text-xs leading-relaxed text-slate-400">{c.sheetEmpty}</p>
               </div>
             ) : (
@@ -760,28 +884,28 @@ export function QuoteStudio() {
                   const lines = quote.lines.filter((line) => line.service === item.key);
                   const amount = lines.reduce((sum, line) => sum + (line.tbd ? 0 : line.amount), 0);
                   const tbd = lines.some((line) => line.tbd);
-                  return <li key={item.key} className="flex items-start gap-3"><span className="relative size-11 shrink-0 overflow-hidden rounded-xl"><Image src={PRODUCT_BY_KEY[item.key].image} alt="" fill sizes="44px" className="object-cover" /></span><div className="min-w-0 flex-1"><p className="text-xs font-medium text-slate-600">{SERVICE_TEXT[item.key].name[lang]}</p><p className="mt-1 text-sm font-bold tabular-nums text-slate-800">{amount > 0 ? won(amount, lang) : c.tbd}</p><p className="mt-1 text-[11px] leading-relaxed text-slate-400">{optionSummary(item, lang, (slug) => kioskExperiences.find((e) => e.value === slug)?.label).join(' · ')}</p>{tbd && amount > 0 && <p className="mt-1 text-[10px] text-amber-700">+ {c.tbd}</p>}</div><button type="button" aria-label={`${SERVICE_TEXT[item.key].name[lang]} ${lang === 'ko' ? '옵션 수정' : 'edit options'}`} onClick={() => { setActiveOptions(item.key); goTo(2); }} className="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-50 hover:text-teal-600"><ChevronRight className="size-4" aria-hidden="true" /></button></li>;
+                  return <li key={item.key} className="flex items-start gap-3"><span className="relative size-11 shrink-0 overflow-hidden rounded-xl">{renderArtwork ? renderArtwork(item.key) : <Image src={PRODUCT_BY_KEY[item.key].image} alt="" fill sizes="44px" className="object-cover" />}</span><div className="min-w-0 flex-1"><p className="text-xs font-medium text-slate-600">{SERVICE_TEXT[item.key].name[lang]}</p><p className="mt-1 text-sm font-bold tabular-nums text-slate-800">{amount > 0 ? won(amount, lang) : c.tbd}</p><p className="mt-1 text-[11px] leading-relaxed text-slate-400">{optionSummary(item, lang, (slug) => kioskExperiences.find((e) => e.value === slug)?.label).join(' · ')}</p>{tbd && amount > 0 && <p className="mt-1 text-[10px] text-amber-700">+ {c.tbd}</p>}</div><button type="button" aria-label={`${SERVICE_TEXT[item.key].name[lang]} ${lang === 'ko' ? '옵션 수정' : 'edit options'}`} onClick={() => { setActiveOptions(item.key); goTo(2); }} className="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-50 hover:text-teal-600"><ChevronRight className="size-4" aria-hidden="true" /></button></li>;
                 })}
               </ul>
             )}
             <div className="rounded-2xl bg-slate-50 p-4">
               <dl className="space-y-2 text-xs text-slate-500"><div className="flex flex-wrap justify-between gap-2"><dt>{c.supply}</dt><dd className="tabular-nums">{won(quote.supply, lang)}</dd></div><div className="flex flex-wrap justify-between gap-2"><dt>{c.vat}</dt><dd className="tabular-nums">{won(quote.vat, lang)}</dd></div></dl>
-              <div className="mt-4 border-t border-slate-200/60 pt-4"><p className="text-xs font-semibold text-slate-600">{c.mobileTotal}</p><p className="mt-1.5 break-words text-[26px] font-bold leading-tight text-slate-900"><AnimatedAmount value={quote.total} lang={lang} testId="quote-total" /></p><p className="mt-2 text-[10px] text-slate-400">{lang === 'ko' ? '부가세 포함 · 선택한 옵션 기준' : 'Including VAT · based on your selections'}</p><p data-testid="quote-disclaimer" className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">{ESTIMATE_DISCLAIMER[lang]}</p></div>
+              <div className="mt-4 border-t border-slate-200/60 pt-4"><p className="text-xs font-semibold text-slate-600">{c.mobileTotal}</p><p className="mt-1.5 break-words text-[26px] font-bold leading-tight text-teal-700"><AnimatedAmount value={quote.total} lang={lang} testId="quote-total" /></p><p className="mt-2 text-[10px] text-slate-400">{lang === 'ko' ? '부가세 포함 · 선택한 옵션 기준' : 'Including VAT · based on your selections'}</p><p data-testid="quote-disclaimer" className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">{ESTIMATE_DISCLAIMER[lang]}</p></div>
             </div>
             {quote.lines.length > 0 && <details className="group mt-4"><summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 text-xs font-medium text-slate-500 [&::-webkit-details-marker]:hidden">{lang === 'ko' ? '상세 금액 보기' : 'Price breakdown'}<ChevronDown className="size-3.5 transition-transform group-open:rotate-180" aria-hidden="true" /></summary><ul className="max-h-72 space-y-4 overflow-y-auto border-t border-slate-100 py-4" data-lenis-prevent>{quote.lines.map((line, index) => <li key={index} className="text-xs"><div className="flex flex-wrap justify-between gap-1.5"><p className="text-slate-600">{line.label}</p><span className="font-semibold tabular-nums text-slate-800">{line.tbd ? c.tbd : won(line.amount, lang)}</span></div>{line.detail && <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{line.detail}</p>}</li>)}</ul></details>}
             {quote.warnings.length > 0 && <ul className="mt-4 space-y-2 rounded-xl bg-amber-50 p-3 text-[11px] leading-relaxed text-amber-800" role="status">{quote.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul>}
             {quote.notes.length > 0 && <details className="group mt-2"><summary className="flex min-h-10 cursor-pointer list-none items-center justify-between text-xs text-slate-400 [&::-webkit-details-marker]:hidden">{lang === 'ko' ? '이 구성의 안내사항' : 'Notes for this estimate'}<ChevronDown className="size-3.5 group-open:rotate-180" aria-hidden="true" /></summary><div className="space-y-2 pb-3 text-[11px] leading-relaxed text-slate-500">{quote.notes.map((note) => <p key={note}>{note}</p>)}</div></details>}
-            <button type="button" onClick={toEstimate} disabled={input.items.length === 0} className={cn(primaryButton, 'mt-5 w-full')}><FileDown className="size-4" aria-hidden="true" />{c.toForm}</button>
+            <button type="button" onClick={toEstimate} disabled={visual && step < 2 ? step === 0 : input.items.length === 0} className={cn(primaryButton, 'mt-5 w-full')}><FileDown className="size-4" aria-hidden="true" />{visual && step < 2 ? c.next : c.toForm}</button>
             <p className="mt-3 text-center text-[10px] leading-relaxed text-slate-400">{lang === 'ko' ? '선택 내용은 이 브라우저에 자동으로 저장돼요.' : 'Your selections are saved in this browser.'}</p>
           </div>
           <div className="mt-4 flex items-start gap-2.5 px-3 text-xs leading-relaxed text-slate-400"><Sparkles className="mt-0.5 size-4 shrink-0 text-teal-500" aria-hidden="true" /><p>{lang === 'ko' ? '아직 고민 중이어도 괜찮아요. 체험과 옵션은 언제든 바꿀 수 있어요.' : 'Still deciding? You can change any experience or option as you go.'}</p></div>
         </aside>
 
-        {step > 0 && <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-100 bg-white/95 px-5 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] pt-3 backdrop-blur-xl lg:hidden">
+        {step > 0 && <div data-quote-bottom-bar className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-100 bg-white/95 px-5 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] pt-3 backdrop-blur-xl lg:hidden">
           <div className="mx-auto flex max-w-2xl items-center justify-between gap-3">
-            <button type="button" onClick={() => summaryRef.current?.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'start' })} className="min-w-0 text-left" aria-label={c.mobileSee}>
+            <button type="button" onClick={() => smoothScrollIntoView(summaryRef.current, { block: 'start' })} className="min-w-0 text-left" aria-label={c.mobileSee}>
               <span className="flex items-center gap-1 text-[10px] text-slate-500">{c.mobileTotal}<ArrowDown className="size-3" aria-hidden="true" /><span className="text-slate-400">{lang === 'ko' ? '부가세 포함' : 'incl. VAT'}</span></span>
-              <AnimatedAmount value={quote.total} lang={lang} className="mt-0.5 block break-words text-base font-bold text-slate-900" />
+              <AnimatedAmount value={quote.total} lang={lang} className="mt-0.5 block break-words text-base font-bold text-teal-700" />
             </button>
             <button type="button" onClick={moveForward} disabled={step === 2 && input.items.length === 0} className={cn(primaryButton, 'min-h-11 shrink-0 px-5 text-xs')}>{step === 3 ? c.toForm : c.next}<ArrowRight className="size-3.5" aria-hidden="true" /></button>
           </div>

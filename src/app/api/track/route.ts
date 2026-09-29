@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { EVENTS_COLLECTION } from '@/lib/analytics/aggregate'
+import { MAX_ACTIONS_CHARS, MAX_BATCHES, QUOTE_ACTIONS_COLLECTION } from '@/lib/analytics/quote-behavior'
 import { classifyOrigin, isBotAgent, parseUserAgent } from '@/lib/analytics/sources'
 
 // 공개 사이트의 방문 기록기(src/lib/analytics/tracker.ts)가 sendBeacon으로 보내는 요청을 받아
@@ -9,9 +10,12 @@ import { classifyOrigin, isBotAgent, parseUserAgent } from '@/lib/analytics/sour
 
 const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
 const DOCUMENTS = `projects/${PROJECT_ID}/databases/(default)/documents`
-const COMMIT_URL = `https://firestore.googleapis.com/v1/${DOCUMENTS}:commit`
+// 로컬 검증 때는 Firestore 에뮬레이터로 보낸다 (운영에는 이 변수가 없다)
+const FIRESTORE_HOST = process.env.FIRESTORE_EMULATOR_HOST ? `http://${process.env.FIRESTORE_EMULATOR_HOST}` : 'https://firestore.googleapis.com'
+const COMMIT_URL = `${FIRESTORE_HOST}/v1/${DOCUMENTS}:commit`
 const OWN_HOSTS = ['neander.co.kr', 'www.neander.co.kr']
-const MAX_BODY = 4096
+// 견적 행동 묶음(qa)은 행동 목록을 담아 더 크다
+const MAX_BODY = MAX_ACTIONS_CHARS + 4096
 
 const id = z.string().regex(/^[A-Za-z0-9]{16,24}$/)
 
@@ -53,6 +57,13 @@ const payloadSchema = z.discriminatedUnion('t', [
       'quote_view', 'quote_preset', 'quote_step', 'quote_pdf', 'quote_request',
     ]),
     label: z.string().max(200).nullable(),
+  }),
+  z.object({
+    t: z.literal('qa'),
+    ...hit,
+    seq: z.number().int().min(0).max(MAX_BATCHES - 1),
+    /** JSON 배열 문자열 — 형식은 src/lib/analytics/quote-journey.ts 참고 */
+    actions: z.string().min(2).max(MAX_ACTIONS_CHARS),
   }),
   z.object({
     t: z.literal('eng'),
@@ -133,6 +144,43 @@ export async function POST(request: NextRequest) {
 
     const agent = parseUserAgent(ua, payload.tp)
     const source = classifyOrigin(payload.s, agent.inApp, OWN_HOSTS)
+
+    if (payload.t === 'qa') {
+      let count = 0
+      try {
+        const actions: unknown = JSON.parse(payload.actions)
+        if (!Array.isArray(actions)) throw new Error('not an array')
+        count = actions.length
+      } catch {
+        return new NextResponse(null, { status: 400 })
+      }
+      // 여정(jid)마다 묶음 번호(seq)를 붙여 문서 하나로 만든다 — 같은 묶음이 두 번 와도 한 번만 남는다
+      await commit({
+        update: {
+          name: `${DOCUMENTS}/${QUOTE_ACTIONS_COLLECTION}/${payload.id}_${payload.seq}`,
+          fields: encodeFields({
+            jid: payload.id,
+            seq: payload.seq,
+            actions: payload.actions,
+            count,
+            path: payload.path,
+            locale: payload.locale,
+            vid: payload.vid,
+            sid: payload.sid,
+            new_visitor: payload.nv,
+            internal: payload.int === true,
+            channel: source.channel,
+            source: source.source.slice(0, 100),
+            device: agent.device,
+            browser: agent.browser,
+            os: agent.os,
+          }),
+        },
+        updateTransforms: [{ fieldPath: 'ts', setToServerValue: 'REQUEST_TIME' }],
+        currentDocument: { exists: false },
+      })
+      return done
+    }
     const fields = encodeFields({
       type: payload.t === 'pv' ? 'pageview' : 'event',
       name: payload.t === 'ev' ? payload.name : null,

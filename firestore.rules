@@ -113,6 +113,36 @@ service cloud.firestore {
         && request.resource.data.scroll >= 0 && request.resource.data.scroll <= 100;
     }
 
+    // 온라인 견적 행동 기록 (견적 화면의 단계·클릭·머무름을 15초 단위로 묶은 것)
+    // - /api/track 이 인증 없이 만든다: 생성만 허용하고 고칠 수 없다.
+    // - 문서 id 는 '{여정 id}_{묶음 번호}' — 같은 묶음은 한 번만 생긴다.
+    // - 읽기·삭제는 관리자만 가능하다.
+    match /quote_actions/{batchId} {
+      allow read, delete: if isAdmin();
+
+      allow create: if request.resource.data.keys().hasOnly([
+            'jid', 'seq', 'actions', 'count', 'path', 'locale', 'vid', 'sid', 'new_visitor', 'internal',
+            'channel', 'source', 'device', 'browser', 'os', 'ts'
+          ])
+        && batchId == request.resource.data.jid + '_' + string(request.resource.data.seq)
+        && request.resource.data.ts == request.time
+        && request.resource.data.jid is string && request.resource.data.jid.size() <= 24
+        && request.resource.data.seq is int && request.resource.data.seq >= 0 && request.resource.data.seq < 200
+        && request.resource.data.actions is string && request.resource.data.actions.size() <= 12000
+        && request.resource.data.count is int && request.resource.data.count >= 0 && request.resource.data.count <= 1000
+        && request.resource.data.path is string && request.resource.data.path.size() <= 300
+        && request.resource.data.vid is string && request.resource.data.vid.size() <= 24
+        && request.resource.data.sid is string && request.resource.data.sid.size() <= 24
+        && request.resource.data.new_visitor is bool
+        && request.resource.data.internal is bool
+        && request.resource.data.channel in ['direct', 'search', 'social', 'ai', 'email', 'referral', 'campaign']
+        && request.resource.data.device in ['mobile', 'tablet', 'desktop']
+        && request.resource.data.source is string && request.resource.data.source.size() <= 100
+        && optString(request.resource.data, 'locale', 5)
+        && optString(request.resource.data, 'browser', 40)
+        && optString(request.resource.data, 'os', 20);
+    }
+
     // 유입 분석 일별 요약 (관리자 화면이 지난 날짜를 계산해 저장해 두는 캐시)
     match /analytics_daily/{day} {
       allow read, write: if isAdmin();

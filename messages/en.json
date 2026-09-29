@@ -2190,10 +2190,10 @@
   "pricingGuide": {
     "eyebrow": "PRICING & OPERATION",
     "title": "Pricing & operation",
-    "subtitle": "See rough costs before you start internal approval. Prices match our online estimate; all exclude VAT and assume the Seoul metro area.",
+    "subtitle": "See rough costs before you start internal approval. Prices match our online estimate; all exclude VAT and assume an event in Seoul.",
     "startingTitle": "Starting prices",
     "from": "from",
-    "startingNote": "Prices with minimum options (VAT excluded, Seoul metro), based on 6 operating hours per day.",
+    "startingNote": "Prices with minimum options (VAT excluded, Seoul), based on 6 operating hours per day.",
     "serviceDesc": {
       "acscent": "AI analyzes each guest's taste and image to recommend a scent, and a perfumer blends it on site. Starting price assumes 2 perfumers and about 20 guests per hour.",
       "photoBooth": "A photo booth where AI turns guest photos into images in a chosen style. Starting price assumes 1 booth, 1 AI style and QR delivery; prints and photocards are options.",
@@ -2204,7 +2204,7 @@
     },
     "hoverHint": "Hover for details",
     "basis": {
-      "acscent": "Minimum charge · up to 32 guests with 10ml · perfumer team travel (Seoul metro) included",
+      "acscent": "Minimum charge · up to 32 guests with 10ml · perfumer team travel (Seoul) included",
       "photoBooth": "1 day · 1 booth · 2 AI styles · 700 prints · delivery & setup · staff not included",
       "rental": "1 day · 1 kiosk · 1 existing experience as-is (no customization) · camera · delivery & setup · staff not included",
       "spatialDesign": "3×3m booth · design, build & teardown",
@@ -2235,7 +2235,7 @@
       },
       "venue": {
         "name": "Location & installation",
-        "desc": "Seoul metro base (transport included). Truck-delivered products: +KRW 100,000 for Chungcheong/West Gangwon, +KRW 300,000 for Jeolla/Gyeongsang/East Gangwon; AI Kiosk only: +KRW 100,000 / +KRW 200,000. Perfumer team travel varies by region. We do not operate on Jeju or other islands."
+        "desc": "Seoul base (transport included). Truck-delivered products: +KRW 50,000 for Gyeonggi/Incheon, +KRW 100,000 for Chungcheong/West Gangwon, +KRW 300,000 for Jeolla/East Gangwon, +KRW 350,000 for Gyeongsang; AI Kiosk only: +KRW 50,000 / 100,000 / 200,000 / 250,000. Perfumer team travel varies by region. We do not operate on Jeju or other islands."
       }
     },
     "scaleTitle": "Sizing guide",

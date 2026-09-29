@@ -28,7 +28,7 @@ export function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
+      className="relative min-h-svh flex flex-col items-center justify-center overflow-hidden"
       aria-label={t('tagline')}
     >
       {/* ── Photo slideshow + gradient mesh background ───── */}

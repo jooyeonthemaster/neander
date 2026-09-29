@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import { smoothScrollIntoView } from '@/lib/smooth-scroll';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { experiences, getIndustryById, pillars, type PillarId } from '@/data/experiences';
@@ -199,7 +200,7 @@ export function IndustryShowcase({ initialPillar, initialDemo }: IndustryShowcas
   useEffect(() => {
     if (initialPillar && sectionRef.current) {
       const timer = setTimeout(() => {
-        sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        smoothScrollIntoView(sectionRef.current, { block: 'start' });
       }, 400);
       return () => clearTimeout(timer);
     }
@@ -214,7 +215,7 @@ export function IndustryShowcase({ initialPillar, initialDemo }: IndustryShowcas
     >
       {/* Subtle teal glow on white */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] rounded-full blur-[140px]"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] rounded-full blur-[140px] transform-gpu"
         style={{ background: 'radial-gradient(ellipse, rgba(36, 173, 181, 0.06) 0%, transparent 70%)' }}
         aria-hidden="true"
       />

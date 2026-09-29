@@ -2,12 +2,12 @@
  * 온라인 견적 가격표 (2026-09 확정 권장가)
  *
  * 화면(/quote), 가견적서 PDF(/api/quote-pdf), 서비스 페이지의 시작가가 모두 이 파일을 쓴다.
- * 금액은 모두 원(KRW), VAT 별도, 수도권 기준. 가격을 바꿀 때는 이 파일만 고친다.
+ * 금액은 모두 원(KRW), VAT 별도, 서울 기준. 가격을 바꿀 때는 이 파일만 고친다.
  */
 
 export type Lang = 'ko' | 'en';
 export type ServiceKey = 'acscent' | 'photoBooth' | 'rental' | 'mediaArt' | 'spatialDesign' | 'custom';
-export type RegionKey = 'capital' | 'central' | 'south';
+export type RegionKey = 'seoul' | 'gyeongin' | 'central' | 'eastGangwon' | 'jeolla' | 'gyeongsang';
 
 type Text = Record<Lang, string>;
 
@@ -52,17 +52,31 @@ export const SERVICE_TEXT: Record<ServiceKey, { name: Text; summary: Text }> = {
   custom: {
     name: { ko: '커스텀 AI 콘텐츠', en: 'Custom AI Content' },
     summary: {
-      ko: '포토부스·키오스크와 별개인 웹·미디어·대형 AI 콘텐츠를 새로 기획·개발합니다 (1회 개발비).',
-      en: 'New web, media or large-scale AI content, separate from photo booths and kiosks (one-time development).',
+      ko: '특정 행사의 목적과 참여자에 맞는 커스텀 AI 콘텐츠를 기획·개발합니다 (1회 개발비).',
+      en: 'Custom AI content developed for your event’s goals and participants (one-time development).',
     },
   },
 };
 
 export const REGIONS: { key: RegionKey; label: Text }[] = [
-  { key: 'capital', label: { ko: '수도권', en: 'Seoul metro' } },
+  { key: 'seoul', label: { ko: '서울', en: 'Seoul' } },
+  { key: 'gyeongin', label: { ko: '경기·인천', en: 'Gyeonggi / Incheon' } },
   { key: 'central', label: { ko: '충청·강원 영서', en: 'Chungcheong / West Gangwon' } },
-  { key: 'south', label: { ko: '전라·경상·강원 영동', en: 'Jeolla / Gyeongsang / East Gangwon' } },
+  { key: 'eastGangwon', label: { ko: '강원 영동', en: 'East Gangwon' } },
+  { key: 'jeolla', label: { ko: '전라', en: 'Jeolla' } },
+  { key: 'gyeongsang', label: { ko: '경상', en: 'Gyeongsang' } },
 ];
+
+/**
+ * 저장된 값 → 권역. 2026-09 에 3권역(capital·central·south)을 6권역으로 나눴다.
+ * 예전 가견적서를 다시 열어도 금액이 그대로 나오게, 옛 값은 같은 금액의 권역으로 읽는다
+ * (capital → 서울, south → 전라: 둘 다 예전 금액과 같다).
+ */
+export function normalizeRegion(value: unknown): RegionKey {
+  if (value === 'capital') return 'seoul';
+  if (value === 'south') return 'jeolla';
+  return REGIONS.some((r) => r.key === value) ? value as RegionKey : 'seoul';
+}
 
 /** 제주 등 도서 지역은 운영하지 않는다 (견적 화면·가견적서·가격 안내에 표시) */
 /** 가견적서 안내 — 견적 화면·가견적서 페이지·PDF에 모두 넣는다 */
@@ -99,10 +113,11 @@ export const COMMON = {
   /** 전날 사전 설치 (2인, 행사당 1회) */
   setupDayBefore: 300_000,
   /**
-   * 지방 운송비 (AI 향수 체험 외 서비스, 행사당 1회)
-   * 용달 원가(설치 편도 + 철수 편도): 서울권 12만(기본가에 포함) · 충청·강원 영서 20만 · 그 외 40만 → 서울권과의 차액만큼 받는다
+   * 지역 운송비 (AI 향수 체험 외 서비스, 행사당 1회)
+   * 용달 원가(설치 편도 + 철수 편도): 서울 12만(기본가에 포함) · 충청·강원 영서 20만 · 전라·강원 영동 40만 → 서울과의 차액만큼 받는다.
+   * 경기·인천은 먼 곳(평택·포천 등)의 추가 이동분, 경상은 부산·경남까지의 거리(약 400km)만큼 한 계단 더 받는다.
    */
-  travel: { capital: 0, central: 100_000, south: 300_000 } as Record<RegionKey, number>,
+  travel: { seoul: 0, gyeongin: 50_000, central: 100_000, eastGangwon: 300_000, jeolla: 300_000, gyeongsang: 350_000 } as Record<RegionKey, number>,
   vatRate: 0.1,
   /** 가견적서 유효기간 (일) */
   validDays: 30,
@@ -112,6 +127,10 @@ export const COMMON = {
 
 export const PERFUME = {
   minGuests: 20,
+  /** 기본 구성에 포함되는 조향 팀 수 (팀당 조향사 1 + 조수 1) */
+  includedTeams: 1,
+  /** 이 규모를 초과하면 상담으로 운영 계획을 확정한다. 선택 상한은 아니다. */
+  standardTeams: 3,
   /** 인원 구간별 1인 단가 */
   tiers: [
     { min: 20, max: 49, unit: { '10ml': 20_000, '50ml': 45_000 } },
@@ -119,15 +138,15 @@ export const PERFUME = {
     { min: 100, max: Infinity, unit: { '10ml': 15_000, '50ml': 35_000 } },
   ],
   /** 조향 1팀(조향사 1 + 조수 1) 출장비, 운영일마다 */
-  teamTravel: { capital: 350_000, central: 450_000, south: 550_000 } as Record<RegionKey, number>,
+  teamTravel: { seoul: 350_000, gyeongin: 400_000, central: 450_000, eastGangwon: 550_000, jeolla: 550_000, gyeongsang: 600_000 } as Record<RegionKey, number>,
   /**
-   * 최소 금액 (수도권, 1인 단가 합계 + 조향 팀 출장비 기준). 지방은 출장비 차이만큼 더한다.
+   * 최소 금액 (서울, 1인 단가 합계 + 조향 팀 출장비 기준). 다른 지역은 출장비 차이만큼 더한다.
    * 10ml 기준 32명까지는 이 금액이 적용된다.
    */
   minimumCharge: 990_000,
   /** 조향 1팀 시간당 처리 인원 */
-  guestsPerTeamHour: 20,
-  customScent: 1_000_000,
+  guestsPerTeamHour: 40,
+  customScent: 890_000,
   /** 고급 선물 포장 — 기본 AC'SCENT 브랜드 패키지, 병당 (만드는 향수 수 = 체험 인원) */
   premiumPackaging: { '10ml': 3_000, '50ml': 5_000 },
   /** 전용 디자인 단박스 — 새 디자인으로 단박스 제작, 디자인비 포함 최소 금액 (수량·사양은 상담 후 확정) */
@@ -143,7 +162,7 @@ export const PERFUME = {
 /* ── AI 포토부스 ────────────────────────────────────── */
 
 export const PHOTO_BOOTH = {
-  /** 1대 1일 (AI 스타일 2종·인화 1롤 700장·프레임 1종·수도권 운송·설치 포함, 운영 인력 별도) */
+  /** 1대 1일 (AI 스타일 2종·인화 1롤 700장·프레임 1종·서울 운송·설치 포함, 운영 인력 별도) */
   firstBooth: 1_200_000,
   /** 2·3번째 부스 (보유 3대라 할인을 작게 둔다) */
   extraBooth: 1_100_000,
@@ -179,7 +198,7 @@ export const KIOSK = {
   /** 보유 기기 수 — 견적에서 고를 수 있는 최대 대수 */
   maxKiosks: 4,
   /** 키오스크만 있을 때의 지방 운송비 (직접 운반, 행사당 1회). 용달 상품이 함께 있으면 COMMON.travel 을 쓴다 */
-  travel: { capital: 0, central: 100_000, south: 200_000 } as Record<RegionKey, number>,
+  travel: { seoul: 0, gyeongin: 50_000, central: 100_000, eastGangwon: 200_000, jeolla: 200_000, gyeongsang: 250_000 } as Record<RegionKey, number>,
 };
 
 /* ── 인터랙티브 미디어 아트 ─────────────────────────── */
@@ -189,14 +208,29 @@ export const MEDIA_ART = {
   /** 장비·운영 1일 (프로젝터 1대·센서 1세트·운영 1인) */
   operationFirstDay: 800_000,
   operationExtraDay: 600_000,
-  extraSensor: 1_000_000,
+  /** 행사당 장비 대여·연동·현장 보정. 이미지 카메라 1세트는 기본 포함. */
+  depthCameraUpgrade: 500_000,
+  extraSensorByType: { image: 300_000, depth: 800_000 },
 };
 
 /* ── 공간 디자인 ───────────────────────────────────── */
 
+/** 부스 구조 — 조립식 천 부스(재사용 장비)가 기본, 나무 가벽은 행사마다 짜고 철거한다 */
+export type BoothBuild = 'fabric' | 'wood';
+
 export const SPACE = {
-  booth3x3: 4_000_000,
-  booth6x3: 7_000_000,
+  /**
+   * 조립식 천 부스 (기본). 알루미늄 프레임을 재사용하고 천 그래픽만 행사마다 출력한다.
+   * 행사당 원가(그래픽·바닥·조명·인력·운송) 약 80~120만(3×3) / 120~170만(6×3) + 장비값 나눠 받기 약 45 / 60만.
+   * 시장의 시스템 부스 + 그래픽(3×3 200~400만) 안에 둔다. 2026-09 추정 원가 기준 — 외주 견적으로 다시 맞출 것.
+   */
+  booth3x3: 3_000_000,
+  booth6x3: 5_000_000,
+  /**
+   * 나무 가벽 (ㄱ자 가벽 + 바닥, 도장·시트 마감, 철거·폐기 포함).
+   * 추정 원가 약 265~390만(3×3, 가벽 약 14㎡) / 390~580만(6×3, 약 22㎡). 시장 디자인 부스(500~1,500만)의 아래쪽.
+   */
+  woodBooth: { booth3x3: 5_500_000, booth6x3: 9_000_000 },
   /** 30㎡ 이상 팝업·공간형: 평당 시작가 (실측 후 확정) */
   perPyeong: 1_200_000,
   photoZone: 1_500_000,
@@ -232,11 +266,11 @@ export const CUSTOM_DEV_TEXT: {
     },
     content: {
       name: { ko: '콘텐츠 커스텀', en: 'Content customization' },
-      scope: { ko: '기존 체험 틀 안에서 질문(최대 8문항)·선택지·결과 유형(최대 8종)·결과 문구 교체, 출력물 디자인, 브랜드 상품 연결(최대 20개), AI 말투 조정 · 수정 2회 · 3주 전 확정', en: 'Within an existing experience: questions (up to 8), choices, result types (up to 8) and copy, printout design, product matching (up to 20), AI tone · 2 revisions · confirm 3 weeks ahead' },
+      scope: { ko: '기존 체험 틀 안에서 질문(최대 8문항)·선택지·결과 유형(최대 8종)·결과 문구·화면 디자인 교체, 브랜드 상품 연결(최대 20개), AI 말투 조정 · 수정 2회 · 3주 전 확정', en: 'Within an existing experience: questions (up to 8), choices, result types (up to 8) and copy, result screen design, product matching (up to 20), AI tone · 2 revisions · confirm 3 weeks ahead' },
     },
     dedicated: {
       name: { ko: '전용 체험 개발', en: 'Dedicated experience' },
-      scope: { ko: '새 체험 기획, 새 AI 분석·생성 로직, 화면 8개 이내, 출력물, 사전 테스트 운영 · 수정 2회 · 6주 전 확정 · 범위 확정 후 금액 조정', en: 'New experience concept, new AI analysis or generation logic, up to 8 screens, printout, test run · 2 revisions · confirm 6 weeks ahead · final price after scoping' },
+      scope: { ko: '새 체험 기획, 새 AI 분석·생성 로직, 화면 8개 이내, 결과 화면, 사전 테스트 운영 · 수정 2회 · 6주 전 확정 · 범위 확정 후 금액 조정', en: 'New experience concept, new AI analysis or generation logic, up to 8 screens, result screen, test run · 2 revisions · confirm 6 weeks ahead · final price after scoping' },
     },
   },
   booth: {
@@ -264,7 +298,8 @@ export const CUSTOM_TERMS: Text = {
 export const CUSTOM = {
   /** 포토부스·키오스크와 무관한 웹·미디어·대형 콘텐츠 개발 */
   scope: { standard: 8_000_000, large: 15_000_000 },
-  consulting: 1_000_000,
+  consulting: 3_000_000,
+  pgIntegration: 1_000_000,
   maintenancePerMonth: 500_000,
 };
 
@@ -275,6 +310,10 @@ export const OPTION_TEXT = {
     standard: { ko: '스탠다드', en: 'Standard' },
     premium: { ko: '프리미엄', en: 'Premium' },
     fullCustom: { ko: '풀 커스텀', en: 'Full custom' },
+  },
+  boothBuild: {
+    fabric: { ko: '조립식 천 부스', en: 'Modular fabric booth' },
+    wood: { ko: '나무 가벽', en: 'Wooden walls' },
   },
   space: {
     booth3x3: { ko: '부스 3×3m (약 9㎡)', en: 'Booth 3×3m (~9㎡)' },

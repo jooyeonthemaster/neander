@@ -36,12 +36,12 @@ export function ServicesOverview() {
         aria-hidden="true"
       />
       <div
-        className="absolute top-[-8%] left-[15%] w-[600px] h-[400px] rounded-full blur-[120px]"
+        className="absolute top-[-8%] left-[15%] w-[600px] h-[400px] rounded-full blur-[120px] transform-gpu"
         style={{ background: `radial-gradient(ellipse, ${KEY_COLOR}10 0%, transparent 70%)` }}
         aria-hidden="true"
       />
       <div
-        className="absolute bottom-[-5%] right-[10%] w-[500px] h-[300px] rounded-full blur-[100px]"
+        className="absolute bottom-[-5%] right-[10%] w-[500px] h-[300px] rounded-full blur-[100px] transform-gpu"
         style={{ background: 'radial-gradient(ellipse, rgba(36, 173, 181, 0.06) 0%, transparent 70%)' }}
         aria-hidden="true"
       />

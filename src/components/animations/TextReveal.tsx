@@ -2,6 +2,7 @@
 
 import { motion, type Variants } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { useRevealed } from './useRevealed';
 
 interface TextRevealProps {
   /** The text content to reveal word-by-word */
@@ -46,12 +47,14 @@ export function TextReveal({
     },
   };
 
+  const [ref, revealed] = useRevealed<HTMLSpanElement>('-40px');
+
   return (
     <motion.span
+      ref={ref}
       variants={containerVariants}
       initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-40px' }}
+      animate={revealed ? 'visible' : 'hidden'}
       aria-label={text}
       className={cn('inline-flex flex-wrap', className)}
     >

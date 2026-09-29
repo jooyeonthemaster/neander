@@ -202,7 +202,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
 
           {/* Large colored glow */}
           <div
-            className="absolute left-1/2 top-1/4 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[800px] rounded-full"
+            className="absolute left-1/2 top-1/4 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[800px] rounded-full transform-gpu"
             style={{
               backgroundColor: pillarColor,
               opacity: 0.08,
@@ -213,7 +213,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
 
           {/* Secondary glow, offset */}
           <div
-            className="absolute right-0 bottom-0 h-[300px] w-[400px] rounded-full"
+            className="absolute right-0 bottom-0 h-[300px] w-[400px] rounded-full transform-gpu"
             style={{
               backgroundColor: pillarColor,
               opacity: 0.05,
@@ -369,7 +369,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
       <section id="overview" className="relative scroll-mt-16 overflow-x-clip py-20 sm:py-28 lg:scroll-mt-20">
         {/* Subtle top glow bleed from hero */}
         <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 h-[200px] w-[600px] rounded-full"
+          className="absolute top-0 left-1/2 -translate-x-1/2 h-[200px] w-[600px] rounded-full transform-gpu"
           style={{
             backgroundColor: pillarColor,
             opacity: 0.03,
@@ -420,7 +420,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
                       }}
                     >
                       <div
-                        className="absolute top-0 right-0 h-16 w-16 -translate-y-1/2 translate-x-1/2 rounded-full opacity-20 blur-2xl"
+                        className="absolute top-0 right-0 h-16 w-16 -translate-y-1/2 translate-x-1/2 rounded-full opacity-20 blur-2xl transform-gpu"
                         style={{ backgroundColor: pillarColor }}
                         aria-hidden="true"
                       />
@@ -602,7 +602,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
           ══════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden bg-slate-50 py-20 sm:py-28">
         <div
-          className="absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full"
+          className="absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full transform-gpu"
           style={{ backgroundColor: pillarColor, opacity: 0.04, filter: 'blur(120px)' }}
           aria-hidden="true"
         />
@@ -669,7 +669,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
           aria-hidden="true"
         />
         <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[600px] rounded-full"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[600px] rounded-full transform-gpu"
           style={{ backgroundColor: pillarColor, opacity: 0.08, filter: 'blur(140px)' }}
           aria-hidden="true"
         />

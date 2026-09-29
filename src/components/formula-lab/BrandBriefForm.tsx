@@ -104,7 +104,7 @@ export function BrandBriefForm({ onSubmit }: Props) {
           }}
         />
         {/* Teal Glow */}
-        <div className="absolute top-0 right-1/4 w-[600px] h-[400px] bg-teal-500/8 rounded-full blur-[120px]" />
+        <div className="absolute top-0 right-1/4 w-[600px] h-[400px] bg-teal-500/8 rounded-full blur-[120px] transform-gpu" />
 
         <div className="relative max-w-[1400px] mx-auto px-4 sm:px-8 py-16 pb-14 sm:py-24 sm:pb-20">
           <motion.div

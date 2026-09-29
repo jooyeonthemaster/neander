@@ -1,11 +1,28 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { timelineData } from '@/data/timeline';
 import { TimelineItem } from './TimelineItem';
 import { cn } from '@/lib/utils';
+import { useRevealed } from '@/components/animations';
+
+/** 연도 표시 — 화면에 들어오면 튀어나오듯 커진다 */
+function YearBadge({ children }: { children: ReactNode }) {
+  const [ref, revealed] = useRevealed<HTMLDivElement>('-40px');
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ scale: 0, opacity: 0 }}
+      animate={revealed ? { scale: 1, opacity: 1 } : undefined}
+      transition={{ delay: 0.1, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+      className={cn('relative z-10 mb-8', 'flex items-center gap-4', 'lg:justify-center')}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export function Timeline() {
   const t = useTranslations('about.timeline');
@@ -42,21 +59,7 @@ export function Timeline() {
           return (
             <div key={yearEntry.year} className="relative">
               {/* Year badge */}
-              <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 1 }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{
-                  delay: 0.1,
-                  duration: 0.4,
-                  ease: [0.25, 0.1, 0.25, 1],
-                }}
-                className={cn(
-                  'relative z-10 mb-8',
-                  'flex items-center gap-4',
-                  'lg:justify-center'
-                )}
-              >
+              <YearBadge>
                 {/* Year circle */}
                 <div
                   className={cn(
@@ -71,7 +74,7 @@ export function Timeline() {
                     {tEntries(`${yearKey}.title`)}
                   </span>
                 </div>
-              </motion.div>
+              </YearBadge>
 
               {/* Events for this year */}
               <div className="space-y-4 lg:space-y-6">

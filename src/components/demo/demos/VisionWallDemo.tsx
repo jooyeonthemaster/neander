@@ -635,7 +635,7 @@ function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps)
       restartLabel="다른 비전 그리기"
     >
       <div className="relative w-full max-w-sm">
-        <div className="absolute -inset-3 rounded-[2rem] opacity-40 blur-2xl" style={{ background: meta.swatch }} aria-hidden="true" />
+        <div className="absolute -inset-3 rounded-[2rem] opacity-40 blur-2xl transform-gpu" style={{ background: meta.swatch }} aria-hidden="true" />
         <motion.div
           initial={{ opacity: 0, scale: 0.92 }}
           animate={{ opacity: 1, scale: 1 }}

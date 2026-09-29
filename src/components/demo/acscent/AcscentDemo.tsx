@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { smoothScrollTo } from '@/lib/smooth-scroll';
 import { motion, AnimatePresence } from 'motion/react';
 import { AcscentLanding } from './AcscentLanding';
 import { AcscentTestFlow } from './AcscentTestFlow';
@@ -16,7 +17,7 @@ export function AcscentDemo() {
   const [userType, setUserType] = useState<AcscentType | null>(null);
   const [selectedPerfumeId, setSelectedPerfumeId] = useState<string | null>(null);
 
-  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollTop = () => smoothScrollTo(0);
 
   const handleStartTest = useCallback(() => { setView('test'); scrollTop(); }, []);
 

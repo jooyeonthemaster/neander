@@ -360,6 +360,15 @@ export function trackEvent(name: string, label?: string | null) {
   })
 }
 
+/** 온라인 견적 행동 묶음을 보낸다 (quote-journey.ts). jid 는 견적 화면을 연 한 번의 여정 */
+export function sendQuoteActions(jid: string, seq: number, actions: string) {
+  if (!isEnabled()) return
+  const { path, locale } = current ?? normalizePath(window.location.pathname)
+  const session = resolveSession(path)
+  saveSession({ ...session, last: Date.now() })
+  send({ t: 'qa', id: jid, seq, actions, path, locale, entry: false, ...context(session) })
+}
+
 function handleVisibility() {
   if (!current) return
   if (document.visibilityState === 'hidden') {

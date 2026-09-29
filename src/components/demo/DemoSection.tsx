@@ -49,6 +49,8 @@ interface DemoSectionProps {
   closeLabel?: string;
   /** 팝업 아래 '서비스 자세히 보기' 링크 대상 (variant='modal') */
   detailHref?: string;
+  /** Embedded demos return to their parent without leaving the current route. */
+  returnLabel?: string;
   labels: {
     back: string;
     next: string;
@@ -79,6 +81,7 @@ export function DemoSection({
   onClose,
   closeLabel,
   detailHref,
+  returnLabel,
   labels,
 }: DemoSectionProps) {
   const isModal = variant === 'modal';
@@ -86,6 +89,7 @@ export function DemoSection({
   const stageRef = useRef<HTMLElement>(null);
   const [demoModule, setDemoModule] = useState<DemoModule | null>(null);
   const [loadError, setLoadError] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const design = getExperienceDesign(slug);
   const art = getProgramArtDirection(slug);
   const theme = getDemoMockupTheme(slug);
@@ -105,12 +109,13 @@ export function DemoSection({
     const loader = loadDemoModule(slug);
     Promise.resolve().then(() => {
       setLoadError(false);
+      setDemoModule(null);
       return loader ? loader() : Promise.reject(new Error('Unknown demo'));
     }).then((mod) => {
       if (alive) setDemoModule(mod);
     }).catch(() => { if (alive) setLoadError(true); }).finally(() => clearTimeout(timer));
     return () => { alive = false; clearTimeout(timer); };
-  }, [slug]);
+  }, [slug, loadAttempt]);
 
   const toggleFullscreen = useCallback(() => {
     if (document.fullscreenElement) {
@@ -189,7 +194,10 @@ export function DemoSection({
 
   );
 
-  const detailLink = !isFullscreen && (isModal && detailHref
+  const returnAction = returnLabel && onClose ? { label: returnLabel, onClick: onClose } : undefined;
+  const detailLink = !isFullscreen && (returnAction
+    ? <button type="button" onClick={returnAction.onClick} className="venue-detail-link" data-demo-return>{returnAction.label}<span aria-hidden="true">↩</span></button>
+    : isModal && detailHref
     ? <Link href={detailHref} className="venue-detail-link">{labels.scrollHint}<span aria-hidden="true">↗</span></Link>
     : <a href="#overview" className="venue-detail-link">{labels.scrollHint}<span aria-hidden="true">↗</span></a>);
 
@@ -241,7 +249,7 @@ export function DemoSection({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            <DemoShell key={demoModule.config.targetSlug} module={demoModule} pillarColor={pillarColor} serviceName={title} labels={labels} renderHeader={renderHeader} detailLink={detailLink} disclaimer={labels.disclaimer} />
+            <DemoShell key={demoModule.config.targetSlug} module={demoModule} pillarColor={pillarColor} serviceName={title} labels={labels} renderHeader={renderHeader} detailLink={detailLink} disclaimer={labels.disclaimer} returnAction={returnAction} />
           </motion.div>
         ) : (
           <div className="mockup-loading">
@@ -254,7 +262,10 @@ export function DemoSection({
               transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
             />}
             <p>{loadError ? '데모를 불러오지 못했어요. 다시 시도해 주세요.' : labels.loading}</p>
-            {loadError && <button className="mockup-next" type="button" onClick={() => window.location.reload()}>다시 불러오기</button>}
+            {loadError && <button className="mockup-next" type="button" onClick={() => {
+              setLoadError(false);
+              setLoadAttempt((attempt) => attempt + 1);
+            }}>다시 불러오기</button>}
             </div>
           </div>
         )}

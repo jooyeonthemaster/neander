@@ -2,10 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { motion } from 'motion/react';
 import { Link } from '@/i18n/navigation';
 import { FitToViewport, ScrollReveal, StaggerChildren, StaggerItem } from '@/components/animations';
-import { cn } from '@/lib/utils';
 
 /* ─────────────────────────────────────────────────────────
    Naver Place links
@@ -78,7 +76,7 @@ export function FlagshipStore() {
         aria-hidden="true"
       />
       <div
-        className="absolute top-[-8%] right-[20%] w-[500px] h-[400px] rounded-full blur-[120px]"
+        className="absolute top-[-8%] right-[20%] w-[500px] h-[400px] rounded-full blur-[120px] transform-gpu"
         style={{ background: `radial-gradient(ellipse, ${KEY_COLOR}08 0%, transparent 70%)` }}
         aria-hidden="true"
       />
@@ -180,7 +178,7 @@ export function FlagshipStore() {
   );
 }
 
-/* ── Store Card Component (light theme) ────────────────── */
+/* ── Store Card Component (full photo background) ──────── */
 function StoreCard({
   imageSrc,
   icon,
@@ -203,70 +201,51 @@ function StoreCard({
   mapLabel: string;
 }) {
   return (
-    <motion.div
-      whileHover={{ y: -5 }}
-      transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
-      className={cn(
-        'group relative flex flex-col h-full rounded-2xl overflow-hidden',
-        'border border-neutral-200/80',
-        'bg-white',
-        'shadow-sm',
-        'transition-all duration-500',
-        'hover:shadow-xl hover:border-teal-200',
-      )}
-    >
-      {/* Top accent bar */}
-      <div className="h-1 w-full bg-teal-500 transition-all duration-500 group-hover:h-1.5" aria-hidden="true" />
-
-      <div className="relative aspect-[3/2] shrink-0 overflow-hidden bg-neutral-100">
-        <Image
-          src={imageSrc}
-          alt=""
-          fill
-          sizes="(min-width: 1280px) 610px, (min-width: 1024px) 50vw, calc(100vw - 48px)"
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.025] motion-reduce:transition-none"
-        />
-      </div>
-
-      {/* Hover glow */}
+    <article className="group relative isolate flex h-full min-h-[520px] flex-col overflow-hidden rounded-2xl bg-neutral-950 shadow-sm transition-shadow duration-500 hover:shadow-xl sm:min-h-[560px] lg:min-h-[clamp(28rem,51vh,36rem)] lg-short:min-h-[25rem] motion-reduce:transition-none">
+      <Image
+        src={imageSrc}
+        alt=""
+        fill
+        loading="eager"
+        sizes="(min-width: 1280px) 610px, (min-width: 1024px) 50vw, calc(100vw - 48px)"
+        className="pointer-events-none object-cover object-center transition-transform duration-700 ease-out motion-safe:group-hover:scale-[1.035] motion-reduce:transition-none"
+      />
       <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-        style={{
-          background: `radial-gradient(ellipse at 30% 20%, ${KEY_COLOR}0C 0%, transparent 50%)`,
-        }}
+        className="pointer-events-none absolute inset-0"
+        style={{ background: 'linear-gradient(180deg, rgba(8, 15, 17, 0.06) 0%, rgba(8, 15, 17, 0.16) 20%, rgba(8, 15, 17, 0.74) 35%, rgba(8, 15, 17, 0.97) 100%)' }}
         aria-hidden="true"
       />
 
-      <div className="relative flex flex-1 flex-col p-6 sm:p-7 lg-short:p-4">
+      <div className="relative mt-auto flex flex-col px-6 pt-44 pb-6 sm:px-7 sm:pt-52 sm:pb-7 lg:pt-36 lg-short:px-5 lg-short:pt-28 lg-short:pb-5">
         {/* Icon + Name */}
-        <div className="flex items-start gap-4 mb-4 lg-short:mb-2">
-          <div className="flex h-12 w-12 lg-short:h-10 lg-short:w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/[0.08] text-teal-600 ring-1 ring-teal-500/20 transition-all duration-500 group-hover:scale-110 group-hover:bg-teal-500/[0.12]">
+        <div className="mb-4 flex items-center gap-3 lg-short:mb-3">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/25 bg-white/10 text-white backdrop-blur-md lg-short:size-10" aria-hidden="true">
             {icon}
           </div>
           <div>
-            <h3 className="font-[family-name:var(--font-display)] text-lg sm:text-xl font-bold text-neutral-900 tracking-tight">
+            <h3 className="font-[family-name:var(--font-display)] text-xl font-bold tracking-tight text-white sm:text-2xl lg-short:text-xl">
               {name}
             </h3>
-            <p className="text-xs text-neutral-400 mt-0.5">{nameKo}</p>
+            <p className="mt-1 text-xs text-white/75">{nameKo}</p>
           </div>
         </div>
 
         {/* Description */}
-        <p className="text-sm text-neutral-500 leading-relaxed mb-2">
+        <p className="mb-2 text-[13px] leading-relaxed text-white/80 [word-break:keep-all]">
           {description}
         </p>
 
         {/* Detail */}
-        <p className="text-sm text-neutral-700 leading-relaxed mb-4 lg-short:mb-2 flex-1">
+        <p className="mb-4 text-sm leading-relaxed text-white/95 [word-break:keep-all] lg-short:mb-3">
           {detail}
         </p>
 
         {/* Feature tags */}
-        <div className="flex flex-wrap gap-2 mb-5 lg-short:mb-3">
+        <div className="mb-5 flex flex-wrap gap-1.5 lg-short:mb-4">
           {features.map((feature) => (
             <span
               key={feature}
-              className="inline-flex items-center px-2.5 py-1 rounded-full bg-teal-500/[0.06] border border-teal-500/15 text-xs font-medium text-teal-600"
+              className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-xs font-medium text-white/90 backdrop-blur-sm"
             >
               {feature}
             </span>
@@ -274,18 +253,19 @@ function StoreCard({
         </div>
 
         {/* Map link */}
-        <div className="pt-3 border-t border-neutral-100 flex items-center justify-between">
+        <div className="flex items-center border-t border-white/20 pt-4">
           <a
             href={mapUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-teal-600 transition-all duration-300 hover:text-teal-700 hover:gap-3"
+            aria-label={`${name} — ${mapLabel}`}
+            className="group/map inline-flex min-h-11 items-center justify-center gap-3 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-900 transition-colors duration-300 hover:bg-teal-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white motion-reduce:transition-none"
           >
             <span>{mapLabel}</span>
-            <ArrowRightIcon className="transition-transform duration-300 group-hover:translate-x-1" />
+            <ArrowRightIcon className="transition-transform duration-300 motion-safe:group-hover/map:translate-x-1 motion-reduce:transition-none" />
           </a>
         </div>
       </div>
-    </motion.div>
+    </article>
   );
 }

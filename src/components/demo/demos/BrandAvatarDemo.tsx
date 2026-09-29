@@ -230,7 +230,7 @@ function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps)
       {/* Hero avatar */}
       <div className="relative flex flex-col items-center">
         <motion.div
-          className="absolute -inset-4 rounded-full opacity-50 blur-2xl"
+          className="absolute -inset-4 rounded-full opacity-50 blur-2xl transform-gpu"
           style={{ background: style.ring }}
           animate={{ rotate: 360 }}
           transition={{ duration: 14, repeat: Infinity, ease: 'linear' }}

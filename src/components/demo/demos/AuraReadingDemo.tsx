@@ -378,7 +378,7 @@ function Result({ answers, onRestart, pillarColor, generated }: DemoResultProps)
       {capture && (
         <div className="relative">
           <div
-            className="absolute -inset-6 rounded-[3rem] opacity-60 blur-3xl"
+            className="absolute -inset-6 rounded-[3rem] opacity-60 blur-3xl transform-gpu"
             style={{ background: `radial-gradient(circle, ${aura.color}, ${secondAura.color} 55%, transparent 75%)` }}
             aria-hidden="true"
           />

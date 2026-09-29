@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useRef, type ReactNode } from 'react';
 import Lenis from 'lenis';
+import 'lenis/dist/lenis.css';
+import { setLenis } from '@/lib/smooth-scroll';
 import { usePathname } from '@/i18n/navigation';
 
 /* ─────────────────────────────────────────────────────────
@@ -49,7 +51,7 @@ export default function SmoothScrollProvider({ children }: SmoothScrollProviderP
     }
     if (window.location.hash) return;
     lenisRef.current?.scrollTo(0, { immediate: true, force: true });
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [pathname]);
 
   useEffect(() => {
@@ -63,6 +65,7 @@ export default function SmoothScrollProvider({ children }: SmoothScrollProviderP
     });
 
     lenisRef.current = lenis;
+    setLenis(lenis);
 
     function raf(time: number) {
       lenis.raf(time);
@@ -75,6 +78,7 @@ export default function SmoothScrollProvider({ children }: SmoothScrollProviderP
       cancelAnimationFrame(rafId);
       lenis.destroy();
       lenisRef.current = null;
+      setLenis(null);
     };
   }, [isHome]);
 

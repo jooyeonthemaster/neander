@@ -108,6 +108,8 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       className=""
+      // CSS 의 scroll-behavior: smooth 가 페이지 이동 때 '맨 위로'까지 미끄러지게 하지 않도록 Next 에 알린다
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <body className="min-h-screen overflow-x-hidden bg-white font-body text-neutral-900 antialiased">

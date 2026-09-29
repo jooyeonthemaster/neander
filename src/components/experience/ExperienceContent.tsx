@@ -200,7 +200,7 @@ export function ExperienceContent() {
       <section className="relative overflow-hidden bg-neutral-950">
         {/* Teal glow */}
         <div
-          className="absolute left-1/2 top-0 -translate-x-1/2 h-[400px] w-[700px] rounded-full blur-[140px]"
+          className="absolute left-1/2 top-0 -translate-x-1/2 h-[400px] w-[700px] rounded-full blur-[140px] transform-gpu"
           style={{ background: 'radial-gradient(ellipse, rgba(36, 173, 181, 0.12) 0%, transparent 70%)' }}
           aria-hidden="true"
         />

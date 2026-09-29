@@ -1,4 +1,5 @@
 export { ScrollReveal } from './ScrollReveal';
+export { useRevealed } from './useRevealed';
 export { TextReveal } from './TextReveal';
 export { StaggerChildren, StaggerItem, staggerItemVariants } from './StaggerChildren';
 export { CountUp } from './CountUp';

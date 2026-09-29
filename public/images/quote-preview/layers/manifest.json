@@ -1,0 +1,226 @@
+{
+  "version": 1,
+  "description": "Transparent generated layers for an illustrative perfume-event layout. Equipment appearance follows reviewed event references; placement is conceptual, not a measured plan.",
+  "generator": "scripts/prepare-perfume-scene-assets.mjs",
+  "transforms": {
+    "trim": "zero-alpha outer padding only",
+    "resize": "fit within 1000 x 1000 without enlargement",
+    "format": "webp",
+    "quality": 90,
+    "alphaQuality": 100,
+    "backgroundRemoval": false
+  },
+  "assetCount": 7,
+  "assets": [
+    {
+      "id": "kiosk-real",
+      "src": "/images/quote-preview/layers/kiosk-real.webp",
+      "kind": "transparent-scene-layer",
+      "provenance": {
+        "kind": "ai-generated-illustration",
+        "collection": "quote-preview-assets-2026-09-28",
+        "originalSha256": "f2e5a248c70968c82dd7246d33e360e70a8ff8cd9cef3b9059a62ebcb1ead7fb"
+      },
+      "original": {
+        "width": 1024,
+        "height": 1536,
+        "alpha": {
+          "transparentPixels": 978290,
+          "nearOpaquePixels": 576985,
+          "maxAlpha": 254
+        }
+      },
+      "crop": {
+        "left": 65,
+        "top": 20,
+        "width": 945,
+        "height": 1516
+      },
+      "width": 623,
+      "height": 1000,
+      "hasAlpha": true,
+      "bytes": 40770,
+      "sha256": "7c81c157f772d70ffd481f5e7c9c287d7f022a51e4538e4c4f2d8e54573ed3df"
+    },
+    {
+      "id": "perfumery-counter",
+      "src": "/images/quote-preview/layers/perfumery-counter.webp",
+      "kind": "transparent-scene-layer",
+      "provenance": {
+        "kind": "ai-generated-illustration",
+        "collection": "quote-preview-assets-2026-09-28",
+        "originalSha256": "5deb5bda51908ce0c929ee77d2d0a4fb5152558a4ee8a76f7dc07f274e7c6f55"
+      },
+      "original": {
+        "width": 1774,
+        "height": 887,
+        "alpha": {
+          "transparentPixels": 697970,
+          "nearOpaquePixels": 841345,
+          "maxAlpha": 255
+        }
+      },
+      "crop": {
+        "left": 120,
+        "top": 11,
+        "width": 1520,
+        "height": 868
+      },
+      "width": 1000,
+      "height": 571,
+      "hasAlpha": true,
+      "bytes": 91892,
+      "sha256": "8f53e36fc3c0e27105d1882d36036c65977504a45dd5e0210a24ce9401b8ee40"
+    },
+    {
+      "id": "receipt-printer",
+      "src": "/images/quote-preview/layers/receipt-printer.webp",
+      "kind": "transparent-scene-layer",
+      "provenance": {
+        "kind": "ai-generated-illustration",
+        "collection": "quote-preview-assets-2026-09-28",
+        "originalSha256": "a302e475ccfcbb2dc71279c1898b8d5c200d2da9443749319903a69897683a56"
+      },
+      "original": {
+        "width": 1254,
+        "height": 1254,
+        "alpha": {
+          "transparentPixels": 749437,
+          "nearOpaquePixels": 808344,
+          "maxAlpha": 255
+        }
+      },
+      "crop": {
+        "left": 0,
+        "top": 23,
+        "width": 1153,
+        "height": 1231
+      },
+      "width": 937,
+      "height": 1000,
+      "hasAlpha": true,
+      "bytes": 129736,
+      "sha256": "eb7b28d39a54e7f94fb7132ec4270dc08ad566daaaa77c2151a3dc3829d1c152"
+    },
+    {
+      "id": "team-1",
+      "src": "/images/quote-preview/layers/team-1.webp",
+      "kind": "transparent-scene-layer",
+      "provenance": {
+        "kind": "ai-generated-illustration",
+        "collection": "quote-preview-assets-2026-09-28",
+        "originalSha256": "e54ca4676fd834d34b08b6efe40bb33f548f65c88794fc17a90500ad42b29f0b"
+      },
+      "original": {
+        "width": 1024,
+        "height": 1536,
+        "alpha": {
+          "transparentPixels": 862221,
+          "nearOpaquePixels": 666435,
+          "maxAlpha": 254
+        }
+      },
+      "crop": {
+        "left": 64,
+        "top": 24,
+        "width": 882,
+        "height": 1480
+      },
+      "width": 596,
+      "height": 1000,
+      "hasAlpha": true,
+      "bytes": 93564,
+      "sha256": "e28770e9600e5d7078cbdcb3c806ea576128b2abf0254e95807a53a15d5a185b"
+    },
+    {
+      "id": "team-2",
+      "src": "/images/quote-preview/layers/team-2.webp",
+      "kind": "transparent-scene-layer",
+      "provenance": {
+        "kind": "ai-generated-illustration",
+        "collection": "quote-preview-assets-2026-09-28",
+        "originalSha256": "aa0e86a20594a94eaf266e2f9ce20771eb003a59160b2f76de1850b413c0adcd"
+      },
+      "original": {
+        "width": 1024,
+        "height": 1536,
+        "alpha": {
+          "transparentPixels": 841745,
+          "nearOpaquePixels": 686887,
+          "maxAlpha": 254
+        }
+      },
+      "crop": {
+        "left": 0,
+        "top": 47,
+        "width": 1008,
+        "height": 1445
+      },
+      "width": 698,
+      "height": 1000,
+      "hasAlpha": true,
+      "bytes": 108228,
+      "sha256": "ac39c1aa7c9d67d96cf0cbd2c22b57a11516cb786e9712e57eaa89fe15e62df8"
+    },
+    {
+      "id": "team-3",
+      "src": "/images/quote-preview/layers/team-3.webp",
+      "kind": "transparent-scene-layer",
+      "provenance": {
+        "kind": "ai-generated-illustration",
+        "collection": "quote-preview-assets-2026-09-28",
+        "originalSha256": "c29dfb73251096a272578f778b93db51879b74fee93c31f85856eb321a8bae03"
+      },
+      "original": {
+        "width": 1024,
+        "height": 1536,
+        "alpha": {
+          "transparentPixels": 836317,
+          "nearOpaquePixels": 692279,
+          "maxAlpha": 254
+        }
+      },
+      "crop": {
+        "left": 41,
+        "top": 32,
+        "width": 921,
+        "height": 1454
+      },
+      "width": 633,
+      "height": 1000,
+      "hasAlpha": true,
+      "bytes": 97222,
+      "sha256": "1d4308c7f191316a8f4edcfd44e1144d3e80184ce0d6559764d86e46f8a1f5a9"
+    },
+    {
+      "id": "team-4",
+      "src": "/images/quote-preview/layers/team-4.webp",
+      "kind": "transparent-scene-layer",
+      "provenance": {
+        "kind": "ai-generated-illustration",
+        "collection": "quote-preview-assets-2026-09-28",
+        "originalSha256": "6a9b4cac76f84661fd58cd159336cc9421c23d94d66c279ee837f091e69fac77"
+      },
+      "original": {
+        "width": 1024,
+        "height": 1536,
+        "alpha": {
+          "transparentPixels": 833553,
+          "nearOpaquePixels": 696159,
+          "maxAlpha": 254
+        }
+      },
+      "crop": {
+        "left": 0,
+        "top": 43,
+        "width": 992,
+        "height": 1447
+      },
+      "width": 686,
+      "height": 1000,
+      "hasAlpha": true,
+      "bytes": 110452,
+      "sha256": "945dc673e57845983a00ae40dbc27fbec4ade4d6a63e90516a26eaeb2f4d1a46"
+    }
+  ]
+}

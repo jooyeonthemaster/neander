@@ -61,7 +61,7 @@ export default async function ContactPage({ params, searchParams }: Props) {
 
         {/* Gradient glow */}
         <div
-          className="absolute left-1/4 top-0 h-[500px] w-[500px] -translate-y-1/3 rounded-full bg-teal-500/8 blur-[120px]"
+          className="absolute left-1/4 top-0 h-[500px] w-[500px] -translate-y-1/3 rounded-full bg-teal-500/8 blur-[120px] transform-gpu"
           aria-hidden="true"
         />
 

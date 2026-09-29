@@ -1,7 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
-import { useInView } from 'motion/react';
+import { useRevealed } from './useRevealed';
 import { useCountUp } from '@/hooks/useCountUp';
 import { cn } from '@/lib/utils';
 
@@ -27,8 +26,7 @@ export function CountUp({
   decimals = 0,
   className,
 }: CountUpProps) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-40px' });
+  const [ref, isInView] = useRevealed<HTMLSpanElement>('-40px');
 
   const count = useCountUp({
     target,

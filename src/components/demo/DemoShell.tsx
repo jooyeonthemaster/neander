@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
+import { smoothScrollIntoView } from '@/lib/smooth-scroll';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 import type { DemoModule, DemoAnswers } from '@/types/demo';
@@ -26,6 +27,7 @@ interface DemoShellProps {
   renderHeader?: (progress: ReactNode) => ReactNode;
   detailLink?: ReactNode;
   disclaimer?: string;
+  returnAction?: { label: string; onClick: () => void };
   labels: {
     back: string;
     next: string;
@@ -51,7 +53,7 @@ function isArrowKeyOwner(target: EventTarget | null): boolean {
   return target instanceof Element && target.closest(ARROW_KEY_OWNER_SELECTOR) !== null;
 }
 
-export function DemoShell({ module, pillarColor, serviceName = '', labels, renderHeader, detailLink, disclaimer }: DemoShellProps) {
+export function DemoShell({ module, pillarColor, serviceName = '', labels, renderHeader, detailLink, disclaimer, returnAction }: DemoShellProps) {
   const { config, StepComponents, ResultComponent, computeResult, generate } = module;
   const baseDesign = getExperienceDesign(config.targetSlug);
   const theme = getDemoMockupTheme(config.targetSlug);
@@ -175,7 +177,7 @@ export function DemoShell({ module, pillarColor, serviceName = '', labels, rende
     const root = rootRef.current;
     // 고정 헤더(64px) 아래로 데모 시작점이 보이지 않을 때만
     if (root && !root.closest('[data-fit-viewport]') && root.getBoundingClientRect().top < 64) {
-      root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      smoothScrollIntoView(root, { block: 'start' });
     }
   }, [viewKey]);
 
@@ -404,7 +406,9 @@ export function DemoShell({ module, pillarColor, serviceName = '', labels, rende
       {/* A single persistent footer: details on the left, step controls on the right. */}
       <footer className={design ? 'venue-navigation' : 'mt-8 flex items-center justify-between'}>
         <div className="mockup-footer-info">
-          {showResult ? <div className="demo-quote-wrap"><Link href={getServiceContactHref(config.targetSlug)} className="demo-quote-cta" data-demo-quote-cta>이 체험을 우리 행사에<span aria-hidden="true">→</span></Link><p className="mockup-disclaimer">견적 계산기에 이 체험이 담긴 채로 열립니다</p></div> : detailLink}
+          {showResult ? <div className="demo-quote-wrap">{returnAction ? (
+            <button type="button" onClick={returnAction.onClick} className="demo-quote-cta" data-demo-return>{returnAction.label}<span aria-hidden="true">↩</span></button>
+          ) : <><Link href={getServiceContactHref(config.targetSlug)} className="demo-quote-cta" data-demo-quote-cta>이 체험을 우리 행사에<span aria-hidden="true">→</span></Link><p className="mockup-disclaimer">견적 계산기에 이 체험이 담긴 채로 열립니다</p></>}</div> : detailLink}
           {isWelcome && !showResult && !isAnalyzing && disclaimer && <p className="mockup-disclaimer">{disclaimer}</p>}
         </div>
         <div className="mockup-step-actions">

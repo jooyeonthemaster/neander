@@ -103,8 +103,10 @@ export function FeaturedPortfolio() {
                         className={cn(
                           'mt-3 flex items-center gap-2 text-sm font-semibold text-teal-300',
                           'opacity-0 translate-y-2',
-                          'transition-all duration-300',
-                          'group-hover:opacity-100 group-hover:translate-y-0'
+                          'transition-[opacity,translate] duration-300',
+                          'group-hover:opacity-100 group-hover:translate-y-0 group-focus-visible:opacity-100 group-focus-visible:translate-y-0',
+                          // 마우스가 없는 터치 기기에서는 처음부터 보인다
+                          'pointer-coarse:opacity-100 pointer-coarse:translate-y-0'
                         )}
                       >
                         <span>{t('viewProject')}</span>

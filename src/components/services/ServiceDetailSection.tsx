@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { ScrollReveal } from '@/components/animations';
+import { ScrollReveal, useRevealed } from '@/components/animations';
 import { Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
@@ -33,6 +33,7 @@ export function ServiceDetailSection({
   image,
 }: ServiceDetailSectionProps) {
   const isEven = index % 2 === 0;
+  const [featuresRef, featuresRevealed] = useRevealed<HTMLUListElement>('0px');
 
   return (
     <section
@@ -118,13 +119,12 @@ export function ServiceDetailSection({
               </p>
 
               {/* Features list */}
-              <ul className="mb-8 space-y-3" role="list">
+              <ul ref={featuresRef} className="mb-8 space-y-3" role="list">
                 {features.map((feature, i) => (
                   <motion.li
                     key={i}
                     initial={{ opacity: 0, x: -16 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
+                    animate={featuresRevealed ? { opacity: 1, x: 0 } : undefined}
                     transition={{
                       delay: 0.3 + i * 0.08,
                       duration: 0.4,

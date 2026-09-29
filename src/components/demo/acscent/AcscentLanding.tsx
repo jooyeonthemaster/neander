@@ -23,13 +23,13 @@ export function AcscentLanding({ onStart }: Props) {
       {/* Background gradient orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <motion.div
-          className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-teal-500/10"
+          className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-teal-500/10 transform-gpu"
           animate={{ scale: [1, 1.2, 1], x: [0, 30, 0], y: [0, 20, 0] }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
           style={{ filter: 'blur(80px)' }}
         />
         <motion.div
-          className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-cyan-500/8"
+          className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-cyan-500/8 transform-gpu"
           animate={{ scale: [1.2, 1, 1.2], x: [0, -20, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
           style={{ filter: 'blur(100px)' }}

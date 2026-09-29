@@ -3,6 +3,7 @@
 import { motion } from 'motion/react';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
+import { useRevealed } from '@/components/animations';
 import { ExperienceImage } from '@/components/services/ExperienceImage';
 
 interface RelatedExperience {
@@ -20,14 +21,14 @@ interface Props {
 }
 
 export function ExperienceDetailClient({ related, viewDetailLabel }: Props) {
+  const [gridRef, revealed] = useRevealed<HTMLDivElement>('-40px');
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div ref={gridRef} className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {related.map((exp, i) => (
         <motion.div
           key={exp.slug}
           initial={{ opacity: 0, y: 32 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-40px' }}
+          animate={revealed ? { opacity: 1, y: 0 } : undefined}
           transition={{
             delay: i * 0.1,
             duration: 0.6,

@@ -51,11 +51,11 @@ export default async function PortfolioPage({ params }: Props) {
 
         {/* Gradient accents */}
         <div
-          className="absolute left-0 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-500/8 blur-[100px]"
+          className="absolute left-0 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-500/8 blur-[100px] transform-gpu"
           aria-hidden="true"
         />
         <div
-          className="absolute bottom-0 right-0 h-[300px] w-[300px] translate-x-1/4 translate-y-1/4 rounded-full bg-cyan-500/6 blur-[80px]"
+          className="absolute bottom-0 right-0 h-[300px] w-[300px] translate-x-1/4 translate-y-1/4 rounded-full bg-cyan-500/6 blur-[80px] transform-gpu"
           aria-hidden="true"
         />
 

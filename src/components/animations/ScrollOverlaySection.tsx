@@ -92,11 +92,13 @@ export function ScrollOverlaySection({
   });
 
   /* ── Outgoing transforms (section being covered) ────── */
-  // Map the overlap phase [0, 1] to the scale effect
-  const scale = useTransform(scrollYProgress, [coverStart, 1], [1, 0.93]);
-  const borderRadius = useTransform(scrollYProgress, [coverStart, 1], [0, 24]);
-
+  // Map the overlap phase [0, 1] to the scale effect. When the effect is off
+  // (last section, reduced motion) the values simply stay at rest — the style
+  // keys themselves never change, so server and client HTML always match
+  // (the server can't know the visitor's reduced-motion setting).
   const shouldAnimate = !isLast && !prefersReducedMotion;
+  const scale = useTransform(scrollYProgress, [coverStart, 1], [1, shouldAnimate ? 0.93 : 1]);
+  const borderRadius = useTransform(scrollYProgress, [coverStart, 1], [0, shouldAnimate ? 24 : 0]);
 
   return (
     <>
@@ -125,13 +127,9 @@ export function ScrollOverlaySection({
         style={{
           zIndex: index + 1,
           top: stickyTop,
-          ...(shouldAnimate
-            ? {
-              scale,
-              borderRadius,
-              transformOrigin: 'center top',
-            }
-            : {}),
+          scale,
+          borderRadius,
+          transformOrigin: 'center top',
         }}
       >
         {/* ── Incoming top-edge shadow for depth separation ── */}

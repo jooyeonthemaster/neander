@@ -32,44 +32,54 @@ export function FitToViewport({ children, className }: FitToViewportProps) {
     const parent = el?.parentElement;
     if (!el || !parent) return;
 
-    const fit = () => {
-      el.style.zoom = '';
+    /** One shrink step from the current zoom. Returns true if the zoom changed. */
+    const shrink = () => {
       const style = getComputedStyle(parent);
       const target = parseFloat(style.minHeight);
-      if (!target) return;
-
-      const available =
-        target - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
-      const natural = el.offsetHeight;
-      if (natural <= available) return;
-
-      let zoom = Math.max(MIN_ZOOM, available / natural);
-      el.style.zoom = String(zoom);
-      // Zoomed layout isn't perfectly linear (fixed borders, rounding) —
-      // correct once against what the parent actually ended up at
-      const overflow = parent.offsetHeight - target;
-      if (overflow > 0 && zoom > MIN_ZOOM) {
-        zoom = Math.max(MIN_ZOOM, zoom * (available / (available + overflow)));
-        el.style.zoom = String(zoom);
-      }
+      if (!target) return false;
+      const zoom = parseFloat(el.style.zoom) || 1;
+      // Rendered (zoomed) height vs. the room left after everything else in the
+      // parent — padding and any other children
+      const rendered = el.getBoundingClientRect().height;
+      const available = parent.offsetHeight > target
+        ? target - (parent.offsetHeight - rendered)
+        : target - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+      if (rendered <= available + 1) return false;
+      const next = Math.max(MIN_ZOOM, zoom * (available / rendered));
+      if (zoom - next < 0.002) return false;
+      el.style.zoom = String(next);
+      return true;
     };
 
-    // Refit outside the observer callback — fit() itself resizes `el`
+    /**
+     * Zoomed text can wrap differently (it renders a hair smaller), so a fit
+     * can change the height it was based on. Recomputing from the unzoomed
+     * size on every size change therefore flipped between two zooms forever
+     * (a visible jitter). Only start over from 100% when the screen size
+     * changes; otherwise only ever shrink, a few steps until it fits.
+     */
+    const fit = (fromScratch: boolean) => {
+      if (fromScratch) el.style.zoom = '';
+      for (let i = 0; i < 4 && shrink(); i++);
+    };
+
     let frame = 0;
-    const scheduleFit = () => {
+    const schedule = (fromScratch: boolean) => {
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(fit);
+      frame = requestAnimationFrame(() => fit(fromScratch));
     };
+    const onContentResize = () => schedule(false);
+    const onWindowResize = () => schedule(true);
 
-    fit();
-    const observer = new ResizeObserver(scheduleFit);
+    fit(true);
+    const observer = new ResizeObserver(onContentResize);
     observer.observe(el);
-    window.addEventListener('resize', scheduleFit);
+    window.addEventListener('resize', onWindowResize);
 
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
-      window.removeEventListener('resize', scheduleFit);
+      window.removeEventListener('resize', onWindowResize);
     };
   }, []);
 

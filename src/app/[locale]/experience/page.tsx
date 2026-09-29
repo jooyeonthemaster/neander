@@ -53,7 +53,7 @@ export default async function ExperiencePage({ params }: Props) {
 
         {/* Teal glow */}
         <div
-          className="absolute left-1/2 top-0 -translate-x-1/2 h-[600px] w-[900px] rounded-full blur-[140px]"
+          className="absolute left-1/2 top-0 -translate-x-1/2 h-[600px] w-[900px] rounded-full blur-[140px] transform-gpu"
           style={{ background: 'radial-gradient(ellipse, rgba(36, 173, 181, 0.14) 0%, transparent 70%)' }}
           aria-hidden="true"
         />

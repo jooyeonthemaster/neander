@@ -3,6 +3,7 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { useRevealed } from './useRevealed';
 
 type Direction = 'up' | 'down' | 'left' | 'right';
 
@@ -52,6 +53,7 @@ export function ScrollReveal({
 }: ScrollRevealProps) {
   const offset = getDirectionOffset(direction, distance);
   const margin = useContext(RevealMarginContext) ?? '-80px';
+  const [ref, revealed] = useRevealed<HTMLDivElement>(margin, once);
 
   const variants: Variants = {
     hidden: {
@@ -73,10 +75,10 @@ export function ScrollReveal({
 
   return (
     <motion.div
+      ref={ref}
       variants={variants}
       initial="hidden"
-      whileInView="visible"
-      viewport={{ once, margin }}
+      animate={revealed ? 'visible' : 'hidden'}
       className={cn(className)}
     >
       {children}
