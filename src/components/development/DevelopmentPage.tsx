@@ -53,10 +53,26 @@ export function DevelopmentPage({ locale }: { locale: DevelopmentLocale }) {
   // Keep the first click reliable even while the server-rendered page is hydrating.
   const hydrated = useSyncExternalStore(subscribeToHydration, clientHydrationSnapshot, serverHydrationSnapshot);
   const [category, setCategory] = useState<Category>('all');
+  const filterAnchorRef = useRef<HTMLDivElement>(null);
+  const filterBarRef = useRef<HTMLDivElement>(null);
+  const restoreFilterPosition = useRef(false);
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [preview, setPreview] = useState<DevelopmentProject | null>(null);
   const featured = FEATURED[featuredIndex];
   const visibleProjects = DEVELOPMENT_PROJECTS.filter((project) => category === 'all' || project.category === category);
+
+  function changeCategory(next: Category) {
+    if (next === category) return;
+    const bar = filterBarRef.current;
+    restoreFilterPosition.current = Boolean(bar && bar.getBoundingClientRect().top <= parseFloat(getComputedStyle(bar).top) + 1);
+    setCategory(next);
+  }
+
+  useEffect(() => {
+    if (!restoreFilterPosition.current) return;
+    restoreFilterPosition.current = false;
+    smoothScrollIntoView(filterAnchorRef.current, { immediate: true });
+  }, [category]);
 
   return (
     <div className={styles.page}>
@@ -119,14 +135,15 @@ export function DevelopmentPage({ locale }: { locale: DevelopmentLocale }) {
         <div className={styles.container}>
           <div className={styles.workHeading}>
             <div><p className={styles.eyebrow}>{copy.workEyebrow}</p><h2 id="development-work-title" tabIndex={-1}>{copy.workTitle}</h2></div>
-            <div className={styles.workIntroduction}><p>{copy.workDescription}</p><div className={styles.projectTotal}><strong>{String(DEVELOPMENT_PROJECTS.length).padStart(2, '0')}</strong><span>{copy.projectsUnit}<ArrowDown size={17} aria-hidden="true" /></span></div></div>
+            <div className={styles.workIntroduction}><p>{copy.workDescription}</p></div>
           </div>
 
-          <div className={styles.filterBar}>
+          <div ref={filterAnchorRef} aria-hidden="true" />
+          <div ref={filterBarRef} className={styles.filterBar}>
             <div className={styles.filters} role="group" aria-label={copy.filterLabel}>
               {CATEGORIES.map((item) => {
                 const count = item === 'all' ? DEVELOPMENT_PROJECTS.length : DEVELOPMENT_PROJECTS.filter((project) => project.category === item).length;
-                return <button key={item} disabled={!hydrated} onClick={() => setCategory(item)} aria-pressed={category === item}>{copy.categories[item]}<span aria-hidden="true">{String(count).padStart(2, '0')}</span></button>;
+                return <button key={item} disabled={!hydrated} onClick={() => changeCategory(item)} aria-pressed={category === item}>{copy.categories[item]}<span aria-hidden="true">{String(count).padStart(2, '0')}</span></button>;
               })}
             </div>
             <span className={styles.filterCount} role="status" aria-live="polite">{copy.visibleCount(visibleProjects.length, DEVELOPMENT_PROJECTS.length)}</span>
