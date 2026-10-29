@@ -8,7 +8,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { AnimatePresence, MotionConfig, animate, motion, useMotionValue, useReducedMotion, useTransform } from 'motion/react';
-import { ArrowDown, ArrowLeft, ArrowRight, Check as CheckIcon, ChevronDown, ChevronRight, FileDown, FileText, LayoutTemplate, Plus, ShieldCheck, SlidersHorizontal, Sparkles, Trash2, X } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, Check as CheckIcon, ChevronDown, ChevronRight, FileDown, FileText, LayoutTemplate, Plus, RotateCcw, ShieldCheck, SlidersHorizontal, Sparkles, Trash2, X } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { isValidEmail } from '@/lib/email';
@@ -34,6 +34,7 @@ import { QUOTE_COPY } from './copy';
 import { Check, Field, Segmented, Stepper, inputClass } from './QuoteControls';
 import { RegionMap } from './RegionMap';
 import { EventInfoSummary } from './EventInfoSummary';
+import { TotalDelta } from './TotalDelta';
 import { QuoteOptions, type QuoteOptionsSetter } from './QuoteOptions';
 import { optionSummary } from './option-summary';
 import { QUOTE_STORAGE_KEY, addEstimateHistory, estimateHref, loadEstimateHistory, type EstimateHistoryItem } from './history';
@@ -50,6 +51,15 @@ const STORAGE_KEY = QUOTE_STORAGE_KEY;
 const BLANK: QuoteInput = {
   eventType: 'popup', eventDate: '', days: 1, hoursPerDay: 6, attendees: 100, region: 'seoul', extraStaff: 0, items: [],
 };
+
+/** 체험을 담았거나 행사 정보를 바꾼 견적인지 — 비울 것이 있는지, 새로 시작할 때 되돌릴 것이 있는지 */
+function hasDraft(input: QuoteInput): boolean {
+  return input.items.length > 0 || input.eventType !== BLANK.eventType
+    || input.eventDate !== BLANK.eventDate || input.days !== BLANK.days
+    || input.hoursPerDay !== BLANK.hoursPerDay || input.attendees !== BLANK.attendees
+    || input.region !== BLANK.region || input.extraStaff !== BLANK.extraStaff
+    || input.setupDayBefore === true;
+}
 
 function loadSaved(previewMode: boolean): QuoteInput | null {
   try {
@@ -112,7 +122,7 @@ function OptionsPopover({ itemKey, top, caretLeft, reducedMotion, onClose, onHei
 
 const PRODUCT_BY_KEY = Object.fromEntries(PRODUCTS.map((p) => [p.key, p])) as Record<ServiceKey, (typeof PRODUCTS)[number]>;
 const softEase = [0.22, 1, 0.36, 1] as const;
-const primaryButton = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-teal-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400';
+const primaryButton = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-teal-700 px-6 text-sm font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400';
 
 function AnimatedAmount({ value, lang, className, testId }: { value: number; lang: Lang; className?: string; testId?: string }) {
   const reducedMotion = useReducedMotion();
@@ -142,6 +152,8 @@ export interface QuoteExperienceEditorProps {
   onOptionsChange: QuoteOptionsSetter;
   onPerfumeSpaceChange: (size: SpaceOptions['size'] | null) => void;
   kioskExperiences: { value: string; label: string }[];
+  /** 옵션 창을 열고 닫을 때 알린다 — 열려 있는 동안 아래 고정 합계 바(모바일)를 숨긴다 */
+  onOptionsOpenChange?: (open: boolean) => void;
 }
 
 export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwork }: {
@@ -162,6 +174,8 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
 
   const [input, setInput] = useState<QuoteInput>(BLANK);
   const [presetId, setPresetId] = useState<string | null>(null);
+  // 새로 시작하면서 비운 이전 구성 — 확인 없이 사라지지 않게 되돌릴 수 있도록 이 화면에 있는 동안 기억해 둔다
+  const [replaced, setReplaced] = useState<{ input: QuoteInput; presetId: string | null } | null>(null);
   const [ready, setReady] = useState(false);
   const tracked = useRef(new Set<string>());
   const topRef = useRef<HTMLDivElement>(null);
@@ -170,6 +184,8 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
   // 행사 정보 단계의 두 쪽: 0 = 유형·인원·기간·지역, 1 = 날짜·운영 시간·인력·전날 설치
   const [conditionsPage, setConditionsPage] = useState<0 | 1>(0);
   const [activeOptions, setActiveOptions] = useState<ServiceKey | null>(null);
+  // 체험 편집 화면의 옵션 말풍선이 열려 있는지 — 말풍선에도 합계와 '다음'이 있어, 그동안 아래 고정 바는 숨긴다
+  const [optionsOpen, setOptionsOpen] = useState(false);
   const activeItem = input.items.find((i) => i.key === activeOptions) ?? null;
   // 옵션 팝오버: 고른 카드 바로 아래에 겹쳐 띄운다 (아래 내용을 밀지 않음)
   // 단계 전환 애니메이션 뒤에 카드 목록이 붙으므로, 붙는 순간을 알 수 있게 state 로 받는다
@@ -193,6 +209,8 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
   const [furthestStep, setFurthestStep] = useState(0);
   const [contact, setContact] = useState({ name: '', email: '', company: '', phone: '', note: '', consent: false });
   const [emailError, setEmailError] = useState(false);
+  // 빈 칸으로 보냈을 때 어느 칸이 비었는지 (칸마다 안내하고 첫 칸으로 포커스를 보낸다)
+  const [missing, setMissing] = useState<{ name?: boolean; email?: boolean; consent?: boolean }>({});
   const emailRef = useRef<HTMLInputElement>(null);
   const summaryRef = useRef<HTMLElement>(null);
   const focusStep = useRef<number | null>(null);
@@ -270,6 +288,8 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
     focusStep.current = target;
     setStep(target);
     setFurthestStep((previous) => Math.max(previous, target));
+    // 체험을 고르러 넘어가면 새 구성으로 진행하는 것 — 되돌리기 안내를 거둔다
+    if (target >= 2) setReplaced(null);
     if (target > 0) track('quote_step', STEP_KEYS[target]);
     // 새 단계의 맨 위가 보이게 한다
     requestAnimationFrame(() => {
@@ -287,11 +307,22 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
     setPresetId(id);
     recordQuote('p', id ?? 'blank');
     const next = preset ? structuredClone(preset.input) : { ...BLANK };
+    // 담아 둔 체험이나 행사 정보가 있었다면 되돌릴 수 있게 남겨 둔다 (빈 견적은 덮어쓰지 않는다)
+    if (hasDraft(input)) setReplaced({ input, presetId });
     setInput(startingInput(next, visual));
     setActiveOptions(preset?.input.items[0]?.key ?? null);
     setStatus('idle');
     if (!previewMode) trackEvent('quote_preset', id ?? 'blank');
     goTo(1);
+  };
+  const undoReplaced = () => {
+    if (!replaced) return;
+    recordQuote('p', 'undo');
+    setInput(replaced.input);
+    setPresetId(replaced.presetId);
+    setActiveOptions(replaced.input.items[0]?.key ?? null);
+    setReplaced(null);
+    setStatus('idle');
   };
   const showStartView = (view: 'choose' | 'templates') => {
     focusStep.current = 0;
@@ -356,17 +387,14 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
   const [doneLink, setDoneLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   useEffect(() => { if (!previewMode) setHistory(loadEstimateHistory()); }, [previewMode]);
-  const canClearQuote = input.items.length > 0 || input.eventType !== BLANK.eventType
-    || input.eventDate !== BLANK.eventDate || input.days !== BLANK.days
-    || input.hoursPerDay !== BLANK.hoursPerDay || input.attendees !== BLANK.attendees
-    || input.region !== BLANK.region || input.extraStaff !== BLANK.extraStaff
-    || input.setupDayBefore === true;
+  const canClearQuote = hasDraft(input);
 
   const clearQuote = () => {
     if (!canClearQuote || status === 'pdf' || status === 'request') return;
     const empty = { ...BLANK, items: [] };
     setInput(empty);
     setPresetId(null);
+    setReplaced(null);
     setStartView('choose');
     setActiveOptions(null);
     setConditionsPage(0);
@@ -471,15 +499,19 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
       note: String(fd.get('note') ?? '').trim(),
     };
     if (input.items.length === 0) { setStatus('error'); setMessage(c.needItems); return; }
-    if (form.email && !isValidEmail(form.email)) {
+    const invalidEmail = form.email !== '' && !isValidEmail(form.email);
+    const empty = { name: !form.name, email: !form.email, consent: fd.get('consent') !== 'on' };
+    if (invalidEmail || empty.name || empty.email || empty.consent) {
       recordQuote('x', 'invalid');
-      setEmailError(true); emailRef.current?.focus();
-      setStatus('idle'); return;
+      setMissing(empty);
+      setEmailError(invalidEmail);
+      // 위에서부터 첫 번째로 고쳐야 할 칸으로 포커스를 보낸다
+      const first = empty.name ? 'name' : empty.email || invalidEmail ? 'email' : 'consent';
+      (e.currentTarget.elements.namedItem(first) as HTMLElement | null)?.focus();
+      if (empty.name || empty.email || empty.consent) { setStatus('error'); setMessage(c.required); } else setStatus('idle');
+      return;
     }
-    if (!form.name || !form.email || fd.get('consent') !== 'on') {
-      recordQuote('x', 'invalid');
-      setStatus('error'); setMessage(c.required); return;
-    }
+    setMissing({});
     if (previewMode) {
       setStatus('done');
       setMessage(lang === 'ko'
@@ -593,10 +625,10 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                   <li key={index}>
                     <button type="button" disabled={!reachable} onClick={() => goTo(index)} aria-current={current ? 'step' : undefined}
                       className="group flex w-full flex-col items-start gap-2.5 rounded-sm text-left disabled:cursor-default">
-                      <span className={cn('inline-flex size-7 items-center justify-center rounded-full text-[11px] font-bold transition-colors duration-300', current ? 'bg-teal-600 text-white' : done ? 'bg-teal-50 text-teal-700' : 'bg-slate-100 text-slate-400')}>
+                      <span className={cn('inline-flex size-7 items-center justify-center rounded-full text-[11px] font-bold transition-colors duration-300', current ? 'bg-teal-700 text-white' : done ? 'bg-teal-50 text-teal-700' : 'bg-slate-100 text-slate-500')}>
                         {done ? <CheckIcon className="size-3.5" aria-hidden="true" /> : index + 1}
                       </span>
-                      <span className={cn('text-[11px] font-semibold sm:text-xs', current ? 'text-slate-900' : done ? 'text-slate-600' : 'text-slate-400')}>{label}</span>
+                      <span className={cn('text-[11px] font-semibold sm:text-xs', current ? 'text-slate-900' : done ? 'text-slate-600' : 'text-slate-500')}>{label}</span>
                       <span className="relative h-1 w-full overflow-hidden rounded-full bg-slate-100">
                         <motion.span className="absolute inset-y-0 left-0 rounded-full bg-teal-500" animate={{ width: index <= step ? '100%' : '0%' }} transition={{ duration: reducedMotion ? 0 : 0.4, ease: softEase }} />
                       </span>
@@ -648,15 +680,15 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                     </button>
                   )}
                   {startView === 'choose' ? (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:flex-1">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:flex-1 lg:content-center">
                       <motion.button type="button" data-testid="quote-start-blank" onClick={() => applyPreset(null)} whileHover={reducedMotion ? undefined : { y: -3 }} whileTap={reducedMotion ? undefined : { scale: 0.985 }}
-                        className="group grid h-full grid-cols-[48px_1fr] gap-x-4 rounded-[24px] border border-slate-200/80 bg-slate-50/70 p-5 text-left transition-colors hover:border-teal-200 hover:bg-teal-50/40 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 sm:flex sm:flex-col sm:p-7">
+                        className="group grid h-full grid-cols-[48px_1fr] gap-x-4 rounded-[24px] lg:min-h-[232px] border border-slate-200/80 bg-slate-50/70 p-5 text-left transition-colors hover:border-teal-200 hover:bg-teal-50/40 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 sm:flex sm:flex-col sm:p-7">
                         <span className="row-span-2 flex size-12 items-center justify-center rounded-[18px] bg-white text-slate-600 shadow-sm sm:mb-6 sm:size-14"><SlidersHorizontal className="size-6" aria-hidden="true" /></span>
                         <span className="flex w-full items-center justify-between gap-3 text-lg font-bold tracking-tight text-slate-900">{c.startBlank}<ArrowRight className="size-5 shrink-0 text-slate-400 transition-transform group-hover:translate-x-1 motion-reduce:transform-none" aria-hidden="true" /></span>
                         <span className="mt-2 block text-sm leading-relaxed text-slate-500 [word-break:keep-all]">{c.startBlankHint}</span>
                       </motion.button>
                       <motion.button type="button" data-testid="quote-start-templates" onClick={() => showStartView('templates')} whileHover={reducedMotion ? undefined : { y: -3 }} whileTap={reducedMotion ? undefined : { scale: 0.985 }}
-                        className="group grid h-full grid-cols-[48px_1fr] gap-x-4 rounded-[24px] border border-teal-100 bg-teal-50/60 p-5 text-left transition-colors hover:border-teal-300 hover:bg-teal-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 sm:flex sm:flex-col sm:p-7">
+                        className="group grid h-full grid-cols-[48px_1fr] gap-x-4 rounded-[24px] lg:min-h-[232px] border border-teal-100 bg-teal-50/60 p-5 text-left transition-colors hover:border-teal-300 hover:bg-teal-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 sm:flex sm:flex-col sm:p-7">
                         <span className="row-span-2 flex size-12 items-center justify-center rounded-[18px] bg-white text-teal-600 shadow-sm sm:mb-6 sm:size-14"><LayoutTemplate className="size-6" aria-hidden="true" /></span>
                         <span className="flex w-full items-center justify-between gap-3 text-lg font-bold tracking-tight text-slate-900">{c.startTemplates}<ArrowRight className="size-5 shrink-0 text-teal-500 transition-transform group-hover:translate-x-1 motion-reduce:transform-none" aria-hidden="true" /></span>
                         <span className="mt-2 block text-sm leading-relaxed text-slate-500 [word-break:keep-all]">{c.startTemplatesHint}</span>
@@ -675,14 +707,20 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                           whileHover={reducedMotion ? undefined : { y: -3 }} whileTap={reducedMotion ? undefined : { scale: 0.985 }}
                           className="group overflow-hidden rounded-[20px] bg-slate-50 text-left ring-1 ring-slate-100 transition-shadow hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
                           {/* 데스크톱에선 그림을 왼쪽에 두는 가로 카드 — 네 개가 한 화면(2단계 높이)에 스크롤 없이 들어간다. */}
-                          <span className="relative block aspect-[2.2/1] overflow-hidden bg-slate-100 lg:flex lg:aspect-auto lg:h-full lg:items-center">
+                          <span aria-hidden={renderArtwork ? true : undefined} className="relative block aspect-[2.2/1] overflow-hidden bg-slate-100 lg:flex lg:aspect-auto lg:h-full lg:items-center">
                             {renderArtwork ? renderArtwork(preset.input.items[0]?.key ?? 'acscent', preset.id) : <Image src={thumbnail.src} alt={thumbnail.caption[lang]} fill sizes="(min-width: 1280px) 360px, (min-width: 640px) 40vw, 90vw" style={{ objectPosition: thumbnail.objectPosition }} className="object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transform-none" />}
                             <span className="absolute bottom-2 left-3 rounded-full bg-black/60 px-2 py-1 text-[9px] text-white">{renderArtwork ? (lang === 'ko' ? '행사 구성 일러스트' : 'Illustrative event setup') : thumbnail.caption[lang]}</span>
                           </span>
                           <span className="block p-4 lg:flex lg:flex-col lg:justify-center">
                             <span className="flex items-center justify-between gap-2 text-base font-bold text-slate-900">{preset.title[lang]}<ChevronRight className="size-4 shrink-0 text-slate-400" aria-hidden="true" /></span>
                             <span className="mt-1.5 block min-h-[2lh] text-xs leading-relaxed text-slate-500">{preset.caption[lang]}</span>
-                            <span className="mt-3 block text-sm font-bold tabular-nums text-teal-700">{manwon(calculateQuote(startingInput(preset.input, visual), lang).supply, lang)} <span className="text-[10px] font-normal text-slate-400">{lang === 'ko' ? '부가세 별도' : 'excl. VAT'}</span></span>
+                            {(() => {
+                              // 고르자마자 보이는 「예상 합계」와 같은 기준(부가세 포함)으로 보여 주고, 부가세 별도 금액을 나란히 둔다
+                              const estimate = calculateQuote(startingInput(preset.input, visual), lang);
+                              return <span data-testid={`quote-template-price-${preset.id}`} data-total={estimate.total} data-supply={estimate.supply} className="mt-3 block text-sm font-bold tabular-nums text-teal-700">
+                                {manwon(estimate.total, lang)} <span className="text-[10px] font-normal text-slate-500">{lang === 'ko' ? `부가세 포함 · 별도 ${manwon(estimate.supply, lang)}` : `incl. VAT · ${manwon(estimate.supply, lang)} before VAT`}</span>
+                              </span>;
+                            })()}
                           </span>
                         </motion.button>
                       );
@@ -690,12 +728,27 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                     </div>
                     </>
                   )}
-                  <p className="mt-5 flex items-center gap-2 text-xs text-slate-400 lg:mt-auto lg:pt-5"><ShieldCheck className="size-4 shrink-0" aria-hidden="true" />{lang === 'ko' ? '연락처를 입력하지 않아도 금액을 확인할 수 있어요.' : 'See prices without sharing your contact details.'}</p>
+                  <p className="mt-5 flex items-center gap-2 text-xs text-slate-500 lg:mt-auto lg:pt-5"><ShieldCheck className="size-4 shrink-0" aria-hidden="true" />{lang === 'ko' ? '연락처를 입력하지 않아도 금액을 확인할 수 있어요.' : 'See prices without sharing your contact details.'}</p>
                 </>
               )}
 
               {step === 1 && (
                 <>
+                  {replaced && (
+                    <div role="status" data-testid="quote-start-undo" className="mb-5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-2xl bg-amber-50 py-1.5 pl-4 pr-1.5 text-sm leading-relaxed text-amber-900">
+                      <span className="min-w-0 [word-break:keep-all]">{lang === 'ko'
+                        ? `담아 둔 구성${replaced.input.items.length ? `(체험 ${replaced.input.items.length}개)` : ''}을 비우고 새로 시작했어요.`
+                        : `Started fresh — your saved plan${replaced.input.items.length ? ` (${replaced.input.items.length} experience${replaced.input.items.length === 1 ? '' : 's'})` : ''} was cleared.`}</span>
+                      <span className="ml-auto flex shrink-0 items-center">
+                        <button type="button" data-testid="quote-start-undo-button" onClick={undoReplaced} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-amber-900 underline underline-offset-4 hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600">
+                          <RotateCcw className="size-4" aria-hidden="true" />{lang === 'ko' ? '되돌리기' : 'Undo'}
+                        </button>
+                        <button type="button" aria-label={lang === 'ko' ? '안내 닫기' : 'Dismiss'} onClick={() => setReplaced(null)} className="flex size-11 items-center justify-center rounded-xl text-amber-800 hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600">
+                          <X className="size-4" aria-hidden="true" />
+                        </button>
+                      </span>
+                    </div>
+                  )}
                   {/* 페이지 번호와 '시작 구성'을 한 줄에 — 구성이 있어도 2단계 높이가 늘지 않는다. */}
                   <div className="mb-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
                     <p className="text-xs font-semibold text-teal-700">{lang === 'ko' ? `행사 정보 ${conditionsPage + 1}/2` : `Event details ${conditionsPage + 1}/2`}</p>
@@ -728,8 +781,8 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                   ) : (
                   <div className="grid gap-x-5 gap-y-7 sm:grid-cols-2">
                     <Field label={c.eventDate} hint={lang === 'ko' ? '정해지지 않았다면 비워 두어도 괜찮아요.' : 'Leave blank if not decided yet.'}><DatePicker id="q-date" locale={lang} value={input.eventDate} onChange={(value) => update({ eventDate: value })} inputClassName={inputClass} /></Field>
-                    <Field label={c.hours} hint={c.hoursHint} price={{ amount: COMMON.extraHourPerDay, per: lang === 'ko' ? '6시간 넘으면 시간당' : 'per extra hour', after: lang === 'ko' ? '/일' : '/day' }}><Stepper id="q-hours" value={input.hoursPerDay} min={1} max={14} onChange={(value) => update({ hoursPerDay: value })} /></Field>
-                    <Field label={c.staff} hint={c.staffHint} price={{ amount: COMMON.staffPerDay, per: lang === 'ko' ? '1명당' : 'per person', after: lang === 'ko' ? '/일' : '/day' }}><Stepper id="q-staff" value={input.extraStaff} min={0} max={30} onChange={(value) => update({ extraStaff: value })} /></Field>
+                    <Field label={c.hours} hint={c.hoursHint} price={{ amount: COMMON.extraHourPerDay, per: lang === 'ko' ? '6시간 넘으면 시간당' : 'per extra hour', after: lang === 'ko' ? '/일' : '/day' }}><Stepper id="q-hours" value={input.hoursPerDay} min={1} max={14} suffix={lang === 'ko' ? '시간' : 'hours'} onChange={(value) => update({ hoursPerDay: value })} /></Field>
+                    <Field label={c.staff} hint={c.staffHint} price={{ amount: COMMON.staffPerDay, per: lang === 'ko' ? '1명당' : 'per person', after: lang === 'ko' ? '/일' : '/day' }}><Stepper id="q-staff" value={input.extraStaff} min={0} max={30} suffix={lang === 'ko' ? '명' : 'people'} onChange={(value) => update({ extraStaff: value })} /></Field>
                     <Field label={c.setup} hint={c.setupHint} price={{ amount: COMMON.setupDayBefore }}><Check id="q-setup" checked={input.setupDayBefore === true} onChange={(value) => update({ setupDayBefore: value })} label={c.setupLabel} /></Field>
                   </div>
                   )}
@@ -740,7 +793,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
 
               {step === 2 && (
                 <>
-                  {renderExperienceEditor ? renderExperienceEditor({ input, quote, lang, activeKey: activeOptions, onActiveKeyChange: setActiveOptions, onToggleItem: toggleItem, onOptionsChange: setOptions, onPerfumeSpaceChange: setPerfumeSpace, kioskExperiences }) : <>
+                  {renderExperienceEditor ? renderExperienceEditor({ input, quote, lang, activeKey: activeOptions, onActiveKeyChange: setActiveOptions, onToggleItem: toggleItem, onOptionsChange: setOptions, onPerfumeSpaceChange: setPerfumeSpace, kioskExperiences, onOptionsOpenChange: setOptionsOpen }) : <>
                   <div ref={setCardGrid} style={{ marginBottom: popoverOverflow }} className="relative grid grid-cols-1 gap-4 min-[480px]:grid-cols-2">
                     {SERVICE_ORDER.map((key) => {
                       const product = PRODUCT_BY_KEY[key];
@@ -802,7 +855,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                           </OptionsPopover>
                         )}
                   </div>
-                  <p className="mt-3 text-xs text-slate-400">{lang === 'ko' ? '시작가는 부가세 별도예요. 담은 체험을 다시 누르면 빠지고, 옵션은 \'옵션 정하기\'에서 바꿀 수 있어요.' : 'Starting prices exclude VAT. Tap a selected experience again to remove it; use “Set options” to adjust it.'}</p>
+                  <p className="mt-3 text-xs text-slate-500">{lang === 'ko' ? '시작가는 부가세 별도예요. 담은 체험을 다시 누르면 빠지고, 옵션은 \'옵션 정하기\'에서 바꿀 수 있어요.' : 'Starting prices exclude VAT. Tap a selected experience again to remove it; use “Set options” to adjust it.'}</p>
                   </>}
                   <div aria-hidden="true" className="hidden lg:block lg:flex-1" />
                   {nav(input.items.length > 0)}
@@ -823,7 +876,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                         <div className="mt-4 space-y-2">
                           <p className="text-xs text-teal-800">{c.savedLinkHint}</p>
                           <div className="flex flex-wrap gap-2">
-                            <a href={doneLink} target="_blank" rel="noopener" className="inline-flex h-10 items-center rounded-xl bg-teal-600 px-4 text-sm font-semibold text-white hover:bg-teal-500">{c.viewSaved}</a>
+                            <a href={doneLink} target="_blank" rel="noopener" className="inline-flex h-10 items-center rounded-xl bg-teal-700 px-4 text-sm font-semibold text-white hover:bg-teal-800">{c.viewSaved}</a>
                             <button type="button" onClick={() => { navigator.clipboard?.writeText(`${window.location.origin}${doneLink}`).then(() => setCopied(true)).catch(() => {}); }}
                               className="inline-flex h-10 items-center rounded-xl bg-white px-4 text-sm font-semibold text-teal-800 ring-1 ring-teal-200 hover:bg-teal-50">{copied ? c.linkCopied : c.copyLink}</button>
                           </div>
@@ -833,17 +886,24 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                   ) : (
                     <form onSubmit={onSubmit} noValidate className="space-y-5">
                       <div className="grid gap-5 sm:grid-cols-2">
-                        <Field label={`${c.name} *`}><input id="q-name" name="name" autoComplete="name" required maxLength={60} value={contact.name} onChange={(e) => setContact({ ...contact, name: e.target.value })} className={inputClass} /></Field>
-                        <Field label={`${c.email} *`}><input ref={emailRef} id="q-email" name="email" type="email" autoComplete="email" required maxLength={200} value={contact.email} aria-invalid={emailError || undefined}
-                          onChange={(e) => { setContact({ ...contact, email: e.target.value }); if (emailError && isValidEmail(e.target.value)) setEmailError(false); }}
+                        <Field label={`${c.name} *`}><input id="q-name" name="name" autoComplete="name" required maxLength={60} value={contact.name} aria-invalid={missing.name || undefined} aria-describedby={missing.name ? 'q-name-error' : undefined}
+                          onChange={(e) => { setContact({ ...contact, name: e.target.value }); if (missing.name && e.target.value.trim()) setMissing({ ...missing, name: false }); }}
+                          className={cn(inputClass, missing.name && 'border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-red-500/10')} />
+                          {missing.name && <p id="q-name-error" data-testid="quote-name-error" className="text-xs font-medium text-red-600">{c.nameRequired}</p>}</Field>
+                        <Field label={`${c.email} *`}><input ref={emailRef} id="q-email" name="email" type="email" autoComplete="email" required maxLength={200} value={contact.email} aria-invalid={emailError || missing.email || undefined} aria-describedby={missing.email ? 'q-email-required' : undefined}
+                          onChange={(e) => { setContact({ ...contact, email: e.target.value }); if (emailError && isValidEmail(e.target.value)) setEmailError(false); if (missing.email && e.target.value.trim()) setMissing({ ...missing, email: false }); }}
                           onBlur={(e) => setEmailError(e.target.value.trim() !== '' && !isValidEmail(e.target.value))}
-                          className={cn(inputClass, emailError && 'border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-red-500/10')} />
-                          {emailError && <p role="alert" data-testid="quote-email-error" className="text-xs font-medium text-red-600">{c.invalidEmail}</p>}</Field>
+                          className={cn(inputClass, (emailError || missing.email) && 'border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-red-500/10')} />
+                          {emailError && <p role="alert" data-testid="quote-email-error" className="text-xs font-medium text-red-600">{c.invalidEmail}</p>}
+                          {missing.email && !emailError && <p id="q-email-required" data-testid="quote-email-required" className="text-xs font-medium text-red-600">{c.emailRequired}</p>}</Field>
                         <Field label={c.company}><input id="q-company" name="company" autoComplete="organization" maxLength={80} value={contact.company} onChange={(e) => setContact({ ...contact, company: e.target.value })} className={inputClass} /></Field>
                         <Field label={c.phone}><input id="q-phone" name="phone" type="tel" autoComplete="tel" maxLength={40} value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} className={inputClass} /></Field>
                       </div>
                       <Field label={c.message}><textarea id="q-note" name="note" rows={3} maxLength={1000} value={contact.note} onChange={(e) => setContact({ ...contact, note: e.target.value })} className={cn(inputClass, 'h-auto py-3')} /></Field>
-                      <label data-track="consent" className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-xs leading-relaxed text-slate-500"><Checkbox name="consent" required checked={contact.consent} onChange={(e) => setContact({ ...contact, consent: e.target.checked })} className="mt-0.5 size-4" /><span>{c.consent} <Link href="/privacy" className="font-medium text-teal-700 underline underline-offset-2">{c.privacy}</Link></span></label>
+                      <div>
+                        <label data-track="consent" className={cn('flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-xs leading-relaxed text-slate-500', missing.consent && 'bg-red-50/60 ring-1 ring-red-300')}><Checkbox name="consent" required checked={contact.consent} aria-invalid={missing.consent || undefined} aria-describedby={missing.consent ? 'q-consent-error' : undefined} onChange={(e) => { setContact({ ...contact, consent: e.target.checked }); if (missing.consent && e.target.checked) setMissing({ ...missing, consent: false }); }} className="mt-0.5 size-4" /><span>{c.consent} <Link href="/privacy" className="font-medium text-teal-700 underline underline-offset-2">{c.privacy}</Link></span></label>
+                        {missing.consent && <p id="q-consent-error" data-testid="quote-consent-error" className="mt-1.5 text-xs font-medium text-red-600">{c.consentRequired}</p>}
+                      </div>
                       {status === 'error' && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-600" role="alert">{message}</p>}
                       <div className="flex flex-col gap-3">
                         <button type="submit" value="pdf" disabled={status === 'pdf' || status === 'request'} className={primaryButton}><FileDown className="size-4" aria-hidden="true" />{previewMode ? (lang === 'ko' ? '견적서 받기 흐름 확인 (실험)' : 'Try the estimate flow (test)') : status === 'pdf' ? c.pdfBusy : c.pdf}</button>
@@ -876,35 +936,41 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
             {input.items.length === 0 ? (
               <div className={cn('text-center', step >= 2 ? 'py-6' : 'py-8')}>
                 <div className={cn('mb-5 flex justify-center -space-x-3', step >= 2 && 'hidden')} aria-hidden="true">{(['acscent', 'photoBooth', 'rental'] as const).map((key, index) => <div key={key} className={cn('relative size-20 overflow-hidden rounded-2xl border-4 border-white shadow-sm', index === 0 ? '-rotate-12' : index === 2 ? 'rotate-12' : 'z-10 -translate-y-2')}>{renderArtwork ? renderArtwork(key) : <Image src={PRODUCT_BY_KEY[key].image} alt="" fill sizes="80px" className="object-cover" />}</div>)}</div>
-                <p className="text-sm font-semibold text-slate-700">{lang === 'ko' ? '어떤 경험을 함께 만들까요?' : 'What will you create?'}</p><p className="mx-auto mt-2 max-w-52 text-xs leading-relaxed text-slate-400">{c.sheetEmpty}</p>
+                <p className="text-sm font-semibold text-slate-700">{lang === 'ko' ? '어떤 경험을 함께 만들까요?' : 'What will you create?'}</p><p className="mx-auto mt-2 max-w-52 text-xs leading-relaxed text-slate-500">{c.sheetEmpty}</p>
               </div>
             ) : (
-              <ul className="my-5 space-y-4">
+              <>
+              <p id="quote-items-vat-note" data-testid="quote-items-vat-note" className="mt-5 text-[10px] text-slate-500">{lang === 'ko' ? '체험별 금액은 부가세 별도예요.' : 'Experience prices exclude VAT.'}</p>
+              <ul className="mb-5 mt-2.5 space-y-4" aria-describedby="quote-items-vat-note">
                 {input.items.map((item) => {
                   const lines = quote.lines.filter((line) => line.service === item.key);
                   const amount = lines.reduce((sum, line) => sum + (line.tbd ? 0 : line.amount), 0);
                   const tbd = lines.some((line) => line.tbd);
-                  return <li key={item.key} className="flex items-start gap-3"><span className="relative size-11 shrink-0 overflow-hidden rounded-xl">{renderArtwork ? renderArtwork(item.key) : <Image src={PRODUCT_BY_KEY[item.key].image} alt="" fill sizes="44px" className="object-cover" />}</span><div className="min-w-0 flex-1"><p className="text-xs font-medium text-slate-600">{SERVICE_TEXT[item.key].name[lang]}</p><p className="mt-1 text-sm font-bold tabular-nums text-slate-800">{amount > 0 ? won(amount, lang) : c.tbd}</p><p className="mt-1 text-[11px] leading-relaxed text-slate-400">{optionSummary(item, lang, (slug) => kioskExperiences.find((e) => e.value === slug)?.label).join(' · ')}</p>{tbd && amount > 0 && <p className="mt-1 text-[10px] text-amber-700">+ {c.tbd}</p>}</div><button type="button" aria-label={`${SERVICE_TEXT[item.key].name[lang]} ${lang === 'ko' ? '옵션 수정' : 'edit options'}`} onClick={() => { setActiveOptions(item.key); goTo(2); }} className="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-50 hover:text-teal-600"><ChevronRight className="size-4" aria-hidden="true" /></button></li>;
+                  return <li key={item.key} className="flex items-start gap-3"><span className="relative size-11 shrink-0 overflow-hidden rounded-xl">{renderArtwork ? renderArtwork(item.key) : <Image src={PRODUCT_BY_KEY[item.key].image} alt="" fill sizes="44px" className="object-cover" />}</span><div className="min-w-0 flex-1"><p className="text-xs font-medium text-slate-600">{SERVICE_TEXT[item.key].name[lang]}</p><p className="mt-1 text-sm font-bold tabular-nums text-slate-800">{amount > 0 ? won(amount, lang) : c.tbd}</p><p className="mt-1 text-[11px] leading-relaxed text-slate-500">{optionSummary(item, lang, (slug) => kioskExperiences.find((e) => e.value === slug)?.label).join(' · ')}</p>{tbd && amount > 0 && <p className="mt-1 text-[10px] text-amber-700">+ {c.tbd}</p>}</div><button type="button" aria-label={`${SERVICE_TEXT[item.key].name[lang]} ${lang === 'ko' ? '옵션 수정' : 'edit options'}`} onClick={() => { setActiveOptions(item.key); goTo(2); }} className="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-slate-50 hover:text-teal-700"><ChevronRight className="size-4" aria-hidden="true" /></button></li>;
                 })}
               </ul>
+              </>
             )}
             <div className="rounded-2xl bg-slate-50 p-4">
               <dl className="space-y-2 text-xs text-slate-500"><div className="flex flex-wrap justify-between gap-2"><dt>{c.supply}</dt><dd className="tabular-nums">{won(quote.supply, lang)}</dd></div><div className="flex flex-wrap justify-between gap-2"><dt>{c.vat}</dt><dd className="tabular-nums">{won(quote.vat, lang)}</dd></div></dl>
-              <div className="mt-4 border-t border-slate-200/60 pt-4"><p className="text-xs font-semibold text-slate-600">{c.mobileTotal}</p><p className="mt-1.5 break-words text-[26px] font-bold leading-tight text-teal-700"><AnimatedAmount value={quote.total} lang={lang} testId="quote-total" /></p><p className="mt-2 text-[10px] text-slate-400">{lang === 'ko' ? '부가세 포함 · 선택한 옵션 기준' : 'Including VAT · based on your selections'}</p><p data-testid="quote-disclaimer" className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">{ESTIMATE_DISCLAIMER[lang]}</p></div>
+              <div className="mt-4 border-t border-slate-200/60 pt-4"><p className="flex min-h-5 flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold text-slate-600">{c.mobileTotal}<TotalDelta value={quote.total} lang={lang} /></p><p className="mt-1.5 break-words text-[26px] font-bold leading-tight text-teal-700"><AnimatedAmount value={quote.total} lang={lang} testId="quote-total" /></p><p className="mt-2 text-[10px] text-slate-500">{lang === 'ko' ? '부가세 포함 · 선택한 옵션 기준' : 'Including VAT · based on your selections'}</p><p data-testid="quote-disclaimer" className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">{ESTIMATE_DISCLAIMER[lang]}</p></div>
             </div>
-            {quote.lines.length > 0 && <details className="group mt-4"><summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 text-xs font-medium text-slate-500 [&::-webkit-details-marker]:hidden">{lang === 'ko' ? '상세 금액 보기' : 'Price breakdown'}<ChevronDown className="size-3.5 transition-transform group-open:rotate-180" aria-hidden="true" /></summary><ul className="max-h-72 space-y-4 overflow-y-auto border-t border-slate-100 py-4" data-lenis-prevent>{quote.lines.map((line, index) => <li key={index} className="text-xs"><div className="flex flex-wrap justify-between gap-1.5"><p className="text-slate-600">{line.label}</p><span className="font-semibold tabular-nums text-slate-800">{line.tbd ? c.tbd : won(line.amount, lang)}</span></div>{line.detail && <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{line.detail}</p>}</li>)}</ul></details>}
+            {quote.lines.length > 0 && <details className="group mt-4"><summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 text-xs font-medium text-slate-500 [&::-webkit-details-marker]:hidden">{lang === 'ko' ? '상세 금액 보기' : 'Price breakdown'}<ChevronDown className="size-3.5 transition-transform group-open:rotate-180" aria-hidden="true" /></summary><ul className="max-h-72 space-y-4 overflow-y-auto border-t border-slate-100 py-4" data-lenis-prevent>{quote.lines.map((line, index) => <li key={index} className="text-xs"><div className="flex flex-wrap justify-between gap-1.5"><p className="text-slate-600">{line.label}</p><span className="font-semibold tabular-nums text-slate-800">{line.tbd ? c.tbd : won(line.amount, lang)}</span></div>{line.detail && <p className="mt-1 text-[11px] leading-relaxed text-slate-500">{line.detail}</p>}</li>)}</ul></details>}
             {quote.warnings.length > 0 && <ul className="mt-4 space-y-2 rounded-xl bg-amber-50 p-3 text-[11px] leading-relaxed text-amber-800" role="status">{quote.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul>}
-            {quote.notes.length > 0 && <details className="group mt-2"><summary className="flex min-h-10 cursor-pointer list-none items-center justify-between text-xs text-slate-400 [&::-webkit-details-marker]:hidden">{lang === 'ko' ? '이 구성의 안내사항' : 'Notes for this estimate'}<ChevronDown className="size-3.5 group-open:rotate-180" aria-hidden="true" /></summary><div className="space-y-2 pb-3 text-[11px] leading-relaxed text-slate-500">{quote.notes.map((note) => <p key={note}>{note}</p>)}</div></details>}
-            <button type="button" onClick={toEstimate} disabled={visual && step < 2 ? step === 0 : input.items.length === 0} className={cn(primaryButton, 'mt-5 w-full')}><FileDown className="size-4" aria-hidden="true" />{visual && step < 2 ? c.next : c.toForm}</button>
-            <p className="mt-3 text-center text-[10px] leading-relaxed text-slate-400">{lang === 'ko' ? '선택 내용은 이 브라우저에 자동으로 저장돼요.' : 'Your selections are saved in this browser.'}</p>
+            {quote.notes.length > 0 && <details className="group mt-2"><summary className="flex min-h-10 cursor-pointer list-none items-center justify-between text-xs text-slate-500 [&::-webkit-details-marker]:hidden">{lang === 'ko' ? '이 구성의 안내사항' : 'Notes for this estimate'}<ChevronDown className="size-3.5 group-open:rotate-180" aria-hidden="true" /></summary><div className="space-y-2 pb-3 text-[11px] leading-relaxed text-slate-500">{quote.notes.map((note) => <p key={note}>{note}</p>)}</div></details>}
+            {/* 1~2단계에서는 '다음'(화살표), 3단계부터 '견적서 받기'(내려받기). 견적서를 받은 뒤에는 다시 누를 일이 없어 감춘다 */}
+            {!(step === 3 && status === 'done') && <button type="button" data-testid="quote-summary-action" onClick={toEstimate} disabled={visual && step < 2 ? step === 0 : input.items.length === 0} className={cn(primaryButton, 'mt-5 w-full')}>
+              {visual && step < 2 ? <>{c.next}<ArrowRight className="size-4" aria-hidden="true" /></> : <><FileDown className="size-4" aria-hidden="true" />{c.toForm}</>}
+            </button>}
+            <p className="mt-3 text-center text-[10px] leading-relaxed text-slate-500">{lang === 'ko' ? '선택 내용은 이 브라우저에 자동으로 저장돼요.' : 'Your selections are saved in this browser.'}</p>
           </div>
-          <div className="mt-4 flex items-start gap-2.5 px-3 text-xs leading-relaxed text-slate-400"><Sparkles className="mt-0.5 size-4 shrink-0 text-teal-500" aria-hidden="true" /><p>{lang === 'ko' ? '아직 고민 중이어도 괜찮아요. 체험과 옵션은 언제든 바꿀 수 있어요.' : 'Still deciding? You can change any experience or option as you go.'}</p></div>
+          <div className="mt-4 flex items-start gap-2.5 px-3 text-xs leading-relaxed text-slate-500"><Sparkles className="mt-0.5 size-4 shrink-0 text-teal-500" aria-hidden="true" /><p>{lang === 'ko' ? '아직 고민 중이어도 괜찮아요. 체험과 옵션은 언제든 바꿀 수 있어요.' : 'Still deciding? You can change any experience or option as you go.'}</p></div>
         </aside>
 
-        {step > 0 && <div data-quote-bottom-bar className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-100 bg-white/95 px-5 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] pt-3 backdrop-blur-xl lg:hidden">
+        {step > 0 && <div data-quote-bottom-bar hidden={step === 2 && optionsOpen} className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-100 bg-white/95 px-5 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] pt-3 backdrop-blur-xl lg:hidden">
           <div className="mx-auto flex max-w-2xl items-center justify-between gap-3">
             <button type="button" onClick={() => smoothScrollIntoView(summaryRef.current, { block: 'start' })} className="min-w-0 text-left" aria-label={c.mobileSee}>
-              <span className="flex items-center gap-1 text-[10px] text-slate-500">{c.mobileTotal}<ArrowDown className="size-3" aria-hidden="true" /><span className="text-slate-400">{lang === 'ko' ? '부가세 포함' : 'incl. VAT'}</span></span>
+              <span className="flex items-center gap-1 text-[10px] text-slate-500">{c.mobileTotal}<ArrowDown className="size-3" aria-hidden="true" /><span className="text-slate-500">{lang === 'ko' ? '부가세 포함' : 'incl. VAT'}</span><TotalDelta value={quote.total} lang={lang} className="ml-1" /></span>
               <AnimatedAmount value={quote.total} lang={lang} className="mt-0.5 block break-words text-base font-bold text-teal-700" />
             </button>
             <button type="button" onClick={moveForward} disabled={step === 2 && input.items.length === 0} className={cn(primaryButton, 'min-h-11 shrink-0 px-5 text-xs')}>{step === 3 ? c.toForm : c.next}<ArrowRight className="size-3.5" aria-hidden="true" /></button>

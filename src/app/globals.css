@@ -428,6 +428,16 @@ body {
 /* Laptop-height desktop screens — home sections use compact spacing */
 @custom-variant lg-short (@media (width >= 64rem) and (height <= 860px));
 
+/* 손가락으로 누르는 화면(터치 기기·좁은 화면) — 작은 버튼의 누르는 영역을 44px 이상으로 키울 때 쓴다 */
+@custom-variant touch {
+  @media (pointer: coarse) {
+    @slot;
+  }
+  @media (width < 40rem) {
+    @slot;
+  }
+}
+
 /* ─────────────────────────────────────────────────────────
    Reduced Motion
    ───────────────────────────────────────────────────────── */

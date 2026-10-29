@@ -40,7 +40,7 @@ export function KioskScene({ options, lang }: { options: KioskOptions; lang: Lan
       {assignments.map((slug, index) => <li key={index} data-testid={`preview-kiosk-assignment-${index + 1}`} data-instance={index + 1} data-experience-slug={slug}
         className="flex min-w-0 items-center gap-2.5 rounded-xl border border-white bg-white/80 px-3 py-2.5">
         <span aria-hidden="true" className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-700 text-[11px] font-bold text-white">{index + 1}</span>
-        <div className="min-w-0"><p className="text-[10px] font-medium text-slate-400">{L(`${index + 1}번 기기`, `Kiosk ${index + 1}`)}</p><p className="mt-0.5 text-xs font-semibold leading-relaxed text-slate-700">{getKioskExperience(slug)?.name[lang] ?? L('체험 미정', 'Choose later')}</p></div>
+        <div className="min-w-0"><p className="text-[10px] font-medium text-slate-500">{L(`${index + 1}번 기기`, `Kiosk ${index + 1}`)}</p><p className="mt-0.5 text-xs font-semibold leading-relaxed text-slate-700">{getKioskExperience(slug)?.name[lang] ?? L('체험 미정', 'Choose later')}</p></div>
       </li>)}
     </ol>
     <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-white/80 bg-white/65 px-4 py-3.5 text-xs text-slate-600 sm:px-5" aria-live="polite" aria-atomic="true">

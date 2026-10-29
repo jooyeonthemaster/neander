@@ -13,10 +13,7 @@ for (const preview of [true, false]) {
       await page.goto(`${route}?item=acscent`, { waitUntil: 'domcontentloaded' });
       for (let i = 0; i < 2; i++) await nextPreviewStep(page);
       const panel = page.getByTestId('quote-options-acscent');
-      if (preview) await showOptionPage(page, 'acscent', 'basic');
-      else if (!(await panel.isVisible())) await page.getByTestId('quote-edit-acscent').click();
-      const accordion = () => panel.getByRole('button', { name: lang === 'ko' ? /선물·운영 옵션 더하기/ : /Gift & staffing options/ });
-      if (!preview) await accordion().click();
+      await showOptionPage(page, 'acscent', 'basic');
       const input = panel.locator('#p-teams');
       const minus = panel.getByRole('button', { name: `${QUOTE_COPY[lang].extraTeams} −`, exact: true });
       const plus = panel.getByRole('button', { name: `${QUOTE_COPY[lang].extraTeams} +`, exact: true });
@@ -64,16 +61,14 @@ for (const preview of [true, false]) {
 
       await page.goto(route, { waitUntil: 'domcontentloaded' });
       await page.getByRole('button', { name: lang === 'ko' ? /담아 둔 체험 1개/ : /You have 1 saved experiences/ }).click();
-      if (preview) await showOptionPage(page, 'acscent', 'basic');
-      else if (!(await panel.isVisible())) await page.getByTestId('quote-edit-acscent').click();
-      if (!preview) await accordion().click();
+      await showOptionPage(page, 'acscent', 'basic');
       await expectTeams(5);
       await expect(plus).toBeEnabled();
       const summary = page.getByRole('complementary', { name: QUOTE_COPY[lang].sheetTitle });
       // The compact summary is hidden in preview step three, but still provides
       // the same total-team wording when the final step becomes visible.
       if (preview) await nextPreviewStep(page);
-      await expect(summary).toContainText(lang === 'ko' ? '조향 5팀' : '5 perfumer team(s)');
+      await expect(summary).toContainText(lang === 'ko' ? '조향 5팀' : '5 perfumer teams');
 
       // Saved quantities above the standard setup are retained in both flows.
       const legacy = sanitizeInput({ items: [{ key: 'acscent', options: { guests: 100 } }] });
@@ -81,11 +76,40 @@ for (const preview of [true, false]) {
       await page.evaluate(({ storageKey, value }) => localStorage.setItem(storageKey, value), { storageKey: key, value: JSON.stringify(legacy) });
       await page.goto(route, { waitUntil: 'domcontentloaded' });
       await page.getByRole('button', { name: lang === 'ko' ? /담아 둔 체험 1개/ : /You have 1 saved experiences/ }).click();
-      if (preview) await showOptionPage(page, 'acscent', 'basic');
-      else if (!(await panel.isVisible())) await page.getByTestId('quote-edit-acscent').click();
-      if (!preview) await accordion().click();
+      await showOptionPage(page, 'acscent', 'basic');
       await expectTeams(11);
       await expect(plus).toBeEnabled();
     });
   }
+}
+
+// 기본 1팀의 출장비도 합계에 들어간다 — 팀 금액 문구와 소계 안내가 실제 과금과 같아야 한다
+for (const lang of ['ko', 'en'] as const) {
+  test(`${lang}: perfume options show that every team is charged and how the subtotal adds up`, async ({ page }) => {
+    const key = 'neander-quote-preview-flow-v1';
+    await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview?item=acscent`, { waitUntil: 'domcontentloaded' });
+    for (let i = 0; i < 2; i++) await nextPreviewStep(page);
+    const panel = await showOptionPage(page, 'acscent', 'basic');
+    const basic = panel.getByTestId('perfume-basic-configuration');
+    const breakdown = panel.getByTestId('perfume-base-breakdown');
+    const perfumeLines = async () => calculateQuote(await stored(page, key), lang).lines.filter((line) => line.service === 'acscent');
+
+    // 100명 · 10ml · 1팀 · 서울 · 1일: 150만원 + 35만원 = 185만원
+    await expect(panel.locator('#p-guests')).toHaveValue('100');
+    await expect(panel.locator('#p-teams')).toHaveValue('1');
+    await expect(basic).toContainText(lang === 'ko' ? '기본 1팀부터 적용' : 'each team');
+    await expect(basic).not.toContainText(lang === 'ko' ? '추가 팀당' : 'per extra team');
+    await expect(breakdown).toHaveAttribute('data-guests', '1500000');
+    await expect(breakdown).toHaveAttribute('data-travel', '350000');
+    await expect(breakdown).toHaveAttribute('data-subtotal', '1850000');
+    for (const amount of lang === 'ko' ? ['150만원', '35만원', '185만원'] : ['KRW 1,500,000', 'KRW 350,000', 'KRW 1,850,000']) await expect(breakdown).toContainText(amount);
+    expect((await perfumeLines()).reduce((sum, line) => sum + line.amount, 0)).toBe(1_850_000);
+
+    // 팀을 늘리면 소계도 같은 금액만큼 늘고, 견적 계산과 계속 같다
+    await panel.getByRole('button', { name: `${QUOTE_COPY[lang].extraTeams} +`, exact: true }).click();
+    await expect(panel.locator('#p-teams')).toHaveValue('2');
+    await expect(breakdown).toHaveAttribute('data-travel', '700000');
+    await expect(breakdown).toHaveAttribute('data-subtotal', '2200000');
+    await expect.poll(async () => (await perfumeLines()).reduce((sum, line) => sum + line.amount, 0)).toBe(2_200_000);
+  });
 }

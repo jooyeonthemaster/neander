@@ -1,4 +1,12 @@
 {
+  "kwave-dance-festival-2026": {
+    "objective_ko": "이틀간 이태원로 일대에서 열린 2026 K-WAVE DANCE FESTIVAL에서 국내외 관람객이 K-컬처를 직접 체험하고 결과물을 가져갈 수 있는 부스를 선보이고자 했습니다.",
+    "execution_ko": "사주 오행을 분석해 부족한 기운을 채우는 향을 처방하고 현장에서 조향하는 AI 조향사와, 사진 한 장으로 음방 엔딩요정·앨범 재킷·무대 직캠·뮤비 스틸컷 네 가지 아이돌 컨셉 포토를 만드는 AI 포토부스를 운영했습니다. 두 체험 모두 한국어·영어·일본어·중국어로 이용할 수 있게 구성했습니다.",
+    "outcome_ko": "10월 3일과 4일 이틀간 낮부터 저녁까지 두 부스를 현장 운영하며 방문객에게 맞춤 향수와 아이돌 컨셉 포토를 제공했습니다.",
+    "objective_en": "At the two-day 2026 K-WAVE DANCE FESTIVAL on Itaewon-ro, we wanted Korean and international visitors to experience K-culture hands-on and take the result home.",
+    "execution_en": "We ran an AI Perfumer that reads the Five Elements of a visitor’s saju, prescribes a scent to balance them and blends it on site, and an AI Photo Booth that turns a single photo into four K-pop idol concepts: Ending Fairy, Album Jacket, Stage Fancam and MV Still Cut. Both experiences were available in Korean, English, Japanese and Chinese.",
+    "outcome_en": "Operated both booths from daytime into the evening on October 3 and 4, giving visitors custom perfumes and idol concept photos."
+  },
   "jimff-2026-ost-fair": {
     "objective_ko": "제22회 제천국제음악영화제 OST페어에서 영화제의 이야기를 관객이 직접 참여하는 경험과 기념품으로 확장하고자 했습니다.",
     "execution_ko": "AI 조향 체험과 영화제 게임 짐프러너를 개발해 키오스크로 운영하고, 영화제 굿즈로 디퓨저 키캡 키링을 제작했습니다.",

@@ -1,6 +1,7 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { SERVICE_TEXT } from '../../src/lib/quote/catalog';
 import { calculateQuote, type QuoteInput } from '../../src/lib/quote/engine';
+import { KIOSK_EXPERIENCES } from '../../src/lib/quote/kiosk-experiences';
 import { toggleKioskExperience, closePreviewOptions, nextPreviewStep, openPreviewOptions, showOptionPage } from './helpers/quote-preview-options';
 
 for (const lang of ['ko', 'en'] as const) {
@@ -100,6 +101,18 @@ for (const lang of ['ko', 'en'] as const) {
     // toolbar first. Re-entering an actual page control triggers dismissal.
     await page.getByTestId('quote-next').focus();
     await expect(dialog).toBeHidden();
+    // 키보드: 마지막 버튼에서 Tab 을 누르면 닫히고 카드 바로 다음 요소(이 카드의 빼기 버튼)로,
+    // 첫 버튼에서 Shift+Tab 을 누르면 닫히고 카드로 돌아온다 — 사이트 헤더로 튀지 않는다
+    await openPreviewOptions(page, 'rental');
+    await page.locator('[data-testid="option-page-next"]:visible, [data-testid="quote-options-done"]:visible').last().focus();
+    await page.keyboard.press('Tab');
+    await expect(dialog).toBeHidden();
+    await expect(page.getByTestId('quote-remove-rental')).toBeFocused();
+    await openPreviewOptions(page, 'rental');
+    await expect(page.getByTestId('quote-options-close')).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(dialog).toBeHidden();
+    await expect(trigger).toBeFocused();
     await openPreviewOptions(page, 'rental');
     await closePreviewOptions(page);
     expect(await stored()).toEqual(configured);
@@ -113,3 +126,123 @@ for (const lang of ['ko', 'en'] as const) {
     expect(errors).toEqual([]);
   });
 }
+
+// 말풍선은 여는 순간 한 번만 자리를 잡는다. 열려 있는 동안에는 옵션을 고르거나 주제를 옮겨도
+// 문서 스크롤·위아래 배치·높이가 그대로이고, 늘어난 내용은 말풍선 안에서 스크롤한다.
+test.describe('an open balloon stays put', () => {
+  // 화면이 움직이는지 보려면 애니메이션을 켠 상태여야 한다 (기본 설정은 reduce)
+  test.use({ reducedMotion: 'no-preference' });
+
+  const placement = (page: Page) => page.evaluate(() => {
+    const balloon = document.querySelector<HTMLElement>('[data-testid="quote-options-popover"]')!;
+    const box = balloon.getBoundingClientRect();
+    return { scrollY: Math.round(window.scrollY), side: balloon.dataset.side, top: Math.round(box.top), height: Math.round(box.height) };
+  });
+  /** 여는 순간의 화면 맞춤(부드러운 스크롤)이 끝날 때까지 기다린다 */
+  async function settled(page: Page) {
+    let previous = await placement(page);
+    await expect.poll(async () => {
+      await page.waitForTimeout(250);
+      const current = await placement(page);
+      const still = JSON.stringify(current) === JSON.stringify(previous);
+      previous = current;
+      return still;
+    }, { timeout: 10_000 }).toBe(true);
+    return previous;
+  }
+
+  for (const lang of ['ko', 'en'] as const) {
+    test(`${lang}: choosing kiosk experiences and changing topics never moves the document or flips the balloon`, async ({ page }) => {
+      await page.route('**/api/demo-ai/**', route => route.abort());
+      await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
+      await page.getByTestId('quote-start-blank').click();
+      await nextPreviewStep(page);
+      await nextPreviewStep(page);
+
+      const kiosk = await openPreviewOptions(page, 'rental');
+      const opened = await settled(page);
+      expect(['top', 'bottom', 'overlay']).toContain(opened.side);
+      await kiosk.locator('#k-count').fill('3');
+      await kiosk.locator('#k-count').press('Enter');
+      await expect(page.locator('[data-testid="event-object"][data-service="rental"][data-kind="kiosk"]')).toHaveCount(3);
+      expect(await settled(page), 'changing the kiosk count').toEqual(opened);
+
+      await page.locator('[data-testid="option-page-next"]:visible').click();
+      await expect(kiosk.getByTestId('option-pages')).toHaveAttribute('data-current-page', 'kiosk-1');
+      expect(await settled(page), 'moving to the experience topic').toEqual(opened);
+
+      const area = kiosk.getByTestId('option-page-scroll');
+      const before = await area.evaluate(element => element.scrollHeight);
+      // 갤러리 첫 쪽의 체험 두 개를 차례로 고른다
+      for (const slug of KIOSK_EXPERIENCES.slice(0, 2).map(experience => experience.slug)) {
+        await page.getByTestId(`kiosk-experience-1-${slug}`).click();
+        await expect(page.getByTestId(`kiosk-experience-1-${slug}`)).toHaveAttribute('aria-checked', 'true');
+        expect(await settled(page), `choosing ${slug}`).toEqual(opened);
+      }
+      // 고른 체험의 기기 배분 줄만큼 내용이 길어졌다 — 말풍선은 그대로이고 안에서 스크롤한다
+      await expect(page.getByTestId('kiosk-distribution')).toBeVisible();
+      expect(await area.evaluate(element => element.scrollHeight)).toBeGreaterThan(before);
+      const overflow = await area.evaluate(element => element.scrollHeight - element.clientHeight);
+      if (overflow > 4) await expect(area).toHaveAttribute('data-more-below', 'true');
+
+      await page.locator('[data-testid="option-page-previous"]:visible').click();
+      await expect(kiosk.getByTestId('option-pages')).toHaveAttribute('data-current-page', 'basic');
+      expect(await settled(page), 'back to the first topic').toEqual(opened);
+      await closePreviewOptions(page);
+
+      // 향수: 주제를 끝까지 옮겨도 문서와 말풍선이 움직이지 않는다
+      const perfume = await openPreviewOptions(page, 'acscent');
+      const perfumeOpened = await settled(page);
+      const pages = perfume.getByTestId('option-pages');
+      const total = Number(await pages.getAttribute('data-total-steps'));
+      expect(total).toBeGreaterThanOrEqual(4);
+      for (let step = 2; step <= total; step++) {
+        await page.locator('[data-testid="option-page-next"]:visible').click();
+        await expect(pages).toHaveAttribute('data-current-step', String(step));
+        expect(await settled(page), `perfume topic ${step}`).toEqual(perfumeOpened);
+      }
+    });
+
+    test(`${lang}: kiosk customization cards show their whole label and price`, async ({ page }, testInfo) => {
+      await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
+      await page.getByTestId('quote-start-blank').click();
+      await nextPreviewStep(page);
+      await nextPreviewStep(page);
+      await showOptionPage(page, 'rental', 'kiosk-1');
+      const group = page.getByTestId('kiosk-customization-cards');
+      await group.scrollIntoViewIfNeeded();
+      const cards = group.getByRole('radio');
+      await expect(cards).toHaveCount(4);
+      for (const choice of ['none', 'brand', 'content', 'dedicated'] as const) {
+        if (choice !== 'none') await page.getByTestId(`kiosk-custom-${choice}`).click();
+        await expect(page.getByTestId(`kiosk-custom-${choice}`)).toHaveAttribute('aria-checked', 'true');
+        const measured = await cards.evaluateAll(nodes => nodes.map((node) => {
+          const card = node.getBoundingClientRect();
+          const mark = (node.querySelector('[data-card-mark]') ?? node.querySelector('svg.absolute'))?.getBoundingClientRect() ?? new DOMRect(-9, -9, 0, 0);
+          // 글자가 실제로 차지하는 영역 (이름과 금액)
+          const text = [...node.querySelectorAll('[data-card-text] > *')].map((part) => {
+            const range = document.createRange();
+            range.selectNodeContents(part);
+            return range.getBoundingClientRect();
+          });
+          return {
+            name: node.getAttribute('data-testid'),
+            clipped: node.scrollHeight - node.clientHeight, clippedWidth: node.scrollWidth - node.clientWidth,
+            height: Math.round(card.height),
+            textInside: text.every((rect) => rect.top >= card.top - .5 && rect.bottom <= card.bottom + .5 && rect.left >= card.left - .5 && rect.right <= card.right + .5),
+            markOverlapsText: text.some((rect) => rect.left < mark.right - .5 && rect.right > mark.left + .5 && rect.top < mark.bottom - .5 && rect.bottom > mark.top + .5),
+          };
+        }));
+        for (const card of measured) {
+          expect(card.clipped, `${card.name} height`).toBeLessThanOrEqual(0);
+          expect(card.clippedWidth, `${card.name} width`).toBeLessThanOrEqual(0);
+          expect(card.textInside, `${card.name} text stays inside the card`).toBe(true);
+          expect(card.markOverlapsText, `${card.name} selection mark and text`).toBe(false);
+        }
+        // 네 장 모두 가장 큰 카드의 높이에 맞춘다
+        expect(new Set(measured.map((card) => card.height)).size, JSON.stringify(measured)).toBe(1);
+      }
+      await group.screenshot({ path: testInfo.outputPath(`kiosk-custom-cards-${lang}.png`), style: 'nextjs-portal { display: none !important; }' });
+    });
+  }
+});

@@ -9,6 +9,7 @@ import { ScrollReveal } from '@/components/animations';
 import { ExperienceCard } from './ExperienceCard';
 import { DemoModal } from '@/components/demo/DemoModal';
 import { hasDemoForSlug } from '@/data/demo-registry';
+import { getLiveDemoHref } from '@/data/live-demos';
 import { cn } from '@/lib/utils';
 
 /* ── Pillar icon SVGs ────────────────────────────────── */
@@ -289,6 +290,7 @@ export function IndustryShowcase({ initialPillar, initialDemo }: IndustryShowcas
                           industryName={industryName(exp.industry)}
                           pillarColor={pillar?.color ?? '#0D9488'}
                           onOpenDemo={hasDemoForSlug(exp.slug) ? () => openDemoPopup(exp.slug) : undefined}
+                          liveDemoHref={getLiveDemoHref(exp.slug)}
                         />
                       );
                     })}

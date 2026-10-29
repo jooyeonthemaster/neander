@@ -140,6 +140,26 @@ export function footprintBounds(footprint: EventSceneFootprint): EventSceneBound
   return boundsFor([...footprint.points, ...[frontLeft, backLeft, backRight].map((point) => ({ x: point.x, y: point.y - footprint.wallHeight }))]);
 }
 
+/** Cameras ring the front of the LED wall like a stage: a half ellipse
+ * centred under the wall on screen, ends beside the wall and the middle in
+ * front of it. Cameras are spaced by arc length so none of them overlap. */
+function mediaStageArc(count: number): EventScenePoint[] {
+  const wall = { x: 1253, y: 650 };
+  const radius = { x: 185, y: 80 };
+  const point = (t: number) => {
+    const angle = Math.PI * (.9 - .8 * t);
+    return { x: wall.x + Math.cos(angle) * radius.x, y: wall.y + Math.sin(angle) * radius.y };
+  };
+  const path = Array.from({ length: 121 }, (_, index) => point(index / 120));
+  const lengths = path.reduce<number[]>((total, current, index) => [...total, index ? total[index - 1] + Math.hypot(current.x - path[index - 1].x, current.y - path[index - 1].y) : 0], []);
+  return Array.from({ length: count }, (_, index) => {
+    const target = lengths[120] * (index + .5) / count;
+    const segment = Math.max(1, lengths.findIndex((length) => length >= target));
+    const part = (target - lengths[segment - 1]) / (lengths[segment] - lengths[segment - 1]);
+    return point((segment - 1 + part) / 120);
+  });
+}
+
 /** One shared event floor for all five physical services. Selection order,
  * editor focus, totals and unrelated event fields do not change the layout.
  * Every selected station is arranged inside the purchased booth, which never
@@ -210,12 +230,8 @@ export function resolveEventScene(input: QuoteInput): EventSceneModel | null {
     add('media-screen', 'mediaArt', 0, 1250, 650, { grade: media.grade });
     add('media-operator', 'mediaArt', 0, 1085, 650);
     add('media-guest', 'mediaArt', 0, 1330, 660);
-    add('projector', 'mediaArt', 0, 1180, 700);
-    const sensorPositions = [
-      ...Array.from({ length: 8 }, (_, index) => ({ x: 1135 + index * 26, y: 780 - index * 13 })),
-      { x: 1135, y: 735 }, { x: 1175, y: 725 }, { x: 1215, y: 715 },
-    ];
-    sensorPositions.slice(0, 1 + media.extraSensors).forEach(({ x, y }, index) => add('sensor', 'mediaArt', index, x, y, { sensorType: media.sensorType ?? 'image' }));
+    add('projector', 'mediaArt', 0, 1180, 685);
+    mediaStageArc(1 + media.extraSensors).forEach(({ x, y }, index) => add('sensor', 'mediaArt', index, x, y, { sensorType: media.sensorType ?? 'image' }));
   }
   if (space?.photoZone) add('photo-zone', 'spatialDesign', 0, 650, 662, { scale: 0.85 });
 

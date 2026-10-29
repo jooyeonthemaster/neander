@@ -46,7 +46,7 @@ export function SpaceAreaInput({ id, pyeong, areaUnit = 'pyeong', lang, onChange
   return <div className="min-w-0 space-y-2.5" data-testid={`${id}-field`}>
     <div className="flex items-center gap-1.5">
       <label htmlFor={id} className="text-sm font-semibold leading-relaxed text-slate-700">{label}</label>
-      {info && <HoverInfo info={info}><button type="button" aria-label={ko ? '공간 넓이 안내' : 'About floor area'} className="flex size-5 items-center justify-center rounded-full text-slate-400 focus-visible:outline-2 focus-visible:outline-teal-600"><Info size={13} /></button></HoverInfo>}
+      {info && <HoverInfo info={info}><button type="button" aria-label={ko ? '공간 넓이 안내' : 'About floor area'} className="flex size-5 items-center justify-center rounded-full text-slate-500 focus-visible:outline-2 focus-visible:outline-teal-600"><Info size={13} /></button></HoverInfo>}
     </div>
     <div role="group" aria-label={ko ? '넓이 단위' : 'Area unit'} className="flex max-w-xs gap-1 rounded-xl bg-slate-100/80 p-1">
       {(['pyeong', 'sqm'] as const).map((unit) => <button key={unit} type="button" data-testid={`${id}-unit-${unit}`} aria-pressed={areaUnit === unit} aria-controls={id}

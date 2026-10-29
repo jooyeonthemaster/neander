@@ -50,7 +50,7 @@ export function EventInfoSummary({ input, lang, c, update, onOpenDetails }: {
         <div className="mt-1 space-y-0.5 text-xs leading-relaxed">
           <p className="text-slate-700">{eventType} · {region}</p>
           <p className="tabular-nums text-slate-500">
-            {ko ? `${input.days}일 × ${input.hoursPerDay}시간 · ${input.attendees.toLocaleString('ko-KR')}명` : `${input.days} day(s) × ${input.hoursPerDay} h · ${input.attendees.toLocaleString('en-US')} guests`}
+            {ko ? `${input.days}일 × ${input.hoursPerDay}시간 · ${input.attendees.toLocaleString('ko-KR')}명` : `${input.days} ${input.days === 1 ? 'day' : 'days'} × ${input.hoursPerDay} h · ${input.attendees.toLocaleString('en-US')} ${input.attendees === 1 ? 'guest' : 'guests'}`}
           </p>
           {extras.length > 0 && <p className="text-slate-500">{extras.join(' · ')}</p>}
         </div>

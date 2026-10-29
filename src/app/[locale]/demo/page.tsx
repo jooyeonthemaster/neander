@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { ScrollReveal } from '@/components/animations';
 import { localeAlternates } from '@/lib/seo';
+import { KIOSK_DEMO_URL } from '@/lib/constants';
 
 export async function generateMetadata({
   params,
@@ -33,7 +34,19 @@ const demos = [
     gradient: 'from-rose-400 via-fuchsia-400 to-violet-500',
     accentBg: 'bg-gradient-to-br from-rose-50 to-violet-50',
   },
+  {
+    // 실제 키오스크 프로그램은 acscent 사이트에서 돌아서 새 탭으로 연다
+    id: 'kiosk',
+    href: KIOSK_DEMO_URL,
+    external: true,
+    emoji: '🖥️',
+    gradient: 'from-teal-400 via-sky-400 to-indigo-500',
+    accentBg: 'bg-gradient-to-br from-teal-50 to-indigo-50',
+  },
 ] as const;
+
+const cardClassName =
+  'group block rounded-2xl border border-slate-200 bg-white overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-4';
 
 export default async function DemoPage({
   params,
@@ -43,6 +56,7 @@ export default async function DemoPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'demo' });
+  const tA11y = await getTranslations({ locale, namespace: 'accessibility' });
 
   return (
     <section className="min-h-screen bg-white">
@@ -69,13 +83,10 @@ export default async function DemoPage({
 
       {/* Demo cards grid */}
       <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {demos.map((demo, i) => (
-            <ScrollReveal key={demo.id} delay={i * 0.15}>
-              <Link
-                href={demo.href}
-                className="group block rounded-2xl border border-slate-200 bg-white overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-4"
-              >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {demos.map((demo, i) => {
+            const card = (
+              <>
                 {/* Preview area */}
                 <div className={`relative h-64 ${demo.accentBg} flex items-center justify-center overflow-hidden`}>
                   <div className={`absolute inset-0 bg-gradient-to-br ${demo.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
@@ -94,14 +105,37 @@ export default async function DemoPage({
                   </p>
                   <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-teal-600 group-hover:gap-3 transition-all duration-300">
                     {t('tryIt')}
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">
-                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    {'external' in demo ? (
+                      <>
+                        <span className="sr-only">{tA11y('externalLink')}</span>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                          <path d="M5 11l6-6M6 5h5v5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </>
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">
+                        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
                   </div>
                 </div>
-              </Link>
-            </ScrollReveal>
-          ))}
+              </>
+            );
+
+            return (
+              <ScrollReveal key={demo.id} delay={i * 0.15}>
+                {'external' in demo ? (
+                  <a href={demo.href} target="_blank" rel="noopener" className={cardClassName}>
+                    {card}
+                  </a>
+                ) : (
+                  <Link href={demo.href} className={cardClassName}>
+                    {card}
+                  </Link>
+                )}
+              </ScrollReveal>
+            );
+          })}
         </div>
       </div>
     </section>

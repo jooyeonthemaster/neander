@@ -28,6 +28,7 @@
     "companyName": "NEANDERco",
     "description": "Fragrance, imagery, light, sound — we engineer sensory experiences\nwith AI and bring unforgettable moments to offline spaces.",
     "cta": "Start Your Project",
+    "ctaQuote": "Get an Online Quote",
     "ctaSecondary": "View Portfolio",
     "scrollIndicator": "Scroll to explore",
     "badge": "190+ Events Delivered"
@@ -1216,6 +1217,77 @@
   "about": {
     "title": "About Us",
     "subtitle": "The People Who Design Sensory Experiences",
+    "metaDescription": "NEANDER plans and builds AI experiences with scent, photography and media art, and runs them on site at events.",
+    "hero": {
+      "eyebrow": "ABOUT NEANDER · SINCE 2022",
+      "title": "We build AI experiences\nand bring them to life on site.",
+      "description": "We connect people and brands through scent, photography and media art.\nWe stay with you from planning and production to on-site operation.",
+      "primaryCta": "Start a project",
+      "secondaryCta": "View portfolio",
+      "photoAlt": "Visitors gathered around a perfume-making table at the Pyeongtaek AI Festa experience booth",
+      "photoTitle": "Pyeongtaek AI Festa · 2026",
+      "photoRole": "AI experience planning & operation"
+    },
+    "statement": "We plan it, we build it, and we run it with you on site.",
+    "work": {
+      "label": "OUR WORK",
+      "title": "Experiences we've made",
+      "more": "See more projects",
+      "items": {
+        "jimff": {
+          "title": "Jecheon International Music & Film Festival",
+          "role": "Turning film tastes into scent · 2026",
+          "alt": "Perfume ingredient shelves and a blue backdrop at the AI perfume booth of the JIMFF OST Fair"
+        },
+        "seoulWriters": {
+          "title": "Seoul International Writers' Festival",
+          "role": "An exhibition linking books and scent · 2025",
+          "alt": "Book tables and colorful text panels in the AI book perfume exhibition at the Seoul International Writers' Festival"
+        },
+        "acscentId": {
+          "title": "AC'SCENT ID",
+          "role": "A space to find your own scent · 2025",
+          "alt": "Silver hand sculptures holding glass scent flasks at the AC'SCENT ID store"
+        }
+      }
+    },
+    "process": {
+      "label": "HOW WE WORK",
+      "title": "So a good idea\nbecomes a great event.",
+      "description": "One team connects everything from planning to operation.",
+      "steps": {
+        "plan": {
+          "title": "Planning",
+          "description": "We start by understanding your event's goals and its participants."
+        },
+        "make": {
+          "title": "Production",
+          "description": "We create the content, the space and what guests take home."
+        },
+        "operate": {
+          "title": "On-site operation",
+          "description": "We stay with you from installation to guiding every guest."
+        }
+      }
+    },
+    "story": {
+      "label": "OUR STORY",
+      "title": "From scent and space\nto more experiences.",
+      "milestones": {
+        "2022": "NEANDER founded · CROSS THE LINE",
+        "2023": "AC'SCENT Sinchon opens",
+        "2024": "AC'SCENT Wau opens",
+        "2025": "AC'SCENT ID launches",
+        "2026": "Expanding to festivals and brand events"
+      },
+      "showAll": "View full history",
+      "hideAll": "Hide full history"
+    },
+    "cta": {
+      "title": "What experience shall we create together?",
+      "description": "Start by telling us your event's goals and schedule.",
+      "button": "Start a project"
+    },
     "mission": {
       "title": "Mission",
       "content": "By combining AI technology with creative sensibility, we deliver unforgettable offline experiences to people everywhere."
@@ -1550,9 +1622,13 @@
     "subtitle": "Experience NEANDERco's AI Content Firsthand",
     "description": "Preview the AC'SCENT fragrance quiz and AI Photo Booth right here on the web.",
     "metaTitle": "Try a Demo",
-    "metaDescription": "Experience the AC'SCENT fragrance quiz and AI Photo Booth on the web.",
+    "metaDescription": "Experience the AC'SCENT fragrance quiz, AI Photo Booth and our kiosk programs on the web.",
     "category": "DEMO",
     "tryIt": "Try It",
+    "kiosk": {
+      "title": "Kiosk Experience Programs",
+      "description": "Pick one of the AI programs that run on our in-store and event kiosks and try it yourself (Korean only)."
+    },
     "scent-quiz": {
       "title": "AC'SCENT Scent Recommendation",
       "description": "Answer a few questions and let AI recommend the perfect fragrance for you.",

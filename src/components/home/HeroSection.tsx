@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { TextReveal } from '@/components/animations';
+import { QUOTE_HREF } from '@/lib/constants';
 import { Badge } from '@/components/ui';
 import { NeuralCircuitGrid } from './NeuralCircuitGrid';
 import { HeroSlideshow } from './HeroSlideshow';
@@ -92,58 +92,43 @@ export function HeroSection() {
           </Badge>
         </motion.div>
 
+        {/* 첫 화면의 글(제목·설명·버튼)은 등장 애니메이션 없이 서버 HTML 그대로 보인다 —
+            opacity:0 으로 내려보내면 스크립트가 늦을 때 제목이 비어 보이고 가장 큰 글자의 표시가 늦어진다 */}
         {/* Sub-tagline (above main heading) */}
-        <motion.p
-          className="mb-3 text-base sm:text-lg md:text-xl font-medium text-white/70 tracking-wide"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4 }}
-        >
+        <p className="mb-3 text-base sm:text-lg md:text-xl font-medium text-white/70 tracking-wide">
           {t('taglineSub')}
-        </motion.p>
+        </p>
 
         {/* Main heading */}
         <h1 className="font-[family-name:var(--font-display)] font-extrabold tracking-tight text-white">
-          <TextReveal
-            text={t('tagline')}
-            className="justify-center text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[0.95]"
-            delay={0.6}
-            staggerDelay={0.06}
-          />
+          <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[0.95]">
+            {t('tagline')}
+          </span>
         </h1>
 
         {/* Company name */}
-        <motion.p
+        <p
           className="mt-3 text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold font-[family-name:var(--font-display)] bg-linear-135 from-teal-300 to-teal-500 bg-clip-text text-transparent tracking-tight"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 1.2 }}
         >
           {t('companyName')}
-        </motion.p>
+        </p>
 
         {/* Description */}
-        <motion.p
+        <p
           className="mt-6 max-w-xl text-base sm:text-lg text-white/75 leading-relaxed whitespace-pre-line"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 1.5 }}
         >
           {t('description')}
-        </motion.p>
+        </p>
 
         {/* CTA */}
-        <motion.div
+        <div
           className="mt-8 flex flex-wrap items-center justify-center gap-3"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 1.8 }}
         >
           <Link
-            href="/contact"
+            href={QUOTE_HREF}
             className="inline-flex h-12 items-center justify-center rounded-lg bg-teal-600 px-7 text-base font-medium text-white transition-colors hover:bg-teal-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
           >
-            {t('cta')}
+            {t('ctaQuote')}
           </Link>
           <Link
             href="/portfolio"
@@ -151,7 +136,7 @@ export function HeroSection() {
           >
             {t('ctaSecondary')}
           </Link>
-        </motion.div>
+        </div>
       </motion.div>
 
       {/* ── Scroll indicator ─────────────────────────────── */}

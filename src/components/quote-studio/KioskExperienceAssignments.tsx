@@ -53,23 +53,23 @@ export function KioskExperienceAssignments({ options, lang, experiences, onChang
       </div>
       <KioskExperienceGallery number={1} value={chosen[0] ?? ''} experiences={experiences} lang={lang} onOpenDemo={onOpenDemo} dense={customize}
         {...(multiple ? { values: chosen, limit: kiosks, onChange: toggle, onClear: () => apply(distributeKioskExperiences([], kiosks)) } : { onChange: (slug: string) => apply([slug]) })} />
-      {multiple && chosen.length > 0 && <ul data-testid="kiosk-distribution" aria-label={L('기기별 배정', 'Kiosk split')} className="space-y-0.5">
+      {multiple && chosen.length > 0 && <ul data-testid="kiosk-distribution" aria-label={L('체험별 기기 수 배분', 'Kiosks per experience')} className="space-y-0.5">
         {groups.map((group) => {
           const count = group.kiosks.length;
           const canTake = groups.some((other) => other !== group && (!other.slug || other.kiosks.length > 1));
           const canGive = count > 1 && groups.some((other) => other !== group && other.slug);
           return <li key={group.slug || 'undecided'} data-testid={`kiosk-distribution-${group.slug || 'undecided'}`} data-count={count}
-            className="flex min-h-7 min-w-0 items-center gap-2 rounded-lg bg-slate-50 px-2 py-0.5 text-[11px]">
+            className="flex min-h-7 min-w-0 items-center gap-2 rounded-lg bg-slate-50 px-2 py-0.5 text-[11px] touch:min-h-12">
             <span className="shrink-0 rounded-md bg-white px-1 py-0.5 text-[10px] font-semibold tabular-nums text-teal-700 ring-1 ring-teal-100">{formatKioskNumbers(group.kiosks, lang)}</span>
             <span className={cn('min-w-0 flex-1 truncate', group.slug ? 'font-medium text-slate-800' : 'text-slate-500')}>{nameOf(group.slug)}</span>
             {group.slug && (chosen.length > 1 || hasUndecided) ? <span className="flex shrink-0 items-center gap-1">
               <button type="button" data-testid={`kiosk-distribution-less-${group.slug}`} disabled={!canGive} onClick={() => apply(shiftKioskExperience(assignments, group.slug, -1))}
                 aria-label={L(`${nameOf(group.slug)} 한 대 줄이기`, `One fewer kiosk for ${nameOf(group.slug)}`)}
-                className="flex size-6 items-center justify-center rounded-md bg-white text-slate-500 ring-1 ring-slate-200 hover:text-teal-700 disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-teal-600"><Minus size={12} aria-hidden="true" /></button>
+                className="flex size-6 items-center justify-center rounded-md bg-white text-slate-500 ring-1 ring-slate-200 hover:text-teal-700 disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-teal-600 touch:size-11"><Minus size={12} aria-hidden="true" /></button>
               <span className="w-6 text-center font-semibold tabular-nums text-slate-800">{L(`${count}대`, `${count}`)}</span>
               <button type="button" data-testid={`kiosk-distribution-more-${group.slug}`} disabled={!canTake} onClick={() => apply(shiftKioskExperience(assignments, group.slug, 1))}
                 aria-label={L(`${nameOf(group.slug)} 한 대 늘리기`, `One more kiosk for ${nameOf(group.slug)}`)}
-                className="flex size-6 items-center justify-center rounded-md bg-white text-slate-500 ring-1 ring-slate-200 hover:text-teal-700 disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-teal-600"><Plus size={12} aria-hidden="true" /></button>
+                className="flex size-6 items-center justify-center rounded-md bg-white text-slate-500 ring-1 ring-slate-200 hover:text-teal-700 disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-teal-600 touch:size-11"><Plus size={12} aria-hidden="true" /></button>
             </span> : <span className="shrink-0 font-semibold tabular-nums text-slate-600">{L(`${count}대`, `${count}`)}</span>}
           </li>;
         })}
@@ -111,7 +111,7 @@ export function KioskExperienceAssignments({ options, lang, experiences, onChang
               <Link href={`/services?demo=${slug}`} target="_blank" rel="noopener noreferrer" aria-label={L(`${selected.label} 데모 보기 · 새 탭`, `Try ${selected.label} demo in a new tab`)}
                 className="mt-1 inline-flex min-h-8 items-center gap-1 rounded text-[11px] font-medium text-teal-700 underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600">{L('데모 보기', 'Try demo')}<ArrowUpRight size={12} aria-hidden="true" /></Link>
             </div>
-          </div> : <p className="mt-2 text-[11px] leading-relaxed text-slate-400">{L('아직 정하지 않았다면 비워두어도 괜찮아요.', 'You can leave this undecided for now.')}</p>}
+          </div> : <p className="mt-2 text-[11px] leading-relaxed text-slate-500">{L('아직 정하지 않았다면 비워두어도 괜찮아요.', 'You can leave this undecided for now.')}</p>}
         </div>;
       })}
     </div>

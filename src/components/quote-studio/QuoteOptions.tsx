@@ -4,16 +4,17 @@ import { Children, isValidElement, useId, useState, type ComponentProps, type Re
 import { Select } from '@/components/ui/Select';
 import Image from 'next/image';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { ChevronDown, SlidersHorizontal, TriangleAlert } from 'lucide-react';
 import { getExperienceImage } from '@/data/experience-images';
 import {
   CUSTOM, CUSTOM_DEV, CUSTOM_DEV_TEXT, KIOSK, MEDIA_ART, OPTION_TEXT, PERFUME, PHOTO_BOOTH, SPACE, type Lang,
 } from '@/lib/quote/catalog';
 import { boothPrice, getPerfumeStaffing, type QuoteInput, type QuoteItem } from '@/lib/quote/engine';
 import { cn } from '@/lib/utils';
-import { Check, Field, inputClass, Segmented, Stepper, type Price } from './QuoteControls';
+import { Check, Field, formatPriceAmount, inputClass, Segmented, Stepper, type Price } from './QuoteControls';
 import { QUOTE_COPY } from './copy';
 import { optionInfo } from './option-info';
+import { perfumeBaseBreakdown } from './perfume-breakdown';
 import { PhotoBoothTemplates } from './PhotoBoothTemplates';
 import { KioskExperienceAssignments } from './KioskExperienceAssignments';
 import { QuoteOptionPages, type QuoteOptionPage } from './QuoteOptionPages';
@@ -156,7 +157,7 @@ function ExperienceSuggestions({ experiences, lang, onSelect, renderIllustration
           </button>
         ))}
       </div>
-      <p className="mt-2 text-[10px] text-slate-400">{lang === 'ko' ? '이해를 돕기 위한 연출 예시예요.' : 'Illustrative examples of each experience.'}</p>
+      <p className="mt-2 text-[10px] text-slate-500">{lang === 'ko' ? '이해를 돕기 위한 연출 예시예요.' : 'Illustrative examples of each experience.'}</p>
     </div>
   );
 }
@@ -188,6 +189,9 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
   const add = (amount: number, per?: string, after?: string): Price => ({ amount, per, after });
   const base = (amount: number, per?: string, after?: string): Price => ({ amount, add: false, per, after });
   const u = (koText: string, enText: string) => (ko ? koText : enText);
+  // '~부터' 금액: 한국어는 금액 뒤에 '부터', 영어는 금액 앞에 'from'
+  const from = (price: Price): Price => (ko ? { ...price, after: '부터' } : { ...price, per: 'from' });
+  const plural = (count: number, one: string, many = `${one}s`) => `${count} ${count === 1 ? one : many}`;
   const included: Price = {};
   const noExtra: Price = { free: u('추가 비용 없음', 'No extra cost') };
 
@@ -202,21 +206,45 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
         <Stepper id="p-guests" value={o.guests} min={o.customBox ? PERFUME.customBox.minGuests : PERFUME.minGuests} max={5000} step={10} suffix={ko ? '명' : paged ? undefined : 'guests'} onChange={(value) => setOptions('acscent', { guests: value })} />
         {!paged && o.customBox && <p className="text-xs font-medium leading-relaxed text-amber-700">{c.customBoxGuestsLock}</p>}
       </Field>;
-      const teamsControl = <Field label={c.extraTeams} info={info('extraTeams')} price={add(PERFUME.teamTravel[schedule.region], u('추가 팀당', 'per extra team'), u('/일', '/day'))}
-        hint={ko ? `1팀당 시간당 ${PERFUME.guestsPerTeamHour}명 · ${PERFUME.standardTeams + 1}팀부터 상담 필요` : `${PERFUME.guestsPerTeamHour} guests/hour/team · ${PERFUME.standardTeams + 1}+ teams need consultation`}>
-        <div className="max-w-64"><Stepper id="p-teams" value={staffing.teams} min={staffing.minimumTeams} suffix={ko ? '팀' : undefined} onChange={(value) => setOptions('acscent', { extraTeams: value - PERFUME.includedTeams })} /></div>
+      const teamsControl = <Field label={c.extraTeams} info={info('extraTeams')} price={base(PERFUME.teamTravel[schedule.region], u('팀당', 'each team'), u('/일 (기본 1팀부터 적용)', '/day'))}
+        // 상담 기준(4팀)은 입력 상한이 아니라서 넘겨도 입력된다 — 기준을 눈에 띄게 두고, 넘으면 입력칸 테두리와 색으로도 알린다
+        hint={<>{ko ? `1팀당 시간당 ${PERFUME.guestsPerTeamHour}명` : `${PERFUME.guestsPerTeamHour} guests/hour/team`}{' · '}
+          <span data-testid="perfume-consultation-threshold" className={cn('whitespace-nowrap font-semibold', staffing.requiresConsultation ? 'text-amber-800' : 'text-amber-700')}>
+            {ko ? `${PERFUME.standardTeams + 1}팀부터 상담 필요` : `${PERFUME.standardTeams + 1}+ teams need consultation`}
+          </span></>}>
+        <div className={cn('max-w-64 rounded-2xl', staffing.requiresConsultation && 'ring-2 ring-amber-400 ring-offset-1')}><Stepper id="p-teams" value={staffing.teams} min={staffing.minimumTeams} suffix={ko ? '팀' : undefined} onChange={(value) => setOptions('acscent', { extraTeams: value - PERFUME.includedTeams })} /></div>
       </Field>;
+      // 상담이 필요한 규모(4팀부터)면 그 기준을 맨 위 제목으로 올린다 — 본문 가운데 묻혀 있어 놓치기 쉬웠다.
+      // 열려 있는 옵션 창은 높이를 바꾸지 않으므로, 제목이 생기는 만큼 본문을 줄여 상자 높이가 늘지 않게 한다
+      // (기준 줄을 따로 두지 않고 '1팀당 N명 기준'을 본문에 넣는다).
+      const capacityBasis = ko ? `${staffing.days}일 · 하루 ${staffing.hoursPerDay}시간 기준, 1팀당 ${staffing.capacityPerTeam}명` : `${plural(staffing.days, 'day')} × ${staffing.hoursPerDay} hours/day: ${staffing.capacityPerTeam} guests per team`;
       const teamsNotice = <div data-testid="perfume-capacity-notice" role="status" aria-atomic="true"
-        className={cn('rounded-xl px-3 py-2 text-[11px] leading-relaxed', staffing.requiresConsultation ? 'bg-amber-50 text-amber-800' : 'bg-teal-50/80 text-teal-800')}>
-        <p className="font-semibold text-balance">{ko ? `${staffing.days}일 · 하루 ${staffing.hoursPerDay}시간 기준, 1팀당 ${staffing.capacityPerTeam}명` : `${staffing.days} day(s) × ${staffing.hoursPerDay} hours/day: ${staffing.capacityPerTeam} guests per team`}</p>
-        <p className="mt-0.5">{staffing.requiresConsultation
-          ? ko
-            ? `${staffing.teams}팀${staffing.automaticTeams > 0 ? '으로 자동 조정했어요' : '을 선택했어요'}. ${PERFUME.standardTeams + 1}팀부터 상담이 필요해요. 팀 출장비는 반영되며, 운영 계획과 최종 금액은 상담 후 정해요.`
-            : `${staffing.automaticTeams > 0 ? 'Adjusted to' : 'Selected'} ${staffing.teams} teams. ${PERFUME.standardTeams + 1}+ teams need consultation. Travel fees are included; the plan and final price are confirmed together.`
-          : staffing.automaticTeams > 0
+        className={cn('rounded-xl px-3 py-2 text-[11px] leading-relaxed', staffing.requiresConsultation ? 'border border-amber-300 bg-amber-50 text-amber-900' : 'bg-teal-50/80 text-teal-800')}>
+        {staffing.requiresConsultation ? <>
+          <p data-testid="perfume-consultation-title" className="flex items-start gap-1.5 text-[13px] font-bold leading-snug text-amber-900">
+            <TriangleAlert size={15} aria-hidden="true" className="mt-px shrink-0 text-amber-600" />{ko ? `${PERFUME.standardTeams + 1}팀부터 상담이 필요해요` : `${PERFUME.standardTeams + 1}+ teams need consultation`}
+          </p>
+          <p className="mt-1">{ko
+            ? `${staffing.automaticTeams > 0 ? `1팀당 ${staffing.capacityPerTeam}명 기준 ${staffing.teams}팀으로 자동 조정했어요` : `${staffing.teams}팀을 선택했어요`}. 팀 출장비는 반영되며, 운영 계획과 최종 금액은 상담 후 정해요.`
+            : `${staffing.automaticTeams > 0 ? `Adjusted to ${staffing.teams} teams at ${staffing.capacityPerTeam} guests per team` : `Selected ${staffing.teams} teams`}. Travel fees are included; the plan and final price are confirmed together.`}</p>
+        </> : <>
+          <p className="font-semibold text-balance">{capacityBasis}</p>
+          <p className="mt-0.5">{staffing.automaticTeams > 0
             ? ko ? `인원에 맞춰 ${staffing.teams}팀으로 자동 조정했어요. 팀 출장비도 반영돼요.` : `Automatically adjusted to ${staffing.teams} teams. Team travel fees are included.`
             : ko ? '팀당 조향사 1명과 보조 1명이에요. 필요한 팀 수보다 더 고를 수도 있어요.' : 'A perfumer and an assistant per team. You can choose more than the minimum.'}</p>
+        </>}
       </div>;
+      // 기본 1팀의 출장비도 합계에 들어간다 — 인원 비용만 보고 합계가 다르다고 느끼지 않게 식으로 풀어 보여 준다
+      const breakdown = perfumeBaseBreakdown(o, schedule);
+      const figure = (value: number, total = false) => <b className={cn('font-semibold tabular-nums', total ? 'text-teal-700' : 'text-slate-800')}>{formatPriceAmount(value, lang)}</b>;
+      const baseBreakdown = <p data-testid="perfume-base-breakdown" data-guests={breakdown.guests} data-travel={breakdown.travel} data-subtotal={breakdown.subtotal}
+        className="col-span-2 text-[11px] leading-[18px] text-slate-500">
+        {u('체험 인원', 'Guests')} {figure(breakdown.guests)} + {ko
+          ? `조향팀 출장비(${breakdown.teams}팀${breakdown.days > 1 ? ` × ${breakdown.days}일` : ''})`
+          : `${plural(breakdown.teams, 'team')}${breakdown.days > 1 ? ` × ${breakdown.days} days` : ''}`} {figure(breakdown.travel)}
+        {breakdown.adjustment > 0 && <> + {u('최소 금액 보정', 'minimum charge')} {figure(breakdown.adjustment)}</>}
+        {' = '}{ko && '소계 '}{figure(breakdown.subtotal, true)} {u('(부가세 별도)', 'excl. VAT')}
+      </p>;
       const volumeControl = <Field label={c.volume} info={info('volume')} hint={ko ? '가볍게 선물하는 10ml, 넉넉하게 즐기는 50ml' : '10ml for a small gift, 50ml for more to enjoy.'}>
         <Segmented name={c.volume} compact={paged} value={o.volume} onChange={(value) => setOptions('acscent', { volume: value })} options={[{ value: '10ml', label: '10ml', price: perGuest('10ml') }, { value: '50ml', label: '50ml', price: perGuest('50ml') }]} />
       </Field>;
@@ -227,9 +255,10 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
       </div> : null;
       return (
         <OptionsLayout key={item.key} {...layout}>
-          {paged ? <div data-testid="perfume-basic-configuration" className="grid grid-cols-2 items-start gap-3 sm:col-span-2 sm:gap-5">
+          {paged ? <div data-testid="perfume-basic-configuration" className="grid grid-cols-2 items-start gap-x-3 gap-y-2.5 sm:col-span-2 sm:gap-x-5">
             <div className="min-w-0 space-y-4">{guestsControl}{teamsControl}</div>
             <div className="min-w-0 space-y-3">{volumeControl}{teamsNotice}</div>
+            {baseBreakdown}
           </div> : <>{guestsControl}{volumeControl}</>}
           <OptionTopic id="analysis" label={ko ? '분석 기기' : 'Analysis'}>
             <Field label={c.analysis} hint={(o.analysisKiosks ?? 0) > 0 ? c.analysisKioskHint : c.analysisQrHint}>
@@ -273,8 +302,8 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
                 options={[
                   { value: 'none', label: ko ? '기본 무지 포장' : 'Plain package', price: included },
                   { value: 'brand', price: add(PERFUME.premiumPackaging[o.volume], u('병당', 'per bottle')), info: `${info('premiumPackaging')} ${ko ? `병당 ${PERFUME.premiumPackaging[o.volume].toLocaleString('ko-KR')}원` : `KRW ${PERFUME.premiumPackaging[o.volume].toLocaleString('en-US')}/bottle`}`,
-                    label: paged ? (ko ? '브랜드 포장' : 'Brand pack') : c.brandPack },
-                  { value: 'custom', info: info('customBox'), price: add(PERFUME.customBox.minimum, undefined, u('부터', '+')),
+                    label: paged ? (ko ? 'ACSCENT 브랜드 포장' : 'ACSCENT brand pack') : c.brandPack },
+                  { value: 'custom', info: info('customBox'), price: from(add(PERFUME.customBox.minimum)),
                     label: paged ? (ko ? '전용 단박스' : 'Custom box') : `${c.customBox}${o.guests < PERFUME.customBox.minGuests ? (ko ? ` (${PERFUME.customBox.minGuests}명부터)` : ` (${PERFUME.customBox.minGuests}+ guests)`) : ''}` },
                 ]} />
               <div aria-live="polite">
@@ -332,7 +361,7 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
                 options={[
                   { value: 'none', label: c.none, price: noExtra },
                   { value: 'flow', label: CUSTOM_DEV_TEXT.booth.flow.name[lang], price: add(CUSTOM_DEV.booth.flow), info: CUSTOM_DEV_TEXT.booth.flow.scope[lang] },
-                  { value: 'dedicated', label: CUSTOM_DEV_TEXT.booth.dedicated.name[lang], price: add(CUSTOM_DEV.booth.dedicated, undefined, u('부터', '+')), info: CUSTOM_DEV_TEXT.booth.dedicated.scope[lang] },
+                  { value: 'dedicated', label: CUSTOM_DEV_TEXT.booth.dedicated.name[lang], price: from(add(CUSTOM_DEV.booth.dedicated)), info: CUSTOM_DEV_TEXT.booth.dedicated.scope[lang] },
                 ]} />
             </Field></div>
             </OptionTopic>
@@ -385,7 +414,7 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
                   { value: 'none', label: c.none, price: noExtra },
                   { value: 'brand', label: CUSTOM_DEV_TEXT.kiosk.brand.name[lang], price: add(CUSTOM_DEV.kiosk.brand), info: CUSTOM_DEV_TEXT.kiosk.brand.scope[lang] },
                   { value: 'content', label: CUSTOM_DEV_TEXT.kiosk.content.name[lang], price: add(CUSTOM_DEV.kiosk.content), info: CUSTOM_DEV_TEXT.kiosk.content.scope[lang] },
-                  { value: 'dedicated', label: CUSTOM_DEV_TEXT.kiosk.dedicated.name[lang], price: add(CUSTOM_DEV.kiosk.dedicated, undefined, u('부터', '+')), info: CUSTOM_DEV_TEXT.kiosk.dedicated.scope[lang] },
+                  { value: 'dedicated', label: CUSTOM_DEV_TEXT.kiosk.dedicated.name[lang], price: from(add(CUSTOM_DEV.kiosk.dedicated)), info: CUSTOM_DEV_TEXT.kiosk.dedicated.scope[lang] },
                 ]} />
             </Field></div>
           </MoreOptions>}
@@ -398,7 +427,7 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
         <OptionsLayout key={item.key} {...layout}>
           <div className="sm:col-span-2"><Field label={c.grade} hint={ko ? '제작 규모를 먼저 고르고, 세부 연출은 상담에서 함께 정해요.' : 'Start with a production level. We’ll work out the visual details together.'}>
             <Segmented name={c.grade} value={o.grade} onChange={(value) => setOptions('mediaArt', { grade: value })}
-              options={(['standard', 'premium', 'fullCustom'] as const).map((grade) => ({ value: grade, label: OPTION_TEXT.production[grade][lang], price: base(MEDIA_ART.production[grade]), info: info(grade === 'standard' ? 'gradeStandard' : grade === 'premium' ? 'gradePremium' : 'gradeFullCustom') }))} />
+              options={(['standard', 'premium', 'fullCustom'] as const).map((grade) => ({ value: grade, label: OPTION_TEXT.production[grade][lang], price: from(base(MEDIA_ART.production[grade])), info: info(grade === 'standard' ? 'gradeStandard' : grade === 'premium' ? 'gradePremium' : 'gradeFullCustom') }))} />
           </Field></div>
           <MoreOptions lang={lang} pageId="sensors" pageLabel={ko ? '센서 구성' : 'Sensors'} title={ko ? '움직임을 어떻게 감지할까요?' : 'How should we track movement?'}
             hint="" count={Number(o.extraSensors > 0) + Number(o.sensorType === 'depth')}>
@@ -426,7 +455,7 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
           <div className="sm:col-span-2"><Field label={c.size} hint={ko ? '부스부터 팝업 공간까지, 준비 중인 크기와 가까운 것을 골라 주세요.' : 'Choose the closest size, from a single booth to a pop-up space.'}>
             <Segmented name={c.size} value={o.size} onChange={(value) => setOptions('spatialDesign', { size: value })}
               options={(['booth3x3', 'booth6x3', 'large'] as const).map((size) => ({ value: size, label: OPTION_TEXT.space[size][lang].replace(/ \((.+)\)$/, '\n$1'), info: info(size),
-                price: size === 'large' ? base(SPACE.perPyeong * 10, undefined, u('부터', '+')) : base(SPACE[size], undefined, u('부터', '+')) }))} />
+                price: from(base(size === 'large' ? SPACE.perPyeong * 10 : SPACE[size])) }))} />
           </Field></div>
           {o.size !== 'large' && <OptionTopic id="build" label={c.boothBuild} inline><div className="sm:col-span-2"><Field label={c.boothBuild} hint={c.boothBuildHint}>
             <Segmented name={c.boothBuild} value={o.build ?? 'fabric'} onChange={(value) => setOptions('spatialDesign', { build: value })}

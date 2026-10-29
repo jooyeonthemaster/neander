@@ -61,16 +61,17 @@ export function KioskExperienceGallery({ number, value, experiences, lang, onCha
   const selectionSummary = multiple ? <>
       <p aria-live="polite" aria-atomic="true" className={cn("min-w-0 flex-1 text-[10px] leading-relaxed text-teal-800", dense && "truncate")}>{chosenLabels.length ? L(`${chosenLabels.length}종 선택${full && limit > 1 ? ' · 최대' : ''}`, `${chosenLabels.length} chosen${full && limit > 1 ? ' · max' : ''}`) : L('여러 개 고를 수 있어요. 미정이면 상담 때 정해요.', 'Pick one or more, or decide later.')}</p>
       {chosenLabels.length > 0 && <button type="button" data-testid={`kiosk-experience-reset-${number}`} onClick={onClear}
-        className={cn('shrink-0 rounded px-1 text-[10px] font-medium text-teal-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-teal-600', dense ? 'min-h-6' : 'min-h-7')}>{L('모두 상담 후 결정', 'Decide later')}</button>}
+        className={cn('shrink-0 rounded px-1 text-[10px] font-medium text-teal-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-teal-600 touch:min-h-11', dense ? 'min-h-6' : 'min-h-7')}>{L('모두 상담 후 결정', 'Decide later')}</button>}
   </> : <>
       <p aria-live="polite" aria-atomic="true" className={cn("min-w-0 flex-1 text-[10px] leading-relaxed text-teal-800", dense && "truncate")}>{selected ? L(`선택: ${selected.label}`, `Selected: ${selected.label}`) : L('미정으로 넘어가도 괜찮아요. 상담할 때 함께 정해요.', 'You can decide later with our help.')}</p>
       {selected && <button type="button" data-testid={`kiosk-experience-reset-${number}`} onClick={() => onChange('')}
-        className={cn('shrink-0 rounded px-1 text-[10px] font-medium text-teal-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-teal-600', dense ? 'min-h-6' : 'min-h-7')}>{L('상담 후 결정', 'Decide later')}</button>}
+        className={cn('shrink-0 rounded px-1 text-[10px] font-medium text-teal-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-teal-600 touch:min-h-11', dense ? 'min-h-6' : 'min-h-7')}>{L('상담 후 결정', 'Decide later')}</button>}
   </>;
 
   return <div data-testid={`kiosk-assignment-${number}`} data-experience-slug={value} className={dense ? "space-y-1" : "space-y-2"}>
     <div ref={regionRef} id={id} data-testid={`kiosk-experience-gallery-${number}`} data-gallery-page={currentPage + 1}
-      role="region" aria-roledescription={L('캐러셀', 'carousel')} aria-label={L(`${number}번 키오스크의 체험 둘러보기`, `Browse experiences for kiosk ${number}`)}
+      // 여러 대면 한 갤러리에서 여러 체험을 골라 기기에 나눠 담는다 — 특정 기기 하나의 선택이 아니다
+      role="region" aria-roledescription={L('캐러셀', 'carousel')} aria-label={multiple ? L('키오스크에 넣을 체험 둘러보기 · 여러 개 선택', 'Browse experiences for your kiosks, choose one or more') : L(`${number}번 키오스크의 체험 둘러보기`, `Browse experiences for kiosk ${number}`)}
       tabIndex={0} className="overflow-hidden rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2" style={{ touchAction: 'pan-y' }}
       onKeyDown={(event) => {
         if (event.target !== event.currentTarget || event.altKey || event.ctrlKey || event.metaKey) return;
@@ -90,7 +91,7 @@ export function KioskExperienceGallery({ number, value, experiences, lang, onCha
         }
       }}
       onClickCapture={(event) => { if (event.timeStamp < suppressClickUntil.current) { event.preventDefault(); event.stopPropagation(); } }}>
-      <div role={multiple ? 'group' : 'radiogroup'} aria-label={multiple ? L('키오스크에 넣을 체험', 'Experiences for your kiosks') : L(`${number}번 키오스크의 체험`, `Experience for kiosk ${number}`)}>
+      <div role={multiple ? 'group' : 'radiogroup'} aria-label={multiple ? L(`키오스크 ${limit}대에 나눠 담을 체험 (최대 ${limit}종)`, `Experiences to split across ${limit} kiosks (up to ${limit})`) : L(`${number}번 키오스크의 체험`, `Experience for kiosk ${number}`)}>
         <AnimatePresence initial={false} mode="wait"><motion.div key={currentPage}
           initial={{ opacity: reducedMotion ? 1 : 0, x: reducedMotion ? 0 : direction * 16 }} animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: reducedMotion ? 1 : 0, x: reducedMotion ? 0 : -direction * 16 }} transition={{ duration: reducedMotion ? 0 : 0.16 }}
@@ -137,7 +138,7 @@ export function KioskExperienceGallery({ number, value, experiences, lang, onCha
               </button>
               <button type="button" data-testid={`kiosk-demo-${number}-${experience.value}`} aria-haspopup={onOpenDemo ? 'dialog' : undefined}
                 aria-label={L(`${experience.label} 데모 체험`, `Try ${experience.label} demo`)} onClick={() => openDemo(experience.value)}
-                className="absolute bottom-1 right-1 inline-flex min-h-6 items-center gap-0.5 rounded px-1 text-[9px] text-slate-500 hover:text-teal-700 focus-visible:outline-2 focus-visible:outline-teal-600">
+                className="absolute bottom-1 right-1 inline-flex min-h-6 items-center gap-0.5 rounded px-1 text-[9px] text-slate-500 hover:text-teal-700 focus-visible:outline-2 focus-visible:outline-teal-600 touch:before:absolute touch:before:-inset-x-1 touch:before:-top-5 touch:before:-bottom-1 touch:before:content-['']">
                 {L('데모 체험', 'Try demo')}<ArrowRight size={10} aria-hidden="true" />
               </button>
             </article>;
@@ -147,10 +148,10 @@ export function KioskExperienceGallery({ number, value, experiences, lang, onCha
     </div>
     <nav aria-label={L('체험 목록 넘기기', 'Browse experience pages')} className="flex items-center justify-between gap-2">
       <button type="button" aria-label={L('이전 체험 보기', 'Previous experiences')} aria-controls={id} disabled={currentPage === 0} onClick={() => movePage(-1)}
-        className={cn('flex items-center justify-center rounded-lg bg-slate-50 text-slate-600 hover:bg-teal-50 disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-teal-600', dense ? 'size-7' : 'size-8')}><ChevronLeft size={16} aria-hidden="true" /></button>
+        className={cn('flex items-center justify-center rounded-lg bg-slate-50 text-slate-600 hover:bg-teal-50 disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-teal-600 touch:size-11', dense ? 'size-7' : 'size-8')}><ChevronLeft size={16} aria-hidden="true" /></button>
       <div className={cn('min-w-0 flex-1 text-center', dense && 'flex items-center gap-2')}><span aria-live="polite" aria-atomic="true" className="shrink-0 text-[11px] tabular-nums text-slate-500">{currentPage + 1} / {pages}</span>{dense && selectionSummary}</div>
       <button type="button" aria-label={L('다음 체험 보기', 'Next experiences')} aria-controls={id} disabled={currentPage === pages - 1} onClick={() => movePage(1)}
-        className={cn('flex items-center justify-center rounded-lg bg-slate-50 text-slate-600 hover:bg-teal-50 disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-teal-600', dense ? 'size-7' : 'size-8')}><ChevronRight size={16} aria-hidden="true" /></button>
+        className={cn('flex items-center justify-center rounded-lg bg-slate-50 text-slate-600 hover:bg-teal-50 disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-teal-600 touch:size-11', dense ? 'size-7' : 'size-8')}><ChevronRight size={16} aria-hidden="true" /></button>
     </nav>
     {!dense && <div className="flex items-center gap-2 rounded-lg bg-teal-50/70 px-2.5 py-1.5">
       {selectionSummary}

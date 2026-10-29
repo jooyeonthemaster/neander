@@ -19,6 +19,8 @@ interface ExperienceCardProps {
   stretch?: boolean;
   /** 데모가 있는 서비스 — 누르면 상세 페이지 대신 데모 팝업을 연다 (새 탭·Cmd 클릭은 그대로 상세 페이지) */
   onOpenDemo?: () => void;
+  /** 실제 키오스크·포토부스 프로그램 주소 — 있으면 데모 팝업 대신 이 주소를 새 탭으로 연다 (Cmd 클릭은 그대로 상세 페이지) */
+  liveDemoHref?: string;
 }
 
 export function ExperienceCard({
@@ -29,19 +31,23 @@ export function ExperienceCard({
   industryName,
   stretch = true,
   onOpenDemo,
+  liveDemoHref,
 }: ExperienceCardProps) {
   const t = useTranslations('services');
   const tDemo = useTranslations('demos');
+  const tA11y = useTranslations('accessibility');
+  const hasDemo = Boolean(liveDemoHref || onOpenDemo);
 
   return (
     <Link
       href={`/services/${slug}`}
       onClick={(e) => {
-        if (!onOpenDemo || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        if (!hasDemo || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
         e.preventDefault();
-        onOpenDemo();
+        if (liveDemoHref) window.open(liveDemoHref, '_blank', 'noopener');
+        else onOpenDemo?.();
       }}
-      aria-haspopup={onOpenDemo ? 'dialog' : undefined}
+      aria-haspopup={!liveDemoHref && onOpenDemo ? 'dialog' : undefined}
       className={cn('block focus-visible:outline-none group', stretch && 'h-full')}
     >
       <motion.div
@@ -88,7 +94,8 @@ export function ExperienceCard({
 
           {/* Arrow link */}
           <div className="mt-4 pt-3 border-t border-neutral-100 flex items-center gap-1.5 text-sm font-semibold text-teal-600 group-hover:text-teal-700 transition-colors duration-300">
-            <span>{onOpenDemo ? tDemo('tryDemo') : t('viewDetail')}</span>
+            <span>{hasDemo ? tDemo('tryDemo') : t('viewDetail')}</span>
+            {liveDemoHref && <span className="sr-only">{tA11y('externalLink')}</span>}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -99,11 +106,20 @@ export function ExperienceCard({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="transition-transform duration-300 group-hover:translate-x-1.5"
+              className={cn(
+                'transition-transform duration-300',
+                liveDemoHref ? 'group-hover:translate-x-0.5 group-hover:-translate-y-0.5' : 'group-hover:translate-x-1.5',
+              )}
               aria-hidden="true"
             >
-              <path d="M5 12h14" />
-              <path d="m12 5 7 7-7 7" />
+              {liveDemoHref ? (
+                <path d="M7 17 17 7M8 7h9v9" />
+              ) : (
+                <>
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
+                </>
+              )}
             </svg>
           </div>
         </div>

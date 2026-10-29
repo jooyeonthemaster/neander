@@ -76,6 +76,9 @@ for (const lang of ['ko', 'en'] as const) {
     const areaTotal = await amount(page);
     await page.getByTestId('s-pyeong-unit-sqm').click();
     await expect.poll(() => amount(page)).toBe(areaTotal);
+    // 넓이 주제는 맞춤 공간을 고른 뒤에 생겼다. 열려 있는 말풍선은 높이를 바꾸지 않으므로 다시 열어 확인한다
+    await closePreviewOptions(page);
+    await showOptionPage(page, 'spatialDesign', 'area');
     await capture('spatialDesign', 'area');
     await showOptionPage(page, 'spatialDesign', 'styling');
     await space.locator('#s-zone').check();

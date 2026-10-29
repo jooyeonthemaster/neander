@@ -28,10 +28,10 @@ test('projectile measurements and result copy agree for a hit and a miss', () =>
   assert.ok(Math.abs(projectileRange(30, 18) - projectileRange(60, 18)) < 1e-10);
 });
 
-test('quote links preserve the selected service and quote tab', () => {
+test('quote links open the quote page with the selected service', () => {
   assert.deepEqual(getServiceContactHref('ai-science-kiosk'), {
-    pathname: '/contact',
-    query: { type: 'quote', service: 'ai-science-kiosk' },
+    pathname: '/quote',
+    query: { service: 'ai-science-kiosk' },
   });
 });
 

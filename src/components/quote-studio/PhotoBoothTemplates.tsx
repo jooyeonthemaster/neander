@@ -98,19 +98,19 @@ export function PhotoBoothTemplates({ options, lang, onChange, compact = false, 
               </span>
             </button></HoverInfo>
             <button type="button" data-testid={`booth-demo-${template.slug}`} aria-haspopup={onOpenDemo ? 'dialog' : undefined} aria-label={L(`${template.name.ko} 데모 체험`, `Try ${template.name.en} demo`)} onClick={() => openDemo(template.slug)}
-              className="absolute bottom-1 right-1 inline-flex min-h-6 items-center gap-0.5 rounded px-1 text-[9px] text-slate-500 hover:text-teal-700 focus-visible:outline-2 focus-visible:outline-teal-600">{L('데모', 'Demo')}<ArrowRight size={10} aria-hidden="true" /></button>
+              className="absolute bottom-1 right-1 inline-flex min-h-6 items-center gap-0.5 rounded px-1 text-[9px] text-slate-500 hover:text-teal-700 focus-visible:outline-2 focus-visible:outline-teal-600 touch:before:absolute touch:before:-inset-x-2 touch:before:-top-5 touch:before:-bottom-1 touch:before:content-['']">{L('데모', 'Demo')}<ArrowRight size={10} aria-hidden="true" /></button>
           </article>;
         })}
 
       </motion.div></AnimatePresence></div>
       <div className="flex items-center justify-between gap-3">
-        <button type="button" data-testid="booth-templates-previous" aria-label={L('이전 사진 스타일', 'Previous photo styles')} aria-controls={gridId} disabled={galleryPage === 0} onClick={() => moveGallery(-1)} className="inline-flex size-8 items-center justify-center rounded-lg bg-slate-50 text-slate-600 hover:bg-teal-50 disabled:cursor-default disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-teal-600"><ChevronLeft size={16} aria-hidden="true" /></button>
+        <button type="button" data-testid="booth-templates-previous" aria-label={L('이전 사진 스타일', 'Previous photo styles')} aria-controls={gridId} disabled={galleryPage === 0} onClick={() => moveGallery(-1)} className="inline-flex size-8 touch:size-11 items-center justify-center rounded-lg bg-slate-50 text-slate-600 hover:bg-teal-50 disabled:cursor-default disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-teal-600"><ChevronLeft size={16} aria-hidden="true" /></button>
         <div className="flex min-w-0 flex-1 items-center gap-2"><span data-testid="booth-templates-page" aria-live="polite" aria-atomic="true" className="shrink-0 text-[11px] font-medium tabular-nums text-slate-500">{galleryPage + 1} / {galleryPages}</span>
       <p data-testid="booth-template-selection" aria-live="polite" aria-atomic="true" className="truncate text-[10px] leading-4 text-teal-800">
         {selected.length || customCount > 0 ? L(`기존 ${selected.length}종${extraCount ? ` +${price(extraCount * PHOTO_BOOTH.extraStyle, lang)}` : ' 추가비 없음'}${customCount ? ` · 새 스타일 ${customCount}종 +${price(customCount * CUSTOM_DEV.boothStyle, lang)}` : ''}`, `${selected.length} existing · ${extraCount ? `+${price(extraCount * PHOTO_BOOTH.extraStyle, lang)}` : 'no extra fee'}${customCount ? ` · ${customCount} new +${price(customCount * CUSTOM_DEV.boothStyle, lang)}` : ''}`) : L('미정으로 넘어가도 괜찮아요. 상담할 때 함께 정해요.', 'You can leave styles undecided until consultation.')}
       </p>
       </div>
-        <button type="button" data-testid="booth-templates-next" aria-label={L('다음 사진 스타일', 'Next photo styles')} aria-controls={gridId} disabled={galleryPage === galleryPages - 1} onClick={() => moveGallery(1)} className="inline-flex size-8 items-center justify-center rounded-lg bg-slate-50 text-slate-600 hover:bg-teal-50 disabled:cursor-default disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-teal-600"><ChevronRight size={16} aria-hidden="true" /></button>
+        <button type="button" data-testid="booth-templates-next" aria-label={L('다음 사진 스타일', 'Next photo styles')} aria-controls={gridId} disabled={galleryPage === galleryPages - 1} onClick={() => moveGallery(1)} className="inline-flex size-8 touch:size-11 items-center justify-center rounded-lg bg-slate-50 text-slate-600 hover:bg-teal-50 disabled:cursor-default disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-teal-600"><ChevronRight size={16} aria-hidden="true" /></button>
       </div>
       <article data-testid="booth-template-custom-style" className={cn('flex min-h-[52px] min-w-0 items-center gap-2 rounded-xl border bg-white px-2.5 py-1', customCount > 0 ? 'border-teal-500 ring-1 ring-teal-500/15' : 'border-slate-200')}>
           <HoverInfo className="min-w-0 flex-1" info={`${CUSTOM_DEV_TEXT.boothStyle.scope[lang]} ${L('기존 스타일과 별도인 1회 제작비 · 부가세 별도 · 시안 3컷, 수정 1회 · 1주 전 확정', 'Separate one-time production fee · VAT excluded · 3 samples, 1 revision · confirm 1 week ahead')}`}>
@@ -129,7 +129,7 @@ export function PhotoBoothTemplates({ options, lang, onChange, compact = false, 
               onBlur={() => { if (customDraft !== null) setCustomCount(Number(customDraft || 0)); }}
               onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); event.currentTarget.blur(); } }}
               className="h-full w-8 min-w-0 flex-1 bg-transparent text-center text-[11px] font-semibold tabular-nums text-slate-800 outline-none [appearance:textfield] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-600 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
-            <span className="text-[9px] text-slate-400">{L('종', 'styles')}</span>
+            <span className="text-[9px] text-slate-500">{L('종', 'styles')}</span>
             <button type="button" aria-label={L('새로 만들 스타일 수 늘리기', 'Increase new styles')} disabled={customCount === 10} onClick={() => setCustomCount(customCount + 1)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded text-slate-600 disabled:opacity-25 focus-visible:outline-2 focus-visible:outline-teal-600"><Plus size={12} aria-hidden="true" /></button>
           </div>
         </article>

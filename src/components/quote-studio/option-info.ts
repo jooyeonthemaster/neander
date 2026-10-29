@@ -23,8 +23,8 @@ export const OPTION_INFO = {
     en: 'A touchscreen AI kiosk at the booth runs the analysis. Easier for guests who prefer not to use their phone, and more eye-catching.',
   },
   extraTeams: {
-    ko: '조향사 1명과 보조 1명이 한 팀이며, 시간당 최대 40명을 맡아요. 체험 인원과 하루 운영 시간·행사 일수에 맞춰 기본 1팀에서 필요한 만큼 자동으로 늘어나요. 필요한 팀 수 이상으로 직접 선택할 수도 있으며, 4팀부터는 상담 후 인력 배치와 최종 금액을 확정해요. 지역과 운영 일수에 따른 팀별 출장비가 견적에 반영돼요.',
-    en: 'Each team has a perfumer and an assistant and serves up to 40 guests an hour. Teams automatically increase from 1 based on perfume guests, daily hours and event days. You can choose more than the minimum. Four or more teams require consultation to confirm staffing and the final price. Travel fees apply per team, based on your region and event days.',
+    ko: '조향사 1명과 보조 1명이 한 팀이며, 시간당 최대 40명을 맡아요. 체험 인원과 하루 운영 시간·행사 일수에 맞춰 기본 1팀에서 필요한 만큼 자동으로 늘어나요. 필요한 팀 수 이상으로 직접 선택할 수도 있으며, 4팀부터는 상담 후 인력 배치와 최종 금액을 확정해요. 출장비는 기본 1팀을 포함해 팀마다, 운영일마다 견적에 반영돼요 (지역에 따라 달라요).',
+    en: 'Each team has a perfumer and an assistant and serves up to 40 guests an hour. Teams automatically increase from 1 based on perfume guests, daily hours and event days. You can choose more than the minimum. Four or more teams require consultation to confirm staffing and the final price. Travel fees apply to every team, including the first, for each event day (the rate depends on your region).',
   },
   customScent: {
     ko: '기본 체험에는 준비된 30가지 향이 포함돼요. 이 옵션은 브랜드나 행사만의 향을 새로 개발하며, 제작비 89만원(부가세 별도)이 한 번 추가돼요. 방문객은 이 향을 바탕으로 자기 향수를 만들어요.',

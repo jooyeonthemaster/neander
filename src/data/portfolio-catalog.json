@@ -1,5 +1,115 @@
 [
   {
+    "id": "kwave-dance-festival-2026",
+    "tags": [
+      "Festival",
+      "AI Perfumer",
+      "AI Photo Booth"
+    ],
+    "services": [
+      "acscent",
+      "photoBooth"
+    ],
+    "year": 2026,
+    "location": "서울 이태원",
+    "is_featured": false,
+    "title_ko": "K-WAVE DANCE FESTIVAL 2026 — AI 조향사 · AI 포토부스",
+    "title_en": "K-WAVE DANCE FESTIVAL 2026 — AI Perfumer & AI Photo Booth",
+    "description_ko": "서울 이태원로 일대에서 열린 2026 K-WAVE DANCE FESTIVAL에서 AI 조향사와 AI 포토부스 두 부스를 운영했습니다. 생년월일로 사주 오행을 읽어 나에게 맞는 향을 처방하고 현장에서 조향하는 체험과, 사진 한 장으로 K-POP 아이돌 컨셉 포토를 만드는 체험을 한국어·영어·일본어·중국어로 제공했습니다.",
+    "description_en": "At the 2026 K-WAVE DANCE FESTIVAL on Itaewon-ro in Seoul, we ran two booths: an AI Perfumer and an AI Photo Booth. Visitors had their saju (Korean astrology) read from their birth date to receive and blend a personal scent, or turned a single photo into a K-pop idol concept portrait, in Korean, English, Japanese and Chinese.",
+    "slug": "kwave-dance-festival-2026",
+    "category": "offline",
+    "tags_ko": [
+      "축제",
+      "AI 조향",
+      "AI 포토부스"
+    ],
+    "tags_en": [
+      "Festival",
+      "AI Perfumer",
+      "AI Photo Booth"
+    ],
+    "client": "K-WAVE DANCE FESTIVAL",
+    "period": "2026.10.03–10.04",
+    "period_ko": "2026.10.03–10.04",
+    "period_en": "October 3–4, 2026",
+    "client_ko": "K-WAVE DANCE FESTIVAL",
+    "client_en": "K-WAVE DANCE FESTIVAL",
+    "location_ko": "서울 이태원",
+    "location_en": "Itaewon, Seoul",
+    "result_ko": "AI 조향사 · AI 포토부스 2개 부스 현장 운영",
+    "result_en": "On-site operation of two booths · AI Perfumer and AI Photo Booth",
+    "images": [
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-01.webp?alt=media&token=fcf1b88b-e0bb-40c5-863c-e939785b882f",
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-02.webp?alt=media&token=82e4fb3e-eaf8-49a1-9bf4-e3b7e2b348a3",
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-04.webp?alt=media&token=e1043841-2e74-44e2-9614-fe450558d5a3",
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-06.webp?alt=media&token=7a070db1-d9f2-45b0-a390-8c00f5e93046",
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-07.webp?alt=media&token=0f6cbfac-822f-4aad-b006-534950683423",
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-08.webp?alt=media&token=ff9839de-5748-47ef-98b9-5904de7f4662",
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-09.webp?alt=media&token=4f4b4529-bc03-4e8a-9093-57d74abc88f0",
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-10.webp?alt=media&token=674328f5-d2f0-4b64-9190-f8f81fe744ea",
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-11.webp?alt=media&token=b72e0404-28e4-41af-8b29-0601b474e9bd",
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-12.webp?alt=media&token=2fd616b1-35b3-437b-8a04-5166bec5b10f"
+    ],
+    "thumbnail": "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-01.webp?alt=media&token=fcf1b88b-e0bb-40c5-863c-e939785b882f",
+    "image_metadata": {
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-01.webp?alt=media&token=fcf1b88b-e0bb-40c5-863c-e939785b882f": {
+        "caption_ko": "해 질 무렵의 AI 사주&퍼스널 향수 · AI 포토부스 부스 전경",
+        "caption_en": "The AI Saju & Personal Scent and AI Photo Booth tents at dusk",
+        "kind": "photo"
+      },
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-02.webp?alt=media&token=82e4fb3e-eaf8-49a1-9bf4-e3b7e2b348a3": {
+        "caption_ko": "이태원로에 나란히 선 두 부스와 관람객",
+        "caption_en": "The two booths side by side on Itaewon-ro",
+        "kind": "photo"
+      },
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-04.webp?alt=media&token=e1043841-2e74-44e2-9614-fe450558d5a3": {
+        "caption_ko": "키오스크에 생년월일을 입력하는 방문객",
+        "caption_en": "Visitors entering a birth date on the kiosk",
+        "kind": "photo"
+      },
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-06.webp?alt=media&token=7a070db1-d9f2-45b0-a390-8c00f5e93046": {
+        "caption_ko": "출력된 향 처방전과 키오스크, 조향 오르간",
+        "caption_en": "A printed scent prescription beside the kiosk and scent organ",
+        "kind": "photo"
+      },
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-07.webp?alt=media&token=0f6cbfac-822f-4aad-b006-534950683423": {
+        "caption_ko": "부스 안에서 본 조향 오르간과 차례를 기다리는 방문객",
+        "caption_en": "The scent organ seen from inside the booth, with visitors waiting their turn",
+        "kind": "photo"
+      },
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-08.webp?alt=media&token=ff9839de-5748-47ef-98b9-5904de7f4662": {
+        "caption_ko": "AI 포토부스 부스 — K-POP 아이돌 컨셉 안내 배너",
+        "caption_en": "AI Photo Booth — banner introducing the K-pop idol concepts",
+        "kind": "photo"
+      },
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-09.webp?alt=media&token=4f4b4529-bc03-4e8a-9093-57d74abc88f0": {
+        "caption_ko": "AI 포토부스 앞에 늘어선 대기 줄",
+        "caption_en": "The queue in front of the AI Photo Booth",
+        "kind": "photo"
+      },
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-10.webp?alt=media&token=674328f5-d2f0-4b64-9190-f8f81fe744ea": {
+        "caption_ko": "앨범 재킷 컨셉으로 완성된 결과 화면과 인화 사진",
+        "caption_en": "An Album Jacket result on screen and the printed photo",
+        "kind": "photo"
+      },
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-11.webp?alt=media&token=b72e0404-28e4-41af-8b29-0601b474e9bd": {
+        "caption_ko": "두 부스 앞을 채운 관람객",
+        "caption_en": "Crowds in front of both booths",
+        "kind": "photo"
+      },
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-12.webp?alt=media&token=2fd616b1-35b3-437b-8a04-5166bec5b10f": {
+        "caption_ko": "저녁까지 이어진 대기 줄",
+        "caption_en": "Queues continuing into the evening",
+        "kind": "photo"
+      }
+    },
+    "is_published": true,
+    "display_order": 1,
+    "created_at": "2026-10-07T09:35:02.000Z",
+    "updated_at": "2026-10-07T09:35:02.000Z"
+  },
+  {
     "id": "jimff-2026-ost-fair",
     "tags": [
       "Film Festival",
@@ -159,7 +269,7 @@
       }
     },
     "is_published": true,
-    "display_order": 1,
+    "display_order": 2,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -294,7 +404,7 @@
       }
     },
     "is_published": true,
-    "display_order": 2,
+    "display_order": 3,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -386,7 +496,7 @@
       }
     },
     "is_published": true,
-    "display_order": 3,
+    "display_order": 4,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -460,7 +570,7 @@
       }
     },
     "is_published": true,
-    "display_order": 4,
+    "display_order": 5,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -534,7 +644,7 @@
       }
     },
     "is_published": true,
-    "display_order": 5,
+    "display_order": 6,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -705,7 +815,7 @@
       }
     },
     "is_published": true,
-    "display_order": 6,
+    "display_order": 7,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -961,7 +1071,7 @@
       }
     },
     "is_published": true,
-    "display_order": 7,
+    "display_order": 8,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1132,7 +1242,7 @@
       }
     },
     "is_published": true,
-    "display_order": 8,
+    "display_order": 9,
     "created_at": "2025-01-01T00:00:00.000Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1224,7 +1334,7 @@
       }
     },
     "is_published": true,
-    "display_order": 9,
+    "display_order": 10,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1298,7 +1408,7 @@
       }
     },
     "is_published": true,
-    "display_order": 10,
+    "display_order": 11,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1468,7 +1578,7 @@
       }
     },
     "is_published": true,
-    "display_order": 11,
+    "display_order": 12,
     "created_at": "2025-01-01T00:00:00.000Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1560,7 +1670,7 @@
       }
     },
     "is_published": true,
-    "display_order": 12,
+    "display_order": 13,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1658,7 +1768,7 @@
       }
     },
     "is_published": true,
-    "display_order": 13,
+    "display_order": 14,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1733,7 +1843,7 @@
       }
     },
     "is_published": true,
-    "display_order": 14,
+    "display_order": 15,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1789,7 +1899,7 @@
       }
     },
     "is_published": true,
-    "display_order": 15,
+    "display_order": 16,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1894,7 +2004,7 @@
       }
     },
     "is_published": true,
-    "display_order": 16,
+    "display_order": 17,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1992,7 +2102,7 @@
       }
     },
     "is_published": true,
-    "display_order": 17,
+    "display_order": 18,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2102,7 +2212,7 @@
       }
     },
     "is_published": true,
-    "display_order": 18,
+    "display_order": 19,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2188,7 +2298,7 @@
       }
     },
     "is_published": true,
-    "display_order": 19,
+    "display_order": 20,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2286,7 +2396,7 @@
       }
     },
     "is_published": true,
-    "display_order": 20,
+    "display_order": 21,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2348,7 +2458,7 @@
       }
     },
     "is_published": true,
-    "display_order": 21,
+    "display_order": 22,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2410,7 +2520,7 @@
       }
     },
     "is_published": true,
-    "display_order": 22,
+    "display_order": 23,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2466,7 +2576,7 @@
       }
     },
     "is_published": true,
-    "display_order": 23,
+    "display_order": 24,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2534,7 +2644,7 @@
       }
     },
     "is_published": true,
-    "display_order": 24,
+    "display_order": 25,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2596,7 +2706,7 @@
       }
     },
     "is_published": true,
-    "display_order": 25,
+    "display_order": 26,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2676,7 +2786,7 @@
       }
     },
     "is_published": true,
-    "display_order": 27,
+    "display_order": 28,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2786,7 +2896,7 @@
       }
     },
     "is_published": true,
-    "display_order": 28,
+    "display_order": 29,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2878,7 +2988,7 @@
       }
     },
     "is_published": true,
-    "display_order": 29,
+    "display_order": 30,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3042,7 +3152,7 @@
       }
     },
     "is_published": true,
-    "display_order": 30,
+    "display_order": 31,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3164,7 +3274,7 @@
       }
     },
     "is_published": true,
-    "display_order": 31,
+    "display_order": 32,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3329,7 +3439,7 @@
       }
     },
     "is_published": true,
-    "display_order": 32,
+    "display_order": 33,
     "created_at": "2025-01-01T00:00:00.000Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3416,7 +3526,7 @@
       }
     },
     "is_published": true,
-    "display_order": 33,
+    "display_order": 34,
     "created_at": "2025-01-01T00:00:00.000Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3551,7 +3661,7 @@
       }
     },
     "is_published": true,
-    "display_order": 34,
+    "display_order": 35,
     "created_at": "2025-01-01T00:00:00.000Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3619,7 +3729,7 @@
       }
     },
     "is_published": true,
-    "display_order": 35,
+    "display_order": 36,
     "created_at": "2025-01-01T00:00:00.000Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3693,7 +3803,7 @@
       }
     },
     "is_published": true,
-    "display_order": 36,
+    "display_order": 37,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3767,7 +3877,7 @@
       }
     },
     "is_published": true,
-    "display_order": 37,
+    "display_order": 38,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3829,7 +3939,7 @@
       }
     },
     "is_published": true,
-    "display_order": 38,
+    "display_order": 39,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3891,7 +4001,7 @@
       }
     },
     "is_published": true,
-    "display_order": 40,
+    "display_order": 41,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3959,7 +4069,7 @@
       }
     },
     "is_published": true,
-    "display_order": 41,
+    "display_order": 42,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -4015,7 +4125,7 @@
       }
     },
     "is_published": true,
-    "display_order": 42,
+    "display_order": 43,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -4137,7 +4247,7 @@
       }
     },
     "is_published": true,
-    "display_order": 43,
+    "display_order": 44,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -4189,7 +4299,7 @@
       }
     },
     "is_published": true,
-    "display_order": 44,
+    "display_order": 45,
     "created_at": "2025-01-01T00:00:00.000Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   }

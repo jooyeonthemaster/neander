@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { calculateQuote, type QuoteInput } from '../../src/lib/quote/engine';
 import { PHOTO_BOOTH_TEMPLATES } from '../../src/lib/quote/photo-booth-templates';
-import { toggleKioskExperience, openPreviewOptions, showOptionPage, showPhotoGalleryPage } from './helpers/quote-preview-options';
+import { closePreviewOptions, toggleKioskExperience, openPreviewOptions, showOptionPage, showPhotoGalleryPage } from './helpers/quote-preview-options';
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
 
 const storageKey = 'neander-quote-preview-flow-v1';
@@ -110,7 +110,7 @@ for (const lang of ['ko', 'en'] as const) {
     expect(errors).toEqual([]);
   });
 
-  test(`${lang}: every option is reachable in order and desktop topics need no internal scrolling`, async ({ page }, testInfo) => {
+  test(`${lang}: every option is reachable in order and desktop topics need no internal scrolling when opened`, async ({ page }, testInfo) => {
     const mobile = testInfo.project.name === 'mobile';
     const viewports = mobile ? [{ width: 390, height: 844 }] : [{ width: 1440, height: 900 }, { width: 1366, height: 768 }];
     const measurements: unknown[] = [];
@@ -148,7 +148,8 @@ for (const lang of ['ko', 'en'] as const) {
             top: element.scrollTop, pageScroll: window.scrollY,
           }));
           measurements.push({ ...viewport, lang, service, page: id, ...measured });
-          if (!mobile) expect(measured.overflow, `${viewport.width}×${viewport.height} ${service}/${id}`).toBeLessThanOrEqual(1);
+          // 열려 있는 동안 말풍선은 높이를 바꾸지 않는다 — 옵션을 늘려 길어진 내용은 안에서 스크롤하고(아래 다시 열어 확인),
+          // 문서는 움직이지 않는다
           if (openingScroll === undefined) openingScroll = measured.pageScroll;
           else expect(measured.pageScroll, `${service}/${id} should not move the document`).toBe(openingScroll);
           if (id === 'space' || id === 'packaging' || id === 'photo-styles' || id === 'kiosk-1') {
@@ -174,6 +175,21 @@ for (const lang of ['ko', 'en'] as const) {
           await expect(pages).not.toHaveAttribute('data-current-page', id);
         }
         expect(visited.length).toBeLessThan(20);
+        // 다시 열면 가장 긴 주제에 맞춰 높이를 잡는다 — 데스크톱에서는 모든 주제가 안쪽 스크롤 없이 보인다.
+        // 키오스크 4대에 체험 4종을 나눠 담은 경우만 말풍선 최대 높이를 넘을 수 있고, 그때는 아래에 더 있다고 알려 준다.
+        if (!mobile) {
+          await openPreviewOptions(page, service);
+          for (const id of visited) {
+            await options.getByTestId(`option-tab-${id}`).click();
+            await expect(pages).toHaveAttribute('data-current-page', id);
+            const area = options.getByTestId('option-page-scroll');
+            const overflow = await area.evaluate(element => element.scrollHeight - element.clientHeight);
+            measurements.push({ ...viewport, lang, service, page: id, reopened: true, overflow });
+            if (service === 'rental' && id === 'kiosk-1' && overflow > 1) await expect(area).toHaveAttribute('data-more-below', 'true');
+            else expect(overflow, `${viewport.width}×${viewport.height} ${service}/${id} after reopening`).toBeLessThanOrEqual(1);
+          }
+          await closePreviewOptions(page);
+        }
         if (service === 'acscent') expect(visited).toEqual(['space', 'space-area', 'basic', 'analysis', 'packaging']);
         if (service === 'photoBooth') expect(visited).toEqual(['basic', 'photo-styles', 'prints', 'branding']);
         if (service === 'rental') expect(visited).toEqual(['basic', 'kiosk-1']);

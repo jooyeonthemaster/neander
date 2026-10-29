@@ -72,7 +72,7 @@ export function ServicePreview({ input, lang, activeKey }: { input: QuoteInput; 
           ? <PhotoTemplateStage options={model.item.options} lang={lang} />
           : <PreviewCanvas lang={lang} label={current.description}><ServiceIllustration service={model.key} item={model.item} view={current.id} lang={lang} /></PreviewCanvas>}
         <div className="space-y-3 px-4 py-4 sm:px-5">
-          <p className="text-[10px] font-medium tracking-wide text-slate-400">{current.caption}</p>
+          <p className="text-[10px] font-medium tracking-wide text-slate-500">{current.caption}</p>
           <p data-testid="preview-service-label" className="text-sm font-semibold leading-relaxed text-slate-800">{current.description}</p>
           <p className="text-xs leading-relaxed text-slate-500">{model.intro}</p>
           <ul aria-label={L('현재 선택한 구성', 'Selected configuration')} className="flex flex-wrap gap-1.5">
@@ -185,9 +185,9 @@ function ServiceDetails({ item, lang }: { item: QuoteItem; lang: Lang }) {
       <h3 className="text-xs font-semibold text-slate-800">{L('우리 행사에 맞춘 AI 콘텐츠', 'AI content tailored to your event')}</h3>
       <div className="mt-3 space-y-2 rounded-2xl bg-slate-50 p-3">
         {o.consulting && <div className="flex items-center gap-3 rounded-xl border border-dashed border-teal-200 bg-teal-50 p-3"><Layers3 size={17} className="shrink-0 text-teal-600" aria-hidden="true" /><p className="text-xs font-medium text-teal-800">{L('기획부터 함께 정리하기', 'Plan the idea together')}</p></div>}
-        <div className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm"><Monitor size={18} className="shrink-0 text-slate-400" aria-hidden="true" /><div><p className="text-[10px] font-semibold text-slate-400">01 · {L('참여', 'JOIN')}</p><p className="mt-1 text-xs font-semibold text-slate-700">{L('취향이나 이야기를 알려주세요', 'Share a preference or a story')}</p></div></div>
+        <div className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm"><Monitor size={18} className="shrink-0 text-slate-400" aria-hidden="true" /><div><p className="text-[10px] font-semibold text-slate-500">01 · {L('참여', 'JOIN')}</p><p className="mt-1 text-xs font-semibold text-slate-700">{L('취향이나 이야기를 알려주세요', 'Share a preference or a story')}</p></div></div>
         <div className={cn('grid gap-2', o.scope === 'large' ? 'grid-cols-2' : 'grid-cols-1')}>
-          <div className="rounded-xl bg-teal-600 p-4 text-white"><Sparkles size={20} aria-hidden="true" /><p className="mt-3 text-xs font-semibold">{L('나만의 AI 결과', 'Your own AI result')}</p><p className="mt-1 text-[10px] leading-relaxed text-teal-50">{L('브랜드와 연결된 이야기', 'A story linked to your brand')}</p></div>
+          <div className="rounded-xl bg-teal-700 p-4 text-white"><Sparkles size={20} aria-hidden="true" /><p className="mt-3 text-xs font-semibold">{L('나만의 AI 결과', 'Your own AI result')}</p><p className="mt-1 text-[10px] leading-relaxed text-teal-50">{L('브랜드와 연결된 이야기', 'A story linked to your brand')}</p></div>
           {o.scope === 'large' && <div className="rounded-xl bg-slate-800 p-4 text-white"><Layers3 size={20} aria-hidden="true" /><p className="mt-3 text-xs font-semibold">{L('공간으로 이어지는 체험', 'An experience across spaces')}</p><p className="mt-1 text-[10px] leading-relaxed text-slate-300">{L('여러 접점의 흐름 설계', 'Connect multiple touchpoints')}</p></div>}
         </div>
         {o.pgIntegration && <p className="rounded-xl bg-white p-3 text-xs font-medium text-teal-800">{L('콘텐츠에서 결제하고 참여하기 · PG 연결', 'Pay and participate within your content · payment gateway')}</p>}

@@ -15,17 +15,18 @@ interface Props {
   searchParams: Promise<{ t?: string }>;
 }
 
-export const metadata: Metadata = {
-  title: 'Estimate',
-  robots: { index: false, follow: false },
-};
+// 개인 정보가 들어 있어 검색에 노출하지 않는다. 제목은 화면 언어에 맞춘다
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return { title: COPY[locale === 'en' ? 'en' : 'ko'].title, robots: { index: false, follow: false } };
+}
 
 const COPY = {
   ko: {
     title: '가견적서',
     invalid: '가견적서를 찾을 수 없습니다',
-    invalidBody: '링크가 잘렸거나 바뀌었을 수 있습니다. 받은 링크를 다시 확인하거나 새로 견적을 내 주세요.',
-    newQuote: '새 견적 내기',
+    invalidBody: '링크가 잘렸거나 바뀌었을 수 있습니다. 받은 링크를 다시 확인하거나 새 견적을 만들어 주세요. 발급받은 가견적서가 필요하면 담당자에게 문의해 주세요.',
+    newQuote: '새 견적 만들기',
     issued: '발행일',
     validUntil: '유효기간',
     expired: '유효기간이 지났습니다. 금액이 달라졌을 수 있어 새로 견적을 받아 보세요.',
@@ -53,7 +54,7 @@ const COPY = {
   en: {
     title: 'Preliminary estimate',
     invalid: 'Estimate not found',
-    invalidBody: 'The link may be cut off or changed. Check the link you received or create a new estimate.',
+    invalidBody: 'The link may be cut off or changed. Check the link you received or create a new estimate. If you need the estimate we issued, contact our team.',
     newQuote: 'Create a new estimate',
     issued: 'Issued',
     validUntil: 'Valid until',
@@ -97,7 +98,11 @@ export default async function EstimatePage({ params, searchParams }: Props) {
         <div className="container-wide max-w-xl text-center">
           <h1 className="text-2xl font-bold text-slate-900">{c.invalid}</h1>
           <p className="mt-3 text-sm leading-relaxed text-slate-600">{c.invalidBody}</p>
-          <Link href="/quote" className="mt-8 inline-flex h-11 items-center rounded-lg bg-teal-600 px-6 text-sm font-semibold text-white hover:bg-teal-500">{c.newQuote}</Link>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+            <Link href="/quote" className="inline-flex h-11 items-center rounded-lg bg-teal-700 px-6 text-sm font-semibold text-white hover:bg-teal-800">{c.newQuote}</Link>
+            <Link href="/contact" className="inline-flex h-11 items-center px-3 text-sm font-medium text-slate-600 underline underline-offset-4 hover:text-slate-900">{c.contact}</Link>
+          </div>
+          <p className="mt-4 text-xs text-slate-500"><a href="mailto:ok@neander.co.kr" className="underline underline-offset-4 hover:text-slate-800">ok@neander.co.kr</a></p>
         </div>
       </div>
     );

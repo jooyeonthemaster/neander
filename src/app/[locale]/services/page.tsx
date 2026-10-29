@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { ScrollReveal } from '@/components/animations';
 import { IndustryShowcase } from '@/components/services/IndustryShowcase';
 import { ProcessFlow } from '@/components/services/ProcessFlow';
 import { ServiceCTA } from '@/components/services/ServiceCTA';
@@ -50,7 +49,8 @@ export default async function ServicesPage({ params, searchParams }: Props) {
         aria-labelledby="services-hero-title"
       >
         <div className="relative z-10 mx-auto max-w-7xl px-4 pb-8 pt-16 sm:px-6 sm:pt-20 lg:flex lg:min-h-[640px] lg:items-center lg:px-8 lg:py-24">
-          <ScrollReveal className="max-w-xl lg:max-w-[52%]">
+          {/* 첫 화면(h1 포함)은 등장 애니메이션 없이 서버 HTML 그대로 보인다 — 스크립트가 늦어도 제목이 비어 보이지 않게 */}
+          <div className="max-w-xl lg:max-w-[52%]">
             <span className="inline-flex items-center gap-2 mb-5 px-4 py-1.5 rounded-full border border-teal-500/20 bg-teal-500/[0.06] text-[11px] font-semibold uppercase tracking-[0.25em] text-teal-400">
               <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" aria-hidden="true" />
               {t('title')}
@@ -67,7 +67,7 @@ export default async function ServicesPage({ params, searchParams }: Props) {
             <p className="mt-6 text-xl font-semibold text-teal-300">
               {t('heroTagline')}
             </p>
-          </ScrollReveal>
+          </div>
         </div>
 
         <div className="relative aspect-[4/3] sm:aspect-video lg:absolute lg:inset-0 lg:aspect-auto">

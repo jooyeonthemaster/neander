@@ -27,7 +27,7 @@ export function PerfumeScene({ input, lang }: { input: QuoteInput; lang: Lang })
     data-staff={model.staff} data-space={model.size} data-visible-teams={model.teams.length} data-overflow-teams={model.overflowTeams.length}
     aria-label={description} className="overflow-hidden bg-[#f7f5f0]">
     <div className="flex items-center justify-between gap-3 px-5 pt-4 text-[11px] font-medium text-slate-500">
-      <span>{label}</span><span className="text-slate-400">{L('우리 행사 구성', 'Your event setup')}</span>
+      <span>{label}</span><span className="text-slate-500">{L('우리 행사 구성', 'Your event setup')}</span>
     </div>
     <PreviewCanvas lang={lang} label={description}>
     <motion.svg viewBox={camera} animate={{ viewBox: camera }} transition={{ duration }} role="img" aria-label={description} preserveAspectRatio="xMidYMid meet" className="block h-full w-full">

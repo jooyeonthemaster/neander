@@ -26,6 +26,11 @@ export const NAV_ITEMS: NavItem[] = [
 /** 온라인 견적 페이지 (/quote). 예전 주소 /contact?type=quote 는 이 페이지로 넘겨준다. */
 export const QUOTE_HREF = '/quote' as const;
 
+/** 매장 키오스크·포토부스 프로그램은 acscent 사이트에서 돈다 — 데모도 그쪽 주소로 연다 */
+export const ACSCENT_URL = 'https://www.acscent.co.kr';
+/** 키오스크 프로그램 데모 목록 (acscent src/lib/kiosk/demo.ts 에서 관리) */
+export const KIOSK_DEMO_URL = `${ACSCENT_URL}/kiosk-demo`;
+
 /** 체험에서 문의·견적으로 갈 때 어떤 체험에서 왔는지 함께 넘긴다 */
 export function getServiceContactHref(slug: string, quote = true) {
   return quote

@@ -122,10 +122,12 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
   const usedServices = project.services
     .map((sKey) => {
       const svc = services.find((s) => s.key === sKey);
-      if (!svc || !tServices.has(`items.${sKey}.shortTitle`)) return null;
+      // 서비스 key는 photoBooth인데 번역 키는 photobooth라서 소문자 키도 함께 찾는다.
+      const msgKey = [sKey, sKey.toLowerCase()].find((k) => tServices.has(`items.${k}.shortTitle`));
+      if (!svc || !msgKey) return null;
       return {
         key: sKey,
-        name: tServices(`items.${sKey}.shortTitle`),
+        name: tServices(`items.${msgKey}.shortTitle`),
         icon: svc.icon,
       };
     })

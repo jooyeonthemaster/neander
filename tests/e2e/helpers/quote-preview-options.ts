@@ -15,7 +15,10 @@ export async function openPreviewOptions(page: Page, service: string) {
   if (await page.getByTestId('quote-options-popover').isVisible() && await panel.isVisible()) return panel;
   await closePreviewOptions(page);
   const add = page.getByTestId(`quote-add-${service}`);
-  await (await add.isVisible() ? add : page.getByTestId(`quote-edit-${service}`)).click();
+  const edit = page.getByTestId(`quote-edit-${service}`);
+  // 단계 전환 애니메이션이 끝나 카드가 나타난 뒤에 담았는지(add/edit)를 가린다
+  await expect(add.or(edit)).toBeVisible();
+  await (await add.isVisible() ? add : edit).click();
   await expect(page.getByTestId('quote-options-popover')).toBeVisible();
   await expect(panel).toBeVisible();
   return panel;

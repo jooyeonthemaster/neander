@@ -105,7 +105,7 @@ const InfoMark = () => <Info size={13} aria-hidden="true" className="shrink-0 te
 
 const FieldContext = createContext<{ label: string; labelId: string; hintId?: string } | null>(null);
 
-export function Field({ label, hint, info, price, children }: { label: string; hint?: string; info?: string; price?: Price; children: ReactNode }) {
+export function Field({ label, hint, info, price, children }: { label: string; hint?: ReactNode; info?: string; price?: Price; children: ReactNode }) {
   const id = useId();
   const labelId = `${id}-label`;
   const hintId = hint ? `${id}-hint` : undefined;
