@@ -4,7 +4,6 @@ import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { QUOTE_HREF } from '@/lib/constants';
 import { Badge } from '@/components/ui';
 import { NeuralCircuitGrid } from './NeuralCircuitGrid';
 import { HeroSlideshow } from './HeroSlideshow';
@@ -125,10 +124,10 @@ export function HeroSection() {
           className="mt-8 flex flex-wrap items-center justify-center gap-3"
         >
           <Link
-            href={QUOTE_HREF}
+            href="/services"
             className="inline-flex h-12 items-center justify-center rounded-lg bg-teal-600 px-7 text-base font-medium text-white transition-colors hover:bg-teal-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
           >
-            {t('ctaQuote')}
+            {t('ctaServices')}
           </Link>
           <Link
             href="/portfolio"

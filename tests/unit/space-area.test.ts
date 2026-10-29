@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { calculateQuote, defaultOptions, sanitizeInput, type QuoteInput, type SpaceOptions } from '../../src/lib/quote/engine';
-import { SPACE } from '../../src/lib/quote/catalog';
 import { convertAreaFromPyeong, convertAreaToPyeong, formatSpaceArea, formatSpaceAreaEquivalent, normalizePyeong } from '../../src/lib/quote/space-area';
 import { optionSummary } from '../../src/components/quote-studio/option-summary';
 import { resolvePreview } from '../../src/lib/quote-preview/model';
@@ -70,23 +69,22 @@ test('changing only the displayed unit leaves every charged amount and quote tot
   assert.deepEqual(after.lines.map(({ amount, tbd }) => ({ amount, tbd })), before.lines.map(({ amount, tbd }) => ({ amount, tbd })));
   assert.deepEqual([after.supply, after.vat, after.total], [before.supply, before.vat, before.total]);
   const line = after.lines.find((entry) => entry.service === 'spatialDesign')!;
-  assert.match(line.detail, /100㎡ \(30\.25평\)/);
-  assert.equal(line.amount, 36_300_000);
+  assert.match(line.detail, /별도 문의/);
+  assert.equal(line.amount, 0);
+  assert.equal(line.tbd, true);
   assert.equal(after.supply, after.lines.filter((entry) => !entry.tbd).reduce((sum, entry) => sum + entry.amount, 0));
 });
 
-test('fractional custom-space estimates are integer won and included in the estimate total', () => {
+test('fractional custom-space areas cannot add charges to automatically priced experiences', () => {
   const input = inputWith({ pyeong: normalizePyeong(convertAreaToPyeong(100.123, 'sqm')), areaUnit: 'sqm' });
   const result = calculateQuote(input);
-  const area = input.items.find((item) => item.key === 'spatialDesign')!.options.pyeong;
   const estimated = result.lines.find((entry) => entry.service === 'spatialDesign')!;
-  assert.equal(estimated.amount, Math.round(SPACE.perPyeong * area));
-  assert.ok(Number.isInteger(estimated.amount));
+  assert.equal(estimated.amount, 0);
+  assert.equal(estimated.tbd, true);
   const original = calculateQuote(inputWith({ pyeong: 10 }));
-  assert.ok(result.total > original.total, 'increasing custom-space area increases the estimate');
-  assert.equal(result.supply - original.supply, estimated.amount - 12_000_000);
-  assert.equal(result.total, result.supply + Math.round(result.supply * 0.1));
-  assert.ok(!estimated.tbd);
+  assert.deepEqual(result, original);
+  const perfumeOnly = calculateQuote({ ...input, items: input.items.filter((item) => item.key === 'acscent') });
+  assert.equal(result.total, perfumeOnly.total);
 });
 
 test('summary, preview and restored drafts retain the selected unit through repeated saves', () => {
@@ -99,13 +97,13 @@ test('summary, preview and restored drafts retain the selected unit through repe
     assert.equal(space.options.areaUnit, 'sqm');
   }
   const item = input.items.find((entry) => entry.key === 'spatialDesign')!;
-  assert.ok(optionSummary(item, 'ko').some((text) => text.includes('100㎡')));
+  assert.deepEqual(optionSummary(item, 'ko'), ['별도 문의 필요']);
   assert.ok(resolvePreview(input, 'combined', 'ko').badges.includes('맞춤 공간 · 100㎡'));
   assert.ok(resolvePreview(input, 'combined', 'en').notes.some((text) => text.includes('100 m²')));
 });
 
-// A custom pop-up must never drop the estimate below a ready-made booth.
-test('the minimum pop-up estimate exceeds a 6x3 booth and survives both area units and restores', () => {
+// Restoring legacy venue choices must never revive their former automatic charges.
+test('every restored space choice remains separately quoted across areas and units', () => {
   const booth = calculateQuote(inputWith({ size: 'booth6x3', photoZone: false, lighting: false }));
   for (const areaUnit of ['pyeong', 'sqm'] as const) {
     for (const pyeong of [0, 10, 10.5, 20, 500]) {
@@ -113,9 +111,9 @@ test('the minimum pop-up estimate exceeds a 6x3 booth and survives both area uni
       const restored = loadPreviewFlow({ getItem: (key) => key === QUOTE_PREVIEW_FLOW_STORAGE_KEY ? JSON.stringify(input) : null })!;
       const result = calculateQuote(restored);
       const base = result.lines.find((line) => line.service === 'spatialDesign')!;
-      assert.ok(base.amount >= 12_000_000);
-      assert.ok(result.total > booth.total);
-      assert.ok(!base.tbd);
+      assert.equal(base.amount, 0);
+      assert.equal(result.total, booth.total);
+      assert.equal(base.tbd, true);
       assert.deepEqual(result, calculateQuote(input));
     }
   }

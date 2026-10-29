@@ -28,7 +28,7 @@
     "companyName": "NEANDERco",
     "description": "Fragrance, imagery, light, sound — we engineer sensory experiences\nwith AI and bring unforgettable moments to offline spaces.",
     "cta": "Start Your Project",
-    "ctaQuote": "Get an Online Quote",
+    "ctaServices": "Explore Our Services",
     "ctaSecondary": "View Portfolio",
     "scrollIndicator": "Scroll to explore",
     "badge": "190+ Events Delivered"
@@ -64,6 +64,14 @@
   },
 
   "services": {
+    "consultationOnly": "On request",
+    "inquire": "Contact us",
+    "showcaseGroups": {
+      "caseTitle": "Programs we have run",
+      "caseDescription": "Explore our programs with photos from events we have operated.",
+      "conceptTitle": "More experience ideas",
+      "conceptDescription": "AI experience ideas illustrated with concept images."
+    },
     "title": "Services",
     "subtitle": "Unforgettable Offline Experiences Powered by AI",
     "description": "We plan experiential AI content that makes your brand shine. We create AI experiences that visitors can participate in and enjoy in physical spaces.",
@@ -1064,7 +1072,6 @@
         "shortTitle": "Media Art",
         "description": "AI media art that responds to visitors' movement, sound, and touch, transforming spaces into living art.",
         "features": ["Motion tracking interaction", "Real-time AI generative art", "Sound-reactive visuals", "Immersive projection mapping"],
-        "stat": "100% Satisfaction",
         "tag": "Immersive"
       },
       "spatialDesign": {
@@ -1094,36 +1101,6 @@
     }
   },
 
-  "stats": {
-    "title": "NEANDERco in Numbers",
-    "subtitle": "Results That Speak for Themselves",
-    "items": {
-      "events": {
-        "number": "190",
-        "suffix": "+",
-        "label": "Events Delivered",
-        "description": "Pop-ups, festivals, exhibitions, and more"
-      },
-      "visitors": {
-        "number": "10K",
-        "suffix": "+",
-        "label": "Total Visitors",
-        "description": "People who experienced our AI content"
-      },
-      "stores": {
-        "number": "3",
-        "suffix": "",
-        "label": "AC'SCENT Stores",
-        "description": "Sinchon, Wau, and ID flagship locations"
-      },
-      "satisfaction": {
-        "number": "100",
-        "suffix": "%",
-        "label": "Client Satisfaction",
-        "description": "Post-experience participant satisfaction rate"
-      }
-    }
-  },
 
   "portfolio": {
     "title": "Portfolio",

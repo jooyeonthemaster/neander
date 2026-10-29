@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { calculateQuote, type QuoteInput } from '../../src/lib/quote/engine';
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
-import { closePreviewOptions, nextPreviewStep, openPreviewDetails, showOptionPage } from './helpers/quote-preview-options';
+import { enterExperienceStep, closePreviewOptions, nextPreviewStep, openPreviewDetails, showOptionPage } from './helpers/quote-preview-options';
 
 for (const preview of [true, false]) {
   for (const lang of ['ko', 'en'] as const) {
@@ -20,12 +20,7 @@ for (const preview of [true, false]) {
         await target.press('Enter');
       };
       async function openOptions() {
-        if (preview) await showOptionPage(page, 'acscent', 'basic');
-        else {
-          if (!(await panel.isVisible())) await page.getByTestId('quote-edit-acscent').click();
-          const accordion = panel.getByRole('button', { name: lang === 'ko' ? /선물·운영 옵션 더하기/ : /Gift & staffing options/ });
-          if (await accordion.getAttribute('aria-expanded') !== 'true') await accordion.click();
-        }
+        await showOptionPage(page, 'acscent', 'basic');
       }
       async function expectTeams(count: number, minimum: number) {
         await expect(teams).toHaveValue(String(count));
@@ -74,11 +69,10 @@ for (const preview of [true, false]) {
       // Save/reload preserves auto staffing, then changing hours releases teams.
       await change(guests, 300);
       await page.goto(route, { waitUntil: 'domcontentloaded' });
-      await page.getByRole('button', { name: lang === 'ko' ? /담아 둔 체험 1개/ : /You have 1 saved experiences/ }).click();
+      await enterExperienceStep(page);
       await openOptions();
       await expectTeams(2, 2);
-      if (preview) await closePreviewOptions(page);
-      else await panel.getByRole('button', { name: lang === 'ko' ? '옵션 닫기' : 'Close options', exact: true }).click();
+      await closePreviewOptions(page);
       await page.getByTestId('quote-prev').click();
       await change(page.locator('#q-hours'), 8);
       await nextPreviewStep(page);

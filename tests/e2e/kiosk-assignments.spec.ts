@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { closePreviewOptions, shiftKioskExperience, toggleKioskExperience, nextPreviewStep, openPreviewDetails, openPreviewOptions, showKioskGalleryPage, showOptionPage } from './helpers/quote-preview-options';
+import { enterExperienceStep, closePreviewOptions, shiftKioskExperience, toggleKioskExperience, nextPreviewStep, openPreviewDetails, openPreviewOptions, showKioskGalleryPage, showOptionPage } from './helpers/quote-preview-options';
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
 import { calculateQuote, sanitizeInput, type QuoteInput } from '../../src/lib/quote/engine';
 import { getKioskExperience, KIOSK_EXPERIENCES } from '../../src/lib/quote/kiosk-experiences';
@@ -65,14 +65,13 @@ async function expectAssignments(page: Page, assignments: string[], lang: 'ko' |
 }
 
 for (const lang of ['ko', 'en'] as const) {
-  test(`${lang}: each kiosk keeps its own included experience through resizing, event rental and all four steps`, async ({ page }, testInfo) => {
+  test(`${lang}: each kiosk keeps its own included experience through resizing, event rental and all three stages`, async ({ page }, testInfo) => {
     const errors: string[] = [];
     const generationRequests: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.route('**/api/demo-ai/**', route => { generationRequests.push(route.request().url()); return route.abort(); });
     await page.goto(lang === 'ko' ? '/quote-preview' : '/en/quote-preview', { waitUntil: 'domcontentloaded' });
-    await expect(step(page, 0)).toBeVisible();
-    await page.getByTestId('quote-start-blank').click();
+    await expect(step(page, 1)).toBeVisible();
     await passConditions(page);
     await openPreviewOptions(page, 'rental');
     await expectAssignments(page, [''], lang);
@@ -274,8 +273,8 @@ for (const lang of ['ko', 'en'] as const) {
     await page.getByTestId('quote-prev').click();
     await expectAssignments(page, [a, a, a, ''], lang);
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await expect(step(page, 0)).toBeVisible();
-    await page.getByRole('button', { name: lang === 'ko' ? /담아 둔 체험 1개/ : /You have 1 saved experiences/ }).click();
+    await expect(step(page, 1)).toBeVisible();
+    await enterExperienceStep(page);
     await openPreviewOptions(page, 'rental');
     await expectAssignments(page, [a, a, a, ''], lang);
     await expect.poll(() => saved(page)).toEqual(selected);
@@ -303,7 +302,7 @@ for (const lang of ['ko', 'en'] as const) {
       }
     }, { flowKey: FLOW_KEY, liveKey: LIVE_KEY, value: serialized });
     await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
-    await page.getByRole('button', { name: lang === 'ko' ? /담아 둔 체험 1개/ : /You have 1 saved experiences/ }).click();
+    await enterExperienceStep(page);
     await expectAssignments(page, [a, b], lang);
     const normalized = normalizePreviewInput(legacy);
     await expect.poll(() => saved(page)).toEqual(normalized);
@@ -340,7 +339,7 @@ for (const lang of ['ko', 'en'] as const) {
     await page.waitForTimeout(250);
     await page.screenshot({ path: testInfo.outputPath(`event-rental-migration-${lang}.png`), style: 'nextjs-portal { display: none !important; }' });
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.getByRole('button', { name: lang === 'ko' ? /담아 둔 체험 1개/ : /You have 1 saved experiences/ }).click();
+    await enterExperienceStep(page);
     await expectAssignments(page, [a, b], lang);
     await expect.poll(() => saved(page)).toEqual(threeDays);
     await expectTotal(page, oneDay + 880_000);
@@ -348,7 +347,7 @@ for (const lang of ['ko', 'en'] as const) {
 
     // /quote 도 같은 체험 편집 화면을 쓴다 — 저장된 월 이용은 행사 기간 대여로 바뀌고 배정은 그대로
     await page.goto(`${lang === 'en' ? '/en' : ''}/quote`, { waitUntil: 'domcontentloaded' });
-    await page.getByRole('button', { name: lang === 'ko' ? /담아 둔 체험 1개/ : /You have 1 saved experiences/ }).click();
+    await enterExperienceStep(page);
     await openPreviewOptions(page, 'rental');
     await showOptionPage(page, 'rental', 'kiosk-1');
     await expect(page.getByTestId('kiosk-experience-assignments')).toHaveAttribute('data-assignments', `${a},${b}`);
@@ -366,7 +365,7 @@ test('preview drafts, presets and incoming experiences assign device slots while
     }
   }, { flowKey: FLOW_KEY, liveKey: LIVE_KEY, value: JSON.stringify(legacy) });
   await page.goto('/quote-preview', { waitUntil: 'domcontentloaded' });
-  await page.getByRole('button', { name: /담아 둔 체험 1개/ }).click();
+  await enterExperienceStep(page);
   await openPreviewOptions(page, 'rental');
   await expectAssignments(page, [a, '', ''], 'ko');
   await toggleKioskExperience(page, b, 'ko');
@@ -395,7 +394,7 @@ test('preview drafts, presets and incoming experiences assign device slots while
   // /quote 도 같은 체험 편집 화면 — 예전 저장(체험 1종 + 추가 콘텐츠)은 기기별 배정으로 옮겨진다
   await page.goto('/quote', { waitUntil: 'domcontentloaded' });
   await expect(page.getByTestId('quote-studio')).toHaveAttribute('data-mode', 'live');
-  await page.getByRole('button', { name: /담아 둔 체험 1개/ }).click();
+  await enterExperienceStep(page);
   await openPreviewOptions(page, 'rental');
   await showOptionPage(page, 'rental', 'kiosk-1');
   await expect(page.getByTestId('kiosk-experience-assignments')).toHaveAttribute('data-assignments', `${a},,`);

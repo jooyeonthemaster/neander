@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { Suspense } from 'react';
-import { Check, ChevronDown, Info } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { setRequestLocale } from 'next-intl/server';
 import { VisualQuoteStudio } from '@/components/quote-preview/QuotePreviewLab';
-import { PricingGuide } from '@/components/services/PricingGuide';
 import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
 
 interface Props {
@@ -98,21 +97,7 @@ export default async function QuotePage({ params }: Props) {
         </div>
       </section>
 
-      <div className="mx-auto w-full max-w-[96rem] px-4 sm:px-6 pb-14 sm:pb-20">
-        <details className="group rounded-2xl border border-slate-200/70 bg-white">
-          <summary className="flex cursor-pointer list-none items-center gap-3 rounded-2xl px-5 py-5 outline-none transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-teal-500 sm:px-6 [&::-webkit-details-marker]:hidden">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500"><Info size={18} aria-hidden="true" /></span>
-            <span className="flex-1">
-              <span className="block text-sm font-semibold text-slate-700">{c.pricingTitle}</span>
-              <span className="mt-1 block text-xs leading-relaxed text-slate-500">{c.pricingHint}</span>
-            </span>
-            <ChevronDown size={18} className="shrink-0 text-slate-400 transition-transform duration-300 group-open:rotate-180 motion-reduce:transition-none" aria-hidden="true" />
-          </summary>
-          <div className="border-t border-slate-100 px-5 sm:px-6 [&>section]:bg-transparent [&>section]:py-8 [&>section>div]:w-full [&>section>div]:px-0">
-            <PricingGuide locale={locale} variant="full" />
-          </div>
-        </details>
-      </div>
+
     </div>
   );
 }

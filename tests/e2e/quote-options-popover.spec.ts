@@ -9,7 +9,6 @@ for (const lang of ['ko', 'en'] as const) {
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
-    await page.getByTestId('quote-start-blank').click();
     await nextPreviewStep(page);
     await nextPreviewStep(page);
     const originalPreview = await page.getByTestId('event-preview').elementHandle();
@@ -155,7 +154,6 @@ test.describe('an open balloon stays put', () => {
     test(`${lang}: choosing kiosk experiences and changing topics never moves the document or flips the balloon`, async ({ page }) => {
       await page.route('**/api/demo-ai/**', route => route.abort());
       await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
-      await page.getByTestId('quote-start-blank').click();
       await nextPreviewStep(page);
       await nextPreviewStep(page);
 
@@ -195,7 +193,7 @@ test.describe('an open balloon stays put', () => {
       const perfumeOpened = await settled(page);
       const pages = perfume.getByTestId('option-pages');
       const total = Number(await pages.getAttribute('data-total-steps'));
-      expect(total).toBeGreaterThanOrEqual(4);
+      expect(total).toBe(3);
       for (let step = 2; step <= total; step++) {
         await page.locator('[data-testid="option-page-next"]:visible').click();
         await expect(pages).toHaveAttribute('data-current-step', String(step));
@@ -205,7 +203,6 @@ test.describe('an open balloon stays put', () => {
 
     test(`${lang}: kiosk customization cards show their whole label and price`, async ({ page }, testInfo) => {
       await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
-      await page.getByTestId('quote-start-blank').click();
       await nextPreviewStep(page);
       await nextPreviewStep(page);
       await showOptionPage(page, 'rental', 'kiosk-1');

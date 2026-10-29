@@ -1,14 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { Select } from '@/components/ui/Select';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { AnimatePresence, MotionConfig, animate, motion, useMotionValue, useReducedMotion, useTransform } from 'motion/react';
-import { ArrowDown, ArrowLeft, ArrowRight, Check as CheckIcon, ChevronDown, ChevronRight, FileDown, FileText, LayoutTemplate, Plus, RotateCcw, ShieldCheck, SlidersHorizontal, Sparkles, Trash2, X } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, Check as CheckIcon, ChevronDown, ChevronRight, FileDown, FileText, Plus, Sparkles, Trash2, X } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { isValidEmail } from '@/lib/email';
@@ -20,7 +19,7 @@ import { experiences, getExperienceBySlug } from '@/data/experiences';
 import { PRODUCTS } from '@/data/products';
 import { QUOTE_PRESET_IMAGES } from '@/data/quote-preset-images';
 import {
-  COMMON, ESTIMATE_DISCLAIMER, EVENT_TYPES, REGION_NOTE, REGIONS, SERVICE_ORDER, SERVICE_TEXT,
+  COMMON, ESTIMATE_DISCLAIMER, PERFUME, REGION_NOTE, REGIONS, SERVICE_ORDER, SERVICE_TEXT, isConsultationService,
   type Lang, type RegionKey, type ServiceKey,
 } from '@/lib/quote/catalog';
 import {
@@ -31,7 +30,7 @@ import { loadPreviewFlow, normalizePreviewInput, QUOTE_PREVIEW_FLOW_STORAGE_KEY 
 import { getKioskAssignments } from '@/lib/quote/kiosk-experiences';
 import { QUOTE_PRESETS } from '@/lib/quote/presets';
 import { QUOTE_COPY } from './copy';
-import { Check, Field, Segmented, Stepper, inputClass } from './QuoteControls';
+import { Check, Field, NumberInput, Segmented, Stepper, inputClass } from './QuoteControls';
 import { RegionMap } from './RegionMap';
 import { EventInfoSummary } from './EventInfoSummary';
 import { TotalDelta } from './TotalDelta';
@@ -41,7 +40,7 @@ import { QUOTE_STORAGE_KEY, addEstimateHistory, estimateHref, loadEstimateHistor
 
 /* ─────────────────────────────────────────────────────────
    온라인 견적 (/quote)
-   왼쪽: 시작 방법 → 행사 조건 → 체험 담기 → 견적서 받기
+   왼쪽: 행사 조건 → 체험 담기 → 견적서 받기
    오른쪽: 가견적서 미리보기 (실시간, 연락처 없이 금액 공개)
    단계별 이용 기록: quote_view · quote_preset · quote_step(conditions · add_서비스 · form) · quote_pdf · quote_request
    ───────────────────────────────────────────────────────── */
@@ -49,12 +48,12 @@ import { QUOTE_STORAGE_KEY, addEstimateHistory, estimateHref, loadEstimateHistor
 const STORAGE_KEY = QUOTE_STORAGE_KEY;
 
 const BLANK: QuoteInput = {
-  eventType: 'popup', eventDate: '', days: 1, hoursPerDay: 6, attendees: 100, region: 'seoul', extraStaff: 0, items: [],
+  eventType: 'popup', eventName: '', eventDate: '', days: 1, hoursPerDay: 6, attendees: 100, region: 'seoul', extraStaff: 0, items: [],
 };
 
-/** 체험을 담았거나 행사 정보를 바꾼 견적인지 — 비울 것이 있는지, 새로 시작할 때 되돌릴 것이 있는지 */
+/** 체험을 담았거나 행사 정보를 바꾼 견적인지 — 비우기 버튼의 활성화 기준 */
 function hasDraft(input: QuoteInput): boolean {
-  return input.items.length > 0 || input.eventType !== BLANK.eventType
+  return input.items.length > 0 || !!input.eventName || input.eventType !== BLANK.eventType
     || input.eventDate !== BLANK.eventDate || input.days !== BLANK.days
     || input.hoursPerDay !== BLANK.hoursPerDay || input.attendees !== BLANK.attendees
     || input.region !== BLANK.region || input.extraStaff !== BLANK.extraStaff
@@ -71,9 +70,10 @@ function loadSaved(previewMode: boolean): QuoteInput | null {
   }
 }
 
-/** 시작 구성을 화면에 맞게 정리한다 — 템플릿 카드의 가격도 이 결과로 계산해야 들어간 뒤 금액과 맞는다 */
+/** 저장된 구성도 현재 자동 견적 대상과 화면 규칙에 맞게 정리한다 */
 function startingInput(input: QuoteInput, visual: boolean): QuoteInput {
-  return visual ? normalizePreviewInput(input) : normalizePerfumeStaffing(input);
+  const automaticInput = { ...input, items: input.items.filter((item) => !isConsultationService(item.key)) };
+  return visual ? normalizePreviewInput(automaticInput) : normalizePerfumeStaffing(automaticInput);
 }
 
 const won = (n: number, lang: Lang) => (lang === 'ko' ? `${n.toLocaleString('ko-KR')}원` : `KRW ${n.toLocaleString('en-US')}`);
@@ -174,14 +174,11 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
 
   const [input, setInput] = useState<QuoteInput>(BLANK);
   const [presetId, setPresetId] = useState<string | null>(null);
-  // 새로 시작하면서 비운 이전 구성 — 확인 없이 사라지지 않게 되돌릴 수 있도록 이 화면에 있는 동안 기억해 둔다
-  const [replaced, setReplaced] = useState<{ input: QuoteInput; presetId: string | null } | null>(null);
   const [ready, setReady] = useState(false);
   const tracked = useRef(new Set<string>());
   const topRef = useRef<HTMLDivElement>(null);
-  const [step, setStep] = useState(0);
-  const [startView, setStartView] = useState<'choose' | 'templates'>('choose');
-  // 행사 정보 단계의 두 쪽: 0 = 유형·인원·기간·지역, 1 = 날짜·운영 시간·인력·전날 설치
+  const [step, setStep] = useState(1);
+  // 행사 정보 단계의 두 쪽: 0 = 행사명·인원·기간·지역, 1 = 날짜·운영 시간·인력·전날 설치
   const [conditionsPage, setConditionsPage] = useState<0 | 1>(0);
   const [activeOptions, setActiveOptions] = useState<ServiceKey | null>(null);
   // 체험 편집 화면의 옵션 말풍선이 열려 있는지 — 말풍선에도 합계와 '다음'이 있어, 그동안 아래 고정 바는 숨긴다
@@ -206,7 +203,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
     observer.observe(grid);
     return () => observer.disconnect();
   }, [activeOptions, cardGrid, input.items.length]);
-  const [furthestStep, setFurthestStep] = useState(0);
+  const [furthestStep, setFurthestStep] = useState(1);
   const [contact, setContact] = useState({ name: '', email: '', company: '', phone: '', note: '', consent: false });
   const [emailError, setEmailError] = useState(false);
   // 빈 칸으로 보냈을 때 어느 칸이 비었는지 (칸마다 안내하고 첫 칸으로 포커스를 보낸다)
@@ -258,10 +255,9 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
       }
     }
     setInput(startingInput(next, visual));
-    // 시나리오·상품·체험을 들고 왔으면 행사 조건(2단계)부터, 아니면 처음부터
-    const initialStep = preset || serviceParam || itemParam ? 1 : 0;
+    // 저장값이나 링크 진입도 행사 정보부터 시작한다
+    const initialStep = 1;
     setStep(initialStep);
-    setStartView('choose');
     setFurthestStep(initialStep);
     setActiveOptions(next.items[0]?.key ?? null);
     setReady(true);
@@ -282,14 +278,12 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
 
   const STEP_KEYS = ['scenario', 'conditions', 'experiences', 'form'] as const;
   const goTo = (next: number) => {
-    const target = Math.max(0, Math.min(3, next));
+    const target = Math.max(1, Math.min(3, next));
     // 뒤 단계에서 돌아오면 행사 정보의 둘째 쪽으로, 앞에서 들어오면 첫째 쪽으로
     if (target === 1) setConditionsPage(step > 1 ? 1 : 0);
     focusStep.current = target;
     setStep(target);
     setFurthestStep((previous) => Math.max(previous, target));
-    // 체험을 고르러 넘어가면 새 구성으로 진행하는 것 — 되돌리기 안내를 거둔다
-    if (target >= 2) setReplaced(null);
     if (target > 0) track('quote_step', STEP_KEYS[target]);
     // 새 단계의 맨 위가 보이게 한다
     requestAnimationFrame(() => {
@@ -299,37 +293,19 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
   };
   const update = (patch: Partial<QuoteInput>) => {
     for (const [field, value] of Object.entries(patch)) recordQuote('e', field, String(value));
-    setInput((prev) => normalizePerfumeStaffing({ ...prev, ...patch }));
+    setInput((prev) => {
+      const next = { ...prev, ...patch };
+      if (patch.attendees !== undefined) {
+        next.items = prev.items.map((item) => item.key === 'acscent'
+          ? { ...item, options: { ...item.options, guests: Math.max(item.options.customBox ? PERFUME.customBox.minGuests : PERFUME.minGuests, Math.min(5000, patch.attendees!)) } }
+          : item);
+      }
+      return normalizePerfumeStaffing(next);
+    });
     setStatus('idle');
-  };
-  const applyPreset = (id: string | null) => {
-    const preset = QUOTE_PRESETS.find((p) => p.id === id);
-    setPresetId(id);
-    recordQuote('p', id ?? 'blank');
-    const next = preset ? structuredClone(preset.input) : { ...BLANK };
-    // 담아 둔 체험이나 행사 정보가 있었다면 되돌릴 수 있게 남겨 둔다 (빈 견적은 덮어쓰지 않는다)
-    if (hasDraft(input)) setReplaced({ input, presetId });
-    setInput(startingInput(next, visual));
-    setActiveOptions(preset?.input.items[0]?.key ?? null);
-    setStatus('idle');
-    if (!previewMode) trackEvent('quote_preset', id ?? 'blank');
-    goTo(1);
-  };
-  const undoReplaced = () => {
-    if (!replaced) return;
-    recordQuote('p', 'undo');
-    setInput(replaced.input);
-    setPresetId(replaced.presetId);
-    setActiveOptions(replaced.input.items[0]?.key ?? null);
-    setReplaced(null);
-    setStatus('idle');
-  };
-  const showStartView = (view: 'choose' | 'templates') => {
-    focusStep.current = 0;
-    setStartView(view);
   };
   const toEstimate = () => {
-    if (visual && step < 2) { if (step > 0) moveForward(); return; }
+    if (visual && step === 1) { moveForward(); return; }
     goTo(input.items.length > 0 ? 3 : 2);
   };
   const hasItem = (key: ServiceKey) => input.items.some((i) => i.key === key);
@@ -394,11 +370,9 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
     const empty = { ...BLANK, items: [] };
     setInput(empty);
     setPresetId(null);
-    setReplaced(null);
-    setStartView('choose');
     setActiveOptions(null);
     setConditionsPage(0);
-    setFurthestStep(0);
+    setFurthestStep(1);
     setStatus('idle');
     setMessage('');
     setDoneLink(null);
@@ -417,13 +391,9 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
       clearedSearch.current = url.searchParams.toString();
       window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
     }
-    goTo(0);
-    if (step === 0 && startView === 'choose') {
-      requestAnimationFrame(() => {
-        document.getElementById('q-step1')?.focus({ preventScroll: true });
-        focusStep.current = null;
-      });
-    }
+    focusStep.current = 1;
+    setStep(1);
+    scrollToTop();
   };
 
   async function saveInquiry(form: { name: string; email: string; company: string; phone: string; note: string }, subject: string, estimate?: { no: string; token: string | null }) {
@@ -434,7 +404,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
     const items = input.items.map((item) => ({ name: SERVICE_TEXT[item.key].name.ko, options: optionSummary(item, 'ko', expName) }));
     const lines = ko.lines.map((l) => ({ label: l.label, detail: l.detail, amount: l.amount, ...(l.tbd ? { tbd: true } : {}) }));
     const services = ko.lines.map((l) => `${l.label} ${l.tbd ? '(상담 후 산정)' : won(l.amount, 'ko')}`);
-    const eventLabel = EVENT_TYPES.find((e) => e.key === input.eventType)?.label.ko ?? input.eventType;
+    const eventLabel = input.eventName?.trim() || '행사명 미정';
     const summary = [
       `${eventLabel} · ${input.eventDate || '일자 미정'} · ${input.days}일 × 1일 ${input.hoursPerDay}시간 · ${input.attendees}명 · ${REGIONS.find((r) => r.key === input.region)?.label.ko}`
         + `${input.setupDayBefore ? ' · 전날 설치' : ''}${input.extraStaff ? ` · 추가 인력 ${input.extraStaff}명` : ''}`,
@@ -456,7 +426,8 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
       message: summary.slice(0, 4900),
       locale,
       quote: {
-        eventType: eventLabel,
+        eventName: eventLabel,
+        eventType: input.eventType,
         eventDate: input.eventDate || undefined,
         duration: input.days,
         hoursPerDay: input.hoursPerDay,
@@ -515,8 +486,8 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
     if (previewMode) {
       setStatus('done');
       setMessage(lang === 'ko'
-        ? '4단계까지 구성을 확인했어요. 실험용 확인이 완료되었으며, 입력한 정보는 전송하거나 저장하지 않았어요.'
-        : 'You have reviewed all four steps. This test is complete; your contact details were not sent or saved.');
+        ? '3단계까지 구성을 확인했어요. 실험용 확인이 완료되었으며, 입력한 정보는 전송하거나 저장하지 않았어요.'
+        : 'You have reviewed all three steps. This test is complete; your contact details were not sent or saved.');
       return;
     }
     setStatus(action);
@@ -568,8 +539,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
   // 견적 행동 기록 (실험 페이지 제외) — 화면이 그려진 뒤 시작해 떠날 때 끝낸다
   const [studioEl, setStudioEl] = useState<HTMLDivElement | null>(null);
   useEffect(() => (studioEl && !previewMode ? startQuoteJourney(studioEl) : undefined), [studioEl, previewMode]);
-  const screen = step === 0 ? (startView === 'templates' ? 'templates' : 'start')
-    : step === 1 ? (conditionsPage === 1 ? 'cond2' : 'cond1')
+  const screen = step === 1 ? (conditionsPage === 1 ? 'cond2' : 'cond1')
     : step === 2 ? 'experiences' : status === 'done' ? 'done' : 'form';
   useEffect(() => { if (studioEl) recordQuoteScreen(screen); }, [studioEl, screen]);
   useEffect(() => { if (studioEl) recordQuoteTotal(quote.total); }, [studioEl, quote.total]);
@@ -577,11 +547,10 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
   const selectedPreset = QUOTE_PRESETS.find((preset) => preset.id === presetId);
   const selectedPresetImage = selectedPreset ? QUOTE_PRESET_IMAGES[selectedPreset.id] : undefined;
   const selectedImage = selectedPresetImage?.src || PRODUCT_BY_KEY[input.items[0]?.key ?? 'acscent'].image;
-  const stepHeadings = [startView === 'templates' ? c.templateTitle : c.step1, conditionsPage === 1 ? c.step2b : c.step2, c.step3, c.step4];
-  const stepHints = [startView === 'templates' ? c.templateHint : c.step1Hint, conditionsPage === 1 ? c.step2bHint : (lang === 'ko' ? '아직 정해지지 않았다면 대략 선택해도 괜찮아요.' : 'An approximate answer is fine. You can change it later.'), renderExperienceEditor ? (lang === 'ko' ? '체험을 담고 옵션을 바꾸며 우리 행사의 모습을 미리 살펴보세요.' : 'Choose experiences and explore how your event could look as you adjust the options.') : c.step3Hint, previewMode ? (lang === 'ko' ? '고른 구성으로 견적서 받기 화면을 확인해 보세요. 이 페이지에서는 실제 발급이나 상담 접수가 이루어지지 않아요.' : 'Try the final estimate step with your choices. This experiment does not issue documents or submit inquiries.') : c.step4Hint];
+  const stepHeadings = ['', conditionsPage === 1 ? c.step2b : c.step2, c.step3, c.step4];
+  const stepHints = ['', conditionsPage === 1 ? c.step2bHint : (lang === 'ko' ? '아직 정해지지 않았다면 대략 선택해도 괜찮아요.' : 'An approximate answer is fine. You can change it later.'), renderExperienceEditor ? (lang === 'ko' ? '체험을 담고 옵션을 바꾸며 우리 행사의 모습을 미리 살펴보세요.' : 'Choose experiences and explore how your event could look as you adjust the options.') : c.step3Hint, previewMode ? (lang === 'ko' ? '고른 구성으로 견적서 받기 화면을 확인해 보세요. 이 페이지에서는 실제 발급이나 상담 접수가 이루어지지 않아요.' : 'Try the final estimate step with your choices. This experiment does not issue documents or submit inquiries.') : c.step4Hint];
   const scrollToTop = () => requestAnimationFrame(() => smoothScrollIntoView(topRef.current, { block: 'start' }));
   const moveForward = () => {
-    if (step === 0) return;
     if (step === 1 && conditionsPage === 0) {
       focusStep.current = 1;
       setConditionsPage(1);
@@ -597,9 +566,9 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
     : step === 2 ? (lang === 'ko' ? '이 구성으로 견적 받기' : 'Continue with these experiences') : c.next;
   const nav = (canNext = true) => (
     <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-6">
-      <button type="button" data-testid="quote-prev" onClick={() => { if (step === 1 && conditionsPage === 1) { focusStep.current = 1; setConditionsPage(0); scrollToTop(); } else goTo(step - 1); }} className="inline-flex min-h-12 items-center gap-2 rounded-xl px-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-800">
+      {(step > 1 || conditionsPage === 1) ? <button type="button" data-testid="quote-prev" onClick={() => { if (step === 1 && conditionsPage === 1) { focusStep.current = 1; setConditionsPage(0); scrollToTop(); } else goTo(step - 1); }} className="inline-flex min-h-12 items-center gap-2 rounded-xl px-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-800">
         <ArrowLeft className="size-4" aria-hidden="true" />{c.prev}
-      </button>
+      </button> : <span />}
       <button type="button" data-testid="quote-next" disabled={!canNext} onClick={moveForward} className={primaryButton}>
         {nextLabel}<ArrowRight className="size-4" aria-hidden="true" />
       </button>
@@ -616,21 +585,22 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
           // 1~3단계는 데스크톱에서 같은 높이(2단계 기준)로 — 단계를 오가도 카드 크기가 출렁이지 않는다.
           step < 3 && 'lg:flex lg:min-h-[var(--quote-intro-h)] lg:flex-col [--quote-intro-h:766px]')}>
           <nav aria-label={lang === 'ko' ? '견적 만들기 단계' : 'Estimate steps'}>
-            <ol className="mb-9 grid grid-cols-4 gap-2 sm:gap-4">
+            <ol className="mb-9 grid grid-cols-3 gap-2 sm:gap-4">
               {c.stepLabels.map((label, index) => {
-                const done = index < step;
-                const current = index === step;
-                const reachable = index <= furthestStep && (index !== 3 || input.items.length > 0);
+                const targetStep = index + 1;
+                const done = targetStep < step;
+                const current = targetStep === step;
+                const reachable = targetStep <= furthestStep && (targetStep !== 3 || input.items.length > 0);
                 return (
                   <li key={index}>
-                    <button type="button" disabled={!reachable} onClick={() => goTo(index)} aria-current={current ? 'step' : undefined}
+                    <button type="button" disabled={!reachable} onClick={() => goTo(targetStep)} aria-current={current ? 'step' : undefined}
                       className="group flex w-full flex-col items-start gap-2.5 rounded-sm text-left disabled:cursor-default">
                       <span className={cn('inline-flex size-7 items-center justify-center rounded-full text-[11px] font-bold transition-colors duration-300', current ? 'bg-teal-700 text-white' : done ? 'bg-teal-50 text-teal-700' : 'bg-slate-100 text-slate-500')}>
                         {done ? <CheckIcon className="size-3.5" aria-hidden="true" /> : index + 1}
                       </span>
                       <span className={cn('text-[11px] font-semibold sm:text-xs', current ? 'text-slate-900' : done ? 'text-slate-600' : 'text-slate-500')}>{label}</span>
                       <span className="relative h-1 w-full overflow-hidden rounded-full bg-slate-100">
-                        <motion.span className="absolute inset-y-0 left-0 rounded-full bg-teal-500" animate={{ width: index <= step ? '100%' : '0%' }} transition={{ duration: reducedMotion ? 0 : 0.4, ease: softEase }} />
+                        <motion.span className="absolute inset-y-0 left-0 rounded-full bg-teal-500" animate={{ width: targetStep <= step ? '100%' : '0%' }} transition={{ duration: reducedMotion ? 0 : 0.4, ease: softEase }} />
                       </span>
                     </button>
                   </li>
@@ -640,7 +610,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
           </nav>
 
           <AnimatePresence mode="wait" initial={false}>
-            <motion.section key={step === 0 ? `start-${startView}` : step === 1 ? `1-${conditionsPage}` : step} data-quote-page={step === 1 ? conditionsPage + 1 : undefined} data-quote-step={step} data-quote-start-view={step === 0 ? startView : undefined} aria-labelledby={`q-step${step + 1}`}
+            <motion.section key={step === 1 ? `1-${conditionsPage}` : step} data-quote-page={step === 1 ? conditionsPage + 1 : undefined} data-quote-step={step} aria-labelledby={`q-step${step + 1}`}
               className={cn(step < 3 && 'lg:flex lg:flex-1 lg:flex-col')}
               initial={{ opacity: 0, y: reducedMotion ? 0 : 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: reducedMotion ? 0 : -6 }}
               transition={{ duration: reducedMotion ? 0 : 0.22, ease: softEase }}
@@ -651,12 +621,12 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                 }
               }}>
               <div className="mb-7">
-                <p className="mb-2 text-xs font-semibold text-teal-600">{c.stepCount(step + 1, 4)}</p>
+                <p className="mb-2 text-xs font-semibold text-teal-600">{c.stepCount(step, 3)}</p>
                 <h2 id={`q-step${step + 1}`} tabIndex={-1} style={{ outline: 'none' }} className="text-2xl font-bold leading-snug tracking-tight text-slate-900 sm:text-[28px]">{stepHeadings[step]}</h2>
                 <p className="mt-2 text-sm leading-relaxed text-slate-500 [word-break:keep-all]">{stepHints[step]}</p>
               </div>
 
-              {step === 0 && (
+              {step === 1 && (
                 <>
                   {history.length > 0 && (
                     <div className="mb-5 rounded-2xl border border-slate-200 bg-white p-4">
@@ -674,81 +644,6 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                       </ul>
                     </div>
                   )}
-                  {input.items.length > 0 && (
-                    <button type="button" onClick={() => goTo(2)} className="mb-5 flex w-full items-center justify-between gap-3 rounded-2xl bg-teal-50 px-4 py-3 text-left text-sm font-medium text-teal-800">
-                      <span>{lang === 'ko' ? `담아 둔 체험 ${input.items.length}개가 있어요. 이어서 만들어 볼까요?` : `You have ${input.items.length} saved experiences. Continue editing.`}</span><ArrowRight className="size-4 shrink-0" aria-hidden="true" />
-                    </button>
-                  )}
-                  {startView === 'choose' ? (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:flex-1 lg:content-center">
-                      <motion.button type="button" data-testid="quote-start-blank" onClick={() => applyPreset(null)} whileHover={reducedMotion ? undefined : { y: -3 }} whileTap={reducedMotion ? undefined : { scale: 0.985 }}
-                        className="group grid h-full grid-cols-[48px_1fr] gap-x-4 rounded-[24px] lg:min-h-[232px] border border-slate-200/80 bg-slate-50/70 p-5 text-left transition-colors hover:border-teal-200 hover:bg-teal-50/40 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 sm:flex sm:flex-col sm:p-7">
-                        <span className="row-span-2 flex size-12 items-center justify-center rounded-[18px] bg-white text-slate-600 shadow-sm sm:mb-6 sm:size-14"><SlidersHorizontal className="size-6" aria-hidden="true" /></span>
-                        <span className="flex w-full items-center justify-between gap-3 text-lg font-bold tracking-tight text-slate-900">{c.startBlank}<ArrowRight className="size-5 shrink-0 text-slate-400 transition-transform group-hover:translate-x-1 motion-reduce:transform-none" aria-hidden="true" /></span>
-                        <span className="mt-2 block text-sm leading-relaxed text-slate-500 [word-break:keep-all]">{c.startBlankHint}</span>
-                      </motion.button>
-                      <motion.button type="button" data-testid="quote-start-templates" onClick={() => showStartView('templates')} whileHover={reducedMotion ? undefined : { y: -3 }} whileTap={reducedMotion ? undefined : { scale: 0.985 }}
-                        className="group grid h-full grid-cols-[48px_1fr] gap-x-4 rounded-[24px] lg:min-h-[232px] border border-teal-100 bg-teal-50/60 p-5 text-left transition-colors hover:border-teal-300 hover:bg-teal-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 sm:flex sm:flex-col sm:p-7">
-                        <span className="row-span-2 flex size-12 items-center justify-center rounded-[18px] bg-white text-teal-600 shadow-sm sm:mb-6 sm:size-14"><LayoutTemplate className="size-6" aria-hidden="true" /></span>
-                        <span className="flex w-full items-center justify-between gap-3 text-lg font-bold tracking-tight text-slate-900">{c.startTemplates}<ArrowRight className="size-5 shrink-0 text-teal-500 transition-transform group-hover:translate-x-1 motion-reduce:transform-none" aria-hidden="true" /></span>
-                        <span className="mt-2 block text-sm leading-relaxed text-slate-500 [word-break:keep-all]">{c.startTemplatesHint}</span>
-                      </motion.button>
-                    </div>
-                  ) : (
-                    <>
-                    <button type="button" data-testid="quote-back-to-start" onClick={() => showStartView('choose')} className="mb-4 inline-flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600">
-                      <ArrowLeft className="size-4" aria-hidden="true" />{c.backToStart}
-                    </button>
-                    <div className="grid gap-4 sm:grid-cols-2 lg:flex-1 lg:auto-rows-fr lg:gap-3">
-                    {QUOTE_PRESETS.map((preset) => {
-                      const thumbnail = QUOTE_PRESET_IMAGES[preset.id];
-                      return (
-                        <motion.button key={preset.id} type="button" data-testid={`quote-preset-${preset.id}`} onClick={() => applyPreset(preset.id)} aria-pressed={presetId === preset.id}
-                          whileHover={reducedMotion ? undefined : { y: -3 }} whileTap={reducedMotion ? undefined : { scale: 0.985 }}
-                          className="group overflow-hidden rounded-[20px] bg-slate-50 text-left ring-1 ring-slate-100 transition-shadow hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-                          {/* 데스크톱에선 그림을 왼쪽에 두는 가로 카드 — 네 개가 한 화면(2단계 높이)에 스크롤 없이 들어간다. */}
-                          <span aria-hidden={renderArtwork ? true : undefined} className="relative block aspect-[2.2/1] overflow-hidden bg-slate-100 lg:flex lg:aspect-auto lg:h-full lg:items-center">
-                            {renderArtwork ? renderArtwork(preset.input.items[0]?.key ?? 'acscent', preset.id) : <Image src={thumbnail.src} alt={thumbnail.caption[lang]} fill sizes="(min-width: 1280px) 360px, (min-width: 640px) 40vw, 90vw" style={{ objectPosition: thumbnail.objectPosition }} className="object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transform-none" />}
-                            <span className="absolute bottom-2 left-3 rounded-full bg-black/60 px-2 py-1 text-[9px] text-white">{renderArtwork ? (lang === 'ko' ? '행사 구성 일러스트' : 'Illustrative event setup') : thumbnail.caption[lang]}</span>
-                          </span>
-                          <span className="block p-4 lg:flex lg:flex-col lg:justify-center">
-                            <span className="flex items-center justify-between gap-2 text-base font-bold text-slate-900">{preset.title[lang]}<ChevronRight className="size-4 shrink-0 text-slate-400" aria-hidden="true" /></span>
-                            <span className="mt-1.5 block min-h-[2lh] text-xs leading-relaxed text-slate-500">{preset.caption[lang]}</span>
-                            {(() => {
-                              // 고르자마자 보이는 「예상 합계」와 같은 기준(부가세 포함)으로 보여 주고, 부가세 별도 금액을 나란히 둔다
-                              const estimate = calculateQuote(startingInput(preset.input, visual), lang);
-                              return <span data-testid={`quote-template-price-${preset.id}`} data-total={estimate.total} data-supply={estimate.supply} className="mt-3 block text-sm font-bold tabular-nums text-teal-700">
-                                {manwon(estimate.total, lang)} <span className="text-[10px] font-normal text-slate-500">{lang === 'ko' ? `부가세 포함 · 별도 ${manwon(estimate.supply, lang)}` : `incl. VAT · ${manwon(estimate.supply, lang)} before VAT`}</span>
-                              </span>;
-                            })()}
-                          </span>
-                        </motion.button>
-                      );
-                    })}
-                    </div>
-                    </>
-                  )}
-                  <p className="mt-5 flex items-center gap-2 text-xs text-slate-500 lg:mt-auto lg:pt-5"><ShieldCheck className="size-4 shrink-0" aria-hidden="true" />{lang === 'ko' ? '연락처를 입력하지 않아도 금액을 확인할 수 있어요.' : 'See prices without sharing your contact details.'}</p>
-                </>
-              )}
-
-              {step === 1 && (
-                <>
-                  {replaced && (
-                    <div role="status" data-testid="quote-start-undo" className="mb-5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-2xl bg-amber-50 py-1.5 pl-4 pr-1.5 text-sm leading-relaxed text-amber-900">
-                      <span className="min-w-0 [word-break:keep-all]">{lang === 'ko'
-                        ? `담아 둔 구성${replaced.input.items.length ? `(체험 ${replaced.input.items.length}개)` : ''}을 비우고 새로 시작했어요.`
-                        : `Started fresh — your saved plan${replaced.input.items.length ? ` (${replaced.input.items.length} experience${replaced.input.items.length === 1 ? '' : 's'})` : ''} was cleared.`}</span>
-                      <span className="ml-auto flex shrink-0 items-center">
-                        <button type="button" data-testid="quote-start-undo-button" onClick={undoReplaced} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-amber-900 underline underline-offset-4 hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600">
-                          <RotateCcw className="size-4" aria-hidden="true" />{lang === 'ko' ? '되돌리기' : 'Undo'}
-                        </button>
-                        <button type="button" aria-label={lang === 'ko' ? '안내 닫기' : 'Dismiss'} onClick={() => setReplaced(null)} className="flex size-11 items-center justify-center rounded-xl text-amber-800 hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600">
-                          <X className="size-4" aria-hidden="true" />
-                        </button>
-                      </span>
-                    </div>
-                  )}
                   {/* 페이지 번호와 '시작 구성'을 한 줄에 — 구성이 있어도 2단계 높이가 늘지 않는다. */}
                   <div className="mb-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
                     <p className="text-xs font-semibold text-teal-700">{lang === 'ko' ? `행사 정보 ${conditionsPage + 1}/2` : `Event details ${conditionsPage + 1}/2`}</p>
@@ -762,14 +657,14 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                   {conditionsPage === 0 ? (
                   <div className="@container">
                   <div className="grid gap-x-5 gap-y-7 @3xl:grid-cols-2">
-                    {/* 왼쪽: 행사 유형 · 기간 · 인원을 세로로. 오른쪽: 지도에서 행사 지역을 고른다.
+                    {/* 왼쪽: 행사명 · 기간 · 체험 인원을 세로로. 오른쪽: 지도에서 행사 지역을 고른다.
                         지도 옆 권역 버튼은 키보드로 고르는 길이자 지도 범례다.
                         두 열은 입력 영역이 768px 이상일 때만 — 오른쪽 요약 칸이 붙어 좁아지면
                         버튼 글자가 서너 줄로 꺾여서, 그때는 입력칸 아래로 지도를 쌓는다. */}
                     <div className="flex min-w-0 flex-col gap-y-7">
-                      <Field label={c.eventType}><Select id="q-type" aria-label={c.eventType} value={input.eventType} onValueChange={(value) => update({ eventType: value })} triggerClassName={inputClass} options={EVENT_TYPES.map((event) => ({ value: event.key, label: event.label[lang] }))} /></Field>
-                      <Field label={c.days}><Stepper id="q-days" value={input.days} min={1} max={60} suffix={lang === 'ko' ? '일' : 'days'} onChange={(value) => update({ days: value })} /></Field>
-                      <Field label={c.attendees} hint={lang === 'ko' ? '행사 전체 기간에 방문할 인원이에요.' : 'Total guests across all event days.'}><Stepper id="q-attendees" value={input.attendees} min={1} max={100000} step={50} suffix={lang === 'ko' ? '명' : 'guests'} onChange={(value) => update({ attendees: value })} /></Field>
+                      <Field label={c.eventName}><input id="q-event-name" type="text" maxLength={200} autoComplete="off" value={input.eventName ?? ''} onChange={(event) => update({ eventName: event.target.value })} placeholder={lang === 'ko' ? '예: 네안데르 브랜드 팝업' : 'e.g. NEANDER brand pop-up'} className={inputClass} /></Field>
+                      <Field label={c.days}><NumberInput id="q-days" value={input.days} min={1} max={60} suffix={lang === 'ko' ? '일' : 'days'} onChange={(value) => update({ days: value })} /></Field>
+                      <Field label={c.attendees} hint={lang === 'ko' ? '행사 전체 기간에 체험할 인원이에요. 향수 체험 인원에도 반영돼요.' : 'Total participants across all event days. Also updates the perfume participant count.'}><NumberInput id="q-attendees" value={input.attendees} min={1} max={100000} suffix={lang === 'ko' ? '명' : 'guests'} onChange={(value) => update({ attendees: value })} /></Field>
                     </div>
                     <Field label={c.region} hint={REGION_NOTE[lang]}>
                       <RegionMap value={input.region} lang={lang} onChange={(value) => update({ region: value })}>
@@ -959,7 +854,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
             {quote.warnings.length > 0 && <ul className="mt-4 space-y-2 rounded-xl bg-amber-50 p-3 text-[11px] leading-relaxed text-amber-800" role="status">{quote.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul>}
             {quote.notes.length > 0 && <details className="group mt-2"><summary className="flex min-h-10 cursor-pointer list-none items-center justify-between text-xs text-slate-500 [&::-webkit-details-marker]:hidden">{lang === 'ko' ? '이 구성의 안내사항' : 'Notes for this estimate'}<ChevronDown className="size-3.5 group-open:rotate-180" aria-hidden="true" /></summary><div className="space-y-2 pb-3 text-[11px] leading-relaxed text-slate-500">{quote.notes.map((note) => <p key={note}>{note}</p>)}</div></details>}
             {/* 1~2단계에서는 '다음'(화살표), 3단계부터 '견적서 받기'(내려받기). 견적서를 받은 뒤에는 다시 누를 일이 없어 감춘다 */}
-            {!(step === 3 && status === 'done') && <button type="button" data-testid="quote-summary-action" onClick={toEstimate} disabled={visual && step < 2 ? step === 0 : input.items.length === 0} className={cn(primaryButton, 'mt-5 w-full')}>
+            {!(step === 3 && status === 'done') && <button type="button" data-testid="quote-summary-action" onClick={toEstimate} disabled={step >= 2 && input.items.length === 0} className={cn(primaryButton, 'mt-5 w-full')}>
               {visual && step < 2 ? <>{c.next}<ArrowRight className="size-4" aria-hidden="true" /></> : <><FileDown className="size-4" aria-hidden="true" />{c.toForm}</>}
             </button>}
             <p className="mt-3 text-center text-[10px] leading-relaxed text-slate-500">{lang === 'ko' ? '선택 내용은 이 브라우저에 자동으로 저장돼요.' : 'Your selections are saved in this browser.'}</p>

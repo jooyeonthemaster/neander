@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { calculateQuote, sanitizeInput } from '@/lib/quote/engine';
+import { isConsultationService } from '@/lib/quote/catalog';
 import { newEstimateNo, renderEstimatePdf } from '@/lib/quote/pdf';
 import { createEstimateToken, readEstimateToken, type EstimateSnapshot } from '@/lib/quote/token';
 import { createRateLimiter } from '@/lib/mailer';
@@ -57,6 +58,12 @@ export async function POST(request: NextRequest) {
 
   const input = sanitizeInput(parsed.data.input);
   if (input.items.length === 0) return NextResponse.json({ error: 'empty' }, { status: 400 });
+  if (!input.items.some((item) => !isConsultationService(item.key))) {
+    return NextResponse.json({
+      error: 'consultation_required',
+      message: parsed.data.lang === 'ko' ? '선택한 서비스는 별도 문의가 필요합니다.' : 'The selected services require a separate inquiry.',
+    }, { status: 400 });
+  }
 
   const { name, email, company, phone } = parsed.data.recipient;
   const snapshot: EstimateSnapshot = {

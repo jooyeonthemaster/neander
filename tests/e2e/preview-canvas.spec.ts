@@ -2,7 +2,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
 import { SERVICE_ORDER } from '../../src/lib/quote/catalog';
 import { calculateQuote, sanitizeInput, type QuoteInput } from '../../src/lib/quote/engine';
-import { closePreviewOptions, nextPreviewStep, openPreviewOptions, showOptionPage } from './helpers/quote-preview-options';
+import { enterExperienceStep, closePreviewOptions, nextPreviewStep, openPreviewOptions, showOptionPage } from './helpers/quote-preview-options';
 
 const storageKey = 'neander-quote-preview-flow-v1';
 const canvas = (page: Page) => page.getByTestId('preview-canvas');
@@ -88,10 +88,10 @@ async function pinch(page: Page) {
 test('wheel over the preview zooms around the cursor without scrolling the page', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name === 'mobile', 'Mouse wheel interaction on desktop');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  const input = sanitizeInput({ items: [{ key: 'acscent', options: {} }, { key: 'spatialDesign', options: { size: 'booth6x3' } }] });
+  const input = sanitizeInput({ items: [{ key: 'acscent', options: {} }] });
   await page.addInitScript(({ key, value }) => localStorage.setItem(key, value), { key: storageKey, value: JSON.stringify(input) });
   await page.goto('/quote-preview', { waitUntil: 'domcontentloaded' });
-  await page.getByRole('button', { name: /담아 둔 체험 2개/ }).click();
+  await enterExperienceStep(page);
   await viewport(page).evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
   const baseline = await dimensions(canvas(page));
   const selection = await saved(page);
@@ -143,12 +143,11 @@ test('wheel over the preview zooms around the cursor without scrolling the page'
 });
 
 for (const lang of ['ko', 'en'] as const) {
-  test(`${lang}: the same canvas fits every event size and zooming or moving never changes the estimate`, async ({ page }, testInfo) => {
+  test(`${lang}: the same canvas fits the three automatic experiences and zooming or moving never changes the estimate`, async ({ page }, testInfo) => {
     const mobile = testInfo.project.name === 'mobile';
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
-    await page.getByTestId('quote-start-blank').click();
     await nextPreviewStep(page);
     await nextPreviewStep(page);
     await expect(canvas(page)).toHaveCount(1);
@@ -165,14 +164,6 @@ for (const lang of ['ko', 'en'] as const) {
     measured.push({ state: 'single-perfume', ...await dimensions(canvas(page)) });
     await page.getByTestId('preview-zoom-in').click();
     await expect(canvas(page)).toHaveAttribute('data-zoom', '1.25');
-    for (const size of ['booth3x3', 'booth6x3']) {
-      await showOptionPage(page, 'acscent', 'space');
-      await page.getByTestId(`perfume-space-${size}`).click();
-      await closePreviewOptions(page);
-      await stableSize(page, baseline);
-      await expect(canvas(page)).toHaveAttribute('data-zoom', '1.25');
-      measured.push({ state: size, ...await dimensions(canvas(page)) });
-    }
     await showOptionPage(page, 'acscent', 'analysis');
     await page.getByTestId('quote-options-acscent').getByRole('radiogroup', { name: QUOTE_COPY[lang].analysis, exact: true }).getByRole('radio').last().check();
     await setNumber(page, 'p-akiosk', 4);
@@ -182,18 +173,12 @@ for (const lang of ['ko', 'en'] as const) {
     await setNumber(page, 'b-booths', 3);
     await showOptionPage(page, 'rental', 'basic');
     await setNumber(page, 'k-count', 4);
-    await showOptionPage(page, 'rental', 'printing');
-    await page.locator('#k-printer').check();
-    await showOptionPage(page, 'mediaArt', 'basic');
-    await page.getByTestId('quote-options-mediaArt').getByRole('radio').last().check();
-    await showOptionPage(page, 'mediaArt', 'sensors');
-    await setNumber(page, 'm-sensors', 10);
     await closePreviewOptions(page);
     await stableSize(page, baseline);
     await expect(canvas(page)).toHaveAttribute('data-zoom', '1.25');
-    measured.push({ state: 'five-services-max-equipment', ...await dimensions(canvas(page)) });
+    measured.push({ state: 'three-services-max-equipment', ...await dimensions(canvas(page)) });
     if (!mobile) {
-      const options = await openPreviewOptions(page, 'mediaArt');
+      const options = await openPreviewOptions(page, 'acscent');
       const topic = await options.getByTestId('option-pages').getAttribute('data-current-page');
       await page.getByTestId('preview-zoom-in').click();
       await expect(canvas(page)).toHaveAttribute('data-zoom', '1.5');
@@ -204,7 +189,7 @@ for (const lang of ['ko', 'en'] as const) {
       await expect(page.getByTestId('quote-options-popover')).toBeVisible();
       await closePreviewOptions(page);
     }
-    for (const [kind, count] of [['team', 3], ['analysis-kiosk', 4], ['photo-booth', 3], ['kiosk', 4], ['printer', 4], ['sensor', 11]] as const) {
+    for (const [kind, count] of [['team', 3], ['analysis-kiosk', 4], ['photo-booth', 3], ['kiosk', 4], ['printer', 0], ['sensor', 0]] as const) {
       await expect(page.locator(`[data-testid="event-object"][data-kind="${kind}"]`)).toHaveCount(count);
     }
     await resetCamera(page);
@@ -264,17 +249,14 @@ test('every service detail and alternate view uses the same fixed canvas control
     { key: 'acscent', options: { analysisKiosks: 2, extraTeams: 1 } },
     { key: 'photoBooth', options: { booths: 2, templateSlugs: ['ai-caricature-artist', 'ai-hanbok-booth'] } },
     { key: 'rental', options: { kiosks: 2, experienceSlugs: ['ai-personal-color', 'ai-face-reading'] } },
-    { key: 'spatialDesign', options: { size: 'booth6x3' } },
-    { key: 'mediaArt', options: { grade: 'premium' } },
-    { key: 'custom', options: { scope: 'large' } },
   ] });
   await page.addInitScript(({ key, value }) => localStorage.setItem(key, value), { key: storageKey, value: JSON.stringify(input) });
   await page.goto('/quote-preview', { waitUntil: 'domcontentloaded' });
-  await page.getByRole('button', { name: /담아 둔 체험 6개/ }).click();
+  await enterExperienceStep(page);
   const baseline = await dimensions(canvas(page));
   const original = await saved(page);
   const total = await page.getByTestId('quote-total').getAttribute('data-amount');
-  for (const service of SERVICE_ORDER) {
+  for (const service of SERVICE_ORDER.filter(key => ['acscent', 'photoBooth', 'rental'].includes(key))) {
     await openPreviewOptions(page, service);
     await closePreviewOptions(page);
     await page.getByTestId('event-preview-detail').click();

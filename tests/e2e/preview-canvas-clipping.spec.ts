@@ -1,3 +1,4 @@
+import { enterExperienceStep } from './helpers/quote-preview-options';
 import { expect, test, type Page } from '@playwright/test';
 import { sanitizeInput } from '../../src/lib/quote/engine';
 
@@ -41,7 +42,14 @@ async function sampleFloor(page: Page) {
 async function dragScene(page: Page, mobile: boolean, vertical: number) {
   const viewport = page.getByTestId('preview-canvas-viewport');
   await viewport.evaluate(element => element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' }));
-  const box = (await viewport.boundingBox())!;
+  let box = (await viewport.boundingBox())!;
+  await expect.poll(async () => {
+    await page.waitForTimeout(150);
+    const next = (await viewport.boundingBox())!;
+    const stable = Math.abs(next.x - box.x) < .5 && Math.abs(next.y - box.y) < .5;
+    box = next;
+    return stable;
+  }).toBe(true);
   const start = { x: box.x + box.width * .85, y: box.y + box.height * .5 };
   const delta = { x: -box.width * .4, y: box.height * vertical };
   expect(await page.evaluate(point => !!document.elementFromPoint(point.x, point.y)?.closest('[data-testid="preview-canvas-viewport"]'), start)).toBe(true);
@@ -71,7 +79,7 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
       const input = sanitizeInput({ items: [{ key: 'acscent', options: {} }] });
       await page.addInitScript(({ key, value }) => localStorage.setItem(key, value), { key: storageKey, value: JSON.stringify(input) });
       await page.goto('/quote-preview', { waitUntil: 'domcontentloaded' });
-      await page.getByRole('button', { name: /담아 둔 체험 1개/ }).click();
+      await enterExperienceStep(page);
       await expect(page.getByTestId('event-scene')).toHaveAttribute('data-space', 'existing');
       const selection = await page.evaluate(key => localStorage.getItem(key), storageKey);
       const price = await page.getByTestId('quote-total').getAttribute('data-amount');

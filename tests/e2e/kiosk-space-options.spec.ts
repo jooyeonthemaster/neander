@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { calculateQuote, type QuoteInput } from '../../src/lib/quote/engine';
-import { CUSTOM_DEV, SPACE } from '../../src/lib/quote/catalog';
-import { toggleKioskExperience, closePreviewOptions, showOptionPage } from './helpers/quote-preview-options';
+import { CUSTOM_DEV } from '../../src/lib/quote/catalog';
+import { enterExperienceStep, toggleKioskExperience, closePreviewOptions, showOptionPage } from './helpers/quote-preview-options';
 
 const key = 'neander-quote-preview-flow-v1';
 const seed = { days: 1, hoursPerDay: 6, region: 'capital', items: [
@@ -12,13 +12,13 @@ const saved = (page: Page): Promise<QuoteInput> => page.evaluate(key => JSON.par
 const amount = (page: Page) => page.getByTestId('quote-total').getAttribute('data-amount').then(Number);
 
 for (const lang of ['ko', 'en'] as const) {
-  test(`${lang}: kiosk custom options share the experience topic and pop-up prices include construction`, async ({ page }, testInfo) => {
+  test(`${lang}: kiosk custom options share the experience topic while space design requires a separate inquiry`, async ({ page }, testInfo) => {
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.addInitScript(({ key, seed }) => { if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify(seed)); }, { key, seed });
     await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`);
-    const resume = () => page.getByRole('button', { name: lang === 'ko' ? /담아 둔 체험 2개/ : /You have 2 saved experiences/ });
-    await resume().click();
+    const resume = () => enterExperienceStep(page);
+    await resume();
     await page.getByTestId('quote-edit-rental').evaluate(element => element.scrollIntoView({ block: 'end' }));
     const kiosk = await showOptionPage(page, 'rental', 'kiosk-1');
     await expect(kiosk.getByTestId('option-pages')).toHaveAttribute('data-total-steps', '2');
@@ -63,32 +63,18 @@ for (const lang of ['ko', 'en'] as const) {
     await showOptionPage(page, 'rental', 'kiosk-1');
     await page.getByTestId('kiosk-custom-none').click();
     await closePreviewOptions(page);
-    await page.getByTestId('quote-edit-spatialDesign').evaluate(element => element.scrollIntoView({ block: 'end' }));
-    const space = await showOptionPage(page, 'spatialDesign', 'basic');
-    const boothTotal = await amount(page);
-    await space.getByRole('radio').last().check();
-    await expect.poll(() => amount(page)).toBe(boothTotal + (12_000_000 - SPACE.booth6x3) * 1.1);
-    await expect(space.getByTestId('option-pages')).toHaveAttribute('data-total-steps', '3');
-    await showOptionPage(page, 'spatialDesign', 'area');
-    await space.locator('#s-pyeong').fill('20');
-    await space.locator('#s-pyeong').press('Enter');
-    await expect.poll(() => amount(page)).toBe(boothTotal + (24_000_000 - SPACE.booth6x3) * 1.1);
-    const areaTotal = await amount(page);
-    await page.getByTestId('s-pyeong-unit-sqm').click();
-    await expect.poll(() => amount(page)).toBe(areaTotal);
-    // 넓이 주제는 맞춤 공간을 고른 뒤에 생겼다. 열려 있는 말풍선은 높이를 바꾸지 않으므로 다시 열어 확인한다
-    await closePreviewOptions(page);
-    await showOptionPage(page, 'spatialDesign', 'area');
-    await capture('spatialDesign', 'area');
-    await showOptionPage(page, 'spatialDesign', 'styling');
-    await space.locator('#s-zone').check();
-    await space.locator('#s-light').check();
-    await expect.poll(() => amount(page)).toBe(areaTotal + (SPACE.photoZone + SPACE.lighting) * 1.1);
-    await capture('spatialDesign', 'styling');
+    const automaticTotal = await amount(page);
+    await page.getByTestId('quote-add-spatialDesign').click();
+    const inquiry = page.getByTestId('quote-consultation-notice');
+    await expect(inquiry).toHaveAttribute('data-service', 'spatialDesign');
+    await expect(inquiry).toContainText(lang === 'ko' ? '별도 문의 필요' : 'Separate inquiry required');
+    await expect(page.getByTestId('quote-options-popover')).toBeHidden();
+    await expect.poll(() => amount(page)).toBe(automaticTotal);
+    expect(calculateQuote(await saved(page), lang).lines.filter(line => line.service === 'spatialDesign')).toEqual([]);
     const final = await saved(page);
     await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(calculateQuote(final, lang).total));
     await page.reload();
-    await resume().click();
+    await resume();
     await expect.poll(() => saved(page)).toEqual(final);
     await showOptionPage(page, 'rental', 'kiosk-1');
     await expect(page.getByTestId('kiosk-assignment-1')).toHaveAttribute('data-experience-slug', 'ai-sommelier');

@@ -135,6 +135,37 @@ export function Field({ label, hint, info, price, children }: { label: string; h
   );
 }
 
+/** Direct number entry with the phone's numeric keypad. */
+export function NumberInput({ id, value, min, max, onChange, suffix }: {
+  id: string; value: number; min: number; max: number; onChange: (value: number) => void; suffix?: string;
+}) {
+  const field = useContext(FieldContext);
+  const [draft, setDraft] = useState<string | null>(null);
+  const commit = (text: string) => {
+    const number = Number(text);
+    onChange(Math.min(max, Math.max(min, Number.isFinite(number) ? Math.round(number) : min)));
+  };
+  return (
+    <div className="flex h-[52px] items-center rounded-2xl border border-slate-200 bg-white px-4 transition-shadow focus-within:border-teal-500 focus-within:ring-4 focus-within:ring-teal-500/10">
+      <input id={id} type="number" inputMode="numeric" min={min} max={max} step={1} value={draft ?? value}
+        aria-labelledby={field?.labelId} aria-describedby={field?.hintId}
+        onFocus={() => setDraft(String(value))}
+        onChange={(event) => {
+          const next = event.target.value;
+          setDraft(next);
+          if (/^\d+$/.test(next) && Number(next) >= min && Number(next) <= max) commit(next);
+        }}
+        onBlur={() => { if (draft !== null) commit(draft || String(min)); setDraft(null); }}
+        onKeyDown={(event) => {
+          if (['e', 'E', '+', '-', '.'].includes(event.key)) event.preventDefault();
+          if (event.key === 'Enter') { event.preventDefault(); event.currentTarget.blur(); }
+        }}
+        className="h-full w-full min-w-0 bg-transparent text-base tabular-nums text-slate-900 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
+      {suffix && <span className="shrink-0 pl-2 text-sm text-slate-500">{suffix}</span>}
+    </div>
+  );
+}
+
 export function Stepper({ id, value, min, max, step = 1, onChange, suffix }: {
   id: string; value: number; min: number; max?: number; step?: number; onChange: (value: number) => void; suffix?: string;
 }) {

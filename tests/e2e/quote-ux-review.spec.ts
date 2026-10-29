@@ -1,8 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { closePreviewOptions, nextPreviewStep, openPreviewOptions, showOptionPage } from './helpers/quote-preview-options';
 import { calculateQuote, type QuoteInput } from '../../src/lib/quote/engine';
-import { normalizePreviewInput } from '../../src/lib/quote-preview/flow-storage';
-import { QUOTE_PRESETS } from '../../src/lib/quote/presets';
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
 
 // 2026-10-02 UI/UX 점검에서 고친 항목의 회귀 테스트 (docs/quote-preview.md 참고)
@@ -11,7 +9,6 @@ const saved = (page: Page): Promise<QuoteInput> => page.evaluate((key) => JSON.p
 const route = (lang: 'ko' | 'en', path = '/quote-preview') => `${lang === 'en' ? '/en' : ''}${path}`;
 async function toExperiences(page: Page, lang: 'ko' | 'en') {
   await page.goto(route(lang), { waitUntil: 'domcontentloaded' });
-  await page.getByTestId('quote-start-blank').click();
   await nextPreviewStep(page);
   await nextPreviewStep(page);
   await expect(page.locator('[data-quote-step="2"]')).toBeVisible();
@@ -42,7 +39,14 @@ for (const lang of ['ko', 'en'] as const) {
           sceneVisible: (Math.min(scene.bottom, window.innerHeight) - Math.max(scene.top, 80)) / scene.height,
         };
       });
-      const opened = await geometry();
+      let opened = await geometry();
+      await expect.poll(async () => {
+        await page.waitForTimeout(200);
+        const next = await geometry();
+        const stable = JSON.stringify(next) === JSON.stringify(opened);
+        opened = next;
+        return stable;
+      }).toBe(true);
       expect(opened.coversName, `${label} balloon leaves the card name uncovered`).toBe(false);
       expect(opened.nameVisible, `${label} card name stays on screen`).toBe(true);
       expect(opened.sceneVisible, `${label} preview scene stays on screen`).toBeGreaterThanOrEqual(0.5);
@@ -112,20 +116,6 @@ for (const lang of ['ko', 'en'] as const) {
 
   test(`${lang}: totals name their VAT basis, flash the change and the kiosk summary does not repeat itself`, async ({ page }) => {
     await page.goto(route(lang), { waitUntil: 'domcontentloaded' });
-    await page.getByTestId('quote-start-templates').click();
-    // 템플릿 카드: 고른 뒤 보이는 예상 합계와 같은 기준(부가세 포함) + 부가세 별도 금액
-    for (const preset of QUOTE_PRESETS) {
-      const estimate = calculateQuote(normalizePreviewInput(structuredClone(preset.input)), lang);
-      const price = page.getByTestId(`quote-template-price-${preset.id}`);
-      await expect(price).toHaveAttribute('data-total', String(estimate.total));
-      await expect(price).toHaveAttribute('data-supply', String(estimate.supply));
-      await expect(price).toContainText(lang === 'ko' ? '부가세 포함' : 'incl. VAT');
-      await expect(price).toContainText(lang === 'ko' ? '별도' : 'before VAT');
-      // 그림 설명은 장식이다 — 버튼 이름은 템플릿 이름으로 시작한다
-      await expect(page.getByTestId(`quote-preset-${preset.id}`)).toHaveAccessibleName(new RegExp(`^${preset.title[lang].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
-    }
-    await page.getByTestId('quote-back-to-start').click();
-    await page.getByTestId('quote-start-blank').click();
     await expect(page.locator('[data-quote-step="1"]')).toBeVisible();
     // 요약 칸의 '다음'은 내려받기 아이콘이 아니라 화살표
     await expect(page.getByTestId('quote-summary-action')).toHaveText(QUOTE_COPY[lang].next);

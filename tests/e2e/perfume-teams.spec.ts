@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { nextPreviewStep, openPreviewDetails, showOptionPage } from './helpers/quote-preview-options';
+import { enterExperienceStep, nextPreviewStep, openPreviewDetails, showOptionPage } from './helpers/quote-preview-options';
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
 import { calculateQuote, sanitizeInput, type QuoteInput } from '../../src/lib/quote/engine';
 
@@ -60,7 +60,7 @@ for (const preview of [true, false]) {
       await input.locator('..').screenshot({ path: testInfo.outputPath(`teams-consultation-${lang}.png`) });
 
       await page.goto(route, { waitUntil: 'domcontentloaded' });
-      await page.getByRole('button', { name: lang === 'ko' ? /담아 둔 체험 1개/ : /You have 1 saved experiences/ }).click();
+      await enterExperienceStep(page);
       await showOptionPage(page, 'acscent', 'basic');
       await expectTeams(5);
       await expect(plus).toBeEnabled();
@@ -75,7 +75,7 @@ for (const preview of [true, false]) {
       legacy.items.find((item) => item.key === 'acscent')!.options.extraTeams = 10;
       await page.evaluate(({ storageKey, value }) => localStorage.setItem(storageKey, value), { storageKey: key, value: JSON.stringify(legacy) });
       await page.goto(route, { waitUntil: 'domcontentloaded' });
-      await page.getByRole('button', { name: lang === 'ko' ? /담아 둔 체험 1개/ : /You have 1 saved experiences/ }).click();
+      await enterExperienceStep(page);
       await showOptionPage(page, 'acscent', 'basic');
       await expectTeams(11);
       await expect(plus).toBeEnabled();

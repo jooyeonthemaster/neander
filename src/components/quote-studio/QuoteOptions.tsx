@@ -7,9 +7,9 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { ChevronDown, SlidersHorizontal, TriangleAlert } from 'lucide-react';
 import { getExperienceImage } from '@/data/experience-images';
 import {
-  CUSTOM, CUSTOM_DEV, CUSTOM_DEV_TEXT, KIOSK, MEDIA_ART, OPTION_TEXT, PERFUME, PHOTO_BOOTH, SPACE, type Lang,
+  CUSTOM_DEV, CUSTOM_DEV_TEXT, KIOSK, PERFUME, PHOTO_BOOTH, type Lang,
 } from '@/lib/quote/catalog';
-import { boothPrice, getPerfumeStaffing, type QuoteInput, type QuoteItem } from '@/lib/quote/engine';
+import { getPerfumeStaffing, perfumeGuestCost, type QuoteInput, type QuoteItem } from '@/lib/quote/engine';
 import { cn } from '@/lib/utils';
 import { Check, Field, formatPriceAmount, inputClass, Segmented, Stepper, type Price } from './QuoteControls';
 import { QUOTE_COPY } from './copy';
@@ -18,7 +18,7 @@ import { perfumeBaseBreakdown } from './perfume-breakdown';
 import { PhotoBoothTemplates } from './PhotoBoothTemplates';
 import { KioskExperienceAssignments } from './KioskExperienceAssignments';
 import { QuoteOptionPages, type QuoteOptionPage } from './QuoteOptionPages';
-import { SpaceAreaInput } from './SpaceAreaInput';
+import { ConsultationNotice } from './ConsultationNotice';
 
 export type QuoteOptionsSetter = <K extends QuoteItem['key']>(key: K, patch: Partial<Extract<QuoteItem, { key: K }>['options']>) => void;
 
@@ -199,11 +199,12 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
     case 'acscent': {
       const o = item.options;
       const staffing = getPerfumeStaffing(o, schedule);
-      const tier = PERFUME.tiers.find((t) => o.guests >= t.min && o.guests <= t.max) ?? PERFUME.tiers[0];
-      const perGuest = (volume: '10ml' | '50ml') => base(tier.unit[volume], u('1인', 'per guest'));
+      const guestCost = perfumeGuestCost(o.guests, o.volume);
+      const perGuest = (volume: '10ml' | '50ml') => base(perfumeGuestCost(o.guests, volume).unit, u('1인', 'per guest'));
       const guestsControl = <Field label={c.guests} price={perGuest(o.volume)} info={`${info('perfumeGuests')}${o.customBox ? ` ${c.customBoxGuestsLock}` : ''}`}
         hint={paged ? (o.customBox ? (ko ? '단박스 선택 시 최소 300명' : 'Custom boxes: 300+ guests') : (ko ? `향수를 받아 갈 인원 · ${PERFUME.minGuests}명부터` : `Take-home perfumes · ${PERFUME.minGuests}+ guests`)) : (ko ? `향수를 받아 갈 인원이에요. ${PERFUME.minGuests}명부터, 최소 99만원(서울)으로 시작해요.` : `Guests taking home a perfume. From ${PERFUME.minGuests} guests; minimum KRW 990,000 in Seoul.`)}>
         <Stepper id="p-guests" value={o.guests} min={o.customBox ? PERFUME.customBox.minGuests : PERFUME.minGuests} max={5000} step={10} suffix={ko ? '명' : paged ? undefined : 'guests'} onChange={(value) => setOptions('acscent', { guests: value })} />
+        {guestCost.billedGuests > o.guests && <p data-testid="perfume-tier-discount" className="text-[11px] leading-relaxed text-teal-700">{ko ? `${guestCost.billedGuests}명 구간으로 계산하는 편이 더 저렴해 해당 할인을 적용했어요.` : `The ${guestCost.billedGuests}-guest tier costs less, so that discount is applied.`}</p>}
         {!paged && o.customBox && <p className="text-xs font-medium leading-relaxed text-amber-700">{c.customBoxGuestsLock}</p>}
       </Field>;
       const teamsControl = <Field label={c.extraTeams} info={info('extraTeams')} price={base(PERFUME.teamTravel[schedule.region], u('팀당', 'each team'), u('/일 (기본 1팀부터 적용)', '/day'))}
@@ -421,81 +422,9 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
         </OptionsLayout>
       );
     }
-    case 'mediaArt': {
-      const o = item.options;
-      return (
-        <OptionsLayout key={item.key} {...layout}>
-          <div className="sm:col-span-2"><Field label={c.grade} hint={ko ? '제작 규모를 먼저 고르고, 세부 연출은 상담에서 함께 정해요.' : 'Start with a production level. We’ll work out the visual details together.'}>
-            <Segmented name={c.grade} value={o.grade} onChange={(value) => setOptions('mediaArt', { grade: value })}
-              options={(['standard', 'premium', 'fullCustom'] as const).map((grade) => ({ value: grade, label: OPTION_TEXT.production[grade][lang], price: from(base(MEDIA_ART.production[grade])), info: info(grade === 'standard' ? 'gradeStandard' : grade === 'premium' ? 'gradePremium' : 'gradeFullCustom') }))} />
-          </Field></div>
-          <MoreOptions lang={lang} pageId="sensors" pageLabel={ko ? '센서 구성' : 'Sensors'} title={ko ? '움직임을 어떻게 감지할까요?' : 'How should we track movement?'}
-            hint="" count={Number(o.extraSensors > 0) + Number(o.sensorType === 'depth')}>
-            <div className="sm:col-span-2 space-y-3">
-              <Field label={ko ? '움직임 감지 카메라' : 'Motion camera'}>
-                <Segmented name={ko ? '움직임 감지 카메라' : 'Motion camera'} value={o.sensorType ?? 'image'} onChange={(value) => setOptions('mediaArt', { sensorType: value })}
-                  options={[
-                    { value: 'image', label: ko ? '이미지 카메라' : 'Image camera', price: included, info: info('imageCamera') },
-                    { value: 'depth', label: ko ? '3D 카메라' : '3D camera', price: add(MEDIA_ART.depthCameraUpgrade), info: info('depthCamera') },
-                  ]} />
-              </Field>
-              <p className="text-xs leading-relaxed text-slate-500">{o.sensorType === 'depth' ? (ko ? '거리와 깊이를 읽어 앞뒤 움직임까지 활용해요.' : 'Use distance and depth to respond to movement in 3D.') : (ko ? '영상 속 움직임과 사람의 형태에 반응해요.' : 'Respond to movement and silhouettes in the image.')}</p>
-              <Field label={ko ? '카메라 추가 (기본 1세트 포함)' : 'Extra cameras (1 set included)'} info={info('extraSensors')} price={add(MEDIA_ART.extraSensorByType[o.sensorType ?? 'image'], u('1세트당', 'per set'))} hint={ko ? '행사당 금액이에요.' : 'Per event.'}>
-                <Stepper id="m-sensors" value={o.extraSensors} min={0} max={10} suffix={ko ? '세트' : undefined} onChange={(value) => setOptions('mediaArt', { extraSensors: value })} />
-              </Field>
-            </div>
-          </MoreOptions>
-        </OptionsLayout>
-      );
-    }
-    case 'spatialDesign': {
-      const o = item.options;
-      return (
-        <OptionsLayout key={item.key} {...layout}>
-          <div className="sm:col-span-2"><Field label={c.size} hint={ko ? '부스부터 팝업 공간까지, 준비 중인 크기와 가까운 것을 골라 주세요.' : 'Choose the closest size, from a single booth to a pop-up space.'}>
-            <Segmented name={c.size} value={o.size} onChange={(value) => setOptions('spatialDesign', { size: value })}
-              options={(['booth3x3', 'booth6x3', 'large'] as const).map((size) => ({ value: size, label: OPTION_TEXT.space[size][lang].replace(/ \((.+)\)$/, '\n$1'), info: info(size),
-                price: from(base(size === 'large' ? SPACE.perPyeong * 10 : SPACE[size])) }))} />
-          </Field></div>
-          {o.size !== 'large' && <OptionTopic id="build" label={c.boothBuild} inline><div className="sm:col-span-2"><Field label={c.boothBuild} hint={c.boothBuildHint}>
-            <Segmented name={c.boothBuild} value={o.build ?? 'fabric'} onChange={(value) => setOptions('spatialDesign', { build: value })}
-              options={(['fabric', 'wood'] as const).map((build) => ({ value: build, label: OPTION_TEXT.boothBuild[build][lang], info: info(build),
-                price: base(boothPrice(o.size as 'booth3x3' | 'booth6x3', build)) }))} />
-          </Field></div></OptionTopic>}
-          {o.size === 'large' && <OptionTopic id="area" label={ko ? '공간 넓이' : 'Floor area'} inline><div className="sm:col-span-2">{paged ? <SpaceAreaInput id="s-pyeong" pyeong={o.pyeong} areaUnit={o.areaUnit} lang={lang} onChange={(patch) => setOptions('spatialDesign', patch)} info={info('pyeong')} hint={ko ? '평당 120만원 · 최소 10평, 1,200만원부터 예상 합계에 반영해요. 실제 금액은 현장 확인 후 확정해요.' : 'From KRW 1.2M per pyeong, minimum 10 pyeong (KRW 12M), included in this estimate. Final price follows a site survey.'} /> : <Field label={c.pyeong} info={info('pyeong')} price={base(SPACE.perPyeong, u('평당', 'per pyeong'))} hint={ko ? '평당 120만원 · 최소 10평, 1,200만원부터 예상 합계에 반영해요. 실제 금액은 현장 확인 후 확정해요.' : 'From KRW 1.2M per pyeong, minimum 10 pyeong (KRW 12M), included in this estimate. Final price follows a site survey.'}>
-            <div className="max-w-64"><Stepper id="s-pyeong" value={o.pyeong} min={10} max={500} suffix={ko ? '평' : undefined} onChange={(value) => setOptions('spatialDesign', { pyeong: value })} /></div>
-          </Field>}</div></OptionTopic>}
-          <MoreOptions lang={lang} pageId="styling" pageLabel={ko ? '포토존·조명' : 'Finishing touches'} title={ko ? '공간에 특별함 더하기' : 'Add a finishing touch'} hint={ko ? '사진을 남길 포토존과 공간에 맞는 조명' : 'A photo spot and lighting designed for your space'} count={Number(o.photoZone) + Number(o.lighting)}>
-            <Check id="s-zone" checked={o.photoZone} onChange={(value) => setOptions('spatialDesign', { photoZone: value })} label={c.photoZone} info={info('photoZone')} price={add(SPACE.photoZone)} />
-            <Check id="s-light" checked={o.lighting} onChange={(value) => setOptions('spatialDesign', { lighting: value })} label={c.lighting} info={info('lighting')} price={add(SPACE.lighting)} />
-          </MoreOptions>
-        </OptionsLayout>
-      );
-    }
-    case 'custom': {
-      const o = item.options;
-      return (
-        <OptionsLayout key={item.key} {...layout}>
-          <div className="sm:col-span-2"><Field label={c.scope} hint={ko ? '특정 행사의 목적에 맞춘 AI 콘텐츠를 만드는 1회 개발비예요.' : 'A one-time fee to develop AI content tailored to your event’s goals.'}>
-            <Segmented name={c.scope} value={o.scope} onChange={(value) => setOptions('custom', { scope: value })}
-              options={(['standard', 'large'] as const).map((scope) => ({ value: scope, label: OPTION_TEXT.scope[scope][lang], price: base(CUSTOM.scope[scope]), info: info(scope === 'standard' ? 'scopeStandard' : 'scopeLarge') }))} />
-          </Field></div>
-          <MoreOptions lang={lang} pageId="support" pageLabel={ko ? '기획·운영' : 'Support'} title={ko ? '기획부터 운영까지 도움받기' : 'Get help with planning & upkeep'} hint={ko ? '아이디어 구체화나 제작 후 관리가 필요할 때' : 'For help shaping an idea or maintaining it after launch'} count={Number(o.consulting) + Number(o.pgIntegration) + Number(o.maintenanceMonths > 0)}>
-            <OptionTopic id="maintenance" label={ko ? '운영 관리' : 'Maintenance'} inline>
-            <Field label={c.maintenance} info={info('maintenance')} price={add(CUSTOM.maintenancePerMonth, u('월', 'per month'))} hint={ko ? '필요한 기간만 선택해요. 0개월이면 추가하지 않아요.' : 'Choose only the months you need. Leave at 0 to skip.'}>
-              <Stepper id="c-maint" value={o.maintenanceMonths} min={0} max={36} suffix={ko ? '개월' : undefined} onChange={(value) => setOptions('custom', { maintenanceMonths: value })} />
-            </Field>
-            </OptionTopic>
-            <OptionTopic id="consulting" label={ko ? '기획·결제 연결' : 'Planning & payments'} inline>
-            <div className="sm:col-span-2 space-y-3">
-              <Check id="c-consult" checked={o.consulting} onChange={(value) => setOptions('custom', { consulting: value })} label={c.consulting} info={info('consulting')} price={add(CUSTOM.consulting)} />
-              <Check id="c-pg" checked={o.pgIntegration ?? false} onChange={(value) => setOptions('custom', { pgIntegration: value })} label={ko ? 'PG 연결' : 'Payment gateway'} info={info('pgIntegration')} price={add(CUSTOM.pgIntegration)} />
-              <p className="text-xs leading-relaxed text-slate-500">{ko ? 'PG 연결은 콘텐츠 안에서 결제할 수 있도록 개발하는 비용이에요. PG 가입비·결제 수수료와 부가세는 별도예요.' : 'Connect payments within your content. Provider signup fees, transaction fees and VAT are separate.'}</p>
-            </div>
-            </OptionTopic>
-          </MoreOptions>
-        </OptionsLayout>
-      );
-    }
+    case 'mediaArt':
+    case 'spatialDesign':
+    case 'custom':
+      return <ConsultationNotice service={item.key} lang={lang} />;
   }
 }

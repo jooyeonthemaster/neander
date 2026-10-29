@@ -10,6 +10,7 @@ import { ExperienceCard } from './ExperienceCard';
 import { DemoModal } from '@/components/demo/DemoModal';
 import { hasDemoForSlug } from '@/data/demo-registry';
 import { getLiveDemoHref } from '@/data/live-demos';
+import { getExperienceImage } from '@/data/experience-images';
 import { cn } from '@/lib/utils';
 
 /* ── Pillar icon SVGs ────────────────────────────────── */
@@ -146,6 +147,10 @@ export function IndustryShowcase({ initialPillar, initialDemo }: IndustryShowcas
     () => (activePillar === 'all' ? experiences : experiences.filter((exp) => exp.pillar === activePillar)),
     [activePillar]
   );
+  const experienceGroups = useMemo(() => [
+    { kind: 'case', items: activeExperiences.filter((experience) => getExperienceImage(experience.slug)?.kind === 'case') },
+    { kind: 'concept', items: activeExperiences.filter((experience) => getExperienceImage(experience.slug)?.kind !== 'case') },
+  ] as const, [activeExperiences]);
 
   const handlePillarClick = useCallback((pillarId: PillarId | 'all') => {
     if (pillarId === activePillar) return;
@@ -276,24 +281,34 @@ export function IndustryShowcase({ initialPillar, initialDemo }: IndustryShowcas
                 transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
               >
                 {activeExperiences.length > 0 ? (
-                  <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
-                    {activeExperiences.map((exp) => {
-                      const pillar = pillarMap.get(exp.pillar);
-                      return (
-                        <ExperienceCard
-                          key={exp.id}
-                          slug={exp.slug}
-                          name={t(exp.nameKey)}
-                          oneLiner={t(exp.oneLinerKey)}
-                          pillarId={exp.pillar}
-                          pillarName={pillar ? t(pillar.nameKey) : ''}
-                          industryName={industryName(exp.industry)}
-                          pillarColor={pillar?.color ?? '#0D9488'}
-                          onOpenDemo={hasDemoForSlug(exp.slug) ? () => openDemoPopup(exp.slug) : undefined}
-                          liveDemoHref={getLiveDemoHref(exp.slug)}
-                        />
-                      );
-                    })}
+                  <div className="space-y-12">
+                    {experienceGroups.filter((group) => group.items.length > 0).map((group) => (
+                      <div key={group.kind} data-experience-group={group.kind} aria-label={t(`showcaseGroups.${group.kind}Title`)}>
+                        <div className="mb-5 border-t border-neutral-200 pt-6">
+                          <p className="text-xl font-bold tracking-tight text-neutral-900">{t(`showcaseGroups.${group.kind}Title`)}</p>
+                          <p className="mt-2 text-sm leading-relaxed text-neutral-500">{t(`showcaseGroups.${group.kind}Description`)}</p>
+                        </div>
+                        <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
+                          {group.items.map((exp) => {
+                            const pillar = pillarMap.get(exp.pillar);
+                            return (
+                              <ExperienceCard
+                                key={exp.id}
+                                slug={exp.slug}
+                                name={t(exp.nameKey)}
+                                oneLiner={t(exp.oneLinerKey)}
+                                pillarId={exp.pillar}
+                                pillarName={pillar ? t(pillar.nameKey) : ''}
+                                industryName={industryName(exp.industry)}
+                                pillarColor={pillar?.color ?? '#0D9488'}
+                                onOpenDemo={hasDemoForSlug(exp.slug) ? () => openDemoPopup(exp.slug) : undefined}
+                                liveDemoHref={getLiveDemoHref(exp.slug)}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-16 text-center">

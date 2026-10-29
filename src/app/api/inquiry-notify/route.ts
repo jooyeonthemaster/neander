@@ -9,6 +9,7 @@ const SITE_URL = 'https://neander.co.kr';
 
 const quoteSchema = z
   .object({
+    eventName: z.string().max(200).optional(),
     eventType: z.string().max(100).optional(),
     eventDate: z.string().max(100).optional(),
     duration: z.number().optional(),
@@ -55,10 +56,10 @@ function rows(body: Body): [string, string][] {
   const q = body.quote;
   if (q) {
     list.push(
-      ['행사 유형', q.eventType || '-'],
+      [q.eventName ? '행사명' : '행사 유형', q.eventName || q.eventType || '-'],
       ['행사 일자', q.eventDate || '-'],
       ['기간', q.duration ? `${q.duration}일${q.hoursPerDay ? ` · 1일 ${q.hoursPerDay}시간` : ''}` : '-'],
-      ['예상 인원', q.expectedAttendees ? `${q.expectedAttendees}명` : '-'],
+      ['예상 체험 인원', q.expectedAttendees ? `${q.expectedAttendees}명` : '-'],
       ['장소', q.location || '-'],
       ['규모', q.venueSize || '-'],
       ['서비스', q.services.join(', ') || '-'],

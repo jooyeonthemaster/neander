@@ -7,7 +7,7 @@ import { Link } from '@/i18n/navigation';
 import { FitToViewport, ScrollReveal, StaggerChildren, StaggerItem } from '@/components/animations';
 import { industries, experiences } from '@/data/experiences';
 import { PRODUCTS, quoteHrefFor, type ProductEntry } from '@/data/products';
-import { SERVICE_TEXT, type Lang } from '@/lib/quote/catalog';
+import { isConsultationService, SERVICE_TEXT, type Lang } from '@/lib/quote/catalog';
 import { startingPrice } from '@/lib/quote/engine';
 
 /* ─────────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ export function ServicesOverview() {
           <StaggerChildren staggerDelay={0.06} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5 lg-short:gap-3">
             {PRODUCTS.map((product) => (
               <StaggerItem key={product.key}>
-                <ProductCard product={product} lang={lang} labels={{ detail: t('viewDetail'), quote: t('addToQuote'), from: t('priceFrom') }} />
+                <ProductCard product={product} lang={lang} labels={{ detail: t('viewDetail'), quote: t('addToQuote'), from: t('priceFrom'), consultation: t('consultationOnly'), inquiry: t('inquire') }} />
               </StaggerItem>
             ))}
           </StaggerChildren>
@@ -101,9 +101,10 @@ function StatItem({ value, label }: { value: string; label: string }) {
 function ProductCard({ product, lang, labels }: {
   product: ProductEntry;
   lang: Lang;
-  labels: { detail: string; quote: string; from: string };
+  labels: { detail: string; quote: string; from: string; consultation: string; inquiry: string };
 }) {
   const text = SERVICE_TEXT[product.key];
+  const consultation = isConsultationService(product.key);
   const price = startingPrice(product.key);
   const priceText = lang === 'ko' ? `${(price / 10000).toLocaleString('ko-KR')}만원` : `KRW ${price.toLocaleString('en-US')}`;
 
@@ -145,16 +146,16 @@ function ProductCard({ product, lang, labels }: {
       </Link>
       <div className="relative mx-6 mt-4 mb-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/20 pt-3 lg-short:mx-5 lg-short:mt-3 lg-short:mb-4">
         <span className="whitespace-nowrap text-xs text-white/70">
-          {lang === 'en' && <span className="mr-1">{labels.from}</span>}
-          <span className="text-lg font-bold tabular-nums tracking-tight text-white lg-short:text-base">{priceText}</span>
-          {lang === 'ko' && <span className="ml-1">{labels.from}</span>}
+          {!consultation && lang === 'en' && <span className="mr-1">{labels.from}</span>}
+          <span className="text-lg font-bold tabular-nums tracking-tight text-white lg-short:text-base">{consultation ? labels.consultation : priceText}</span>
+          {!consultation && lang === 'ko' && <span className="ml-1">{labels.from}</span>}
         </span>
         <Link
-          href={quoteHrefFor(product.key)}
-          aria-label={`${text.name[lang]} — ${labels.quote}`}
+          href={consultation ? '/contact' : quoteHrefFor(product.key)}
+          aria-label={`${text.name[lang]} — ${consultation ? labels.inquiry : labels.quote}`}
           className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 text-xs font-semibold text-neutral-900 transition-colors hover:bg-teal-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white motion-reduce:transition-none"
         >
-          {labels.quote}
+          {consultation ? labels.inquiry : labels.quote}
           <ArrowRight className="size-3.5" aria-hidden="true" />
         </Link>
       </div>

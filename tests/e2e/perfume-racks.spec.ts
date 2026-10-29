@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { calculateQuote } from '../../src/lib/quote/engine';
-import { closePreviewOptions, showOptionPage } from './helpers/quote-preview-options';
+import { enterExperienceStep, closePreviewOptions, showOptionPage } from './helpers/quote-preview-options';
 
 test('participant count adds scent racks and widens tables in overview and detail', async ({ page }, testInfo) => {
   const errors: string[] = [];
@@ -12,7 +12,7 @@ test('participant count adds scent racks and widens tables in overview and detai
     { key: 'photoBooth', options: {} }, { key: 'rental', options: {} },
   ] })), key);
   await page.goto('/quote-preview');
-  await page.getByRole('button', { name: /담아 둔 체험 4개/ }).click();
+  await enterExperienceStep(page);
   const viewport = page.getByTestId('preview-canvas');
   const height = (await viewport.boundingBox())!.height;
   let width = 0;

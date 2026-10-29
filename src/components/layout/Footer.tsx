@@ -78,9 +78,6 @@ const COMPANY_LINKS = [
 const SUPPORT_LINKS = [
   { labelKey: 'contact' as const, href: '/contact' },
   { labelKey: 'quote' as const, href: QUOTE_HREF },
-  { labelKey: 'faq' as const, href: '/faq' },
-  { labelKey: 'brochure' as const, href: '/brochure' },
-  { labelKey: 'demo' as const, href: '/demo' },
 ];
 
 export default function Footer() {

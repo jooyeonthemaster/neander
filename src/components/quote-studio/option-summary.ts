@@ -1,13 +1,13 @@
-import { CUSTOM_DEV_TEXT, OPTION_TEXT, PERFUME, type Lang } from '@/lib/quote/catalog';
+import { CUSTOM_DEV_TEXT, PERFUME, isConsultationService, type Lang } from '@/lib/quote/catalog';
 import type { QuoteItem } from '@/lib/quote/engine';
 import { getPhotoBoothTemplates } from '@/lib/quote/photo-booth-templates';
 import { getKioskAssignments, getKioskExperience, groupKioskAssignments } from '@/lib/quote/kiosk-experiences';
-import { formatSpaceArea } from '@/lib/quote/space-area';
 
 /* 온라인 견적 — 오른쪽 '지금까지 고른 견적'에 체험별로 고른 옵션을 짧게 보여 준다 */
 
 export function optionSummary(item: QuoteItem, lang: Lang, experienceName?: (slug: string) => string | undefined): string[] {
   const ko = lang === 'ko';
+  if (isConsultationService(item.key)) return [ko ? '별도 문의 필요' : 'Separate inquiry required'];
   const out: string[] = [];
   const add = (cond: unknown, koText: string, enText: string) => { if (cond) out.push(ko ? koText : enText); };
   /** 영어 수량 표기 — 1 kiosk · 3 kiosks */
@@ -61,28 +61,7 @@ export function optionSummary(item: QuoteItem, lang: Lang, experienceName?: (slu
       if (o.custom && o.custom !== 'none') out.push(CUSTOM_DEV_TEXT.kiosk[o.custom].name[lang]);
       break;
     }
-    case 'mediaArt': {
-      const o = item.options;
-      out.push(OPTION_TEXT.production[o.grade][lang]);
-      out.push(o.sensorType === 'depth' ? (ko ? '3D 카메라' : '3D camera') : (ko ? '이미지 카메라' : 'Image camera'));
-      add(o.extraSensors > 0, `센서 +${o.extraSensors}세트`, `+${count(o.extraSensors, 'sensor set')}`);
-      break;
-    }
-    case 'spatialDesign': {
-      const o = item.options;
-      out.push(o.size === 'large' ? (ko ? `팝업·공간 ${formatSpaceArea(o, lang)}` : `Space ${formatSpaceArea(o, lang)}`) : `${OPTION_TEXT.space[o.size][lang]} · ${OPTION_TEXT.boothBuild[o.build ?? 'fabric'][lang]}`);
-      add(o.photoZone, '포토존', 'Photo spot');
-      add(o.lighting, '조명', 'Lighting');
-      break;
-    }
-    case 'custom': {
-      const o = item.options;
-      out.push(OPTION_TEXT.scope[o.scope][lang]);
-      add(o.consulting, '기획 함께', 'Planning');
-      add(o.pgIntegration ?? false, 'PG 연결', 'Payment gateway');
-      add(o.maintenanceMonths > 0, `관리 ${o.maintenanceMonths}개월`, `${o.maintenanceMonths} mo upkeep`);
-      break;
-    }
+
   }
   return out;
 }

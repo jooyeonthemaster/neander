@@ -1,6 +1,17 @@
 import { expect, type Page } from '@playwright/test';
 import { KIOSK_EXPERIENCES } from '../../../src/lib/quote/kiosk-experiences';
 
+/** A restored draft opens on event details, just like a new quote. */
+export async function enterExperienceStep(page: Page) {
+  const experiences = page.locator('[data-quote-step="2"]');
+  if (await experiences.isVisible()) return;
+  const conditions = page.locator('[data-quote-step="1"]');
+  await expect(conditions).toBeVisible();
+  if (await conditions.getAttribute('data-quote-page') === '1') await nextPreviewStep(page);
+  await nextPreviewStep(page);
+  await expect(experiences).toBeVisible();
+}
+
 /** Close the live-updating editor without changing any selected option. */
 export async function closePreviewOptions(page: Page) {
   const popover = page.getByTestId('quote-options-popover');
@@ -50,6 +61,14 @@ export async function openPreviewDetails(page: Page) {
   const reopen = await page.getByTestId('quote-options-popover').isVisible();
   const service = await page.getByTestId('event-preview').getAttribute('data-active-service');
   await detail.click();
+  await expect(page.getByTestId('event-preview')).toHaveAttribute('data-view', 'detail');
+  await expect(page.getByTestId('service-preview')).toBeVisible();
+  // The detail view changes the height of the column beside the service cards.
+  // Let fonts and layout settle before measuring the card for a new popover.
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+  });
   if (reopen && service) await openPreviewOptions(page, service);
 }
 

@@ -287,10 +287,10 @@ const won = (n: number) => `${n.toLocaleString('ko-KR')}원`
 /** 온라인 견적 상세 — 행사 조건, 체험별 옵션, 품목별 수량·단가, 합계 */
 function QuoteDetail({ quote }: { quote: QuoteSnapshot }) {
   const conditions: [string, string | undefined][] = [
-    ['행사 유형', quote.eventType],
+    [quote.eventName ? '행사명' : '행사 유형', quote.eventName || quote.eventType],
     ['행사 일자', quote.eventDate || '미정'],
     ['운영 기간', quote.duration ? `${quote.duration}일${quote.hoursPerDay ? ` · 1일 ${quote.hoursPerDay}시간` : ''}` : undefined],
-    ['예상 인원', quote.expectedAttendees ? `${quote.expectedAttendees.toLocaleString('ko-KR')}명` : undefined],
+    ['예상 체험 인원', quote.expectedAttendees ? `${quote.expectedAttendees.toLocaleString('ko-KR')}명` : undefined],
     ['지역', quote.location],
     ['전날 설치', quote.setupDayBefore === undefined ? undefined : quote.setupDayBefore ? '예' : '아니오'],
     ['추가 인력', quote.extraStaff ? `${quote.extraStaff}명` : undefined],

@@ -13,6 +13,12 @@ type Text = Record<Lang, string>;
 
 export const SERVICE_ORDER: ServiceKey[] = ['acscent', 'photoBooth', 'rental', 'spatialDesign', 'mediaArt', 'custom'];
 
+/** These services need an individual brief and are excluded from online totals. */
+export const CONSULTATION_SERVICES = ['spatialDesign', 'mediaArt', 'custom'] as const satisfies readonly ServiceKey[];
+export function isConsultationService(key: ServiceKey): boolean {
+  return CONSULTATION_SERVICES.some((service) => service === key);
+}
+
 export const SERVICE_TEXT: Record<ServiceKey, { name: Text; summary: Text }> = {
   acscent: {
     name: { ko: 'AI 향수 체험', en: 'AI Perfume Experience' },

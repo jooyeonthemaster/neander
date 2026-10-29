@@ -71,7 +71,7 @@ export async function renderEstimatePdf(input: QuoteInput, meta: EstimateMeta): 
   const quote = meta.quote ?? calculateQuote(input, lang);
   const validUntil = new Date(meta.issuedAt.getTime() + COMMON.validDays * 86400000);
   const won = (n: number) => (lang === 'ko' ? `${n.toLocaleString('ko-KR')}원` : `KRW ${n.toLocaleString('en-US')}`);
-  const eventType = EVENT_TYPES.find((e) => e.key === input.eventType)?.label[lang] ?? input.eventType;
+  const eventName = input.eventName?.trim() || (input.eventName === undefined && meta.quote ? EVENT_TYPES.find((e) => e.key === input.eventType)?.label[lang] ?? input.eventType : L('미정', 'TBD'));
   const region = REGIONS.find((r) => r.key === input.region)?.label[lang] ?? '';
 
   const notes = [
@@ -94,10 +94,10 @@ export async function renderEstimatePdf(input: QuoteInput, meta: EstimateMeta): 
   ];
   const recipientName = meta.recipient.company ? `${meta.recipient.company} ${meta.recipient.name}` : meta.recipient.name;
   const overview = [
-    [L('행사 유형', 'Event type'), eventType],
+    [L('행사명', 'Event name'), eventName],
     [L('행사 일자', 'Event date'), input.eventDate || L('미정', 'TBD')],
     [L('운영 기간', 'Duration'), L(`${input.days}일 · 1일 ${input.hoursPerDay}시간`, `${input.days} day(s) · ${input.hoursPerDay} h/day`)],
-    [L('예상 인원', 'Expected guests'), L(`${input.attendees.toLocaleString('ko-KR')}명`, input.attendees.toLocaleString('en-US'))],
+    [L('예상 체험 인원', 'Expected participants'), L(`${input.attendees.toLocaleString('ko-KR')}명`, input.attendees.toLocaleString('en-US'))],
     [L('지역', 'Region'), region],
   ];
 
@@ -186,8 +186,13 @@ export async function renderEstimatePdf(input: QuoteInput, meta: EstimateMeta): 
   // ── 행사 개요
   text(L('행사 개요', 'Event'), M, y, 10.5, bold);
   y -= 16;
-  const ovColW = W / overview.length;
-  overview.forEach(([k, v], i) => {
+  const [[eventLabel, eventValue], ...eventDetails] = overview;
+  text(eventLabel, M, y, 8, reg, MUTED);
+  const eventNameLines = wrap(eventValue, bold, 9.5, W);
+  eventNameLines.forEach((line, index) => text(line, M, y - 13 - index * 11, 9.5, bold));
+  y -= 27 + eventNameLines.length * 11;
+  const ovColW = W / eventDetails.length;
+  eventDetails.forEach(([k, v], i) => {
     text(k, M + i * ovColW, y, 8, reg, MUTED);
     wrap(v, bold, 9.5, ovColW - 8).slice(0, 2).forEach((ln, j) => text(ln, M + i * ovColW, y - 13 - j * 11, 9.5, bold));
   });

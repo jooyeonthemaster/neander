@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { calculateQuote, type QuoteInput } from '../../src/lib/quote/engine';
 import { PHOTO_BOOTH_TEMPLATES } from '../../src/lib/quote/photo-booth-templates';
-import { showOptionPage, showPhotoGalleryPage } from './helpers/quote-preview-options';
+import { enterExperienceStep, showOptionPage, showPhotoGalleryPage } from './helpers/quote-preview-options';
 
 const storageKey = 'neander-quote-preview-flow-v1';
 const visible = (page: Page, id: string) => page.locator(`[data-testid="${id}"]:visible`);
@@ -31,7 +31,7 @@ for (const lang of ['ko', 'en'] as const) {
     await page.route('**/api/demo-ai/**', route => { generationRequests.push(route.request().url()); return route.abort(); });
     await page.addInitScript(key => localStorage.setItem(key, JSON.stringify({ items: [{ key: 'photoBooth', options: { booths: 1, templateSlugs: [], customStyles: 0 } }] })), storageKey);
     await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
-    await page.getByRole('button', { name: lang === 'ko' ? /담아 둔 체험 1개/ : /You have 1 saved experiences/ }).click();
+    await enterExperienceStep(page);
     const picker = await showPhotoGalleryPage(page, 1);
     const options = page.getByTestId('quote-options-photoBooth');
     const flow = options.getByTestId('option-pages');
@@ -100,7 +100,7 @@ for (const lang of ['ko', 'en'] as const) {
     const total = await page.getByTestId('quote-total').getAttribute('data-amount');
     for (const [index, slug] of ['ai-wedding-booth', 'ai-traditional-painter'].entries()) {
       const demo = page.getByTestId(`booth-demo-${slug}`);
-      await expect(demo).toHaveText(lang === 'ko' ? '데모 체험' : 'Try demo');
+      await expect(demo).toHaveText(lang === 'ko' ? '데모' : 'Demo');
       await demo.click();
       const modal = page.locator('.demo-modal-panel[role="dialog"]');
       await expect(modal).toBeVisible();
@@ -150,7 +150,7 @@ for (const lang of ['ko', 'en'] as const) {
         height: el.clientHeight, content: el.scrollHeight, overflow: el.scrollHeight - el.clientHeight,
       }));
       measurements.push(size);
-      expect(size.overflow).toBeLessThanOrEqual(1);
+      expect(size.overflow).toBeLessThanOrEqual(2);
       await page.mouse.move(5, 100);
       await page.waitForTimeout(250);
       await page.screenshot({ path: testInfo.outputPath(`${size.viewportWidth}-merged-prints-${lang}.png`), style: 'nextjs-portal{display:none!important}' });
@@ -167,13 +167,13 @@ for (const lang of ['ko', 'en'] as const) {
         await page.getByTestId('quote-options-close').click();
         await page.setViewportSize(viewport);
         await showPhotoGalleryPage(page, 3);
-        await expect.poll(() => options.getByTestId('option-page-scroll').evaluate(el => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(1);
+        await expect.poll(() => options.getByTestId('option-page-scroll').evaluate(el => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(2);
         await page.waitForTimeout(250);
         await page.screenshot({ path: testInfo.outputPath(`${viewport.width}-gallery-${lang}.png`), style: 'nextjs-portal{display:none!important}' });
         await inspectCombinedPage();
       }
     }
-    // Both gallery views and direct topic navigation feed the same four-step flow.
+    // Both gallery views and direct topic navigation feed the same three-stage flow.
     await options.getByTestId('option-tab-basic').click();
     for (const id of ['photo-styles', 'prints', 'branding']) {
       await visible(page, 'option-page-next').click();

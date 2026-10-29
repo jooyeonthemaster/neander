@@ -1,19 +1,16 @@
 import { expect, test, type Page } from '@playwright/test';
 import { calculateQuote, type QuoteInput } from '../../src/lib/quote/engine';
 import { PHOTO_BOOTH_TEMPLATES } from '../../src/lib/quote/photo-booth-templates';
-import { closePreviewOptions, toggleKioskExperience, openPreviewOptions, showOptionPage, showPhotoGalleryPage } from './helpers/quote-preview-options';
+import { enterExperienceStep, closePreviewOptions, toggleKioskExperience, openPreviewOptions, showOptionPage, showPhotoGalleryPage } from './helpers/quote-preview-options';
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
 
 const storageKey = 'neander-quote-preview-flow-v1';
-const services = ['acscent', 'photoBooth', 'rental', 'spatialDesign', 'mediaArt', 'custom'] as const;
+const services = ['acscent', 'photoBooth', 'rental'] as const;
 const assigned = ['ai-personal-color', 'ai-sommelier', 'ai-face-reading', 'ai-travel-style'];
 const seed = { items: [
   { key: 'acscent', options: { guests: 100, volume: '10ml', extraTeams: 0, analysisKiosks: 0 } },
   { key: 'photoBooth', options: { booths: 1, templateSlugs: [], customStyles: 0 } },
   { key: 'rental', options: { mode: 'event', kiosks: 1, experienceSlugs: [''] } },
-  { key: 'spatialDesign', options: { size: 'booth3x3', photoZone: false, lighting: false } },
-  { key: 'mediaArt', options: { grade: 'standard', extraSensors: 0 } },
-  { key: 'custom', options: { scope: 'standard', consulting: false, maintenanceMonths: 0 } },
 ] };
 const visible = (page: Page, id: string) => page.locator(`[data-testid="${id}"]:visible`);
 async function setNumber(page: Page, id: string, value: number) {
@@ -26,10 +23,7 @@ async function maximizePage(page: Page, service: string, id: string, lang: 'ko' 
     if (service === 'acscent') { await setNumber(page, 'p-guests', 100); await setNumber(page, 'p-teams', 3); await panel.getByRole('radio').last().check(); }
     if (service === 'photoBooth') await setNumber(page, 'b-booths', 3);
     if (service === 'rental') await setNumber(page, 'k-count', 4);
-    if (['spatialDesign', 'mediaArt', 'custom'].includes(service)) await panel.getByRole('radio').last().check();
-  } else if (id === 'space') await panel.getByTestId('perfume-space-large').click();
-  else if (id === 'space-area') await setNumber(page, 'perfume-space-pyeong', 500);
-  else if (id === 'analysis') { await panel.getByRole('radio').last().check(); await setNumber(page, 'p-akiosk', 4); }
+  } else if (id === 'analysis') { await panel.getByRole('radio').last().check(); await setNumber(page, 'p-akiosk', 4); }
   else if (id === 'packaging') { await panel.getByRole('radiogroup', { name: lang === 'ko' ? '향 구성' : 'Scent selection', exact: true }).getByRole('radio').last().check(); await panel.getByRole('radio').last().check(); }
   else if (id === 'photo-styles') {
     for (let galleryPage = 1; galleryPage <= 3; galleryPage++) {
@@ -46,11 +40,6 @@ async function maximizePage(page: Page, service: string, id: string, lang: 'ko' 
     for (const slug of assigned) await toggleKioskExperience(page, slug, lang);
     await page.getByTestId('kiosk-custom-dedicated').click();
   }
-  else if (id === 'area') await setNumber(page, 's-pyeong', 500);
-  else if (id === 'styling') { await panel.locator('#s-zone').check(); await panel.locator('#s-light').check(); }
-  else if (id === 'sensors') await setNumber(page, 'm-sensors', 10);
-  else if (id === 'consulting') await panel.locator('#c-consult').check();
-  else if (id === 'maintenance') await setNumber(page, 'c-maint', 36);
 }
 
 for (const lang of ['ko', 'en'] as const) {
@@ -62,25 +51,24 @@ for (const lang of ['ko', 'en'] as const) {
     await page.addInitScript(key => {
       if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify({ items: [
         { key: 'acscent', options: { guests: 100, analysisKiosks: 0 } },
-        { key: 'spatialDesign', options: { size: 'large', pyeong: 10 } },
       ] }));
     }, storageKey);
     const route = `${lang === 'en' ? '/en' : ''}/quote-preview`;
-    const resume = () => page.getByRole('button', { name: lang === 'ko' ? /담아 둔 체험 2개/ : /You have 2 saved experiences/ }).click();
+    const resume = () => enterExperienceStep(page);
     await page.goto(route);
     await resume();
     const options = await showOptionPage(page, 'acscent', 'analysis');
     const pages = options.getByTestId('option-pages');
     const radios = options.getByRole('radiogroup', { name: QUOTE_COPY[lang].analysis, exact: true }).getByRole('radio');
     const quantity = options.locator('#p-akiosk');
-    await expect(pages).toHaveAttribute('data-total-steps', '5');
-    await expect(pages).toHaveAttribute('data-current-step', '4');
+    await expect(pages).toHaveAttribute('data-total-steps', '3');
+    await expect(pages).toHaveAttribute('data-current-step', '2');
     await expect(quantity).toHaveCount(0);
     const base = Number(await page.getByTestId('quote-total').getAttribute('data-amount'));
     await radios.last().check();
     await expect(quantity).toBeVisible();
     await expect(quantity).toHaveValue('1');
-    await expect(pages).toHaveAttribute('data-total-steps', '5');
+    await expect(pages).toHaveAttribute('data-total-steps', '3');
     await expect(options.getByTestId('option-tab-analysis-count')).toHaveCount(0);
     await setNumber(page, 'p-akiosk', 4);
     await expect(page.locator('[data-kind="analysis-kiosk"]')).toHaveCount(4);
@@ -98,15 +86,15 @@ for (const lang of ['ko', 'en'] as const) {
     await expect(quantity).toHaveCount(0);
     await expect(page.locator('[data-kind="analysis-kiosk"]')).toHaveCount(0);
     await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(base));
-    await expect(pages).toHaveAttribute('data-total-steps', '5');
+    await expect(pages).toHaveAttribute('data-total-steps', '3');
     await radios.last().check();
     await setNumber(page, 'p-akiosk', 3);
     await page.reload();
     await resume();
     await showOptionPage(page, 'acscent', 'analysis');
     await expect(quantity).toHaveValue('3');
-    await expect(pages).toHaveAttribute('data-current-step', '4');
-    await expect(pages).toHaveAttribute('data-total-steps', '5');
+    await expect(pages).toHaveAttribute('data-current-step', '2');
+    await expect(pages).toHaveAttribute('data-total-steps', '3');
     expect(errors).toEqual([]);
   });
 
@@ -120,7 +108,7 @@ for (const lang of ['ko', 'en'] as const) {
     for (const viewport of viewports) {
       await page.setViewportSize(viewport);
       await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
-      await page.getByRole('button', { name: lang === 'ko' ? /담아 둔 체험 6개/ : /You have 6 saved experiences/ }).click();
+      await enterExperienceStep(page);
       for (const service of services) {
         const options = await openPreviewOptions(page, service);
         const pages = options.getByTestId('option-pages');
@@ -132,8 +120,8 @@ for (const lang of ['ko', 'en'] as const) {
           await expect(visible(page, 'quote-options-done')).toHaveCount(0);
           await expect(visible(page, 'option-page-next')).toContainText(lang === 'ko' ? '남은 옵션 확인' : 'Review remaining');
           await visible(page, 'option-page-next').click();
-          await expect(pages).toHaveAttribute('data-current-page', 'basic');
-          await options.getByTestId('option-tab-space').click();
+          await expect(pages).toHaveAttribute('data-current-page', 'analysis');
+          await options.getByTestId('option-tab-basic').click();
         }
         const visited: string[] = [];
         let openingScroll: number | undefined;
@@ -190,12 +178,9 @@ for (const lang of ['ko', 'en'] as const) {
           }
           await closePreviewOptions(page);
         }
-        if (service === 'acscent') expect(visited).toEqual(['space', 'space-area', 'basic', 'analysis', 'packaging']);
+        if (service === 'acscent') expect(visited).toEqual(['basic', 'analysis', 'packaging']);
         if (service === 'photoBooth') expect(visited).toEqual(['basic', 'photo-styles', 'prints', 'branding']);
         if (service === 'rental') expect(visited).toEqual(['basic', 'kiosk-1']);
-        if (service === 'spatialDesign') expect(visited).toEqual(['basic', 'area', 'styling']);
-        if (service === 'mediaArt') expect(visited).toEqual(['basic', 'sensors']);
-        if (service === 'custom') expect(visited).toEqual(['basic', 'consulting', 'maintenance']);
       }
       const saved: QuoteInput = await page.evaluate(key => JSON.parse(localStorage.getItem(key)!), storageKey);
       await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(calculateQuote(saved, lang).total));
@@ -203,9 +188,6 @@ for (const lang of ['ko', 'en'] as const) {
       expect(perfume.options).toMatchObject({ guests: 300, volume: '50ml', extraTeams: 2, analysisKiosks: 4, customScent: true, customBox: true });
       expect(saved.items.find(item => item.key === 'photoBooth')!.options).toMatchObject({ booths: 3, templateSlugs: PHOTO_BOOTH_TEMPLATES.map(template => template.slug), customStyles: 10, extraPrintRolls: 50, wrapping: true, custom: 'dedicated' });
       expect(saved.items.find(item => item.key === 'rental')!.options).toMatchObject({ kiosks: 4, mode: 'event', months: 1, printer: false, custom: 'dedicated', experienceSlugs: assigned });
-      expect(saved.items.find(item => item.key === 'spatialDesign')!.options).toMatchObject({ size: 'large', pyeong: 500, photoZone: true, lighting: true });
-      expect(saved.items.find(item => item.key === 'mediaArt')!.options).toMatchObject({ grade: 'fullCustom', extraSensors: 10 });
-      expect(saved.items.find(item => item.key === 'custom')!.options).toMatchObject({ scope: 'large', consulting: true, maintenanceMonths: 36 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     }
     await testInfo.attach('option-dimensions', { body: JSON.stringify(measurements, null, 2), contentType: 'application/json' });

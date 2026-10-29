@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { ScrollReveal } from '@/components/animations';
 import { Link } from '@/i18n/navigation';
 import { QUOTE_HREF } from '@/lib/constants';
-import { SERVICE_ORDER, SERVICE_TEXT } from '@/lib/quote/catalog';
+import { SERVICE_ORDER, SERVICE_TEXT, isConsultationService } from '@/lib/quote/catalog';
 import { startingPrice } from '@/lib/quote/engine';
 
 /* ─────────────────────────────────────────────────────────
@@ -23,9 +23,10 @@ export async function PricingGuide({ locale, variant = 'full' }: { locale: strin
   const starting = SERVICE_ORDER.map((key) => ({
     key,
     name: SERVICE_TEXT[key].name[lang],
-    price: fmt(startingPrice(key)),
+    consultation: isConsultationService(key),
+    price: isConsultationService(key) ? (lang === 'ko' ? '별도 문의' : 'On request') : fmt(startingPrice(key)),
     desc: SERVICE_TEXT[key].summary[lang],
-    basis: t.has(`basis.${key}`) ? t(`basis.${key}`) : '',
+    basis: !isConsultationService(key) && t.has(`basis.${key}`) ? t(`basis.${key}`) : '',
   }));
 
   return (
@@ -65,9 +66,9 @@ export async function PricingGuide({ locale, variant = 'full' }: { locale: strin
                   {item.desc}
                 </span>
                 <span className="shrink-0 text-lg font-bold text-slate-900">
-                  {lang !== 'ko' && <span className="mr-1 text-sm font-medium text-slate-500">{t('from')}</span>}
+                  {!item.consultation && lang !== 'ko' && <span className="mr-1 text-sm font-medium text-slate-500">{t('from')}</span>}
                   {item.price}
-                  {lang === 'ko' && <span className="ml-0.5 text-sm font-medium text-slate-500">{t('from')}</span>}
+                  {!item.consultation && lang === 'ko' && <span className="ml-0.5 text-sm font-medium text-slate-500">{t('from')}</span>}
                 </span>
                 {/* 이 시작가가 나오는 조건 */}
                 {item.basis && (

@@ -6,15 +6,16 @@ import { resolveEventScene } from '../../src/lib/quote-preview/event-scene';
 import { resolveServicePreview } from '../../src/lib/quote-preview/service-model';
 
 for (const lang of ['ko', 'en'] as const) {
-  test(`${lang}: motion camera choices price each included/extra set once per event`, () => {
+  test(`${lang}: legacy motion camera choices remain restorable without adding online charges`, () => {
     const quote = (sensorType: string, extraSensors = 0, days = 1) => calculateQuote(sanitizeInput({ days, items: [{ key: 'mediaArt', options: { sensorType, extraSensors } }] }), lang);
     const base = quote('image');
-    assert.equal(quote('depth').total - base.total, 550_000);
-    assert.equal(quote('image', 2).total - base.total, 660_000);
-    assert.equal(quote('depth', 2).total - base.total, 2_310_000);
-    assert.equal(quote('depth', 2, 3).total - quote('image', 0, 3).total, 2_310_000);
-    assert.equal(quote('invalid').total, base.total);
-    assert.match(quote('depth').lines.find(line => line.amount === 500_000)!.label, /3D/);
+    assert.equal(base.total, 0);
+    for (const sensorType of ['image', 'depth', 'invalid']) {
+      for (const extraSensors of [0, 2, 10]) {
+        assert.deepEqual(quote(sensorType, extraSensors, 3), base);
+      }
+    }
+    assert.equal(base.lines[0].tbd, true);
     const input = normalizePreviewInput({ items: [{ key: 'mediaArt', options: { sensorType: 'depth', extraSensors: 3 } }] });
     const sensors = resolveEventScene(input)!.objects.filter(object => object.type === 'sensor');
     assert.equal(sensors.length, 4);
@@ -22,14 +23,15 @@ for (const lang of ['ko', 'en'] as const) {
     assert.ok(resolveServicePreview(input, 'mediaArt', lang)!.badges.some(badge => badge.includes('3D')));
     assert.deepEqual(normalizePreviewInput(JSON.parse(JSON.stringify(input))), input);
   });
-  test(`${lang}: custom planning and PG fees are additive, persist, and have no onsite charges`, () => {
+  test(`${lang}: legacy custom scopes and options persist but need a separate inquiry with no online fees`, () => {
     const input = (options: object) => sanitizeInput({ days: 5, items: [{ key: 'custom', options }] });
     const base = calculateQuote(input({}), lang);
     const selected = input({ consulting: true, pgIntegration: true, maintenanceMonths: 2 });
     const quote = calculateQuote(selected, lang);
-    assert.equal(quote.total - base.total, 5_500_000);
-    assert.equal(quote.lines.find(line => /PG 연결|Payment gateway/.test(line.label))!.amount, 1_000_000);
-    assert.equal(quote.lines.find(line => /기획 컨설팅|Planning consultation/.test(line.label))!.amount, 3_000_000);
+    assert.deepEqual(quote, base);
+    assert.equal(quote.total, 0);
+    assert.equal(quote.lines.length, 1);
+    assert.equal(quote.lines[0].tbd, true);
     assert.ok(!quote.lines.some(line => line.service === 'common'));
     assert.deepEqual(normalizePreviewInput(JSON.parse(JSON.stringify(selected))), selected);
     assert.ok(resolveServicePreview(selected, 'custom', lang)!.badges.some(badge => /PG|Payment gateway/.test(badge)));

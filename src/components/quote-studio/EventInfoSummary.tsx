@@ -3,11 +3,11 @@
 import { useId, useState } from 'react';
 import { ChevronRight, Pencil } from 'lucide-react';
 import { Select } from '@/components/ui/Select';
-import { EVENT_TYPES, REGIONS, type Lang, type RegionKey } from '@/lib/quote/catalog';
+import { REGIONS, type Lang, type RegionKey } from '@/lib/quote/catalog';
 import type { QuoteInput } from '@/lib/quote/engine';
 import { cn } from '@/lib/utils';
 import type { QUOTE_COPY } from './copy';
-import { Field, Stepper, inputClass } from './QuoteControls';
+import { Field, NumberInput, Stepper, inputClass } from './QuoteControls';
 
 /**
  * 「지금까지 고른 견적」 맨 위의 행사 정보 — 3단계부터 보인다.
@@ -28,7 +28,7 @@ export function EventInfoSummary({ input, lang, c, update, onOpenDetails }: {
   const ko = lang === 'ko';
   const id = useId();
   const [open, setOpen] = useState(false);
-  const eventType = EVENT_TYPES.find((event) => event.key === input.eventType)?.label[lang] ?? '';
+  const eventName = input.eventName?.trim() || (ko ? '행사명 미정' : 'Event name TBD');
   const region = REGIONS.find((r) => r.key === input.region)?.label[lang] ?? '';
   const extras = [
     input.eventDate,
@@ -48,7 +48,7 @@ export function EventInfoSummary({ input, lang, c, update, onOpenDetails }: {
 
       {!open ? (
         <div className="mt-1 space-y-0.5 text-xs leading-relaxed">
-          <p className="text-slate-700">{eventType} · {region}</p>
+          <p className="text-slate-700">{eventName} · {region}</p>
           <p className="tabular-nums text-slate-500">
             {ko ? `${input.days}일 × ${input.hoursPerDay}시간 · ${input.attendees.toLocaleString('ko-KR')}명` : `${input.days} ${input.days === 1 ? 'day' : 'days'} × ${input.hoursPerDay} h · ${input.attendees.toLocaleString('en-US')} ${input.attendees === 1 ? 'guest' : 'guests'}`}
           </p>
@@ -56,11 +56,11 @@ export function EventInfoSummary({ input, lang, c, update, onOpenDetails }: {
         </div>
       ) : (
         <div id={`${id}-editor`} className={cn('mt-3 grid gap-4 [&_label]:text-xs')}>
-          <Field label={c.eventType}><Select id={`${id}-type`} aria-label={c.eventType} value={input.eventType} onValueChange={(value) => update({ eventType: value })} triggerClassName={inputClass} options={EVENT_TYPES.map((event) => ({ value: event.key, label: event.label[lang] }))} /></Field>
+          <Field label={c.eventName}><input id={`${id}-event-name`} type="text" maxLength={200} value={input.eventName ?? ''} onChange={(event) => update({ eventName: event.target.value })} className={inputClass} /></Field>
           <Field label={c.region}><Select id={`${id}-region`} aria-label={c.region} value={input.region} onValueChange={(value) => update({ region: value as RegionKey })} triggerClassName={inputClass} options={REGIONS.map((r) => ({ value: r.key, label: r.label[lang] }))} /></Field>
-          <Field label={ko ? '기간' : 'Days'}><Stepper id={`${id}-days`} value={input.days} min={1} max={60} suffix={ko ? '일' : 'days'} onChange={(value) => update({ days: value })} /></Field>
+          <Field label={ko ? '기간' : 'Days'}><NumberInput id={`${id}-days`} value={input.days} min={1} max={60} suffix={ko ? '일' : 'days'} onChange={(value) => update({ days: value })} /></Field>
           <Field label={c.hours}><Stepper id={`${id}-hours`} value={input.hoursPerDay} min={1} max={14} suffix={ko ? '시간' : 'h'} onChange={(value) => update({ hoursPerDay: value })} /></Field>
-          <Field label={c.attendees}><Stepper id={`${id}-attendees`} value={input.attendees} min={1} max={100000} step={50} suffix={ko ? '명' : 'guests'} onChange={(value) => update({ attendees: value })} /></Field>
+          <Field label={c.attendees}><NumberInput id={`${id}-attendees`} value={input.attendees} min={1} max={100000} suffix={ko ? '명' : 'guests'} onChange={(value) => update({ attendees: value })} /></Field>
           <button type="button" onClick={onOpenDetails}
             className="inline-flex min-h-9 items-center gap-1 rounded-lg text-left text-[11px] font-medium text-slate-500 transition-colors hover:text-teal-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600">
             {ko ? '날짜·추가 인력·전날 설치 바꾸기' : 'Change date, staff or setup'}<ChevronRight className="size-3.5" aria-hidden="true" />

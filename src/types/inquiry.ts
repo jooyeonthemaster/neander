@@ -21,6 +21,7 @@ export interface InquiryInput {
 
 /** 견적 마법사에서 고른 내용의 스냅샷 */
 export interface QuoteSnapshot {
+  eventName?: string
   eventType?: string
   eventDate?: string
   duration?: number

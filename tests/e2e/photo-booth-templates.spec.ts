@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { nextPreviewStep, openPreviewDetails, showPhotoGalleryPage } from './helpers/quote-preview-options';
+import { enterExperienceStep, closePreviewOptions, nextPreviewStep, openPreviewDetails, showPhotoGalleryPage } from './helpers/quote-preview-options';
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
 import { calculateQuote, defaultOptions, sanitizeInput, type QuoteInput } from '../../src/lib/quote/engine';
 import { PHOTO_BOOTH_TEMPLATES } from '../../src/lib/quote/photo-booth-templates';
@@ -36,7 +36,7 @@ async function expectPrice(page: Page, amount: number, lang: 'ko' | 'en') {
 }
 
 for (const lang of ['ko', 'en'] as const) {
-  test(`${lang}: existing demo templates and new custom styles have independent prices and survive the four-step journey`, async ({ page }, testInfo) => {
+  test(`${lang}: existing demo templates and new custom styles have independent prices and survive the three-stage journey`, async ({ page }, testInfo) => {
     const path = lang === 'ko' ? '/quote-preview' : '/en/quote-preview';
     const existingLive = JSON.stringify(sanitizeInput({ days: 5, items: [defaultOptions('rental')] }));
     await page.addInitScript(({ key, value }) => {
@@ -47,11 +47,9 @@ for (const lang of ['ko', 'en'] as const) {
     }, { key: LIVE_KEY, value: existingLive });
     await page.goto(path, { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('quote-studio')).toHaveAttribute('data-mode', 'preview');
-    await expect(step(page, 0)).toBeVisible();
-    await page.getByTestId('quote-start-blank').click();
+    await expect(step(page, 1)).toBeVisible();
     await passConditions(page);
     await showPhotoGalleryPage(page, 1);
-    await openDetails(page);
     const picker = page.locator('[data-testid="photo-booth-templates"]:visible');
     await expect(picker).toBeVisible();
     await expect(picker.locator('[data-testid^="booth-template-"][aria-pressed="true"]')).toHaveCount(0);
@@ -66,9 +64,6 @@ for (const lang of ['ko', 'en'] as const) {
       await page.keyboard.press(index % 2 ? 'Space' : 'Enter');
       await expect(button).toHaveAttribute('aria-pressed', 'true');
       await expectPrice(page, base + (index === 2 ? 220_000 : 0), lang);
-      const example = page.getByTestId(`preview-photo-template-${template.slug}`);
-      await expect(example).toContainText(template.name[lang]);
-      await expect(example.locator('svg[data-template-appearance]')).toHaveAttribute('data-template-appearance', template.appearance);
     }
     await expect(picker.getByTestId('booth-template-selection')).toContainText(lang === 'ko' ? '20만원' : '200,000');
     for (const template of templates) {
@@ -84,12 +79,9 @@ for (const lang of ['ko', 'en'] as const) {
     await expect(custom).toHaveAttribute('aria-pressed', 'true');
     await expect(customStyle.locator('#b-cstyles')).toHaveValue('1');
     await expectPrice(page, base + 770_000, lang);
-    await expect(page.getByTestId('preview-photo-custom-styles')).toHaveAttribute('data-count', '1');
-    await expect(page.locator('[data-testid^="preview-photo-template-"]')).toHaveCount(3);
     await customStyle.locator('#b-cstyles').fill('2');
     await customStyle.locator('#b-cstyles').press('Enter');
     await expectPrice(page, base + 1_320_000, lang);
-    await expect(page.getByTestId('preview-photo-custom-styles')).toHaveAttribute('data-count', '2');
     await customStyle.locator('#b-cstyles').fill('1');
     await customStyle.locator('#b-cstyles').press('Enter');
     await expectPrice(page, base + 770_000, lang);
@@ -104,6 +96,18 @@ for (const lang of ['ko', 'en'] as const) {
     await expect(picker.locator('img, canvas, svg image')).toHaveCount(0);
     await picker.screenshot({ path: testInfo.outputPath(`photo-templates-${lang}.png`), style: 'nextjs-portal { display: none !important; }' });
 
+    // Inspect the growing result illustrations with the options closed so the
+    // detail column does not move the card anchoring the active editor.
+    await closePreviewOptions(page);
+    await openDetails(page);
+    for (const template of templates) {
+      const example = page.getByTestId(`preview-photo-template-${template.slug}`);
+      await expect(example).toContainText(template.name[lang]);
+      await expect(example.locator('svg[data-template-appearance]')).toHaveAttribute('data-template-appearance', template.appearance);
+    }
+    await expect(page.getByTestId('preview-photo-custom-styles')).toHaveAttribute('data-count', '1');
+    await expect(page.locator('[data-testid^="preview-photo-template-"]')).toHaveCount(3);
+
     await nextPreviewStep(page);
     await expect(step(page, 3)).toBeVisible();
     const summary = page.getByRole('complementary', { name: QUOTE_COPY[lang].sheetTitle });
@@ -115,8 +119,8 @@ for (const lang of ['ko', 'en'] as const) {
     for (const template of templates) await expect(choice(page, template.slug)).toHaveAttribute('aria-pressed', 'true');
 
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await expect(step(page, 0)).toBeVisible();
-    await page.getByRole('button', { name: lang === 'ko' ? /담아 둔 체험 1개/ : /You have 1 saved experiences/ }).click();
+    await expect(step(page, 1)).toBeVisible();
+    await enterExperienceStep(page);
     await expect(step(page, 2)).toBeVisible();
     await showPhotoGalleryPage(page, 1);
     await openDetails(page);
@@ -143,7 +147,7 @@ for (const lang of ['ko', 'en'] as const) {
   });
 }
 
-test('legacy production quantities stay editable and the lab only replaces them after choosing a named template', async ({ page }) => {
+test('legacy style quantities migrate to named templates in both the live quote and the lab', async ({ page }) => {
   const input = sanitizeInput({ items: [{ key: 'photoBooth', options: { extraStyles: 3, customStyles: 2 } }] });
   await page.addInitScript(({ liveKey, flowKey, value }) => {
     if (!sessionStorage.getItem('photo-legacy-test-seeded')) {
@@ -152,34 +156,19 @@ test('legacy production quantities stay editable and the lab only replaces them 
       sessionStorage.setItem('photo-legacy-test-seeded', 'yes');
     }
   }, { liveKey: LIVE_KEY, flowKey: FLOW_KEY, value: JSON.stringify(input) });
-  await page.goto('/quote', { waitUntil: 'domcontentloaded' });
-  await expect(page.getByTestId('quote-studio')).toHaveAttribute('data-mode', 'live');
-  await page.getByRole('button', { name: /담아 둔 체험 1개/ }).click();
-  await expect(step(page, 2)).toBeVisible();
-  const edit = page.getByTestId('quote-edit-photoBooth');
-  if (await edit.getAttribute('aria-expanded') !== 'true') await edit.click();
-  const options = page.getByTestId('quote-options-photoBooth');
-  await expect(options).toBeVisible();
-  await expect(page.getByTestId('photo-booth-templates')).toHaveCount(0);
-  await options.getByRole('button', { name: /인화·스타일 옵션 더하기/ }).click();
-  await expect(options.locator('#b-styles')).toHaveValue('3');
-  await options.locator('#b-styles').fill('4');
-  await options.locator('#b-styles').press('Enter');
-  await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(calculateQuote(input, 'ko').total + 220_000));
-  expect((await saved(page, LIVE_KEY)).items.find((item) => item.key === 'photoBooth')!.options.templateSlugs).toBeUndefined();
-  const liveAfterEdit = await page.evaluate((key) => localStorage.getItem(key), LIVE_KEY);
-
-  await page.goto('/quote-preview', { waitUntil: 'domcontentloaded' });
-  await page.getByRole('button', { name: /담아 둔 체험 1개/ }).click();
-  await expect(step(page, 2)).toBeVisible();
-  await showPhotoGalleryPage(page, 1);
-  const picker = page.locator('[data-testid="photo-booth-templates"]:visible');
-  await expect(picker).toContainText('저장된 추가 3종');
-  await expect(picker.locator('[data-testid^="booth-template-"][aria-pressed="true"]')).toHaveCount(0);
-  await expectPrice(page, calculateQuote(input, 'ko').total, 'ko');
-  await choice(page, templates[0].slug).click();
-  await expectPrice(page, calculateQuote(input, 'ko').total - 660_000, 'ko');
-  await expect(picker).not.toContainText('저장된 추가');
-  expect((await saved(page)).items.find((item) => item.key === 'photoBooth')!.options.customStyles).toBe(2);
-  expect(await page.evaluate((key) => localStorage.getItem(key), LIVE_KEY)).toBe(liveAfterEdit);
+  let liveAfterEdit: string | null = null;
+  for (const [path, key] of [['/quote', LIVE_KEY], ['/quote-preview', FLOW_KEY]]) {
+    await page.goto(path, { waitUntil: 'domcontentloaded' });
+    await enterExperienceStep(page);
+    const picker = await showPhotoGalleryPage(page, 1);
+    await expect(picker).toContainText('저장된 추가 3종');
+    await expect(picker.locator('[data-testid^="booth-template-"][aria-pressed="true"]')).toHaveCount(0);
+    await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(calculateQuote(input, 'ko').total));
+    await choice(page, templates[0].slug).click();
+    await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(calculateQuote(input, 'ko').total - 660_000));
+    await expect(picker).not.toContainText('저장된 추가');
+    expect((await saved(page, key)).items.find(item => item.key === 'photoBooth')!.options).toMatchObject({ templateSlugs: [templates[0].slug], customStyles: 2 });
+    if (key === LIVE_KEY) liveAfterEdit = await page.evaluate(key => localStorage.getItem(key), LIVE_KEY);
+    else expect(await page.evaluate(key => localStorage.getItem(key), LIVE_KEY)).toBe(liveAfterEdit);
+  }
 });

@@ -1,10 +1,10 @@
 import {
-  COMMON, CUSTOM, CUSTOM_DEV, CUSTOM_DEV_TEXT, CUSTOM_TERMS, KIOSK, MEDIA_ART, OPTION_TEXT, PERFUME, PHOTO_BOOTH, SERVICE_TEXT, SPACE,
+  COMMON, CUSTOM_DEV, CUSTOM_DEV_TEXT, CUSTOM_TERMS, KIOSK, PERFUME, PHOTO_BOOTH, SERVICE_TEXT, SPACE, isConsultationService,
   type BoothBuild, type BoothCustom, type KioskCustom, type Lang, normalizeRegion, type RegionKey, type ServiceKey,
 } from './catalog';
 import { getPhotoBoothTemplates, normalizePhotoBoothTemplateSlugs } from './photo-booth-templates';
 import { formatKioskNumbers, getKioskAssignments, getKioskExperience, groupKioskAssignments, normalizeKioskExperienceSlugs } from './kiosk-experiences';
-import { formatSpaceArea, formatSpaceAreaEquivalent, normalizePyeong, type AreaUnit } from './space-area';
+import { normalizePyeong, type AreaUnit } from './space-area';
 
 /* ─────────────────────────────────────────────────────────
    견적 계산 엔진 — 화면과 PDF가 같은 결과를 내도록 순수 함수로 둔다.
@@ -36,6 +36,8 @@ export type QuoteItem =
 
 export interface QuoteInput {
   eventType: string;
+  /** Customer-entered event name; optional for older saved estimates. */
+  eventName?: string;
   eventDate: string;
   days: number;
   hoursPerDay: number;
@@ -107,7 +109,7 @@ export function normalizePerfumeStaffing(input: QuoteInput): QuoteInput {
 export function defaultOptions(key: ServiceKey, attendees = 100): QuoteItem {
   switch (key) {
     case 'acscent':
-      return { key, options: { guests: Math.max(PERFUME.minGuests, Math.min(attendees, 200)), volume: '10ml', extraTeams: 0, customScent: false, premiumPackaging: false } };
+      return { key, options: { guests: Math.max(PERFUME.minGuests, Math.min(attendees, 5000)), volume: '10ml', extraTeams: 0, customScent: false, premiumPackaging: false } };
     case 'photoBooth':
       return { key, options: { booths: 1, extraStyles: 0, extraPrintRolls: 0, photocard: false, wrapping: false } };
     case 'rental':
@@ -207,6 +209,7 @@ export function sanitizeInput(raw: unknown): QuoteInput {
   }
   return normalizePerfumeStaffing({
     eventType: typeof r.eventType === 'string' ? r.eventType.slice(0, 40) : 'other',
+    ...(typeof r.eventName === 'string' ? { eventName: r.eventName.trim().slice(0, 200) } : {}),
     eventDate: typeof r.eventDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.eventDate) ? r.eventDate : '',
     days: clampInt(r.days, 1, 60, 1),
     hoursPerDay: clampInt(r.hoursPerDay, 1, 14, COMMON.baseHours),
@@ -368,50 +371,17 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
         if (!assigned && o.extraContents) lines.push({ service: 'rental', label: L('체험 콘텐츠 추가', 'Extra experiences'), detail: L(`${o.extraContents}종`, `${o.extraContents}`), amount: KIOSK.extraContent * o.extraContents });
         break;
       }
-      case 'mediaArt': {
-        const o = item.options;
-        const sensorType = o.sensorType === 'depth' ? 'depth' : 'image';
-        const cameraName = sensorType === 'depth' ? L('3D 카메라', '3D camera') : L('이미지 카메라', 'Image camera');
-        lines.push({ service: 'mediaArt', label: L('미디어 아트 콘텐츠 제작', 'Media art production'), detail: `${OPTION_TEXT.production[o.grade][lang]} · ${L('1회', 'one-time')}`, amount: MEDIA_ART.production[o.grade] });
-        lines.push({ service: 'mediaArt', label: L('미디어 아트 장비·운영', 'Media art equipment & operation'), detail: L(
-          `${days}일 (프로젝터 1대·${cameraName} 1세트·운영 1인)`, `${days} day(s) (1 projector, 1 ${cameraName.toLowerCase()} set, 1 operator)`),
-          amount: MEDIA_ART.operationFirstDay + MEDIA_ART.operationExtraDay * extraDays });
-        if (sensorType === 'depth') lines.push({ service: 'mediaArt', label: L('3D 카메라로 변경', '3D camera upgrade'), detail: L('기본 1세트 · 장비 대여·연동·현장 보정 · 행사당 1회', 'Included set · rental, integration & calibration · once per event'), amount: MEDIA_ART.depthCameraUpgrade });
-        if (o.extraSensors) lines.push({ service: 'mediaArt', label: L('움직임 감지 카메라 추가', 'Extra motion cameras'), detail: L(`${cameraName} ${o.extraSensors}세트 · 대여·연동·보정 · 행사당 1회`, `${cameraName} × ${o.extraSensors} · rental, integration & calibration · once per event`), amount: MEDIA_ART.extraSensorByType[sensorType] * o.extraSensors });
+      case 'mediaArt':
+      case 'spatialDesign':
+      case 'custom':
+        lines.push({ service: item.key, label: name(item.key),
+          detail: L('별도 문의가 필요합니다. 상담 후 견적을 안내해 드립니다.', 'Please contact us for a separate quote.'),
+          amount: 0, tbd: true });
         break;
-      }
-      case 'spatialDesign': {
-        const o = item.options;
-        if (o.size === 'large') {
-          const area = `${formatSpaceArea(o, lang)}${o.areaUnit === 'sqm' ? ` (${formatSpaceAreaEquivalent(o, lang)})` : ''}`;
-          lines.push({ service: 'spatialDesign', label: name('spatialDesign'), detail: L(
-            `팝업·공간 약 ${area} · 평당 ${won(SPACE.perPyeong, lang)}부터 · 예상 제작비 · 실측 후 확정`,
-            `About ${area} · from ${won(SPACE.perPyeong, lang)} per pyeong · estimated construction cost · confirmed after site survey`),
-            amount: Math.round(SPACE.perPyeong * normalizePyeong(o.pyeong)) });
-        } else {
-          lines.push({ service: 'spatialDesign', label: name('spatialDesign'), detail: o.build === 'wood'
-            ? L(`${OPTION_TEXT.space[o.size].ko} · ${OPTION_TEXT.boothBuild.wood.ko} · 디자인·가벽 제작·마감·바닥·기본 조명·설치·철거`,
-              `${OPTION_TEXT.space[o.size].en} · ${OPTION_TEXT.boothBuild.wood.en} · design, wall build & finish, flooring, basic lighting, install & teardown`)
-            : L(`${OPTION_TEXT.space[o.size].ko} · ${OPTION_TEXT.boothBuild.fabric.ko} · 디자인·천 그래픽·바닥·기본 조명·설치·철수`,
-              `${OPTION_TEXT.space[o.size].en} · ${OPTION_TEXT.boothBuild.fabric.en} · design, fabric graphics, flooring, basic lighting, install & teardown`),
-            amount: boothPrice(o.size, o.build) });
-        }
-        if (o.photoZone) lines.push({ service: 'spatialDesign', label: L('포토존 디자인', 'Photo zone design'), detail: '', amount: SPACE.photoZone });
-        if (o.lighting) lines.push({ service: 'spatialDesign', label: L('커스텀 조명', 'Custom lighting'), detail: '', amount: SPACE.lighting });
-        break;
-      }
-      case 'custom': {
-        const o = item.options;
-        lines.push({ service: 'custom', label: name('custom'), detail: `${OPTION_TEXT.scope[o.scope][lang]} · ${L('1회 개발비', 'one-time')}`, amount: CUSTOM.scope[o.scope] });
-        if (o.consulting) lines.push({ service: 'custom', label: L('기획 컨설팅', 'Planning consultation'), detail: '', amount: CUSTOM.consulting });
-        if (o.pgIntegration) lines.push({ service: 'custom', label: L('PG 연결', 'Payment gateway integration'), detail: L('결제 연동 개발 1회 · PG 가입비·결제 수수료 별도', 'One-time integration · provider signup and transaction fees excluded'), amount: CUSTOM.pgIntegration });
-        if (o.maintenanceMonths) lines.push({ service: 'custom', label: L('유지보수', 'Maintenance'), detail: L(`${o.maintenanceMonths}개월 × ${won(CUSTOM.maintenancePerMonth, lang)}`, `${o.maintenanceMonths} month(s) × ${won(CUSTOM.maintenancePerMonth, lang)}`), amount: CUSTOM.maintenancePerMonth * o.maintenanceMonths });
-        break;
-      }
     }
   }
 
-  const hasOnsite = input.items.some((i) => i.key !== 'custom' && !(i.key === 'rental' && i.options.mode === 'monthly'));
+  const hasOnsite = input.items.some((i) => !isConsultationService(i.key) && !(i.key === 'rental' && i.options.mode === 'monthly'));
   // 키오스크는 보유 대수 안에서만 쓸 수 있다 (AI 키오스크 + 분석용 키오스크)
   const kioskTotal = input.items.reduce((n, i) => n + (i.key === 'rental' ? i.options.kiosks : i.key === 'acscent' ? (i.options.analysisKiosks ?? 0) : 0), 0);
   if (kioskTotal > KIOSK.maxKiosks) warnings.push(L(
@@ -432,7 +402,7 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
       `${extraHours} h beyond ${COMMON.baseHours} h × ${days} day(s) × ${won(COMMON.extraHourPerDay, lang)}`), amount: COMMON.extraHourPerDay * extraHours * days });
   }
   // 지역 운송비 (행사당 1회): 용달이 필요한 상품이 있으면 용달 기준, 키오스크만 있으면 직접 운반 기준
-  const needsTruck = input.items.some((i) => i.key === 'photoBooth' || i.key === 'spatialDesign' || i.key === 'mediaArt');
+  const needsTruck = input.items.some((i) => i.key === 'photoBooth');
   const hasKiosk = input.items.some((i) => i.key === 'rental');
   const travel = needsTruck ? COMMON.travel[input.region] : hasKiosk ? KIOSK.travel[input.region] : 0;
   if (travel > 0) {
@@ -465,9 +435,9 @@ export function startingPrice(key: ServiceKey): number {
     case 'acscent': return Math.max(PERFUME.minimumCharge, PERFUME.tiers[0].unit['10ml'] * PERFUME.minGuests + PERFUME.teamTravel.seoul);
     case 'photoBooth': return PHOTO_BOOTH.firstBooth;
     case 'rental': return KIOSK.firstKiosk;
-    case 'mediaArt': return MEDIA_ART.production.standard + MEDIA_ART.operationFirstDay;
-    case 'spatialDesign': return SPACE.booth3x3;
-    case 'custom': return CUSTOM.scope.standard;
+    case 'mediaArt':
+    case 'spatialDesign':
+    case 'custom': return 0; // A separate inquiry is required; there is no online starting price.
   }
 }
 
