@@ -10,6 +10,7 @@ import { INSIGHTS } from '@/data/insights';
 const STATIC_PATHS: { path: string; priority: number }[] = [
   { path: '/', priority: 1 },
   { path: '/services', priority: 0.9 },
+  { path: '/development', priority: 0.9 },
   { path: '/quote', priority: 0.9 },
   { path: '/portfolio', priority: 0.9 },
   { path: '/about', priority: 0.7 },

@@ -17,6 +17,7 @@ export const NAV_ITEMS: NavItem[] = [
   { path: '/', labelKey: 'nav.home' },
   { path: '/about', labelKey: 'nav.about' },
   { path: '/services', labelKey: 'nav.services' },
+  { path: '/development', labelKey: 'nav.development' },
   { path: '/quote', labelKey: 'nav.quote' },
   { path: '/portfolio', labelKey: 'nav.portfolio' },
   { path: '/press', labelKey: 'nav.press' },

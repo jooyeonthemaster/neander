@@ -21,7 +21,11 @@ export type ContactTab = 'inquiry' | 'quote';
 
 const TABS: ContactTab[] = ['inquiry', 'quote'];
 
-export function ContactTabs({ initialTab, initialService }: { initialTab: ContactTab; initialService?: string }) {
+export function ContactTabs({ initialTab, initialService, developmentInquiry = false }: {
+  initialTab: ContactTab;
+  initialService?: string;
+  developmentInquiry?: boolean;
+}) {
   const t = useTranslations('contact');
   const tService = useTranslations('services');
   const locale = useLocale();
@@ -56,72 +60,82 @@ export function ContactTabs({ initialTab, initialService }: { initialTab: Contac
 
   return (
     <div>
-      <div className="mx-auto mb-6 max-w-3xl" data-service-context>
-        <Select id="contact-service" label={locale === 'ko' ? '관심 있는 체험' : 'Experience of interest'} value={serviceSlug}
-          options={[{ value: '', label: locale === 'ko' ? '아직 정하지 않았어요' : 'Not decided yet' }, ...experiences.map((experience) => ({ value: experience.slug, label: tService(experience.nameKey) }))]}
-          onValueChange={(slug) => {
-            setServiceSlug(slug);
-            router.replace(slug ? getServiceContactHref(slug, tab === 'quote') : tab === 'quote' ? QUOTE_HREF : '/contact', { scroll: false });
-          }} />
-      </div>
-      {/* Tab switcher */}
-      <div
-        role="tablist"
-        aria-label={t('tabs.label')}
-        className="mx-auto mb-10 grid max-w-3xl grid-cols-2 gap-3 sm:gap-4"
-      >
-        {TABS.map((id) => {
-          const active = tab === id;
-          return (
-            <button
-              key={id}
-              ref={(el) => {
-                tabRefs.current[id] = el;
-              }}
-              type="button"
-              role="tab"
-              id={`contact-tab-${id}`}
-              aria-selected={active}
-              aria-controls={`contact-panel-${id}`}
-              tabIndex={active ? 0 : -1}
-              onClick={() => select(id)}
-              onKeyDown={handleKeyDown}
-              className={cn(
-                'flex flex-col gap-1 rounded-2xl border-2 px-4 py-4 text-left transition-all duration-200 sm:px-6 sm:py-5',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2',
-                active
-                  ? 'border-teal-500 bg-teal-50 shadow-md shadow-teal-500/10'
-                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
-              )}
-            >
-              <span
-                className={cn(
-                  'text-base font-bold sm:text-lg',
-                  active ? 'text-teal-700' : 'text-slate-800'
-                )}
-              >
-                {t(`tabs.${id}`)}
-              </span>
-              <span className="text-xs leading-relaxed text-slate-500 sm:text-sm">
-                {t(`tabs.${id}Desc`)}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      {!developmentInquiry && (
+        <>
+          <div className="mx-auto mb-6 max-w-3xl" data-service-context>
+            <Select id="contact-service" label={locale === 'ko' ? '관심 있는 체험' : 'Experience of interest'} value={serviceSlug}
+              options={[{ value: '', label: locale === 'ko' ? '아직 정하지 않았어요' : 'Not decided yet' }, ...experiences.map((experience) => ({ value: experience.slug, label: tService(experience.nameKey) }))]}
+              onValueChange={(slug) => {
+                setServiceSlug(slug);
+                router.replace(slug ? getServiceContactHref(slug, tab === 'quote') : tab === 'quote' ? QUOTE_HREF : '/contact', { scroll: false });
+              }} />
+          </div>
+          {/* Tab switcher */}
+          <div
+            role="tablist"
+            aria-label={t('tabs.label')}
+            className="mx-auto mb-10 grid max-w-3xl grid-cols-2 gap-3 sm:gap-4"
+          >
+            {TABS.map((id) => {
+              const active = tab === id;
+              return (
+                <button
+                  key={id}
+                  ref={(el) => {
+                    tabRefs.current[id] = el;
+                  }}
+                  type="button"
+                  role="tab"
+                  id={`contact-tab-${id}`}
+                  aria-selected={active}
+                  aria-controls={`contact-panel-${id}`}
+                  tabIndex={active ? 0 : -1}
+                  onClick={() => select(id)}
+                  onKeyDown={handleKeyDown}
+                  className={cn(
+                    'flex flex-col gap-1 rounded-2xl border-2 px-4 py-4 text-left transition-all duration-200 sm:px-6 sm:py-5',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2',
+                    active
+                      ? 'border-teal-500 bg-teal-50 shadow-md shadow-teal-500/10'
+                      : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'text-base font-bold sm:text-lg',
+                      active ? 'text-teal-700' : 'text-slate-800'
+                    )}
+                  >
+                    {t(`tabs.${id}`)}
+                  </span>
+                  <span className="text-xs leading-relaxed text-slate-500 sm:text-sm">
+                    {t(`tabs.${id}Desc`)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       {/* 간단 문의 */}
       <div
-        role="tabpanel"
+        role={developmentInquiry ? 'region' : 'tabpanel'}
         id="contact-panel-inquiry"
-        aria-labelledby="contact-tab-inquiry"
-        hidden={tab !== 'inquiry'}
+        aria-labelledby={developmentInquiry ? 'development-inquiry-title' : 'contact-tab-inquiry'}
+        hidden={!developmentInquiry && tab !== 'inquiry'}
       >
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-5 lg:gap-16">
           <div className="lg:col-span-3">
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-              <h3 className="mb-6 text-xl font-bold text-slate-900">{t('subtitle')}</h3>
-              <ContactForm onRequestQuote={() => select('quote')} serviceSlug={serviceSlug} />
+              <h3 id={developmentInquiry ? 'development-inquiry-title' : undefined} className="mb-6 text-xl font-bold text-slate-900">
+                {developmentInquiry ? t('form.subjectOptions.development') : t('subtitle')}
+              </h3>
+              <ContactForm
+                onRequestQuote={developmentInquiry ? undefined : () => select('quote')}
+                serviceSlug={developmentInquiry ? undefined : serviceSlug}
+                developmentInquiry={developmentInquiry}
+              />
             </div>
           </div>
           <div className="lg:col-span-2">

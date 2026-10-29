@@ -53,7 +53,6 @@ const linkVariants: Variants = {
 
 export default function MobileMenu() {
   const t = useTranslations('nav');
-  const tCommon = useTranslations('common');
   const pathname = usePathname();
   const isMobileMenuOpen = useUIStore((s) => s.isMobileMenuOpen);
   const setMobileMenuOpen = useUIStore((s) => s.setMobileMenuOpen);
@@ -116,7 +115,7 @@ export default function MobileMenu() {
             initial="closed"
             animate="open"
             exit="exit"
-            className="fixed top-0 right-0 bottom-0 flex w-full max-w-sm flex-col bg-white"
+            className="fixed top-0 right-0 bottom-0 flex w-full max-w-sm flex-col overflow-hidden bg-white"
             style={{ zIndex: 'var(--z-modal)' }}
             data-lenis-prevent
             role="dialog"
@@ -124,7 +123,7 @@ export default function MobileMenu() {
             aria-label={t('menu')}
           >
             {/* Close button */}
-            <div className="flex items-center justify-end p-6">
+            <div className="flex shrink-0 items-center justify-end p-6">
               <button
                 onClick={handleClose}
                 aria-label={t('close')}
@@ -146,7 +145,7 @@ export default function MobileMenu() {
             </div>
 
             {/* Navigation links */}
-            <nav className="flex-1 px-6 py-4" aria-label="Mobile navigation">
+            <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4" aria-label="Mobile navigation">
               <ul className="flex flex-col gap-2">
                 {NAV_ITEMS.map((item) => {
                   const isActive =
@@ -158,6 +157,7 @@ export default function MobileMenu() {
                     <motion.li key={item.path} variants={linkVariants}>
                       <Link
                         href={item.path}
+                        aria-current={isActive ? 'page' : undefined}
                         onClick={handleClose}
                         className={cn(
                           'block rounded-xl px-4 py-3.5 font-display text-2xl font-semibold tracking-tight transition-colors',
@@ -177,7 +177,7 @@ export default function MobileMenu() {
             {/* Bottom section: Language + contact */}
             <motion.div
               variants={linkVariants}
-              className="border-t border-neutral-100 px-6 py-6"
+              className="shrink-0 border-t border-neutral-100 px-6 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
             >
               <div className="flex items-center justify-between">
                 <LanguageToggle />

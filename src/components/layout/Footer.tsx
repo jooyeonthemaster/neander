@@ -82,6 +82,7 @@ const SUPPORT_LINKS = [
 
 export default function Footer() {
   const t = useTranslations('footer');
+  const tNav = useTranslations('nav');
   const locale = useLocale();
   const setCursorVariant = useUIStore((s) => s.setCursorVariant);
   const currentYear = new Date().getFullYear();
@@ -168,6 +169,9 @@ export default function Footer() {
                     </FooterLink>
                   </li>
                 ))}
+                <li>
+                  <FooterLink href="/development">{tNav('development')}</FooterLink>
+                </li>
               </ul>
             </div>
 

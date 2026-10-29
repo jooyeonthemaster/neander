@@ -10,6 +10,7 @@
   "nav": {
     "home": "홈",
     "services": "서비스 소개",
+    "development": "프로그램 개발",
     "portfolio": "포트폴리오",
     "about": "회사 소개",
     "contact": "문의하기",
@@ -3210,6 +3211,7 @@
       "subject": "문의 유형",
       "subjectOptions": {
         "general": "일반 문의",
+      "development": "프로그램 개발 / AX 상담",
         "partnership": "제휴 / 협업 문의",
         "quote": "견적 문의",
         "media": "미디어 / 취재 문의",

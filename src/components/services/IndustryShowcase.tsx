@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import { useState, useRef, useMemo, useCallback, useEffect, useSyncExternalStore } from 'react';
 import { smoothScrollIntoView } from '@/lib/smooth-scroll';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslations } from 'next-intl';
@@ -12,6 +12,10 @@ import { hasDemoForSlug } from '@/data/demo-registry';
 import { getLiveDemoHref } from '@/data/live-demos';
 import { getExperienceImage } from '@/data/experience-images';
 import { cn } from '@/lib/utils';
+
+const subscribeToHydration = () => () => {};
+const clientHydrationSnapshot = () => true;
+const serverHydrationSnapshot = () => false;
 
 /* ── Pillar icon SVGs ────────────────────────────────── */
 
@@ -85,15 +89,19 @@ function PillarPill({
   icon,
   isActive,
   onClick,
+  disabled,
 }: {
   label: string;
   icon?: string;
   isActive: boolean;
   onClick: () => void;
+  disabled: boolean;
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
+      disabled={disabled}
       aria-pressed={isActive}
       className={cn(
         'relative flex flex-shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium',
@@ -125,6 +133,8 @@ interface IndustryShowcaseProps {
 
 export function IndustryShowcase({ initialPillar, initialDemo }: IndustryShowcaseProps) {
   const t = useTranslations('services');
+  // Do not accept a filter click before its client handler is ready.
+  const hydrated = useSyncExternalStore(subscribeToHydration, clientHydrationSnapshot, serverHydrationSnapshot);
   const [activePillar, setActivePillar] = useState<PillarId | 'all'>(initialPillar ?? 'all');
   useEffect(() => { setActivePillar(initialPillar ?? 'all'); }, [initialPillar]);
   const sectionRef = useRef<HTMLElement>(null);
@@ -256,6 +266,7 @@ export function IndustryShowcase({ initialPillar, initialDemo }: IndustryShowcas
                   label={t('allPillars')}
                   isActive={activePillar === 'all'}
                   onClick={() => handlePillarClick('all')}
+                  disabled={!hydrated}
                 />
                 {pillars.map((pillar) => (
                   <PillarPill
@@ -264,6 +275,7 @@ export function IndustryShowcase({ initialPillar, initialDemo }: IndustryShowcas
                     icon={pillar.icon}
                     isActive={activePillar === pillar.id}
                     onClick={() => handlePillarClick(pillar.id)}
+                    disabled={!hydrated}
                   />
                 ))}
               </div>

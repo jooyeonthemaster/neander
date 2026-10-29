@@ -32,12 +32,13 @@ interface ContactFormProps {
   /** '견적 문의'를 고르면 견적 계산 탭으로 안내한다 */
   onRequestQuote?: () => void;
   serviceSlug?: string;
+  developmentInquiry?: boolean;
 }
 
-export function ContactForm({ onRequestQuote, serviceSlug }: ContactFormProps = {}) {
+export function ContactForm({ onRequestQuote, serviceSlug, developmentInquiry = false }: ContactFormProps = {}) {
   const t = useTranslations('contact');
   const tService = useTranslations('services');
-  const experience = serviceSlug ? getExperienceBySlug(serviceSlug) : undefined;
+  const experience = !developmentInquiry && serviceSlug ? getExperienceBySlug(serviceSlug) : undefined;
   const tValidation = useTranslations('validation');
   const locale = useLocale();
   const [status, setStatus] = useState<FormStatus>('idle');
@@ -55,7 +56,7 @@ export function ContactForm({ onRequestQuote, serviceSlug }: ContactFormProps = 
       email: '',
       phone: '',
       company: '',
-      subject: '',
+      subject: developmentInquiry ? 'development' : '',
       message: '',
     },
   });
@@ -101,6 +102,7 @@ export function ContactForm({ onRequestQuote, serviceSlug }: ContactFormProps = 
 
   const subjectOptions = [
     { value: 'general', label: t('form.subjectOptions.general') },
+    { value: 'development', label: t('form.subjectOptions.development') },
     { value: 'partnership', label: t('form.subjectOptions.partnership') },
     { value: 'quote', label: t('form.subjectOptions.quote') },
     { value: 'media', label: t('form.subjectOptions.media') },

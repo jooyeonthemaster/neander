@@ -11,6 +11,7 @@
   "nav": {
     "home": "Home",
     "services": "Services",
+    "development": "Development",
     "portfolio": "Portfolio",
     "about": "About",
     "contact": "Contact",
@@ -1786,6 +1787,7 @@
       "subject": "Inquiry Type",
       "subjectOptions": {
         "general": "General Inquiry",
+      "development": "Development / AX consultation",
         "partnership": "Partnership / Collaboration",
         "quote": "Quote Request",
         "media": "Media / Press",

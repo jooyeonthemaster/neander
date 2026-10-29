@@ -28,7 +28,7 @@ export default function Navigation({ inverted = false }: NavigationProps) {
   );
 
   return (
-    <nav aria-label="Main navigation" className="hidden lg:block">
+    <nav aria-label="Main navigation" className="hidden xl:block">
       <ul className="flex items-center gap-1">
         {navItems.map((item) => {
           const isActive =
@@ -40,10 +40,11 @@ export default function Navigation({ inverted = false }: NavigationProps) {
             <li key={item.path} className="relative">
               <Link
                 href={item.path}
+                aria-current={isActive ? 'page' : undefined}
                 onMouseEnter={() => setCursorVariant('pointer')}
                 onMouseLeave={() => setCursorVariant('default')}
                 className={cn(
-                  'relative inline-flex items-center px-4 py-2 text-sm font-medium transition-colors duration-200',
+                  'relative inline-flex items-center whitespace-nowrap px-3 py-2 text-sm font-medium transition-colors duration-200 2xl:px-4',
                   isActive
                     ? inverted ? 'text-teal-300' : 'text-teal-600'
                     : inverted
@@ -62,7 +63,7 @@ export default function Navigation({ inverted = false }: NavigationProps) {
                 {isActive && (
                   <motion.span
                     layoutId="nav-underline"
-                    className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-teal-500"
+                    className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-teal-500 2xl:left-4 2xl:right-4"
                     transition={{
                       type: 'spring',
                       stiffness: 380,

@@ -83,7 +83,7 @@ export default function Header() {
               onMouseEnter={() => setCursorVariant('pointer')}
               onMouseLeave={() => setCursorVariant('default')}
               className={cn(
-                'group relative flex items-baseline gap-0 font-display text-xl font-extrabold tracking-tight lg:text-2xl',
+                'group relative flex shrink-0 items-baseline gap-0 font-display text-xl font-extrabold tracking-tight lg:text-2xl',
                 onDarkHero ? 'text-white' : 'text-neutral-900',
               )}
             >
@@ -114,9 +114,9 @@ export default function Header() {
             <Navigation inverted={onDarkHero} />
 
             {/* ── Right: Actions ─────────────────────────────── */}
-            <div className="flex items-center gap-3">
+            <div className="flex shrink-0 items-center gap-3">
               {/* Language toggle - desktop only */}
-              <div className="hidden lg:block">
+              <div className="hidden xl:block">
                 <LanguageToggle inverted={onDarkHero} />
               </div>
 
@@ -125,7 +125,7 @@ export default function Header() {
                 href="/contact"
                 onMouseEnter={() => setCursorVariant('pointer')}
                 onMouseLeave={() => setCursorVariant('default')}
-                className="hidden items-center rounded-full bg-teal-500 px-5 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-teal-600 hover:shadow-lg hover:shadow-teal-500/20 active:scale-[0.97] lg:inline-flex"
+                className="hidden items-center rounded-full bg-teal-500 px-5 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-teal-600 hover:shadow-lg hover:shadow-teal-500/20 active:scale-[0.97] xl:inline-flex"
               >
                 {t('contact')}
               </Link>
@@ -138,7 +138,7 @@ export default function Header() {
                 aria-label={isMobileMenuOpen ? t('close') : t('menu')}
                 aria-expanded={isMobileMenuOpen}
                 className={cn(
-                  'flex h-10 w-10 items-center justify-center rounded-full transition-colors lg:hidden',
+                  'flex h-10 w-10 items-center justify-center rounded-full transition-colors xl:hidden',
                   onDarkHero ? 'text-white hover:bg-white/10' : 'text-neutral-700 hover:bg-neutral-100',
                 )}
               >
