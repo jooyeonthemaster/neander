@@ -5,7 +5,6 @@ import { Link } from '@/i18n/navigation';
 import { getServiceContactHref } from '@/lib/constants';
 import { ScrollReveal } from '@/components/animations';
 import {
-  experiences,
   getAllSlugs,
   getExperienceBySlug,
   getExperiencesByPillar,
@@ -14,8 +13,6 @@ import {
   getIndustryById,
 } from '@/data/experiences';
 import { ExperienceDetailClient } from './ExperienceDetailClient';
-import { hasDemoForSlug } from '@/data/demo-registry';
-import { DemoSection } from '@/components/demo/DemoSection';
 import { ExperienceImage } from '@/components/services/ExperienceImage';
 import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
 import { getExperienceSpec } from '@/data/experience-specs';
@@ -58,7 +55,6 @@ export default async function ExperienceDetailPage({ params }: Props) {
   if (!exp) notFound();
 
   const t = await getTranslations({ locale, namespace: 'services' });
-  const tCommon = await getTranslations({ locale, namespace: 'common' });
 
   const pillar = getPillarById(exp.pillar);
   const industry = getIndustryById(exp.industry);
@@ -112,9 +108,6 @@ export default async function ExperienceDetailPage({ params }: Props) {
   const pillarColor = pillar?.color ?? '#0D9488';
   const industryName = industry ? t(industry.nameKey) : '';
 
-  /* -- Demo section labels -------------------------------- */
-  const hasDemo = hasDemoForSlug(slug);
-
   // 운영 스펙 카드. 확인되지 않은 수치는 "상담 시 안내"로 둔다
   const spec = getExperienceSpec(slug);
   const tPricing = await getTranslations({ locale, namespace: 'pricingGuide' });
@@ -136,20 +129,6 @@ export default async function ExperienceDetailPage({ params }: Props) {
         { label: t('spec.staff'), value: spec.staff ? t('spec.countValue', { n: spec.staff }) : onRequest },
       ]
     : [];
-  const tDemo = await getTranslations({ locale, namespace: 'demos' });
-  const demoLabels = {
-    back: tDemo('common.back'),
-    next: tDemo('common.next'),
-    seeResult: tDemo('common.seeResult'),
-    analyzing: tDemo('common.analyzing'),
-    analyzingSubtitle: tDemo('common.analyzingSubtitle'),
-    complete: tDemo('common.complete'),
-    loading: tDemo('stage.loading'),
-    fullscreen: tDemo('stage.fullscreen'),
-    exitFullscreen: tDemo('stage.exitFullscreen'),
-    scrollHint: tDemo('stage.scrollHint'),
-    disclaimer: tDemo('stage.disclaimer'),
-  };
   const backHref = `/services?pillar=${exp.pillar}`;
 
   const relatedData = related.map((r) => {
@@ -166,28 +145,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
 
   return (
     <main>
-      {/* ══════════════════════════════════════════════════════
-          1. DEMO STAGE — 데모가 있으면 첫 화면을 데모로 채우고 바로 시작한다
-          ══════════════════════════════════════════════════════ */}
-      {hasDemo && (
-        <DemoSection
-          slug={slug}
-          pillarColor={pillarColor}
-          title={name}
-          subtitle={oneLiner}
-          pillarName={pillarName}
-          industryName={industryName}
-          backHref={backHref}
-          backLabel={t('backToPillar', { pillar: pillarName })}
-          inquiryLabel={t('inquiryBtn')}
-          labels={demoLabels}
-        />
-      )}
-
-      {/* ══════════════════════════════════════════════════════
-          1-B. HERO SECTION (데모가 없는 서비스)
-          ══════════════════════════════════════════════════════ */}
-      {!hasDemo && (
+      {/* Service introduction */}
         <section className="relative overflow-hidden bg-slate-950 pb-20 pt-32 sm:pb-28 sm:pt-44">
           {/* Grid background */}
           <div
@@ -346,6 +304,9 @@ export default async function ExperienceDetailPage({ params }: Props) {
                   >
                     {t('ctaQuote')}
                   </Link>
+                  <Link href="/portfolio" className="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-8 py-4 text-base font-semibold text-slate-300 transition-colors hover:border-slate-500 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">
+                    {t('viewPortfolio')}
+                  </Link>
                 </div>
               </div>
             </ScrollReveal>
@@ -360,7 +321,6 @@ export default async function ExperienceDetailPage({ params }: Props) {
             aria-hidden="true"
           />
         </section>
-      )}
 
       {/* ══════════════════════════════════════════════════════
           2. DESCRIPTION + HIGHLIGHT STATS

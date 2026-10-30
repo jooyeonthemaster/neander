@@ -1,5 +1,8 @@
 import { expect, type Page } from '@playwright/test';
 import { KIOSK_EXPERIENCES } from '../../../src/lib/quote/kiosk-experiences';
+import { getExperienceBySlug } from '../../../src/data/experiences';
+
+const publicKioskExperiences = KIOSK_EXPERIENCES.filter((experience) => getExperienceBySlug(experience.slug));
 
 /** A restored draft opens on event details, just like a new quote. */
 export async function enterExperienceStep(page: Page) {
@@ -72,7 +75,7 @@ export async function openPreviewDetails(page: Page) {
   if (reopen && service) await openPreviewOptions(page, service);
 }
 
-/** The photo-style gallery is one option topic with three internal views. */
+/** The photo-style gallery stays within one option topic. */
 export async function showPhotoGalleryPage(page: Page, target: number) {
   await showOptionPage(page, 'photoBooth', 'photo-styles');
   const gallery = page.getByTestId('photo-booth-templates');
@@ -87,7 +90,7 @@ export async function showPhotoGalleryPage(page: Page, target: number) {
   return gallery;
 }
 
-/** Each kiosk owns a six-view experience gallery inside its existing topic. */
+/** Browse the public kiosk experiences inside the existing option topic. */
 export async function showKioskGalleryPage(page: Page, _number: number, target: number, lang: 'ko' | 'en') {
   // 체험은 한 페이지(kiosk-1)에서 골라 여러 기기에 나눠 담는다
   await showOptionPage(page, 'rental', 'kiosk-1');
@@ -114,7 +117,7 @@ export async function toggleKioskExperience(page: Page, slug: string, lang: 'ko'
     await expect(page.getByTestId('kiosk-experience-assignments')).toHaveAttribute('data-assignments', /^,*$/);
     return;
   }
-  const index = KIOSK_EXPERIENCES.findIndex(experience => experience.slug === slug);
+  const index = publicKioskExperiences.findIndex(experience => experience.slug === slug);
   expect(index, `Known kiosk experience: ${slug}`).toBeGreaterThanOrEqual(0);
   await showKioskGalleryPage(page, 1, Math.floor(index / 4) + 1, lang);
   const card = page.getByTestId(`kiosk-experience-1-${slug}`);

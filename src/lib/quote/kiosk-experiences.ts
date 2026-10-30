@@ -26,7 +26,7 @@ export const KIOSK_EXPERIENCES = [
   { slug: 'ai-celeb-lookalike', name: { ko: 'AI 연예인 닮은꼴 진단', en: 'AI Celebrity Lookalike' } },
   { slug: 'ai-voice-lab', name: { ko: 'AI 보이스 체험관', en: 'AI Voice Lab' } },
   { slug: 'ai-future-career', name: { ko: 'AI 미래직업 진단', en: 'AI Future Career Diagnosis' } },
-  { slug: 'ai-fortune-robot', name: { ko: 'AI 원소 운세', en: 'AI Element Fortune' } },
+  { slug: 'ai-fortune-robot', name: { ko: 'AI 사주', en: 'AI Saju Reading' } },
   { slug: 'ai-face-reading', name: { ko: 'AI 관상 분석', en: 'AI Face Reading' } },
   { slug: 'ai-palm-reading', name: { ko: 'AI 손금 로봇', en: 'AI Palm Reading Robot' } },
   { slug: 'ai-caricature-artist', name: { ko: 'AI 캐리커처 아티스트', en: 'AI Caricature Artist' } },

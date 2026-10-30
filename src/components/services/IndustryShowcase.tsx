@@ -4,13 +4,10 @@ import { useState, useRef, useMemo, useCallback, useEffect, useSyncExternalStore
 import { smoothScrollIntoView } from '@/lib/smooth-scroll';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { experiences, getIndustryById, pillars, type PillarId } from '@/data/experiences';
 import { ScrollReveal } from '@/components/animations';
 import { ExperienceCard } from './ExperienceCard';
-import { DemoModal } from '@/components/demo/DemoModal';
-import { hasDemoForSlug } from '@/data/demo-registry';
-import { getLiveDemoHref } from '@/data/live-demos';
-import { getExperienceImage } from '@/data/experience-images';
 import { cn } from '@/lib/utils';
 
 const subscribeToHydration = () => () => {};
@@ -127,16 +124,13 @@ function PillarPill({
 
 interface IndustryShowcaseProps {
   initialPillar?: PillarId;
-  /** ?demo=<slug> 로 들어오면 그 데모 팝업을 연 채로 시작한다 */
-  initialDemo?: string;
 }
 
-export function IndustryShowcase({ initialPillar, initialDemo }: IndustryShowcaseProps) {
+export function IndustryShowcase({ initialPillar }: IndustryShowcaseProps) {
   const t = useTranslations('services');
   // Do not accept a filter click before its client handler is ready.
   const hydrated = useSyncExternalStore(subscribeToHydration, clientHydrationSnapshot, serverHydrationSnapshot);
   const [activePillar, setActivePillar] = useState<PillarId | 'all'>(initialPillar ?? 'all');
-  useEffect(() => { setActivePillar(initialPillar ?? 'all'); }, [initialPillar]);
   const sectionRef = useRef<HTMLElement>(null);
 
   const industryName = useCallback(
@@ -157,11 +151,6 @@ export function IndustryShowcase({ initialPillar, initialDemo }: IndustryShowcas
     () => (activePillar === 'all' ? experiences : experiences.filter((exp) => exp.pillar === activePillar)),
     [activePillar]
   );
-  const experienceGroups = useMemo(() => [
-    { kind: 'case', items: activeExperiences.filter((experience) => getExperienceImage(experience.slug)?.kind === 'case') },
-    { kind: 'concept', items: activeExperiences.filter((experience) => getExperienceImage(experience.slug)?.kind !== 'case') },
-  ] as const, [activeExperiences]);
-
   const handlePillarClick = useCallback((pillarId: PillarId | 'all') => {
     if (pillarId === activePillar) return;
     setActivePillar(pillarId);
@@ -171,42 +160,10 @@ export function IndustryShowcase({ initialPillar, initialDemo }: IndustryShowcas
     window.history.pushState(null, '', url);
   }, [activePillar]);
 
-
-  /* ── 데모 팝업 — URL ?demo=<slug> 와 맞춰 두어 뒤로가기로 닫히고 링크로 공유된다 ── */
-  const [openDemo, setOpenDemo] = useState<string | null>(
-    initialDemo && hasDemoForSlug(initialDemo) ? initialDemo : null
-  );
-  // 팝업을 열면서 기록을 쌓았는지 — 그랬다면 닫을 때 history.back()으로 되돌린다
-  const pushedDemoRef = useRef(false);
-
-  const openDemoPopup = useCallback((slug: string) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('demo', slug);
-    window.history.pushState(null, '', url);
-    pushedDemoRef.current = true;
-    setOpenDemo(slug);
-  }, []);
-
-  const closeDemoPopup = useCallback(() => {
-    if (pushedDemoRef.current) {
-      window.history.back();
-      return;
-    }
-    const url = new URL(window.location.href);
-    url.searchParams.delete('demo');
-    window.history.replaceState(null, '', url);
-    setOpenDemo(null);
-  }, []);
-
   useEffect(() => {
     const onPopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      const selectedPillar = params.get('pillar');
+      const selectedPillar = new URLSearchParams(window.location.search).get('pillar');
       setActivePillar(pillars.some((pillar) => pillar.id === selectedPillar) ? selectedPillar as PillarId : 'all');
-      const slug = params.get('demo');
-      const valid = slug && hasDemoForSlug(slug) ? slug : null;
-      pushedDemoRef.current = valid !== null;
-      setOpenDemo(valid);
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
@@ -240,16 +197,22 @@ export function IndustryShowcase({ initialPillar, initialDemo }: IndustryShowcas
         <div className="container-default">
           {/* Section header */}
           <ScrollReveal>
-            <div className="max-w-2xl text-center mx-auto">
-              <span className="inline-block mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-teal-600">
-                AI EXPERIENCES
-              </span>
-              <h2 id="industry-showcase-heading" className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
-                {t('industryTitle')}
-              </h2>
-              <p className="mt-4 text-base text-neutral-500 leading-relaxed sm:text-lg">
-                {t('industrySubtitle')}
-              </p>
+            <div className="flex flex-col items-center justify-between gap-6 text-center lg:flex-row lg:items-end lg:text-left">
+              <div className="max-w-2xl">
+                <span className="inline-block mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-teal-600">
+                  AI EXPERIENCES
+                </span>
+                <h2 id="industry-showcase-heading" className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
+                  {t('industryTitle')}
+                </h2>
+                <p className="mt-4 text-base text-neutral-500 leading-relaxed sm:text-lg">
+                  {t('industrySubtitle')}
+                </p>
+              </div>
+              <Link href="/portfolio" className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-5 py-3 text-sm font-semibold text-teal-700 transition-colors hover:border-teal-400 hover:bg-teal-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2">
+                {t('viewPortfolio')}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14m-7-7 7 7-7 7" /></svg>
+              </Link>
             </div>
           </ScrollReveal>
 
@@ -293,34 +256,20 @@ export function IndustryShowcase({ initialPillar, initialDemo }: IndustryShowcas
                 transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
               >
                 {activeExperiences.length > 0 ? (
-                  <div className="space-y-12">
-                    {experienceGroups.filter((group) => group.items.length > 0).map((group) => (
-                      <div key={group.kind} data-experience-group={group.kind} aria-label={t(`showcaseGroups.${group.kind}Title`)}>
-                        <div className="mb-5 border-t border-neutral-200 pt-6">
-                          <p className="text-xl font-bold tracking-tight text-neutral-900">{t(`showcaseGroups.${group.kind}Title`)}</p>
-                          <p className="mt-2 text-sm leading-relaxed text-neutral-500">{t(`showcaseGroups.${group.kind}Description`)}</p>
-                        </div>
-                        <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
-                          {group.items.map((exp) => {
-                            const pillar = pillarMap.get(exp.pillar);
-                            return (
-                              <ExperienceCard
-                                key={exp.id}
-                                slug={exp.slug}
-                                name={t(exp.nameKey)}
-                                oneLiner={t(exp.oneLinerKey)}
-                                pillarId={exp.pillar}
-                                pillarName={pillar ? t(pillar.nameKey) : ''}
-                                industryName={industryName(exp.industry)}
-                                pillarColor={pillar?.color ?? '#0D9488'}
-                                onOpenDemo={hasDemoForSlug(exp.slug) ? () => openDemoPopup(exp.slug) : undefined}
-                                liveDemoHref={getLiveDemoHref(exp.slug)}
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
+                  <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
+                    {activeExperiences.map((exp) => {
+                      const pillar = pillarMap.get(exp.pillar);
+                      return (
+                        <ExperienceCard
+                          key={exp.id}
+                          slug={exp.slug}
+                          name={t(exp.nameKey)}
+                          oneLiner={t(exp.oneLinerKey)}
+                          pillarName={pillar ? t(pillar.nameKey) : ''}
+                          industryName={industryName(exp.industry)}
+                        />
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -338,10 +287,6 @@ export function IndustryShowcase({ initialPillar, initialDemo }: IndustryShowcas
           </div>
         </div>
       </div>
-
-      <AnimatePresence>
-        {openDemo && <DemoModal key={openDemo} slug={openDemo} onClose={closeDemoPopup} />}
-      </AnimatePresence>
     </section>
   );
 }

@@ -55,7 +55,7 @@ export const QUOTE_PRESETS: QuotePreset[] = [
     input: {
       eventType: 'public', eventDate: '', days: 2, hoursPerDay: 6, attendees: 500, region: 'central', extraStaff: 1,
       items: [
-        { key: 'rental', options: { mode: 'event', kiosks: 2, months: 1, printer: true, extraContents: 1, custom: 'brand', experienceSlug: 'ai-travel-style' } },
+        { key: 'rental', options: { mode: 'event', kiosks: 2, months: 1, printer: true, extraContents: 1, custom: 'brand', experienceSlug: 'ai-future-career' } },
       ],
     },
   },

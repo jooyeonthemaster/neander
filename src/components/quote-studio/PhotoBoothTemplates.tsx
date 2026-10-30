@@ -2,11 +2,11 @@
 
 import { useId, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { ArrowRight, Check as CheckIcon, ChevronDown, ChevronLeft, ChevronRight, Minus, Plus, Sparkles } from 'lucide-react';
-import { useRouter } from '@/i18n/navigation';
+import { Check as CheckIcon, ChevronDown, ChevronLeft, ChevronRight, Minus, Plus, Sparkles, X } from 'lucide-react';
 import { CUSTOM_DEV, CUSTOM_DEV_TEXT, PHOTO_BOOTH, type Lang } from '@/lib/quote/catalog';
 import type { PhotoBoothOptions } from '@/lib/quote/engine';
 import { getPhotoBoothTemplates, PHOTO_BOOTH_TEMPLATES } from '@/lib/quote/photo-booth-templates';
+import { getExperienceBySlug } from '@/data/experiences';
 import { cn } from '@/lib/utils';
 import { Check, Field, HoverInfo, PriceTag, Stepper, type Price } from './QuoteControls';
 import { PhotoBoothTemplateArt } from './PhotoBoothTemplateArt';
@@ -14,12 +14,13 @@ import { PhotoBoothTemplateArt } from './PhotoBoothTemplateArt';
 const price = (value: number, lang: Lang) => lang === 'ko'
   ? `${(value / 10_000).toLocaleString('ko-KR')}만원` : `KRW ${value.toLocaleString('en-US')}`;
 
-/** Existing demo selections and new style production have separate prices. */
-export function PhotoBoothTemplates({ options, lang, onChange, compact = false, section = 'all', onOpenDemo }: {
+const publicTemplates = PHOTO_BOOTH_TEMPLATES.filter((template) => getExperienceBySlug(template.slug));
+
+/** Existing template selections and new style production have separate prices. */
+export function PhotoBoothTemplates({ options, lang, onChange, compact = false, section = 'all' }: {
   options: PhotoBoothOptions; lang: Lang; onChange: (patch: Partial<PhotoBoothOptions>) => void;
   compact?: boolean;
   section?: 'all' | 'templates' | 'custom';
-  onOpenDemo?: (slug: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [galleryPage, setGalleryPage] = useState(0);
@@ -29,7 +30,6 @@ export function PhotoBoothTemplates({ options, lang, onChange, compact = false, 
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const suppressClickUntil = useRef(0);
   const reducedMotion = useReducedMotion();
-  const router = useRouter();
   const gridId = useId();
   const L = (ko: string, en: string) => lang === 'ko' ? ko : en;
   const selected = getPhotoBoothTemplates(options.templateSlugs);
@@ -38,17 +38,22 @@ export function PhotoBoothTemplates({ options, lang, onChange, compact = false, 
   const templatePrice = (slug: string): Price =>
     (selectedSlugs.includes(slug) ? selectedSlugs.indexOf(slug) : selected.length) < PHOTO_BOOTH.includedStyles ? {} : { amount: PHOTO_BOOTH.extraStyle };
   const extraCount = options.templateSlugs === undefined ? options.extraStyles : Math.max(0, selected.length - PHOTO_BOOTH.includedStyles);
-  const visible = expanded ? PHOTO_BOOTH_TEMPLATES : PHOTO_BOOTH_TEMPLATES.filter((template, index) => index < 4 || selectedSlugs.includes(template.slug));
+  const visible = expanded ? publicTemplates : publicTemplates.filter((template, index) => index < 4 || selectedSlugs.includes(template.slug));
   const customCount = options.customStyles ?? 0;
   const toggle = (slug: string) => {
     const templateSlugs = selectedSlugs.includes(slug) ? selectedSlugs.filter((value) => value !== slug) : [...selectedSlugs, slug];
     onChange({ templateSlugs, extraStyles: Math.max(0, templateSlugs.length - PHOTO_BOOTH.includedStyles) });
   };
-  const openDemo = (slug: string) => {
-    if (onOpenDemo) onOpenDemo(slug);
-    else router.push(`/services?demo=${slug}`);
-  };
-  const galleryPages = Math.ceil(PHOTO_BOOTH_TEMPLATES.length / 4);
+  const savedChoices = selected.filter((template) => !getExperienceBySlug(template.slug));
+  const savedChoiceChips = savedChoices.length > 0 && <div className="space-y-1.5">
+    <p className="text-[11px] text-slate-500">{L('이전에 저장한 선택', 'Previously saved choices')}</p>
+    <div className="flex flex-wrap gap-1.5">{savedChoices.map((template) => <button key={template.slug} type="button" onClick={() => toggle(template.slug)}
+      aria-label={L(`${template.name.ko} 저장된 선택 제거`, `Remove saved ${template.name.en} choice`)}
+      className="inline-flex min-h-9 touch:min-h-11 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 text-[11px] text-slate-600 transition-colors hover:border-teal-300 hover:text-teal-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600">
+      {template.name[lang]}<X size={12} aria-hidden="true" />
+    </button>)}</div>
+  </div>;
+  const galleryPages = Math.max(1, Math.ceil(publicTemplates.length / 4));
   const moveGallery = (step: number, focus = false) => {
     setDirection(step > 0 ? 1 : -1);
     setGalleryPage((previous) => Math.min(galleryPages - 1, Math.max(0, previous + step)));
@@ -56,7 +61,7 @@ export function PhotoBoothTemplates({ options, lang, onChange, compact = false, 
   };
 
   if (compact && section === 'templates') {
-    const pageTemplates = PHOTO_BOOTH_TEMPLATES.slice(galleryPage * 4, (galleryPage + 1) * 4);
+    const pageTemplates = publicTemplates.slice(galleryPage * 4, (galleryPage + 1) * 4);
     const setCustomCount = (value: number) => {
       setCustomDraft(null);
       onChange({ customStyles: Math.max(0, Math.min(10, Math.round(Number.isFinite(value) ? value : 0))) });
@@ -64,6 +69,7 @@ export function PhotoBoothTemplates({ options, lang, onChange, compact = false, 
     return <section data-testid="photo-booth-templates" data-gallery-page={galleryPage + 1} className="space-y-1.5">
       <p className="text-[11px] leading-relaxed text-slate-500">{L(`기존 ${PHOTO_BOOTH.includedStyles}종 포함 · 추가 1종 ${price(PHOTO_BOOTH.extraStyle, lang)} · 부가세 별도`, `${PHOTO_BOOTH.includedStyles} included · ${price(PHOTO_BOOTH.extraStyle, lang)} per extra style · VAT excluded`)}</p>
       {options.templateSlugs === undefined && options.extraStyles > 0 && <p className="text-[10px] leading-relaxed text-amber-700">{L(`저장된 추가 ${options.extraStyles}종은 미정이에요. 직접 고르면 선택 수로 다시 계산해요.`, `${options.extraStyles} saved extra styles are undecided. Choosing templates recalculates the count.`)}</p>}
+      {savedChoiceChips}
       <div ref={galleryRef} id={gridId} data-testid="booth-templates-gallery" role="region" aria-roledescription={L('캐러셀', 'carousel')} aria-label={L('사진 스타일 둘러보기', 'Browse photo styles')} tabIndex={0}
         className="overflow-hidden rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2" style={{ touchAction: 'pan-y' }}
         onKeyDown={(event) => {
@@ -91,14 +97,12 @@ export function PhotoBoothTemplates({ options, lang, onChange, compact = false, 
                 <PhotoBoothTemplateArt appearance={template.appearance} className="h-full w-full" />
                 {chosen && <span aria-hidden="true" className="absolute left-1 top-1 rounded-full bg-teal-600 p-0.5 text-white"><CheckIcon size={11} /></span>}
               </span>
-              {/* 이름은 위, 가격은 아래 왼쪽 — 오른쪽 아래의 짧은 '데모' 링크와 한 줄에 놓여도 겹치지 않는다 */}
+              {/* 이름과 추가 비용을 카드 안에 함께 표시한다. */}
               <span className="flex h-full min-w-0 flex-col items-start justify-between py-2">
                 <span className="line-clamp-2 text-[11px] font-semibold leading-snug text-slate-800">{template.name[lang]}</span>
                 <PriceTag className="text-[10px]" price={templatePrice(template.slug)} />
               </span>
             </button></HoverInfo>
-            <button type="button" data-testid={`booth-demo-${template.slug}`} aria-haspopup={onOpenDemo ? 'dialog' : undefined} aria-label={L(`${template.name.ko} 데모 체험`, `Try ${template.name.en} demo`)} onClick={() => openDemo(template.slug)}
-              className="absolute bottom-1 right-1 inline-flex min-h-6 items-center gap-0.5 rounded px-1 text-[9px] text-slate-500 hover:text-teal-700 focus-visible:outline-2 focus-visible:outline-teal-600 touch:before:absolute touch:before:-inset-x-2 touch:before:-top-5 touch:before:-bottom-1 touch:before:content-['']">{L('데모', 'Demo')}<ArrowRight size={10} aria-hidden="true" /></button>
           </article>;
         })}
 
@@ -153,10 +157,11 @@ export function PhotoBoothTemplates({ options, lang, onChange, compact = false, 
         <h3 id={`${gridId}-heading`} className="text-sm font-semibold text-slate-800">{L('어떤 모습으로 찍어볼까요?', 'Which looks would you like?')}</h3>
         <span className="rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-semibold text-teal-700">{L(`기존 템플릿 ${PHOTO_BOOTH.includedStyles}종 기본 포함`, `${PHOTO_BOOTH.includedStyles} existing templates included`)}</span>
       </div>
-      <p className="mt-2 text-xs leading-relaxed text-slate-500">{L('서비스 소개에서 체험한 데모 중 포토부스에 어울리는 사진 스타일이에요. 원하는 것을 여러 개 골라주세요.', 'Choose photo styles from our service demos. You can select more than one.')}</p>
+      <p className="mt-2 text-xs leading-relaxed text-slate-500">{L('포토부스에서 사용할 사진 스타일이에요. 원하는 것을 여러 개 골라주세요.', 'Choose photo styles for your booth. You can select more than one.')}</p>
       <p className="mt-2 text-[11px] leading-relaxed text-slate-500">{L(`기본 ${PHOTO_BOOTH.includedStyles}종까지 추가 비용 없이, 그다음부터는 1종당 ${price(PHOTO_BOOTH.extraStyle, lang)}이 추가돼요. 부가세 별도예요.`, `The first ${PHOTO_BOOTH.includedStyles} are included; each additional existing template costs ${price(PHOTO_BOOTH.extraStyle, lang)}, excluding VAT.`)}</p>
 
       {options.templateSlugs === undefined && options.extraStyles > 0 && <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2.5 text-[11px] leading-relaxed text-slate-600">{L(`저장된 추가 스타일 ${options.extraStyles}종은 아직 종류가 정해지지 않았어요. 아래에서 직접 고르면 선택한 수로 다시 계산해요.`, `Your saved ${options.extraStyles} extra styles have no templates yet. Selecting templates below recalculates the quantity from your choices.`)}</p>}
+      {savedChoices.length > 0 && <div className="mt-3">{savedChoiceChips}</div>}
 
       <div id={gridId} className="mt-4 grid grid-cols-2 gap-3">
         {visible.map((template) => {
@@ -174,14 +179,12 @@ export function PhotoBoothTemplates({ options, lang, onChange, compact = false, 
                 <PriceTag className="mt-2" price={templatePrice(template.slug)} />
               </span>
             </button>
-            <button type="button" data-testid={`booth-demo-${template.slug}`} aria-haspopup={onOpenDemo ? 'dialog' : undefined} aria-label={L(`${template.name.ko} 데모 체험`, `Try ${template.name.en} demo`)} onClick={() => openDemo(template.slug)}
-              className="mx-3 mb-2 inline-flex min-h-9 items-center gap-1 text-[11px] font-medium text-slate-500 underline-offset-4 hover:text-teal-700 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600">{L('데모 체험', 'Try demo')}<ArrowRight size={12} aria-hidden="true" /></button>
           </article>;
         })}
       </div>
-      {(expanded || visible.length < PHOTO_BOOTH_TEMPLATES.length) && <button type="button" data-testid="booth-templates-expand" aria-expanded={expanded} aria-controls={gridId} onClick={() => setExpanded(!expanded)}
+      {(expanded || visible.length < publicTemplates.length) && <button type="button" data-testid="booth-templates-expand" aria-expanded={expanded} aria-controls={gridId} onClick={() => setExpanded(!expanded)}
         className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-50 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600">
-        {expanded ? L('템플릿 접기', 'Show fewer templates') : L(`다른 템플릿 ${PHOTO_BOOTH_TEMPLATES.length - visible.length}종 더 보기`, `Explore ${PHOTO_BOOTH_TEMPLATES.length - visible.length} more templates`)}<ChevronDown size={14} aria-hidden="true" className={cn('transition-transform motion-reduce:transition-none', expanded && 'rotate-180')} />
+        {expanded ? L('템플릿 접기', 'Show fewer templates') : L(`다른 템플릿 ${publicTemplates.length - visible.length}종 더 보기`, `Explore ${publicTemplates.length - visible.length} more templates`)}<ChevronDown size={14} aria-hidden="true" className={cn('transition-transform motion-reduce:transition-none', expanded && 'rotate-180')} />
       </button>}
       <div data-testid="booth-template-selection" aria-live="polite" aria-atomic="true" className="mt-3 rounded-xl bg-teal-50/70 px-3.5 py-3 text-xs leading-relaxed text-teal-800">
         <p className="font-semibold">{selected.length ? L(`기존 템플릿 ${selected.length}종 선택 · ${extraCount > 0 ? `추가 ${price(extraCount * PHOTO_BOOTH.extraStyle, lang)}` : '추가 비용 없음'}`, `${selected.length} existing templates selected · ${extraCount > 0 ? `+ ${price(extraCount * PHOTO_BOOTH.extraStyle, lang)}` : 'no extra cost'}`) : L('아직 고르지 않아도 괜찮아요. 종류는 상담할 때 정할 수 있어요.', 'You can choose your templates later during consultation.')}</p>

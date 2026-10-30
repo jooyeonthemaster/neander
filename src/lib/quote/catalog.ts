@@ -37,8 +37,8 @@ export const SERVICE_TEXT: Record<ServiceKey, { name: Text; summary: Text }> = {
   rental: {
     name: { ko: 'AI 키오스크', en: 'AI Kiosk' },
     summary: {
-      ko: '관상·운세·퍼스널컬러 등 41종 AI 체험 중 하나를 그대로 키오스크로 운영합니다. 현장 운영 인력은 별도입니다.',
-      en: 'Run one of 41 AI experiences (face reading, fortune, personal color…) as-is on a kiosk. On-site staff is extra.',
+      ko: '관상·운세·퍼스널컬러 등 AI 체험 중 하나를 그대로 키오스크로 운영합니다. 현장 운영 인력은 별도입니다.',
+      en: 'Run an AI experience such as face reading, fortune or personal color as-is on a kiosk. On-site staff is extra.',
     },
   },
   spatialDesign: {

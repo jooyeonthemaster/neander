@@ -1,7 +1,12 @@
 import { expect, test, type Page } from '@playwright/test';
 import { calculateQuote, type QuoteInput } from '../../src/lib/quote/engine';
 import { PHOTO_BOOTH_TEMPLATES } from '../../src/lib/quote/photo-booth-templates';
+import { getExperienceBySlug } from '../../src/data/experiences';
 import { enterExperienceStep, showOptionPage, showPhotoGalleryPage } from './helpers/quote-preview-options';
+
+const publicTemplates = PHOTO_BOOTH_TEMPLATES.filter((template) => getExperienceBySlug(template.slug));
+const galleryPages = Math.max(1, Math.ceil(publicTemplates.length / 4));
+const extraStyleCost = Math.max(0, publicTemplates.length - 2) * 220_000;
 
 const storageKey = 'neander-quote-preview-flow-v1';
 const visible = (page: Page, id: string) => page.locator(`[data-testid="${id}"]:visible`);
@@ -23,7 +28,7 @@ async function swipeGallery(page: Page, direction: 'left' | 'right') {
 }
 
 for (const lang of ['ko', 'en'] as const) {
-  test(`${lang}: one photo topic keeps all template choices and same-page demos across gallery views`, async ({ page }, testInfo) => {
+  test(`${lang}: one photo topic keeps public template choices and hides demos across gallery views`, async ({ page }, testInfo) => {
     const mobile = testInfo.project.name === 'mobile';
     const errors: string[] = [];
     const generationRequests: string[] = [];
@@ -49,25 +54,30 @@ for (const lang of ['ko', 'en'] as const) {
     expect(custom.y).toBeGreaterThanOrEqual(pager.y + pager.height);
     await page.screenshot({ path: testInfo.outputPath(`styles-first-page-${lang}.png`) });
     await gallery.focus();
-    await page.keyboard.press('ArrowRight');
-    await expect(picker).toHaveAttribute('data-gallery-page', '2');
-    await page.keyboard.press('End');
-    await expect(picker).toHaveAttribute('data-gallery-page', '3');
-    await expect(page.getByTestId('booth-templates-next')).toBeDisabled();
-    await page.keyboard.press('ArrowLeft');
-    await expect(picker).toHaveAttribute('data-gallery-page', '2');
-    await page.keyboard.press('Home');
-    await expect(picker).toHaveAttribute('data-gallery-page', '1');
-    if (mobile) {
-      await swipeGallery(page, 'left');
+    if (galleryPages > 1) {
+      await page.keyboard.press('ArrowRight');
       await expect(picker).toHaveAttribute('data-gallery-page', '2');
-      await swipeGallery(page, 'right');
+      await page.keyboard.press('End');
+      await expect(picker).toHaveAttribute('data-gallery-page', String(galleryPages));
+      await expect(page.getByTestId('booth-templates-next')).toBeDisabled();
+      await page.keyboard.press('ArrowLeft');
+      await expect(picker).toHaveAttribute('data-gallery-page', String(galleryPages - 1));
+      await page.keyboard.press('Home');
       await expect(picker).toHaveAttribute('data-gallery-page', '1');
-      // A real swipe suppresses its synthetic click for 350 ms.
-      await page.waitForTimeout(400);
+      if (mobile) {
+        await swipeGallery(page, 'left');
+        await expect(picker).toHaveAttribute('data-gallery-page', '2');
+        await swipeGallery(page, 'right');
+        await expect(picker).toHaveAttribute('data-gallery-page', '1');
+        await page.waitForTimeout(400);
+      }
+    } else {
+      await page.keyboard.press('ArrowRight');
+      await expect(picker).toHaveAttribute('data-gallery-page', '1');
+      await expect(page.getByTestId('booth-templates-next')).toBeDisabled();
     }
     const base = Number(await page.getByTestId('quote-total').getAttribute('data-amount'));
-    for (const [index, template] of PHOTO_BOOTH_TEMPLATES.entries()) {
+    for (const [index, template] of publicTemplates.entries()) {
       await showPhotoGalleryPage(page, Math.floor(index / 4) + 1);
       await expect(page.getByTestId('booth-template-custom-style')).toBeVisible();
       const button = page.getByTestId(`booth-template-${template.slug}`);
@@ -83,46 +93,22 @@ for (const lang of ['ko', 'en'] as const) {
     await expect(customTile.locator('[data-testid^="booth-demo-"]')).toHaveCount(0);
     await customTile.locator('#b-custom-style-enabled').click();
     await expect(customTile.locator('#b-cstyles')).toHaveValue('1');
-    await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(base + 1_980_000 + 550_000));
+    await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(base + extraStyleCost + 550_000));
     await customTile.locator('#b-cstyles').fill('10');
     await customTile.locator('#b-cstyles').press('Enter');
-    await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(base + 1_980_000 + 5_500_000));
+    await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(base + extraStyleCost + 5_500_000));
     await expect(customTile.getByRole('button', { name: lang === 'ko' ? '새로 만들 스타일 수 늘리기' : 'Increase new styles', exact: true })).toBeDisabled();
     await customTile.locator('#b-cstyles').fill('2');
     await customTile.locator('#b-cstyles').press('Enter');
     const chosen = await saved(page);
-    expect(chosen.items[0].options).toMatchObject({ templateSlugs: PHOTO_BOOTH_TEMPLATES.map(item => item.slug), extraStyles: 9, customStyles: 2 });
+    expect(chosen.items[0].options).toMatchObject({ templateSlugs: publicTemplates.map(item => item.slug), extraStyles: Math.max(0, publicTemplates.length - 2), customStyles: 2 });
     await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(calculateQuote(chosen, lang).total));
 
-    // Loaded welcome screens only: no camera, upload, or AI generation action.
     const url = page.url();
-    const pageCount = page.context().pages().length;
     const total = await page.getByTestId('quote-total').getAttribute('data-amount');
-    for (const [index, slug] of ['ai-wedding-booth', 'ai-traditional-painter'].entries()) {
-      const demo = page.getByTestId(`booth-demo-${slug}`);
-      await expect(demo).toHaveText(lang === 'ko' ? '데모' : 'Demo');
-      await demo.click();
-      const modal = page.locator('.demo-modal-panel[role="dialog"]');
-      await expect(modal).toBeVisible();
-      await expect(modal).toHaveAttribute('aria-modal', 'true');
-      await expect(modal.locator(`[data-program="${slug}"] .venue-shell`)).toBeVisible({ timeout: 30_000 });
-      await expect(page.getByTestId('quote-options-popover')).toHaveAttribute('inert', '');
-      expect(page.url()).toBe(url);
-      expect(page.context().pages()).toHaveLength(pageCount);
-      if (index === 0) {
-        await page.waitForTimeout(250);
-        await page.screenshot({ path: testInfo.outputPath(`demo-welcome-${lang}.png`), style: 'nextjs-portal{display:none!important}' });
-        await page.keyboard.press('Escape');
-      } else await modal.locator('[data-demo-return]:visible').first().click();
-      await expect(modal).toHaveCount(0);
-      await expect(page.getByTestId('quote-options-popover')).toBeVisible();
-      await expect(page.getByTestId('quote-options-popover')).not.toHaveAttribute('inert', '');
-      await expect(demo).toBeFocused();
-      await expect(flow).toHaveAttribute('data-current-page', 'photo-styles');
-      await expect(picker).toHaveAttribute('data-gallery-page', '3');
-      await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', total!);
-      expect(await saved(page)).toEqual(chosen);
-    }
+    await expect(picker.locator('[data-testid^="booth-demo-"]')).toHaveCount(0);
+    await expect(page.locator('.demo-modal-panel')).toHaveCount(0);
+    expect(await saved(page)).toEqual(chosen);
     await showOptionPage(page, 'photoBooth', 'prints');
     const prints = options.getByTestId('option-page-prints');
     await expect(flow).toHaveAttribute('data-current-step', '3');
@@ -157,7 +143,7 @@ for (const lang of ['ko', 'en'] as const) {
     };
     await inspectCombinedPage();
     await showOptionPage(page, 'photoBooth', 'photo-styles');
-    await expect(picker).toHaveAttribute('data-gallery-page', '3');
+    await expect(picker).toHaveAttribute('data-gallery-page', String(galleryPages));
     await expect(customTile.locator('#b-cstyles')).toHaveValue('2');
     await page.mouse.move(5, 100);
     await page.waitForTimeout(250);
@@ -166,7 +152,7 @@ for (const lang of ['ko', 'en'] as const) {
       for (const viewport of [{ width: 1440, height: 900 }, { width: 1366, height: 768 }]) {
         await page.getByTestId('quote-options-close').click();
         await page.setViewportSize(viewport);
-        await showPhotoGalleryPage(page, 3);
+        await showPhotoGalleryPage(page, galleryPages);
         await expect.poll(() => options.getByTestId('option-page-scroll').evaluate(el => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(2);
         await page.waitForTimeout(250);
         await page.screenshot({ path: testInfo.outputPath(`${viewport.width}-gallery-${lang}.png`), style: 'nextjs-portal{display:none!important}' });

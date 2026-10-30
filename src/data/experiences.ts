@@ -1,7 +1,9 @@
 /* ─────────────────────────────────────────────────────────
    NEANDERco.  |  Experiential AI Content Data
-   41 unique AI experience concepts across 9 industries
+   Public AI experience programs
    ───────────────────────────────────────────────────────── */
+
+import { EXPERIENCE_PHOTOS } from './experience-photos';
 
 export type PillarId = 'ai-photo' | 'ai-diagnosis' | 'ai-fortune' | 'ai-creative' | 'ai-immersive';
 export type IndustryId = 'beauty' | 'fnb' | 'fashion' | 'entertainment' | 'education' | 'festival' | 'corporate' | 'tourism' | 'wedding';
@@ -93,7 +95,7 @@ export const pillars: Pillar[] = [
 
 /* ── Industries ───────────────────────────────────────── */
 
-export const industries: Industry[] = [
+const industryCatalog: Industry[] = [
   {
     id: 'beauty',
     nameKey: 'industries.beauty',
@@ -140,7 +142,7 @@ export const industries: Industry[] = [
     id: 'tourism',
     nameKey: 'industries.tourism',
     icon: 'landmark',
-    experiences: ['tour-01', 'tour-02', 'tour-03', 'tour-04'],
+    experiences: ['tour-01', 'tour-02', 'tour-03', 'tour-04', 'tour-05'],
   },
   {
     id: 'wedding',
@@ -152,7 +154,7 @@ export const industries: Industry[] = [
 
 /* ── Experiences ──────────────────────────────────────── */
 
-export const experiences: Experience[] = [
+const experienceCatalog: Experience[] = [
   // ── Beauty ──
   { id: 'beauty-01', slug: 'ai-personal-color', pillar: 'ai-diagnosis', industry: 'beauty', nameKey: 'exp.beauty01.name', oneLinerKey: 'exp.beauty01.oneLiner', descriptionKey: 'exp.beauty01.description', featuresKey: 'exp.beauty01.features', featureCount: 5, processStepCount: 3, processStepsKey: 'exp.beauty01.processSteps', highlightCount: 3, highlightsKey: 'exp.beauty01.highlights', useCaseCount: 3, useCasesKey: 'exp.beauty01.useCases' },
   { id: 'beauty-02', slug: 'ai-skincare-analysis', pillar: 'ai-diagnosis', industry: 'beauty', nameKey: 'exp.beauty02.name', oneLinerKey: 'exp.beauty02.oneLiner', descriptionKey: 'exp.beauty02.description', featuresKey: 'exp.beauty02.features', featureCount: 5, processStepCount: 3, processStepsKey: 'exp.beauty02.processSteps', highlightCount: 3, highlightsKey: 'exp.beauty02.highlights', useCaseCount: 3, useCasesKey: 'exp.beauty02.useCases' },
@@ -212,6 +214,38 @@ export const experiences: Experience[] = [
   { id: 'wed-03', slug: 'ai-future-family', pillar: 'ai-photo', industry: 'wedding', nameKey: 'exp.wed03.name', oneLinerKey: 'exp.wed03.oneLiner', descriptionKey: 'exp.wed03.description', featuresKey: 'exp.wed03.features', featureCount: 5, processStepCount: 3, processStepsKey: 'exp.wed03.processSteps', highlightCount: 3, highlightsKey: 'exp.wed03.highlights', useCaseCount: 3, useCasesKey: 'exp.wed03.useCases' },
   { id: 'wed-04', slug: 'ai-memory-movie', pillar: 'ai-creative', industry: 'wedding', nameKey: 'exp.wed04.name', oneLinerKey: 'exp.wed04.oneLiner', descriptionKey: 'exp.wed04.description', featuresKey: 'exp.wed04.features', featureCount: 5, processStepCount: 3, processStepsKey: 'exp.wed04.processSteps', highlightCount: 3, highlightsKey: 'exp.wed04.highlights', useCaseCount: 3, useCasesKey: 'exp.wed04.useCases' },
 ];
+
+// Keep unlisted programs in the source for demos shared on request.
+// Every public list, related recommendation and service route uses this selection.
+const publishedSlugs = new Set([
+  'ai-personal-color',
+  'ai-skincare-analysis',
+  'ai-sommelier',
+  'ai-style-profiler',
+  'ai-fashion-timemachine',
+  'ai-idol-makeup-booth',
+  'ai-future-career',
+  'ai-fortune-robot',
+  'ai-face-reading',
+  'ai-palm-reading',
+  'ai-caricature-artist',
+  'ai-stamp-tour',
+  'ai-couple-chemistry',
+  ...Object.keys(EXPERIENCE_PHOTOS),
+]);
+
+experienceCatalog.push({
+  id: 'tour-05', slug: 'ai-stamp-tour', pillar: 'ai-immersive', industry: 'tourism',
+  nameKey: 'exp.tour05.name', oneLinerKey: 'exp.tour05.oneLiner', descriptionKey: 'exp.tour05.description',
+  featuresKey: 'exp.tour05.features', featureCount: 5, processStepCount: 3, processStepsKey: 'exp.tour05.processSteps',
+  highlightCount: 3, highlightsKey: 'exp.tour05.highlights', useCaseCount: 3, useCasesKey: 'exp.tour05.useCases',
+});
+
+export const experiences: Experience[] = experienceCatalog.filter((experience) => publishedSlugs.has(experience.slug));
+
+export const industries: Industry[] = industryCatalog
+  .map((industry) => ({ ...industry, experiences: experiences.filter((experience) => experience.industry === industry.id).map((experience) => experience.id) }))
+  .filter((industry) => industry.experiences.length > 0);
 
 /* ── Helper functions ─────────────────────────────────── */
 

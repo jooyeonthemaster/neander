@@ -17,7 +17,7 @@ const COPY = {
     previewLabel: '회사소개서 표지',
     inside: [
       '회사 개요와 연혁',
-      'AI 체험 5개 카테고리와 웹 데모',
+      'AI 체험 5개 카테고리와 프로그램 소개',
       "AC'SCENT AI 조향: 인허가, 운영 규모 가이드",
       '진행 절차와 운영 형태 (행사 렌탈 / 상시 운영)',
       '서비스별 시작가와 가격 결정 요인',
@@ -33,7 +33,7 @@ const COPY = {
     previewLabel: 'Company profile cover',
     inside: [
       'Company overview and history',
-      'Five AI experience categories and web demos',
+      'Five AI experience categories and program descriptions',
       "AC'SCENT AI perfume: licenses and sizing guide",
       'Process and engagement types (event rental / ongoing operation)',
       'Starting prices and price factors',

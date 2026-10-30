@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Check, MessageCircle, Plus, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { SERVICE_ORDER, SERVICE_TEXT, isConsultationService, type Lang, type ServiceKey } from '@/lib/quote/catalog';
 import { type QuoteInput, type QuoteResult, type SpaceOptions } from '@/lib/quote/engine';
@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils';
 import { QUOTE_COPY } from '@/components/quote-studio/copy';
 import { QuoteOptions, type QuoteOptionsSetter } from '@/components/quote-studio/QuoteOptions';
 import { ConsultationNotice } from '@/components/quote-studio/ConsultationNotice';
-import { DemoModal } from '@/components/demo/DemoModal';
 import { EventPreview } from './EventPreview';
 import { QuoteOptionsPopover } from './QuoteOptionsPopover';
 import { ExperienceIllustration, ServiceThumbnail } from './illustrations/ServiceIllustration';
@@ -38,18 +37,6 @@ export function QuotePreviewExperienceEditor({
   const [optionsKey, setOptionsKey] = useState<ServiceKey | null>(null);
   const [hasOpenedOptions, setHasOpenedOptions] = useState(false);
   const [consultationKey, setConsultationKey] = useState<ServiceKey | null>(activeKey && isConsultationService(activeKey) ? activeKey : null);
-  const [demoSlug, setDemoSlug] = useState<string | null>(null);
-  const demoTrigger = useRef<HTMLElement | null>(null);
-  const openExperienceDemo = useCallback((slug: string) => {
-    demoTrigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    setDemoSlug(slug);
-  }, []);
-  const closeExperienceDemo = useCallback(() => {
-    setDemoSlug(null);
-    requestAnimationFrame(() => {
-      if (demoTrigger.current?.isConnected) demoTrigger.current.focus({ preventScroll: true });
-    });
-  }, []);
   const closeOptions = useCallback(() => setOptionsKey(null), []);
   const optionsOpen = optionsKey !== null && input.items.some((item) => item.key === optionsKey);
   useEffect(() => {
@@ -72,7 +59,7 @@ export function QuotePreviewExperienceEditor({
     {/* 두 열(미리보기 | 체험 카드)은 본문 폭이 768px 이상일 때만 — 오른쪽 「지금까지 고른 견적」 칸이
         함께 있어 창이 넓어도 본문은 좁을 수 있다. 좁으면 미리보기 아래에 카드를 둔다. */}
     <div className="@container">
-    <div inert={!!demoSlug} className="grid min-w-0 items-start gap-7 @3xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] @3xl:items-stretch @3xl:gap-8" data-testid="quote-preview-experience-editor">
+    <div className="grid min-w-0 items-start gap-7 @3xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] @3xl:items-stretch @3xl:gap-8" data-testid="quote-preview-experience-editor">
       <div tabIndex={-1} aria-label={ko ? '고른 체험 미리보기' : 'Selected experience preview'} data-preview-column
         className="h-[270px] min-w-0 scroll-mt-28 space-y-4 overflow-y-auto overscroll-contain rounded-[28px] outline-none lg:h-auto lg:overflow-visible lg:[&_[data-testid=preview-canvas]]:h-[220px]" data-lenis-prevent>
         <EventPreview input={automaticInput} lang={lang} activeKey={visibleKey} onActiveKeyChange={onActiveKeyChange} compact />
@@ -119,10 +106,10 @@ export function QuotePreviewExperienceEditor({
 
         {consultationKey && <div id="quote-consultation-info" className="mt-4"><ConsultationNotice service={consultationKey} lang={lang} /></div>}
 
-        {hasOpenedOptions && <QuoteOptionsPopover open={optionsOpen} service={optionsKey} lang={lang} total={quote.total} supply={quote.supply} suspended={!!demoSlug}
+        {hasOpenedOptions && <QuoteOptionsPopover open={optionsOpen} service={optionsKey} lang={lang} total={quote.total} supply={quote.supply}
           onClose={closeOptions} onRemove={() => { if (optionsKey) { onToggleItem(optionsKey); closeOptions(); } }}>
           {automaticInput.items.map((item) => <div key={item.key} id={`preview-options-${item.key}`} data-testid={`quote-options-${item.key}`} hidden={optionsKey !== item.key} inert={optionsKey !== item.key} className={optionsKey === item.key ? 'flex min-h-0 flex-1 flex-col' : 'hidden'}>
-            <QuoteOptions item={item} schedule={input} lang={lang} c={c} kioskExperiences={kioskExperiences} setOptions={onOptionsChange} renderExperienceIllustration={renderExperienceIllustration} enablePhotoBoothTemplates enableKioskAssignments allowKioskSubscription={false} paged flowActive={optionsOpen && optionsKey === item.key} onOpenPhotoDemo={openExperienceDemo} onOpenKioskDemo={openExperienceDemo}
+            <QuoteOptions item={item} schedule={input} lang={lang} c={c} kioskExperiences={kioskExperiences} setOptions={onOptionsChange} renderExperienceIllustration={renderExperienceIllustration} enablePhotoBoothTemplates enableKioskAssignments allowKioskSubscription={false} paged flowActive={optionsOpen && optionsKey === item.key}
               />
           </div>)}
         </QuoteOptionsPopover>}
@@ -130,6 +117,5 @@ export function QuotePreviewExperienceEditor({
       </div>
     </div>
     </div>
-    {demoSlug && <DemoModal slug={demoSlug} onClose={closeExperienceDemo} returnLabel={ko ? '옵션 선택으로 돌아가기' : 'Back to quote options'} />}
   </>;
 }

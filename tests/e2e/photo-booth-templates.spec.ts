@@ -3,10 +3,13 @@ import { enterExperienceStep, closePreviewOptions, nextPreviewStep, openPreviewD
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
 import { calculateQuote, defaultOptions, sanitizeInput, type QuoteInput } from '../../src/lib/quote/engine';
 import { PHOTO_BOOTH_TEMPLATES } from '../../src/lib/quote/photo-booth-templates';
+import { getExperienceBySlug } from '../../src/data/experiences';
 
 const FLOW_KEY = 'neander-quote-preview-flow-v1';
 const LIVE_KEY = 'neander-quote-v2';
-const templates = PHOTO_BOOTH_TEMPLATES.slice(0, 3);
+const publicTemplates = PHOTO_BOOTH_TEMPLATES.filter((template) => getExperienceBySlug(template.slug));
+const templates = publicTemplates.slice(0, 3);
+const galleryPages = Math.max(1, Math.ceil(publicTemplates.length / 4));
 const step = (page: Page, index: number) => page.locator(`[data-quote-step="${index}"]`);
 const choice = (page: Page, slug: string) => page.getByTestId(`booth-template-${slug}`);
 
@@ -36,7 +39,7 @@ async function expectPrice(page: Page, amount: number, lang: 'ko' | 'en') {
 }
 
 for (const lang of ['ko', 'en'] as const) {
-  test(`${lang}: existing demo templates and new custom styles have independent prices and survive the three-stage journey`, async ({ page }, testInfo) => {
+  test(`${lang}: existing templates and new custom styles have independent prices and survive the three-stage journey`, async ({ page }, testInfo) => {
     const path = lang === 'ko' ? '/quote-preview' : '/en/quote-preview';
     const existingLive = JSON.stringify(sanitizeInput({ days: 5, items: [defaultOptions('rental')] }));
     await page.addInitScript(({ key, value }) => {
@@ -53,7 +56,7 @@ for (const lang of ['ko', 'en'] as const) {
     const picker = page.locator('[data-testid="photo-booth-templates"]:visible');
     await expect(picker).toBeVisible();
     await expect(picker.locator('[data-testid^="booth-template-"][aria-pressed="true"]')).toHaveCount(0);
-    await expect(picker.locator('[data-testid^="booth-template-"][aria-pressed]')).toHaveCount(4);
+    await expect(picker.locator('[data-testid^="booth-template-"][aria-pressed]')).toHaveCount(Math.min(4, publicTemplates.length));
     const base = await total(page);
 
     // Choosing cards with Enter and Space preserves native button keyboard behavior.
@@ -66,13 +69,10 @@ for (const lang of ['ko', 'en'] as const) {
       await expectPrice(page, base + (index === 2 ? 220_000 : 0), lang);
     }
     await expect(picker.getByTestId('booth-template-selection')).toContainText(lang === 'ko' ? '20만원' : '200,000');
-    for (const template of templates) {
-      const demo = picker.getByTestId(`booth-demo-${template.slug}`);
-      await expect(demo).toHaveAccessibleName(lang === 'ko' ? `${template.name.ko} 데모 체험` : `Try ${template.name.en} demo`);
-      await expect(demo).toHaveAttribute('aria-haspopup', 'dialog');
-    }
+    await expect(picker.locator('[data-testid^="booth-demo-"]')).toHaveCount(0);
+    await expect(page.locator('.demo-modal-panel')).toHaveCount(0);
 
-    await showPhotoGalleryPage(page, 3);
+    await showPhotoGalleryPage(page, galleryPages);
     const customStyle = picker;
     const custom = customStyle.locator('#b-custom-style-enabled');
     await custom.click();
@@ -86,12 +86,12 @@ for (const lang of ['ko', 'en'] as const) {
     await customStyle.locator('#b-cstyles').press('Enter');
     await expectPrice(page, base + 770_000, lang);
 
-    for (const [index, template] of PHOTO_BOOTH_TEMPLATES.entries()) {
+    for (const [index, template] of publicTemplates.entries()) {
       await showPhotoGalleryPage(page, Math.floor(index / 4) + 1);
       await expect(choice(page, template.slug)).toBeVisible();
       await expect(choice(page, template.slug).locator('svg[data-template-appearance]')).toHaveAttribute('data-template-appearance', template.appearance);
     }
-    await expect(picker.getByTestId('booth-templates-page')).toHaveText('3 / 3');
+    await expect(picker.getByTestId('booth-templates-page')).toHaveText(`${galleryPages} / ${galleryPages}`);
     await showPhotoGalleryPage(page, 1);
     await expect(picker.locator('img, canvas, svg image')).toHaveCount(0);
     await picker.screenshot({ path: testInfo.outputPath(`photo-templates-${lang}.png`), style: 'nextjs-portal { display: none !important; }' });
@@ -125,7 +125,7 @@ for (const lang of ['ko', 'en'] as const) {
     await showPhotoGalleryPage(page, 1);
     await openDetails(page);
     for (const template of templates) await expect(choice(page, template.slug)).toHaveAttribute('aria-pressed', 'true');
-    await showPhotoGalleryPage(page, 3);
+    await showPhotoGalleryPage(page, galleryPages);
     await expect(custom).toHaveAttribute('aria-pressed', 'true');
     await expectPrice(page, base + 770_000, lang);
 
@@ -133,7 +133,7 @@ for (const lang of ['ko', 'en'] as const) {
     await choice(page, templates[2].slug).click();
     await expect(page.getByTestId(`preview-photo-template-${templates[2].slug}`)).toHaveCount(0);
     await expectPrice(page, base + 550_000, lang);
-    await showPhotoGalleryPage(page, 3);
+    await showPhotoGalleryPage(page, galleryPages);
     await custom.click();
     await expect(custom).toHaveAttribute('aria-pressed', 'false');
     await expectPrice(page, base, lang);

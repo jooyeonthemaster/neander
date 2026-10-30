@@ -382,9 +382,9 @@ export const INSIGHTS: Insight[] = [
     keywords: ['행사 AI 체험 콘텐츠', '팝업 AI 체험', 'AI 체험 부스 렌탈', '축제 체험 콘텐츠', '기업 행사 AI 이벤트'],
     ko: {
       title: '행사·팝업 AI 체험 콘텐츠',
-      description: 'AI 포토·진단·포춘·크리에이티브·이머시브 5개 분야 41개 체험. 모두 웹 데모로 먼저 해 보고 행사 렌탈이나 월 단위 상시 운영으로 도입할 수 있습니다.',
+      description: 'AI 포토·진단·포춘·크리에이티브·이머시브 5개 분야의 체험 콘텐츠. 프로그램과 포트폴리오를 살펴보고 행사 렌탈이나 월 단위 상시 운영으로 도입할 수 있습니다.',
       blocks: [
-        { type: 'p', text: '네안데르는 행사·팝업·축제·기업 행사에 맞는 AI 체험 콘텐츠를 기획하고 현장 운영까지 맡습니다. 41개 체험 모두 웹 데모가 있어 예약 전에 직접 해 볼 수 있습니다.' },
+        { type: 'p', text: '네안데르는 행사·팝업·축제·기업 행사에 맞는 AI 체험 콘텐츠를 기획하고 현장 운영까지 맡습니다. 서비스 소개와 포트폴리오에서 프로그램 구성과 운영 사례를 확인할 수 있습니다.' },
         { type: 'h2', text: '5가지 체험 분야' },
         {
           type: 'table',
@@ -392,9 +392,9 @@ export const INSIGHTS: Insight[] = [
           rows: [
             ['AI 포토 체험', 'AI 이미지 생성·합성 기술로 방문자를 특별한 모습으로 변신시키는 포토 체험'],
             ['AI 진단 체험', '컴퓨터 비전과 AI 분석으로 개인 맞춤 진단 결과를 제공하는 체험'],
-            ['AI 포춘 체험', 'AI가 사주, 관상, 손금, 오라 등을 분석하여 재미있는 운세를 제공하는 엔터테인먼트 체험'],
-            ['AI 크리에이티브 체험', 'AI가 방문자를 위해 유일한 창작물(레시피, 디자인, 음악 등)을 생성하는 체험'],
-            ['AI 이머시브 체험', '프로젝션 맵핑, 대형 LED, 인터랙티브 설치 등으로 공간 전체를 AI 체험으로 만드는 대규모 콘텐츠'],
+            ['AI 포춘 체험', 'AI가 사주, 관상, 손금 등을 분석하여 재미있는 운세를 제공하는 엔터테인먼트 체험'],
+            ['AI 크리에이티브 체험', 'AI 향수, 캐리커처, 뮤직비디오 등 방문자를 위한 맞춤 결과물을 만드는 체험'],
+            ['AI 이머시브 체험', 'AI 스탬프 투어 등 공간을 이동하며 참여하는 체험'],
           ],
         },
         { type: 'h2', text: '진행 과정' },
@@ -416,15 +416,16 @@ export const INSIGHTS: Insight[] = [
           ],
         },
         { type: 'p', text: '모든 AI 체험은 클라우드 AI를 사용하므로 현장에 전원과 인터넷이 필요합니다.' },
-        { type: 'cta', text: '41개 체험과 웹 데모 보기', href: '/services' },
+        { type: 'cta', text: '체험 프로그램 보기', href: '/services' },
+        { type: 'cta', text: '포트폴리오 확인하기', href: '/portfolio' },
         { type: 'cta', text: '견적 요청하기', href: '/quote' },
       ],
     },
     en: {
       title: 'AI Experience Content for Events and Pop-ups',
-      description: '41 AI experiences in 5 categories, each with a web demo to try before booking for your event or pop-up.',
+      description: 'AI experience content in five categories for events and pop-ups. Explore the programs and portfolio, with event rental or ongoing operation available.',
       blocks: [
-        { type: 'p', text: 'Neander plans AI experience content for events, pop-ups, festivals and corporate events, and runs it on site. All 41 experiences have web demos you can try before booking.' },
+        { type: 'p', text: 'Neander plans AI experience content for events, pop-ups, festivals and corporate events, and runs it on site. Explore our service descriptions and portfolio to see program details and past projects.' },
         { type: 'h2', text: 'Five categories' },
         {
           type: 'table',
@@ -432,9 +433,9 @@ export const INSIGHTS: Insight[] = [
           rows: [
             ['AI Photo Experience', 'Photo experiences that transform visitors using AI image generation and compositing'],
             ['AI Diagnosis Experience', 'Personalized diagnosis results using computer vision and AI analysis'],
-            ['AI Fortune Experience', 'Entertainment where AI reads fortune, face, palm, aura and more'],
-            ['AI Creative Experience', 'AI generates a unique creation (recipe, design, music, etc.) for each visitor'],
-            ['AI Immersive Experience', 'Large-scale content using projection mapping, LED displays and interactive installations'],
+            ['AI Fortune Experience', 'Entertainment where AI reads fortune, face and palm'],
+            ['AI Creative Experience', 'Personalized creations such as AI perfume, caricatures and music videos'],
+            ['AI Immersive Experience', 'Experiences such as AI stamp tours that invite visitors to explore a space'],
           ],
         },
         { type: 'h2', text: 'How it runs' },
@@ -456,7 +457,8 @@ export const INSIGHTS: Insight[] = [
           ],
         },
         { type: 'p', text: 'All AI experiences use cloud AI, so power and internet are required on site.' },
-        { type: 'cta', text: 'See all 41 experiences and demos', href: '/services' },
+        { type: 'cta', text: 'Explore experience programs', href: '/services' },
+        { type: 'cta', text: 'View portfolio', href: '/portfolio' },
         { type: 'cta', text: 'Request a quote', href: '/quote' },
       ],
     },

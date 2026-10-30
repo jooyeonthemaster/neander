@@ -162,7 +162,7 @@ function ExperienceSuggestions({ experiences, lang, onSelect, renderIllustration
   );
 }
 
-export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOptions, renderExperienceIllustration, enablePhotoBoothTemplates = false, enableKioskAssignments = false, allowKioskSubscription = true, paged = false, leadingPage, flowActive = true, onOpenPhotoDemo, onOpenKioskDemo }: {
+export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOptions, renderExperienceIllustration, enablePhotoBoothTemplates = false, enableKioskAssignments = false, allowKioskSubscription = true, paged = false, leadingPage, flowActive = true }: {
   item: QuoteItem;
   schedule: Pick<QuoteInput, 'days' | 'hoursPerDay' | 'region'>;
   lang: Lang;
@@ -177,8 +177,6 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
   paged?: boolean;
   leadingPage?: LeadingOptionPage | LeadingOptionPage[];
   flowActive?: boolean;
-  onOpenPhotoDemo?: (slug: string) => void;
-  onOpenKioskDemo?: (slug: string) => void;
 }) {
   const ko = lang === 'ko';
   // 전용 디자인 단박스를 고르며 300명으로 올린 경우, 원래 인원 (고객 안내용)
@@ -333,7 +331,7 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
             <p className="text-xs font-semibold text-teal-800">{ko ? '사진은 이렇게 받아요' : 'A photo to take home'}</p>
             <p className="mt-1.5 text-xs leading-relaxed text-teal-700">{ko ? '현장에서 바로 인화하고, QR로 휴대폰에도 저장할 수 있어요.' : 'Guests get an instant print and can save a digital copy via QR.'}</p>
           </div>
-          {enablePhotoBoothTemplates && <PhotoBoothTemplates options={o} lang={lang} onChange={(patch) => setOptions('photoBooth', patch)} onOpenDemo={onOpenPhotoDemo} />}
+          {enablePhotoBoothTemplates && <PhotoBoothTemplates options={o} lang={lang} onChange={(patch) => setOptions('photoBooth', patch)} />}
           <MoreOptions lang={lang} pageId="prints" pageLabel={combinePrintsAndWrapping ? (ko ? '인화·부스 외관' : 'Prints & wrapping') : (ko ? '인화 수량' : 'Prints')} title={combinePrintsAndWrapping ? (ko ? '인화와 부스 외관 고르기' : 'Choose prints and booth wrapping') : enablePhotoBoothTemplates ? (ko ? '인화 수량 더하기' : 'Extra prints') : (ko ? '인화·스타일 옵션 더하기' : 'Print & style options')}
             hint={combinePrintsAndWrapping ? (ko ? '추가 인화 수량과 부스의 브랜드 디자인을 함께 골라요.' : 'Choose extra prints and a branded booth exterior.') : enablePhotoBoothTemplates ? (ko ? '인화지를 더 준비하고 싶을 때 골라주세요.' : 'Add more paper for extra prints.') : (ko ? '인화 수량과 준비된 사진 스타일' : 'Extra prints and ready-made styles')}
             count={Number(!enablePhotoBoothTemplates && o.extraStyles > 0) + Number(o.extraPrintRolls > 0) + Number(combinePrintsAndWrapping && o.wrapping)}>
@@ -389,7 +387,7 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
           {allowKioskSubscription && o.mode === 'monthly' && <OptionTopic id="months" label={ko ? '이용 기간' : 'Rental term'} inline><Field label={c.months} info={info('months')} price={base(KIOSK.monthlyPerKiosk, u('대당', 'each'), u('/월', '/month'))}>
             <Stepper id="k-months" value={o.months} min={1} max={24} suffix={ko ? '개월' : undefined} onChange={(value) => setOptions('rental', { months: value })} />
           </Field></OptionTopic>}
-          {enableKioskAssignments ? <KioskExperienceAssignments options={o} lang={lang} experiences={kioskExperiences} onChange={(patch) => setOptions('rental', patch)} renderIllustration={renderExperienceIllustration} onOpenDemo={onOpenKioskDemo} includeCustomization={paged} /> : <div className="space-y-4 sm:col-span-2">
+          {enableKioskAssignments ? <KioskExperienceAssignments options={o} lang={lang} experiences={kioskExperiences} onChange={(patch) => setOptions('rental', patch)} renderIllustration={renderExperienceIllustration} includeCustomization={paged} /> : <div className="space-y-4 sm:col-span-2">
             <Field label={c.experience} info={info('experience')} hint={ko ? '아직 고민 중이라면 상담 후 정해도 괜찮아요.' : 'You can also decide together with our team later.'}>
               <Select id="k-exp" aria-label={c.experience} value={o.experienceSlug ?? ''} onValueChange={(value) => setOptions('rental', { experienceSlug: value || undefined })} triggerClassName={inputClass}
                 options={[{ value: '', label: ko ? '상담 후 결정' : 'Decide later' }, ...kioskExperiences]} />

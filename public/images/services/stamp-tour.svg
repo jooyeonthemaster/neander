@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" fill="none">
+  <rect width="960" height="540" fill="#EAF3EE"/>
+  <path d="M0 90 960 30M0 270 960 210M0 450 960 390M180 0 120 540M440 0 380 540M700 0 640 540M960 0 900 540" stroke="#D5E5DB" stroke-width="24"/>
+  <path d="M150 370C250 380 230 135 360 150S490 410 620 350 680 150 820 155" stroke="#0D9488" stroke-width="8" stroke-linecap="round" stroke-dasharray="4 18"/>
+  <g fill="#FFFDF7" stroke="#0D9488" stroke-width="5">
+    <circle cx="150" cy="370" r="49"/>
+    <circle cx="360" cy="150" r="60"/>
+    <circle cx="620" cy="350" r="60"/>
+    <circle cx="820" cy="155" r="49"/>
+  </g>
+  <g stroke="#0D9488" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m130 370 14 14 26-29M337 145l23-19 23 19v31h-46v-31Zm15 31v-19h16v19M600 356l20-35 20 35h-40Zm20-35v-14M803 155l12 12 23-27"/>
+  </g>
+  <g transform="translate(72 66) rotate(-8)">
+    <rect width="152" height="96" rx="18" fill="#FFFDF7" stroke="#D5E5DB" stroke-width="3"/>
+    <circle cx="38" cy="48" r="19" stroke="#D49458" stroke-width="4" stroke-dasharray="3 3"/>
+    <path d="m29 48 6 6 12-13M77 37h44M77 53h30" stroke="#D49458" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>

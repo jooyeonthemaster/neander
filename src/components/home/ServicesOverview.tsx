@@ -13,7 +13,7 @@ import { startingPrice } from '@/lib/quote/engine';
 /* ─────────────────────────────────────────────────────────
    홈 'AI 체험' 섹션 — 판매 상품 6가지
    이름·설명·시작가는 온라인 견적(src/lib/quote)과 같은 값을 쓴다.
-   41개 체험을 성격별로 나눈 5개 카테고리는 서비스 소개 페이지의 필터로 남아 있다.
+   체험 프로그램을 성격별로 나눈 5개 카테고리는 서비스 소개 페이지의 필터로 남아 있다.
    ───────────────────────────────────────────────────────── */
 
 const KEY_COLOR = '#24ADB5';
@@ -80,7 +80,7 @@ export function ServicesOverview() {
               <StatItem value={String(industries.length)} label={t('statIndustries')} />
             </div>
             <Link href="/services" className="text-sm font-semibold text-teal-700 underline-offset-4 hover:underline">
-              {t('viewAllExperiences')} →
+              {t('viewAllExperiences', { count: experiences.length })} →
             </Link>
           </ScrollReveal>
         </div>

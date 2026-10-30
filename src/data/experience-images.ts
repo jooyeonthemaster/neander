@@ -33,7 +33,7 @@ const conceptDescriptions: Record<string, [ko: string, en: string]> = {
   'ai-science-kiosk': ['교실 체험 공간에서 두 성인이 과학 터치스크린과 경사면 실험을 살펴보는 모습', 'Two adults using a science touchscreen beside a physical ramp experiment in an ordinary classroom.'],
   'ai-history-travel': ['지역 역사 체험 행사에 설치된 포토 키오스크와 작은 시대별 의상 합성 사진을 보는 방문객', 'Visitors at a local history event viewing a photo kiosk and small prints with historical costumes.'],
   'ai-timecapsule-photo': ['노트북과 포토 프린터 옆에 놓인 미래 모습 사진과 타임캡슐 편지 봉투', 'Age-progression photo prints and time-capsule envelopes beside a laptop and photo printer.'],
-  'ai-fortune-robot': ['야외 마을 행사에서 원소 선택 운세 키오스크를 이용하는 방문객과 카드 출력 공간', 'Visitors using an elemental-fortune touchscreen and card printer at an outdoor community fair.'],
+  'ai-fortune-robot': ['야외 마을 행사에서 운세 키오스크를 이용하는 방문객과 카드 출력 공간', 'Visitors using a fortune-reading touchscreen and card printer at an outdoor community fair.'],
   'ai-face-reading': ['실내 행사에서 웹캠이 달린 관상 체험 단말기를 사용하는 참여자와 작은 분석 결과지', 'A participant using a webcam-equipped face-reading terminal beside a small printed report at an indoor event.'],
   'ai-palm-reading': ['행사 테이블의 소형 카메라 앞에 펼친 손바닥과 태블릿 손금 결과 화면', 'An open palm presented to a small event-table camera beside a tablet showing a palm-line report.'],
   'ai-caricature-artist': ['지역 미술 체험 행사 테이블의 노트북과 프린터, 작은 캐리커처 인쇄물', 'A laptop and printer with small caricature prints on an ordinary community art-fair table.'],
@@ -59,6 +59,12 @@ export const EXPERIENCE_CONCEPTS: Partial<Record<string, ExperienceConceptImage>
       { src: `/images/services/documentary/${slug}.webp`, altKo, altEn },
     ])
   );
+
+EXPERIENCE_CONCEPTS['ai-stamp-tour'] = {
+  src: '/images/services/stamp-tour.svg',
+  altKo: '행사 공간의 체험 지점을 연결하는 동선과 수집한 스탬프를 표현한 일러스트',
+  altEn: 'Illustration of an event route connecting experience stops and collected stamps',
+};
 
 export function getExperienceImage(slug: string): ExperienceImage | undefined {
   const photo = EXPERIENCE_PHOTOS[slug];

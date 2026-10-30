@@ -67,20 +67,14 @@
   "services": {
     "consultationOnly": "On request",
     "inquire": "Contact us",
-    "showcaseGroups": {
-      "caseTitle": "Programs we have run",
-      "caseDescription": "Explore our programs with photos from events we have operated.",
-      "conceptTitle": "More experience ideas",
-      "conceptDescription": "AI experience ideas illustrated with concept images."
-    },
     "title": "Services",
     "subtitle": "Unforgettable Offline Experiences Powered by AI",
     "description": "We plan experiential AI content that makes your brand shine. We create AI experiences that visitors can participate in and enjoy in physical spaces.",
     "heroTagline": "What experience shall we create for you?",
     "pillarsTitle": "AI Experiences by NEANDER",
     "pillarsSubtitle": "Six AI experience products for your event. Check the starting price and add them to an estimate.",
-    "industryTitle": "Which brands can use this?",
-    "industrySubtitle": "Explore AI experience concepts designed for your industry",
+    "industryTitle": "AI experience programs",
+    "industrySubtitle": "Explore AI experience programs for your event and space.",
     "processTitle": "From Planning to On-site Operations",
     "processSubtitle": "NEANDER handles everything end-to-end",
     "ctaTitle": "Your brand is the star of the next experience",
@@ -90,15 +84,16 @@
     "allPillars": "All",
     "noExperiences": "No experiences for this combination. Try a different filter.",
     "viewDetail": "Learn More",
+    "viewPortfolio": "View portfolio",
     "addToQuote": "Add to estimate",
     "priceFrom": "from",
     "statProducts": "Products",
-    "viewAllExperiences": "See all 41 experiences",
+    "viewAllExperiences": "See all {count} experiences",
     "statExperiences": "Experiences",
     "statIndustries": "Industries",
     "statCategories": "Categories",
     "photoCase": "On site",
-    "photoConcept": "AI-generated concept",
+    "photoConcept": "Experience concept image",
     "relatedExperiences": "Related Experiences",
     "inquiryBtn": "Inquire About This Experience",
     "features": "Key Features",
@@ -669,24 +664,57 @@
         ]
       },
       "fest01": {
-        "name": "AI Element Fortune",
-        "oneLiner": "A little encouragement inspired by seasons and elements",
-        "description": "Choose your birth month and a symbolic element for a fictional fortune, a lucky item and a small action for today. This is entertainment, not a birth-chart analysis or a prediction.",
-        "features": ["Birth month and element selection", "A fictional fortune and an encouraging thought", "Fun elements (humorous expressions)", "Fortune card instant printing", "Seasonal themes (New Year, Summer, etc.)"],
+        "name": "AI Saju Reading",
+        "oneLiner": "Explore a personal AI saju reading from your birth details",
+        "description": "An entertaining saju experience where AI uses your birth date and time to interpret personality and selected fortune topics, delivered on a personal result card.",
+        "features": [
+          "Birth date and time input",
+          "Topics such as relationships, career and wealth",
+          "AI saju interpretation and a thought for the day",
+          "Personal saju result card printing",
+          "Screen and card designs tailored to your event or season"
+        ],
         "processSteps": [
-          { "title": "Choose a Season and Element", "description": "Choose a birth month, symbolic element and topic" },
-          { "title": "Create an Encouraging Story", "description": "Your choices inspire a fictional fortune and a small action" },
-          { "title": "Fortune Card Print", "description": "Print fortune card on the spot" }
+          {
+            "title": "Enter Birth Details",
+            "description": "Enter your birth date and time, then choose a topic"
+          },
+          {
+            "title": "AI Saju Reading",
+            "description": "Explore personality and your chosen fortune topic based on the details you entered"
+          },
+          {
+            "title": "Receive Your Card",
+            "description": "Take home your saju reading and a thought for the day on a personal card"
+          }
         ],
         "highlights": [
-          { "value": "5 Topics", "label": "Love/Career/Health/Wealth/Creativity" },
-          { "value": "Humor", "label": "Fun Elements" },
-          { "value": "Seasonal", "label": "Theme Changes" }
+          {
+            "value": "Personal",
+            "label": "Birth Details Reading"
+          },
+          {
+            "value": "Topics",
+            "label": "Choose Your Fortune"
+          },
+          {
+            "value": "Card",
+            "label": "Printed Saju Result"
+          }
         ],
         "useCases": [
-          { "title": "Local Festivals", "description": "Most popular experience booth attracting visitors at local festivals" },
-          { "title": "New Year Events", "description": "Special New Year fortune experience at seasonal celebrations" },
-          { "title": "Corporate Events", "description": "Fun fortune experience to enliven company year-end/new year parties" }
+          {
+            "title": "Local Festivals",
+            "description": "Offer a participatory experience where visitors take home a personal saju reading"
+          },
+          {
+            "title": "New Year Events",
+            "description": "Create a shared saju experience to welcome the new year"
+          },
+          {
+            "title": "Corporate Events",
+            "description": "Invite colleagues to share their results at year-end or new year gatherings"
+          }
         ]
       },
       "fest02": {
@@ -960,6 +988,60 @@
           { "title": "Tourism Expos", "description": "Diagnose visitor travel types and recommend destinations at tourism expos" },
           { "title": "Regional Tourism Promo", "description": "Local governments run personalized tourism recommendation experiences" },
           { "title": "Travel Agency Events", "description": "Recommend personalized travel packages to customers" }
+        ]
+      },
+      "tour05": {
+        "name": "AI Stamp Tour",
+        "oneLiner": "Explore a space through AI missions and collect digital stamps",
+        "description": "A participatory tour that connects event or tourism stops through QR check-ins, with AI-guided missions and digital stamps to collect along the way.",
+        "features": [
+          "QR check-ins and digital stamp collection at each stop",
+          "AI missions and hints tailored to the location and event theme",
+          "Progress and collected stamp display",
+          "Completion cards and souvenir images",
+          "Tour routes and screens tailored to your brand or region"
+        ],
+        "processSteps": [
+          {
+            "title": "Join the Tour",
+            "description": "Scan the starting QR code to see the route and participation guide"
+          },
+          {
+            "title": "Complete AI Missions",
+            "description": "Visit each stop, complete its AI mission and collect a digital stamp"
+          },
+          {
+            "title": "Receive Your Result",
+            "description": "Review your collected stamps and receive a completion card and souvenir image"
+          }
+        ],
+        "highlights": [
+          {
+            "value": "QR",
+            "label": "Connected Tour Stops"
+          },
+          {
+            "value": "AI",
+            "label": "Missions and Hints"
+          },
+          {
+            "value": "Finish",
+            "label": "Stamp Collection Result"
+          }
+        ],
+        "useCases": [
+          {
+            "title": "Local Festivals",
+            "description": "Create a tour that invites visitors to take part in programs across the venue"
+          },
+          {
+            "title": "Tourism and Culture",
+            "description": "Turn stories from a destination or exhibition into missions visitors can explore"
+          },
+          {
+            "title": "Brand Pop-ups",
+            "description": "Guide visitors through products and brand stories with connected activity stops"
+          }
         ]
       },
       "wed01": {

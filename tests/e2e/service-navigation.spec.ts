@@ -23,11 +23,11 @@ test('service filter URLs survive back, forward and reload', async ({ page }) =>
 });
 
 const serviceNames: Record<string, string> = {
-  'ai-science-kiosk': 'AI 과학 체험 키오스크',
-  'ai-fortune-robot': 'AI 원소 운세',
+  'ai-personal-color': 'AI 퍼스널 컬러 진단',
+  'ai-fortune-robot': 'AI 사주',
 };
 
-for (const slug of ['ai-science-kiosk', 'ai-fortune-robot']) {
+for (const slug of ['ai-personal-color', 'ai-fortune-robot']) {
   test(`${slug} contact context remains selected across navigation and reload`, async ({ page }) => {
     await page.goto(`/services/${slug}`, { waitUntil: 'domcontentloaded' });
     const links = page.getByRole('link', { name: '견적 요청하기', exact: true });
@@ -42,7 +42,7 @@ for (const slug of ['ai-science-kiosk', 'ai-fortune-robot']) {
     await expect(page.locator('#contact-panel-inquiry form')).toHaveCSS('opacity', '1');
     const name = page.locator('#contact-panel-inquiry input[name="name"]');
     await name.fill('E2E local test');
-    const other = slug === 'ai-science-kiosk' ? 'ai-fortune-robot' : 'ai-science-kiosk';
+    const other = slug === 'ai-personal-color' ? 'ai-fortune-robot' : 'ai-personal-color';
     await service.click();
     await expect(page.getByRole('listbox')).toBeVisible();
     await page.getByRole('option', { name: serviceNames[other], exact: true }).click();

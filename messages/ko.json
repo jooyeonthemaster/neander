@@ -63,20 +63,14 @@
   "services": {
     "consultationOnly": "별도 문의",
     "inquire": "문의하기",
-    "showcaseGroups": {
-      "caseTitle": "실제 운영 프로그램",
-      "caseDescription": "현장에서 운영한 프로그램을 행사 사진과 함께 살펴보세요.",
-      "conceptTitle": "다양한 체험 예시",
-      "conceptDescription": "연출 이미지로 살펴보는 AI 체험 아이디어입니다."
-    },
     "title": "서비스",
     "subtitle": "AI로 만드는 잊을 수 없는 오프라인 체험",
     "description": "브랜드를 빛나게 할 체험형 AI 콘텐츠를 기획합니다. 오프라인 공간에서 방문자가 직접 참여하고 즐기는 AI 체험을 만들어드립니다.",
     "heroTagline": "어떤 체험을 만들어 드릴까요?",
     "pillarsTitle": "네안데르가 만드는 AI 체험",
     "pillarsSubtitle": "행사에 맞춰 고를 수 있는 6가지 AI 체험 상품입니다. 시작가를 확인하고 바로 견적에 담아 보세요.",
-    "industryTitle": "어떤 브랜드에서 활용할 수 있나요?",
-    "industrySubtitle": "산업별로 설계된 AI 체험 콘셉트를 확인하세요",
+    "industryTitle": "AI 체험 프로그램",
+    "industrySubtitle": "행사와 공간에 어울리는 AI 체험 프로그램을 살펴보세요.",
     "processTitle": "기획부터 현장 운영까지",
     "processSubtitle": "네안데르가 올인원으로 진행합니다",
     "ctaTitle": "다음 체험의 주인공은 당신의 브랜드입니다",
@@ -86,15 +80,16 @@
     "allPillars": "전체",
     "noExperiences": "이 조합의 체험이 없습니다. 다른 필터를 선택해 보세요.",
     "viewDetail": "자세히 보기",
+    "viewPortfolio": "포트폴리오 확인하기",
     "addToQuote": "견적에 담기",
     "priceFrom": "부터",
     "statProducts": "상품",
-    "viewAllExperiences": "전체 체험 41개 보기",
+    "viewAllExperiences": "전체 체험 {count}개 보기",
     "statExperiences": "체험 콘텐츠",
     "statIndustries": "산업군",
     "statCategories": "카테고리",
     "photoCase": "운영 사례",
-    "photoConcept": "AI 콘셉트 이미지",
+    "photoConcept": "체험 콘셉트 이미지",
     "relatedExperiences": "관련 체험 콘텐츠",
     "inquiryBtn": "이 체험 문의하기",
     "features": "주요 기능",
@@ -1401,56 +1396,56 @@
         ]
       },
       "fest01": {
-        "name": "AI 원소 운세",
-        "oneLiner": "계절과 원소의 상징으로 만드는 오늘의 응원 카드",
-        "description": "태어난 달과 끌리는 원소를 고르면 가벼운 운세 이야기와 행운 아이템을 만드는 오락용 체험. 사주·오행 계산이나 실제 미래 예측이 아닙니다.",
+        "name": "AI 사주",
+        "oneLiner": "나의 생년월일로 만나보는 AI 사주 풀이",
+        "description": "생년월일과 태어난 시간을 바탕으로 AI가 성향과 관심 주제의 운세를 풀어주고, 결과 카드로 전하는 재미로 즐기는 사주 체험입니다.",
         "features": [
-          "태어난 달과 끌리는 원소 선택",
-          "선택한 주제에 맞춘 창작 운세와 오늘의 한마디",
-          "재미 요소 가미 (유머러스한 표현)",
-          "운세 카드 즉석 출력",
-          "시즌별 테마 (신년운세, 여름운세 등)"
+          "생년월일과 태어난 시간 입력",
+          "연애·직업·재물 등 관심 주제 선택",
+          "AI 사주 풀이와 오늘의 한마디",
+          "개인별 사주 결과 카드 출력",
+          "행사·시즌에 맞춘 화면과 카드 디자인"
         ],
         "processSteps": [
           {
-            "title": "계절과 원소 선택",
-            "description": "태어난 달, 끌리는 원소, 궁금한 주제를 고릅니다"
+            "title": "사주 정보 입력",
+            "description": "생년월일과 태어난 시간을 입력하고 궁금한 주제를 고릅니다"
           },
           {
-            "title": "응원 이야기 만들기",
-            "description": "선택한 상징으로 창작 운세와 작은 행동 제안을 만듭니다"
+            "title": "AI 사주 풀이",
+            "description": "입력한 정보를 바탕으로 성향과 선택한 주제의 운세를 풀어봅니다"
           },
           {
-            "title": "운세 카드 출력",
-            "description": "운세 카드를 즉석 출력합니다"
+            "title": "결과 카드 받기",
+            "description": "나의 사주 풀이와 오늘의 한마디를 카드로 받아봅니다"
           }
         ],
         "highlights": [
           {
-            "value": "5주제",
-            "label": "연애/직업/건강/재물/창의"
+            "value": "맞춤",
+            "label": "생년월일 기반 풀이"
           },
           {
-            "value": "유머",
-            "label": "재미 요소 가미"
+            "value": "주제별",
+            "label": "궁금한 운세 선택"
           },
           {
-            "value": "시즌별",
-            "label": "테마 변경 가능"
+            "value": "카드",
+            "label": "사주 결과 출력"
           }
         ],
         "useCases": [
           {
             "title": "지역 축제",
-            "description": "지역 축제에서 가장 인기 있는 체험 부스로 방문객을 모읍니다"
+            "description": "방문객이 자신의 사주 풀이를 받아가는 참여형 체험으로 활용할 수 있습니다"
           },
           {
             "title": "신년 행사",
-            "description": "새해 행사에서 신년 운세를 제공하는 특별 체험을 운영합니다"
+            "description": "새해를 맞아 함께 즐기는 사주 체험으로 구성할 수 있습니다"
           },
           {
             "title": "기업 행사",
-            "description": "기업 송년회/신년회에서 재미있는 운세 체험으로 분위기를 띄웁니다"
+            "description": "송년회나 신년회에서 동료들과 결과를 나누는 이벤트로 활용할 수 있습니다"
           }
         ]
       },
@@ -2153,6 +2148,60 @@
           {
             "title": "여행사 이벤트",
             "description": "여행사에서 고객 맞춤 여행 상품을 추천하는 체험으로 활용합니다"
+          }
+        ]
+      },
+      "tour05": {
+        "name": "AI 스탬프 투어",
+        "oneLiner": "AI 미션을 따라 공간을 탐험하고 스탬프를 모으는 체험",
+        "description": "행사장이나 관광지의 방문 지점을 QR로 연결하고, AI가 안내하는 미션을 수행하며 디지털 스탬프를 모으는 참여형 투어 콘텐츠입니다.",
+        "features": [
+          "방문 지점별 QR 체크인과 디지털 스탬프 수집",
+          "장소와 행사 주제에 맞춘 AI 미션·힌트",
+          "참여자의 진행 상황과 수집 현황 표시",
+          "완주 결과 카드와 기념 이미지 제공",
+          "브랜드·지역에 맞춘 투어 코스와 화면 구성"
+        ],
+        "processSteps": [
+          {
+            "title": "투어 참여",
+            "description": "시작 지점의 QR을 스캔하고 투어 코스와 참여 방법을 확인합니다"
+          },
+          {
+            "title": "AI 미션과 스탬프 수집",
+            "description": "각 지점을 방문해 AI 미션을 수행하고 디지털 스탬프를 모읍니다"
+          },
+          {
+            "title": "완주 결과 받기",
+            "description": "수집한 스탬프를 확인하고 완주 결과 카드와 기념 이미지를 받아봅니다"
+          }
+        ],
+        "highlights": [
+          {
+            "value": "QR",
+            "label": "방문 지점 연결"
+          },
+          {
+            "value": "AI",
+            "label": "장소별 미션과 힌트"
+          },
+          {
+            "value": "완주",
+            "label": "스탬프 수집 결과"
+          }
+        ],
+        "useCases": [
+          {
+            "title": "지역 축제",
+            "description": "행사장 여러 구역을 방문하며 프로그램에 참여하는 투어로 구성할 수 있습니다"
+          },
+          {
+            "title": "관광·문화 공간",
+            "description": "관광지나 전시 공간의 이야기를 미션으로 만나는 탐방 콘텐츠로 활용할 수 있습니다"
+          },
+          {
+            "title": "브랜드 팝업",
+            "description": "제품과 브랜드 스토리를 따라 체험 지점을 둘러보는 참여형 이벤트로 구성할 수 있습니다"
           }
         ]
       },

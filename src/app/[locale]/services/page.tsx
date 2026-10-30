@@ -12,7 +12,7 @@ const VALID_PILLARS: PillarId[] = ['ai-photo', 'ai-diagnosis', 'ai-fortune', 'ai
 
 interface Props {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ pillar?: string; demo?: string }>;
+  searchParams: Promise<{ pillar?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ServicesPage({ params, searchParams }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { pillar: pillarParam, demo: demoParam } = await searchParams;
+  const { pillar: pillarParam } = await searchParams;
   const t = await getTranslations({ locale, namespace: 'services' });
 
   const initialPillar = VALID_PILLARS.includes(pillarParam as PillarId)
@@ -87,7 +87,7 @@ export default async function ServicesPage({ params, searchParams }: Props) {
       </section>
 
       {/* ── Industry Showcase (Main Selling Section) ──── */}
-      <IndustryShowcase initialPillar={initialPillar} initialDemo={demoParam} />
+      <IndustryShowcase key={initialPillar ?? 'all'} initialPillar={initialPillar} />
 
       {/* ── Process Flow ────────────────────────────────── */}
       <ProcessFlow />

@@ -2,8 +2,7 @@
 
 import { useId, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { ArrowRight, Check, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRouter } from '@/i18n/navigation';
+import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Lang } from '@/lib/quote/catalog';
 import { cn } from '@/lib/utils';
 import { KioskExperienceArt } from './KioskExperienceArt';
@@ -14,13 +13,12 @@ const PAGE_SIZE = 4;
  * The same compact gallery as photo styles. One experience per device by default;
  * with `values` it becomes a multi-select (checkboxes) for splitting several kiosks.
  */
-export function KioskExperienceGallery({ number, value, experiences, lang, onChange, onOpenDemo, dense = false, values, limit = Infinity, onClear }: {
+export function KioskExperienceGallery({ number, value, experiences, lang, onChange, dense = false, values, limit = Infinity, onClear }: {
   number: number;
   value: string;
   experiences: { value: string; label: string }[];
   lang: Lang;
   onChange: (slug: string) => void;
-  onOpenDemo?: (slug: string) => void;
   dense?: boolean;
   /** Multi-select: the chosen slugs. `onChange` then toggles one. */
   values?: string[];
@@ -39,7 +37,6 @@ export function KioskExperienceGallery({ number, value, experiences, lang, onCha
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const suppressClickUntil = useRef(0);
   const reducedMotion = useReducedMotion();
-  const router = useRouter();
   const id = useId();
   const L = (ko: string, en: string) => lang === 'ko' ? ko : en;
   const pages = Math.max(1, Math.ceil(experiences.length / PAGE_SIZE));
@@ -52,10 +49,6 @@ export function KioskExperienceGallery({ number, value, experiences, lang, onCha
     setDirection(step < 0 ? -1 : 1);
     setPage(Math.max(0, Math.min(pages - 1, currentPage + step)));
     if (focus) regionRef.current?.focus({ preventScroll: true });
-  };
-  const openDemo = (slug: string) => {
-    if (onOpenDemo) onOpenDemo(slug);
-    else router.push(`/services?demo=${slug}`);
   };
 
   const selectionSummary = multiple ? <>
@@ -132,14 +125,9 @@ export function KioskExperienceGallery({ number, value, experiences, lang, onCha
                   <KioskExperienceArt slug={experience.value} className="h-full w-full" />
                   {chosen && <span className="absolute left-1 top-1 rounded-full bg-teal-600 p-0.5 text-white"><Check size={11} /></span>}
                 </span>
-                <span className="flex h-full min-w-0 flex-1 items-center pt-1 pb-7">
+                <span className="flex h-full min-w-0 flex-1 items-center py-2">
                   <span className={cn("block text-[11px] font-semibold leading-[14px] text-slate-800", dense && "line-clamp-2")}>{experience.label}</span>
                 </span>
-              </button>
-              <button type="button" data-testid={`kiosk-demo-${number}-${experience.value}`} aria-haspopup={onOpenDemo ? 'dialog' : undefined}
-                aria-label={L(`${experience.label} 데모 체험`, `Try ${experience.label} demo`)} onClick={() => openDemo(experience.value)}
-                className="absolute bottom-1 right-1 inline-flex min-h-6 items-center gap-0.5 rounded px-1 text-[9px] text-slate-500 hover:text-teal-700 focus-visible:outline-2 focus-visible:outline-teal-600 touch:before:absolute touch:before:-inset-x-1 touch:before:-top-5 touch:before:-bottom-1 touch:before:content-['']">
-                {L('데모 체험', 'Try demo')}<ArrowRight size={10} aria-hidden="true" />
               </button>
             </article>;
           })}

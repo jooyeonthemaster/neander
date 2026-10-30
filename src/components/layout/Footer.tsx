@@ -80,6 +80,48 @@ const SUPPORT_LINKS = [
   { labelKey: 'quote' as const, href: QUOTE_HREF },
 ];
 
+function FooterLink({
+  href,
+  children,
+  external = false,
+}: {
+  href: ComponentProps<typeof Link>['href'];
+  children: React.ReactNode;
+  external?: boolean;
+}) {
+  const setCursorVariant = useUIStore((s) => s.setCursorVariant);
+  const classes = cn(
+    'text-sm text-neutral-400 transition-colors duration-200 hover:text-teal-400',
+  );
+
+  if (typeof href === 'string' && (external || href.startsWith('http'))) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={classes}
+        onMouseEnter={() => setCursorVariant('pointer')}
+        onMouseLeave={() => setCursorVariant('default')}
+      >
+        {children}
+      </a>
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      className={classes}
+      onMouseEnter={() => setCursorVariant('pointer')}
+      onMouseLeave={() => setCursorVariant('default')}
+    >
+      {children}
+    </Link>
+  );
+}
+
+
 export default function Footer() {
   const t = useTranslations('footer');
   const tNav = useTranslations('nav');
@@ -87,45 +129,6 @@ export default function Footer() {
   const setCursorVariant = useUIStore((s) => s.setCursorVariant);
   const currentYear = new Date().getFullYear();
 
-  function FooterLink({
-    href,
-    children,
-    external = false,
-  }: {
-    href: ComponentProps<typeof Link>['href'];
-    children: React.ReactNode;
-    external?: boolean;
-  }) {
-    const classes = cn(
-      'text-sm text-neutral-400 transition-colors duration-200 hover:text-teal-400',
-    );
-
-    if (typeof href === 'string' && (external || href.startsWith('http'))) {
-      return (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={classes}
-          onMouseEnter={() => setCursorVariant('pointer')}
-          onMouseLeave={() => setCursorVariant('default')}
-        >
-          {children}
-        </a>
-      );
-    }
-
-    return (
-      <Link
-        href={href}
-        className={classes}
-        onMouseEnter={() => setCursorVariant('pointer')}
-        onMouseLeave={() => setCursorVariant('default')}
-      >
-        {children}
-      </Link>
-    );
-  }
 
   return (
     <footer className="bg-neutral-950 text-neutral-300" role="contentinfo">

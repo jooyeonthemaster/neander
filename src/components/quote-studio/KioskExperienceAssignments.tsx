@@ -1,8 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { ArrowUpRight, Monitor, Check as CheckIcon, Minus, Plus } from 'lucide-react';
-import { Link } from '@/i18n/navigation';
+import { Monitor, Check as CheckIcon, Minus, Plus } from 'lucide-react';
 import { Select } from '@/components/ui/Select';
 import type { Lang } from '@/lib/quote/catalog';
 import type { KioskOptions } from '@/lib/quote/engine';
@@ -12,14 +11,13 @@ import { Field, inputClass } from './QuoteControls';
 import { KioskExperienceGallery } from './KioskExperienceGallery';
 import { KioskCustomizationCards } from './KioskCustomizationCards';
 
-export function KioskExperienceAssignments({ options, lang, experiences, onChange, renderIllustration, compact = false, onOpenDemo, includeCustomization = false }: {
+export function KioskExperienceAssignments({ options, lang, experiences, onChange, renderIllustration, compact = false, includeCustomization = false }: {
   options: KioskOptions;
   lang: Lang;
   experiences: { value: string; label: string }[];
   onChange: (patch: Partial<KioskOptions>) => void;
   renderIllustration?: (slug: string, label: string) => ReactNode;
   compact?: boolean;
-  onOpenDemo?: (slug: string) => void;
   includeCustomization?: boolean;
 }) {
   const L = (ko: string, en: string) => lang === 'ko' ? ko : en;
@@ -51,7 +49,7 @@ export function KioskExperienceAssignments({ options, lang, experiences, onChang
           ? L(`${chosen.length} / 최대 ${kiosks}종`, `${chosen.length} / up to ${kiosks}`)
           : L(`${chosen.length} / 1대 선택`, `${chosen.length} / 1 assigned`)}</p>
       </div>
-      <KioskExperienceGallery number={1} value={chosen[0] ?? ''} experiences={experiences} lang={lang} onOpenDemo={onOpenDemo} dense={customize}
+      <KioskExperienceGallery number={1} value={chosen[0] ?? ''} experiences={experiences} lang={lang} dense={customize}
         {...(multiple ? { values: chosen, limit: kiosks, onChange: toggle, onClear: () => apply(distributeKioskExperiences([], kiosks)) } : { onChange: (slug: string) => apply([slug]) })} />
       {multiple && chosen.length > 0 && <ul data-testid="kiosk-distribution" aria-label={L('체험별 기기 수 배분', 'Kiosks per experience')} className="space-y-0.5">
         {groups.map((group) => {
@@ -108,8 +106,6 @@ export function KioskExperienceAssignments({ options, lang, experiences, onChang
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-semibold leading-relaxed text-slate-700">{selected.label}</p>
-              <Link href={`/services?demo=${slug}`} target="_blank" rel="noopener noreferrer" aria-label={L(`${selected.label} 데모 보기 · 새 탭`, `Try ${selected.label} demo in a new tab`)}
-                className="mt-1 inline-flex min-h-8 items-center gap-1 rounded text-[11px] font-medium text-teal-700 underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600">{L('데모 보기', 'Try demo')}<ArrowUpRight size={12} aria-hidden="true" /></Link>
             </div>
           </div> : <p className="mt-2 text-[11px] leading-relaxed text-slate-500">{L('아직 정하지 않았다면 비워두어도 괜찮아요.', 'You can leave this undecided for now.')}</p>}
         </div>;

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { PDFDocument, PDFPage } from 'pdf-lib';
-import { experiences } from '../../src/data/experiences';
+import { experiences, getExperienceBySlug } from '../../src/data/experiences';
 import { KIOSK } from '../../src/lib/quote/catalog';
 import { calculateQuote, sanitizeInput, serviceForExperience, type KioskOptions, type QuoteInput } from '../../src/lib/quote/engine';
 import { KIOSK_EXPERIENCES, getKioskAssignments, getKioskExperience, normalizeKioskExperienceSlugs } from '../../src/lib/quote/kiosk-experiences';
@@ -21,8 +21,8 @@ function kioskOptions(input: QuoteInput): KioskOptions {
   return input.items.find((item) => item.key === 'rental')!.options;
 }
 
-test('the assignment allowlist matches active experiences routed to the kiosk service', () => {
-  const actual = KIOSK_EXPERIENCES.map((experience) => experience.slug);
+test('published assignment choices match active experiences routed to the kiosk service', () => {
+  const actual = KIOSK_EXPERIENCES.filter((experience) => getExperienceBySlug(experience.slug)).map((experience) => experience.slug);
   const expected = experiences.filter((experience) => serviceForExperience(experience.slug, experience.pillar) === 'rental').map((experience) => experience.slug);
   assert.deepEqual([...actual].sort(), [...expected].sort());
   assert.equal(new Set(actual).size, actual.length);

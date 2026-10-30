@@ -96,14 +96,8 @@ for (const lang of ['ko', 'en'] as const) {
       expect(box.width, `${name} width`).toBeGreaterThanOrEqual(44);
       expect(box.height, `${name} height`).toBeGreaterThanOrEqual(44);
     }
-    // 데모 링크는 보이는 크기를 그대로 두고 누르는 영역만 넓힌다 (이름 글자와 겹쳐 보이지 않게)
-    const demo = await page.locator('[data-testid^="kiosk-demo-1-"]').first().evaluate(node => {
-      const rect = node.getBoundingClientRect();
-      const before = getComputedStyle(node, '::before');
-      return { height: rect.height - parseFloat(before.top) - parseFloat(before.bottom), width: rect.width - parseFloat(before.left) - parseFloat(before.right) };
-    });
-    expect(demo.height).toBeGreaterThanOrEqual(44);
-    expect(demo.width).toBeGreaterThanOrEqual(44);
+    await expect(page.locator('[data-testid^="kiosk-demo-1-"]')).toHaveCount(0);
+    await expect(page.locator('.demo-modal-panel')).toHaveCount(0);
     // 휴지통 둘레의 빈 띠: 바로 옆을 눌러도 카드(옵션)가 열리지 않는다
     await closePreviewOptions(page);
     await expect(bar).toBeVisible();

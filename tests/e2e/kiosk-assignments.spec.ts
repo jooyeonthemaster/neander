@@ -5,10 +5,13 @@ import { calculateQuote, sanitizeInput, type QuoteInput } from '../../src/lib/qu
 import { getKioskExperience, KIOSK_EXPERIENCES } from '../../src/lib/quote/kiosk-experiences';
 import { normalizePreviewInput } from '../../src/lib/quote-preview/flow-storage';
 import { QUOTE_PRESETS } from '../../src/lib/quote/presets';
+import { getExperienceBySlug } from '../../src/data/experiences';
 
 const FLOW_KEY = 'neander-quote-preview-flow-v1';
 const LIVE_KEY = 'neander-quote-v2';
-const a = 'ai-personal-color', b = 'ai-face-reading', c = 'ai-travel-style', d = 'ai-sommelier';
+const a = 'ai-personal-color', b = 'ai-face-reading', c = 'ai-future-career', d = 'ai-sommelier';
+const publicKioskExperiences = KIOSK_EXPERIENCES.filter((experience) => getExperienceBySlug(experience.slug));
+const galleryPages = Math.ceil(publicKioskExperiences.length / 4);
 const step = (page: Page, index: number) => page.locator(`[data-quote-step="${index}"]`);
 const name = (slug: string, lang: 'ko' | 'en') => getKioskExperience(slug)!.name[lang];
 
@@ -44,7 +47,7 @@ async function expectAssignments(page: Page, assignments: string[], lang: 'ko' |
   const role = assignments.length > 1 ? 'checkbox' : 'radio';
   if (!chosen.length) await expect(gallery.getByRole(role, { checked: true })).toHaveCount(0);
   for (const slug of chosen) {
-    const index = KIOSK_EXPERIENCES.findIndex(experience => experience.slug === slug);
+    const index = publicKioskExperiences.findIndex(experience => experience.slug === slug);
     await showKioskGalleryPage(page, 1, Math.floor(index / 4) + 1, lang);
     const card = page.getByTestId(`kiosk-experience-1-${slug}`);
     await expect(card).toHaveAccessibleName(name(slug, lang));
@@ -89,12 +92,12 @@ for (const lang of ['ko', 'en'] as const) {
     await expect(previous).toBeDisabled();
     await gallery.focus();
     await page.keyboard.press('End');
-    await expect(gallery).toHaveAttribute('data-gallery-page', '6');
+    await expect(gallery).toHaveAttribute('data-gallery-page', String(galleryPages));
     await expect(next).toBeDisabled();
     await page.keyboard.press('ArrowLeft');
-    await expect(gallery).toHaveAttribute('data-gallery-page', '5');
+    await expect(gallery).toHaveAttribute('data-gallery-page', String(galleryPages - 1));
     await page.keyboard.press('ArrowRight');
-    await expect(gallery).toHaveAttribute('data-gallery-page', '6');
+    await expect(gallery).toHaveAttribute('data-gallery-page', String(galleryPages));
     await page.keyboard.press('Home');
     await expect(gallery).toHaveAttribute('data-gallery-page', '1');
     if (testInfo.project.name === 'mobile') {
@@ -124,10 +127,10 @@ for (const lang of ['ko', 'en'] as const) {
           window.scrollTo({ top: window.scrollY + anchor.getBoundingClientRect().top - 680, behavior: 'instant' });
         });
       }
-      for (let view = 1; view <= 6; view++) {
+      for (let view = 1; view <= galleryPages; view++) {
         await showKioskGalleryPage(page, 1, view, lang);
-        await expect(gallery.getByRole('checkbox')).toHaveCount(4);
-        for (const experience of KIOSK_EXPERIENCES.slice((view - 1) * 4, view * 4)) {
+        await expect(gallery.getByRole('checkbox')).toHaveCount(Math.min(4, publicKioskExperiences.length - (view - 1) * 4));
+        for (const experience of publicKioskExperiences.slice((view - 1) * 4, view * 4)) {
           const card = page.getByTestId(`kiosk-experience-1-${experience.slug}`);
           await expect(card).toHaveRole('checkbox');
           await expect(card).toHaveAccessibleName(experience.name[lang]);
@@ -135,11 +138,10 @@ for (const lang of ['ko', 'en'] as const) {
           const titleFits = await card.getByText(experience.name[lang], { exact: true }).evaluate(element => {
             const title = element.getBoundingClientRect();
             const card = element.closest('[role="checkbox"]')!.getBoundingClientRect();
-            const demo = element.closest('article')!.querySelector('[data-testid^="kiosk-demo-"]')!.getBoundingClientRect();
             return title.top >= card.top - 1 && title.bottom <= card.bottom + 1
-              && !(title.right > demo.left && title.bottom > demo.top);
+              && title.left >= card.left - 1 && title.right <= card.right + 1;
           });
-          expect.soft(titleFits, `${lang}: ${experience.slug} title fits above its demo link`).toBe(true);
+          expect.soft(titleFits, `${lang}: ${experience.slug} title fits within its card`).toBe(true);
           if (viewportIndex === 0) {
             // 하나만 고르면 4대 모두 그 체험, 다시 누르면 빠진다
             await card.click();
@@ -157,7 +159,7 @@ for (const lang of ['ko', 'en'] as const) {
         }));
         measurements.push({ ...viewport, lang, galleryPage: view, ...size });
         expect.soft(size.overflow, `${lang} ${viewport.width} kiosk gallery ${view}`).toBeLessThanOrEqual(1);
-        if (view === 1 || view === 6) {
+        if (view === 1 || view === galleryPages) {
           await page.mouse.move(5, 100);
           await page.waitForTimeout(250);
           await page.screenshot({ path: testInfo.outputPath(`${viewport.width}-gallery-${view}-${lang}.png`), style: 'nextjs-portal{display:none!important}' });
@@ -168,38 +170,9 @@ for (const lang of ['ko', 'en'] as const) {
       await closePreviewOptions(page);
       await page.setViewportSize({ width: 1440, height: 900 });
     }
-    // The actual demo's welcome screen opens above the editor. No upload,
-    // camera, generation, or external-page action is performed.
-    const url = page.url(), pageCount = page.context().pages().length;
-    const demoSelection = await saved(page);
-    for (const [index, slug] of [d, c].entries()) {
-      const templateIndex = KIOSK_EXPERIENCES.findIndex(experience => experience.slug === slug);
-      const galleryPage = Math.floor(templateIndex / 4) + 1;
-      await showKioskGalleryPage(page, 1, galleryPage, lang);
-      const demo = page.getByTestId(`kiosk-demo-1-${slug}`);
-      await expect(demo).toHaveText(lang === 'ko' ? '데모 체험' : 'Try demo');
-      await demo.click();
-      const modal = page.locator('.demo-modal-panel[role="dialog"]');
-      await expect(modal).toBeVisible();
-      await expect(modal).toHaveAttribute('aria-modal', 'true');
-      await expect(modal.locator(`[data-program="${slug}"] .venue-shell`)).toBeVisible({ timeout: 30_000 });
-      await expect(page.getByTestId('quote-options-popover')).toHaveAttribute('inert', '');
-      expect(page.url()).toBe(url);
-      expect(page.context().pages()).toHaveLength(pageCount);
-      if (index === 0) {
-        await page.waitForTimeout(250);
-        await page.screenshot({ path: testInfo.outputPath(`kiosk-demo-${lang}.png`), style: 'nextjs-portal{display:none!important}' });
-        await page.keyboard.press('Escape');
-      } else await modal.locator('[data-demo-return]:visible').first().click();
-      await expect(modal).toHaveCount(0);
-      await expect(page.getByTestId('quote-options-popover')).toBeVisible();
-      await expect(page.getByTestId('quote-options-popover')).not.toHaveAttribute('inert', '');
-      await expect(demo).toBeFocused();
-      await expect(gallery).toHaveAttribute('data-gallery-page', String(galleryPage));
-      await expect(flow).toHaveAttribute('data-current-page', 'kiosk-1');
-      expect(await saved(page)).toEqual(demoSelection);
-      await expectTotal(page, baseline);
-    }
+    await expect(page.locator('[data-testid^="kiosk-demo-"]')).toHaveCount(0);
+    await expect(page.locator('.demo-modal-panel')).toHaveCount(0);
+    await expectTotal(page, baseline);
     await expectAssignments(page, ['', '', '', ''], lang);
 
     // 여러 대: 체험을 고를 때마다 고르게 나눠 담는다. 방향키는 초점만 옮기고 고르지 않는다

@@ -6,7 +6,7 @@ import { getAllSlugs } from '@/data/experiences';
 import { fetchPublishedPortfolio } from '@/lib/firebase/rest';
 import { INSIGHTS } from '@/data/insights';
 
-// 검색엔진에 알릴 공개 페이지. 숨은 페이지(formula-lab, demo/acscent)와 아직 기사가 없는 press는 뺀다.
+// 검색엔진에 알릴 공개 페이지. 숨은 페이지(formula-lab, demo)와 아직 기사가 없는 press는 뺀다.
 const STATIC_PATHS: { path: string; priority: number }[] = [
   { path: '/', priority: 1 },
   { path: '/services', priority: 0.9 },
@@ -19,9 +19,6 @@ const STATIC_PATHS: { path: string; priority: number }[] = [
   { path: '/faq', priority: 0.5 },
   { path: '/insights', priority: 0.7 },
   { path: '/brochure', priority: 0.6 },
-  { path: '/demo', priority: 0.5 },
-  { path: '/demo/scent-quiz', priority: 0.4 },
-  { path: '/demo/photo-booth', priority: 0.4 },
   { path: '/privacy', priority: 0.2 },
 ];
 
