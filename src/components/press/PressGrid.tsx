@@ -69,7 +69,9 @@ export function PressGrid({ articles: staticArticles }: PressGridProps) {
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {articles.map((article, index) => (
-        <ScrollReveal key={article.id} delay={index * 0.08}>
+        // 카드는 화면에 들어올 때 각자 나타나므로 지연은 줄 안의 위치로만 준다.
+        // 전체 순번을 쓰면 기사가 많을 때 아래쪽 카드가 몇 초씩 늦게 뜬다.
+        <ScrollReveal key={article.id} delay={(index % 3) * 0.08}>
           <PressCard article={article} />
         </ScrollReveal>
       ))}
