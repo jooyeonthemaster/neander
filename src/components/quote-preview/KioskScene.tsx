@@ -17,7 +17,7 @@ export function KioskScene({ options, lang }: { options: KioskOptions; lang: Lan
   const assignments = getKioskAssignments(options);
   const duration = reducedMotion ? 0 : 0.28;
   const printerCount = options.printer ? options.kiosks : 0;
-  const description = L(`키오스크 ${options.kiosks}대와 프린터 ${printerCount}대 구성 일러스트`, `Illustration of ${options.kiosks} kiosks and ${printerCount} printers`);
+  const description = L(`키오스크 ${options.kiosks}대 구성 일러스트 (영수증형 프린터 내장)`, `Illustration of ${options.kiosks} kiosks with built-in receipt printers`);
   return <section data-testid="kiosk-scene" data-kiosks={options.kiosks} data-printers={printerCount} data-mode="event" data-renderer="svg" className="overflow-hidden bg-[#f5f2e9]">
     <div className="border-y border-white/75 bg-white/65 px-4 py-2.5 text-[10px] font-semibold text-slate-600 sm:px-5">{L('행사장에 설치한 모습', 'Setup at your event')}</div>
     <PreviewCanvas lang={lang} label={description}>
@@ -44,7 +44,7 @@ export function KioskScene({ options, lang }: { options: KioskOptions; lang: Lan
       </li>)}
     </ol>
     <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-white/80 bg-white/65 px-4 py-3.5 text-xs text-slate-600 sm:px-5" aria-live="polite" aria-atomic="true">
-      <span className="inline-flex items-center gap-2"><Monitor size={14} className="text-teal-600" aria-hidden="true" />{L(`키오스크 ${options.kiosks}대`, `${options.kiosks} kiosk(s)`)}</span><span className="inline-flex items-center gap-2"><Printer size={14} className="text-teal-600" aria-hidden="true" />{options.printer ? L(`프린터 ${printerCount}대`, `${printerCount} printer(s)`) : L('화면에서 결과 확인', 'On-screen results')}</span>
+      <span className="inline-flex items-center gap-2"><Monitor size={14} className="text-teal-600" aria-hidden="true" />{L(`키오스크 ${options.kiosks}대`, `${options.kiosks} kiosk(s)`)}</span><span className="inline-flex items-center gap-2"><Printer size={14} className="text-teal-600" aria-hidden="true" />{L('결과지 즉석 출력 · 프린터 내장', 'Instant printout · built-in printer')}</span>
     </div>
   </section>;
 }

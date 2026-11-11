@@ -21,7 +21,7 @@ export const QUOTE_PRESETS: QuotePreset[] = [
       eventType: 'campus', eventDate: '', days: 1, hoursPerDay: 6, attendees: 300, region: 'seoul', extraStaff: 0,
       items: [
         { key: 'photoBooth', options: { booths: 1, extraStyles: 0, extraPrintRolls: 0, photocard: false, wrapping: false } },
-        { key: 'rental', options: { mode: 'event', kiosks: 1, months: 1, printer: true, extraContents: 0, custom: 'none', experienceSlug: 'ai-face-reading' } },
+        { key: 'rental', options: { mode: 'event', kiosks: 1, months: 1, printer: false, extraContents: 0, custom: 'none', experienceSlug: 'ai-face-reading' } },
       ],
     },
   },
@@ -55,7 +55,7 @@ export const QUOTE_PRESETS: QuotePreset[] = [
     input: {
       eventType: 'public', eventDate: '', days: 2, hoursPerDay: 6, attendees: 500, region: 'central', extraStaff: 1,
       items: [
-        { key: 'rental', options: { mode: 'event', kiosks: 2, months: 1, printer: true, extraContents: 1, custom: 'brand', experienceSlug: 'ai-future-career' } },
+        { key: 'rental', options: { mode: 'event', kiosks: 2, months: 1, printer: false, extraContents: 1, custom: 'brand', experienceSlug: 'ai-future-career' } },
       ],
     },
   },

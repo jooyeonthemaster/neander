@@ -67,8 +67,8 @@ export function resolveServicePreview(input: QuoteInput, activeKey: ServiceKey |
       model.intro = L('기기 한 대마다 체험 하나를 담아요. 원하는 기기 앞에서 참여하고 나만의 결과를 확인해요.', 'Each kiosk offers one experience. Step up to your chosen kiosk and discover a result made for you.');
       model.views = [view('scene', L('설치 모습', 'Setup'), L(`행사장에 키오스크 ${o.kiosks}대${o.printer ? ` · 프린터 ${o.kiosks}대` : ''}`, `${o.kiosks} kiosks${o.printer ? ` · ${o.kiosks} printers` : ''} in an event setting`))];
       if (assigned || o.experienceSlugs !== undefined) model.views.push(view('experience', L('선택한 체험', 'Your experiences'), L(`기기 ${o.kiosks}대 중 ${assigned}대의 체험을 골랐어요`, `Experiences chosen for ${assigned} of ${o.kiosks} kiosks`)));
-      model.badges = [L(`키오스크 ${o.kiosks}대`, `${o.kiosks} kiosk(s)`), L(`${normalized.days}일 행사 운영`, `${normalized.days}-day event`), o.printer ? L('결과지 즉석 출력', 'Receipt printing') : L('화면에서 결과 확인', 'On-screen results'), L('기기마다 체험 1종', 'One experience per kiosk')];
-      model.journey = [L('원하는 기기로 이동', 'Choose a kiosk'), L('질문 · 촬영', 'Answer · capture'), o.printer ? L('결과 확인 · 출력', 'View · print result') : L('결과 확인', 'See your result')];
+      model.badges = [L(`키오스크 ${o.kiosks}대`, `${o.kiosks} kiosk(s)`), L(`${normalized.days}일 행사 운영`, `${normalized.days}-day event`), L('결과지 즉석 출력', 'Receipt printing'), L('기기마다 체험 1종', 'One experience per kiosk')];
+      model.journey = [L('원하는 기기로 이동', 'Choose a kiosk'), L('질문 · 촬영', 'Answer · capture'), L('결과 확인 · 출력', 'View · print result')];
       model.notes = [L('선택한 기기를 같은 비율의 일러스트로 보여드려요. 실제 간격과 동선은 행사장에 맞춰 정해요.', 'Selected devices are illustrated at one scale. Actual spacing and visitor flow are planned for your venue.'), L('체험 결과는 키오스크 화면에서 확인해요.', 'Guests view their experience results on the kiosk screen.')];
       if (assigned < o.kiosks) model.notes.push(L('미정인 기기의 체험은 나중에 정해도 괜찮아요.', 'Experiences for unassigned kiosks can be chosen later.'));
       return model;

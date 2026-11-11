@@ -12,7 +12,7 @@ import { normalizePyeong, type AreaUnit } from './space-area';
 
 export interface PerfumeOptions { guests: number; volume: '10ml' | '50ml'; extraTeams: number; /** 자동 증원 전 고객이 선택한 추가 팀 수. 자동 증원이 필요할 때만 저장한다. */ requestedExtraTeams?: number; customScent: boolean; premiumPackaging: boolean; /** 전용 디자인 단박스 (300명 이상) — premiumPackaging 대신 */ customBox?: boolean; /** 분석용 AI 키오스크 대수 (0 = QR 웹 분석) */ analysisKiosks?: number }
 export interface PhotoBoothOptions { booths: number; extraStyles: number; extraPrintRolls: number; photocard: boolean; wrapping: boolean; customStyles?: number; custom?: BoothCustom; /** Chosen existing demo templates; omitted for legacy quantity-only estimates. */ templateSlugs?: string[] }
-export interface KioskOptions { mode: 'event' | 'monthly'; kiosks: number; months: number; printer: boolean; extraContents: number; custom?: KioskCustom; experienceSlug?: string; /** One experience per kiosk, in kiosk-number order. Empty slots are undecided. */ experienceSlugs?: string[] }
+export interface KioskOptions { mode: 'event' | 'monthly'; kiosks: number; months: number; /** 쓰지 않음 — 영수증형 프린터는 키오스크에 내장돼 선택·비용이 없다. 예전 저장값 호환용으로 늘 false */ printer: boolean; extraContents: number; custom?: KioskCustom; experienceSlug?: string; /** One experience per kiosk, in kiosk-number order. Empty slots are undecided. */ experienceSlugs?: string[] }
 export interface MediaArtOptions { grade: 'standard' | 'premium' | 'fullCustom'; extraSensors: number; sensorType?: 'image' | 'depth' }
 export interface SpaceOptions {
   size: 'booth3x3' | 'booth6x3' | 'large'; pyeong: number; areaUnit?: AreaUnit; photoZone: boolean; lighting: boolean;
@@ -169,7 +169,7 @@ export function sanitizeInput(raw: unknown): QuoteInput {
           mode: o.mode === 'monthly' ? 'monthly' : 'event',
           kiosks,
           months: clampInt(o.months, 1, 24, 1),
-          printer: o.printer === true,
+          printer: false, // 프린터는 키오스크에 내장 — 예전 저장값의 printer: true 도 비용 없이 지운다
           extraContents: experienceSlugs === undefined ? clampInt(o.extraContents, 0, 10, 0) : 0,
           // 예전 저장값(branding: true)은 브랜드 적용으로 읽는다
           custom: o.custom === 'brand' || o.custom === 'content' || o.custom === 'dedicated' ? o.custom : o.branding === true ? 'brand' : 'none',
@@ -355,13 +355,12 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
             `${o.kiosks} kiosk(s) × ${o.months} month(s) × ${won(KIOSK.monthlyPerKiosk, lang)} (monthly content refresh)`) + assignmentDetail, amount: KIOSK.monthlyPerKiosk * o.kiosks * o.months });
         } else {
           lines.push({ service: 'rental', label: name('rental'), detail: L(
-            `${o.kiosks}대 · 1일차 (${assigned ? '대당 ' : ''}기존 체험 1종 그대로 운영·카메라·운반·설치 포함, 운영 인력 별도)`,
-            `${o.kiosks} kiosk(s) · day 1 (1 existing experience${assigned ? ' per kiosk' : ''} as-is, camera, delivery & setup; staff not included)`) + assignmentDetail, amount: KIOSK.firstKiosk + KIOSK.extraKiosk * (o.kiosks - 1) });
+            `${o.kiosks}대 · 1일차 (${assigned ? '대당 ' : ''}기존 체험 1종 그대로 운영·카메라·영수증형 프린터 내장·운반·설치 포함, 운영 인력 별도)`,
+            `${o.kiosks} kiosk(s) · day 1 (1 existing experience${assigned ? ' per kiosk' : ''} as-is, camera, built-in receipt printer, delivery & setup; staff not included)`) + assignmentDetail, amount: KIOSK.firstKiosk + KIOSK.extraKiosk * (o.kiosks - 1) });
           if (extraDays) lines.push({ service: 'rental', label: L('키오스크 추가 운영일', 'Kiosk extra days'), detail: L(
             `${o.kiosks}대 × ${extraDays}일 × ${won(KIOSK.extraDayPerKiosk, lang)}`,
             `${o.kiosks} kiosk(s) × ${extraDays} day(s) × ${won(KIOSK.extraDayPerKiosk, lang)}`), amount: KIOSK.extraDayPerKiosk * o.kiosks * extraDays });
         }
-        if (o.printer) lines.push({ service: 'rental', label: L('즉석 프린터', 'Instant printer'), detail: L(`${o.kiosks}대`, `${o.kiosks}`), amount: KIOSK.printer * o.kiosks });
         if (o.custom && o.custom !== 'none') {
           const t = CUSTOM_DEV_TEXT.kiosk[o.custom];
           lines.push({ service: 'rental', label: L(`키오스크 커스텀 — ${t.name.ko}`, `Kiosk custom — ${t.name.en}`), detail: `${t.scope[lang]} · ${L('1회 개발비', 'one-time')}`, amount: CUSTOM_DEV.kiosk[o.custom] });

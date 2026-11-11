@@ -1168,7 +1168,7 @@
       "rental": {
         "title": "AI Kiosk",
         "shortTitle": "AI Kiosk",
-        "description": "Rent AI experience kiosks for your event, with optional camera setup and instant printer.",
+        "description": "Rent AI experience kiosks for your event. Each kiosk has a built-in camera and receipt printer.",
         "features": ["AI kiosk and display rental", "Installation and teardown crews", "On-site operations manager", "Equipment insurance and tech support"],
         "stat": "One-Stop Service",
         "tag": "Convenient"
@@ -2336,7 +2336,7 @@
       "photoBooth": "A photo booth where AI turns guest photos into images in a chosen style. Starting price assumes 1 booth, 1 AI style and QR delivery; prints and photocards are options.",
       "mediaArt": "Interactive media art that reacts to guests' movement, sound and touch. Starting price is for standard content; motion sensors and premium content are options.",
       "spatialDesign": "Design, build and teardown of the space that hosts the experience. Starting price is for a small space (up to ~100㎡); photo zones and lighting are options.",
-      "rental": "Rental of one AI experience kiosk. Camera setup, an instant printer and extra kiosks are options.",
+      "rental": "Rental of one AI experience kiosk with a built-in camera and receipt printer. Extra kiosks are optional.",
       "custom": "AI interactive content planned and built for your brand or event. Starting price is for brand content; planning consultation and aftercare are options."
     },
     "hoverHint": "Hover for details",

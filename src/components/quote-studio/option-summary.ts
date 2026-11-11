@@ -57,7 +57,6 @@ export function optionSummary(item: QuoteItem, lang: Lang, experienceName?: (slu
         if (name) out.push(name);
         add(o.mode === 'event' && o.extraContents > 0, `체험 +${o.extraContents}종`, `+${count(o.extraContents, 'experience')}`);
       }
-      add(o.printer, '결과 인쇄', 'Printer');
       if (o.custom && o.custom !== 'none') out.push(CUSTOM_DEV_TEXT.kiosk[o.custom].name[lang]);
       break;
     }

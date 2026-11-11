@@ -396,13 +396,13 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
               ? <ExperiencePreview slug={selectedExperience.value} label={selectedExperience.label} lang={lang} renderIllustration={renderExperienceIllustration} />
               : <ExperienceSuggestions experiences={kioskExperiences} lang={lang} onSelect={(slug) => setOptions('rental', { experienceSlug: slug })} renderIllustration={renderExperienceIllustration} />}
           </div>}
-          {!(paged && enableKioskAssignments) && <MoreOptions lang={lang} pageId="printing" pageLabel={ko ? '결과 출력' : 'Printing'} title={enableKioskAssignments ? (ko ? '결과를 종이로 전하기' : 'Print your results') : (ko ? '체험·출력 옵션 더하기' : 'Experience & print options')}
-            hint={enableKioskAssignments ? (ko ? '각 키오스크 옆에 결과를 뽑는 프린터를 함께 놓아요.' : 'Add a result printer beside every kiosk.') : (ko ? '체험 종류를 늘리거나 결과를 종이로 전할 수 있어요.' : 'Offer more experiences or hand guests a printed result.')}
-            count={Number(o.printer) + Number(!enableKioskAssignments && o.mode === 'event' && o.extraContents > 0)}>
-            {!enableKioskAssignments && o.mode === 'event' && <Field label={c.extraContents} info={info('extraContents')} price={add(KIOSK.extraContent, u('1종당', 'each'))} hint={ko ? '기본 1종 외에 운영할 체험을 더해요.' : 'Add experiences beyond the one included.'}>
+          {/* 영수증형 즉석 프린터는 키오스크에 내장돼 있어 따로 고르지 않는다 */}
+          {!enableKioskAssignments && o.mode === 'event' && <MoreOptions lang={lang} pageId="contents" pageLabel={ko ? '체험 추가' : 'Experiences'} title={ko ? '체험 옵션 더하기' : 'Experience options'}
+            hint={ko ? '한 키오스크에서 운영할 체험 종류를 늘릴 수 있어요.' : 'Offer more experiences on one kiosk.'}
+            count={Number(o.extraContents > 0)}>
+            <Field label={c.extraContents} info={info('extraContents')} price={add(KIOSK.extraContent, u('1종당', 'each'))} hint={ko ? '기본 1종 외에 운영할 체험을 더해요.' : 'Add experiences beyond the one included.'}>
               <Stepper id="k-contents" value={o.extraContents} min={0} max={10} suffix={ko ? '종' : undefined} onChange={(value) => setOptions('rental', { extraContents: value })} />
-            </Field>}
-            <div className="flex flex-col justify-end"><Check id="k-printer" checked={o.printer} onChange={(value) => setOptions('rental', { printer: value })} label={c.printer} info={info('printer')} price={add(KIOSK.printer, u('대당', 'each'))} /></div>
+            </Field>
           </MoreOptions>}
           {!(paged && enableKioskAssignments) && <MoreOptions lang={lang} pageId="branding" pageLabel={ko ? '브랜드 적용' : 'Branding'} title={ko ? '우리 브랜드에 맞게 바꾸기' : 'Make it your own'}
             hint={ko ? '로고부터 질문과 결과 화면까지, 필요한 만큼만 골라요.' : 'From your logo to questions and results, choose only what you need.'}

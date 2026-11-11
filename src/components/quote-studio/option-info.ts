@@ -83,10 +83,6 @@ export const OPTION_INFO = {
     ko: '한 키오스크에서 두 가지 이상의 체험을 번갈아 운영해요. 방문객이 체험을 골라서 할 수 있어요.',
     en: 'Offer more than one experience on the same kiosk so guests can choose.',
   },
-  printer: {
-    ko: '키오스크 옆에 영수증형 즉석 프린터를 두고 분석 결과를 종이로 뽑아 줘요. 방문객이 결과를 들고 가서 공유하기 좋아요.',
-    en: 'A receipt-style printer next to each kiosk prints the result for guests to take home and share.',
-  },
 
   // 인터랙티브 미디어 아트
   gradeStandard: {

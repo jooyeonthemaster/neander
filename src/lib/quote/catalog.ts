@@ -37,8 +37,8 @@ export const SERVICE_TEXT: Record<ServiceKey, { name: Text; summary: Text }> = {
   rental: {
     name: { ko: 'AI 키오스크', en: 'AI Kiosk' },
     summary: {
-      ko: '관상·운세·퍼스널컬러 등 AI 체험 중 하나를 그대로 키오스크로 운영합니다. 현장 운영 인력은 별도입니다.',
-      en: 'Run an AI experience such as face reading, fortune or personal color as-is on a kiosk. On-site staff is extra.',
+      ko: '관상·운세·퍼스널컬러 등 AI 체험 중 하나를 그대로 키오스크로 운영합니다. 결과는 키오스크에 내장된 영수증형 프린터로 바로 출력합니다. 현장 운영 인력은 별도입니다.',
+      en: 'Run an AI experience such as face reading, fortune or personal color as-is on a kiosk. Results print on the spot from the built-in receipt printer. On-site staff is extra.',
     },
   },
   spatialDesign: {
@@ -189,15 +189,14 @@ export const PHOTO_BOOTH = {
 
 export const KIOSK = {
   /**
-   * 1대 1일 — 기존 체험 1종을 그대로 운영 (커스텀 없음), 카메라·직접 운반·설치 포함, 운영 인력 별도.
+   * 1대 1일 — 기존 체험 1종을 그대로 운영 (커스텀 없음), 카메라·영수증형 프린터(내장)·직접 운반·설치 포함, 운영 인력 별도.
    * 화면·질문·결과를 바꾸는 작업은 '커스텀 AI 콘텐츠' 상품으로 따로 받는다.
    */
   firstKiosk: 890_000,
   extraKiosk: 300_000,
   /** 대당 추가 1일 */
   extraDayPerKiosk: 200_000,
-  /** 영수증형 즉석 프린터, 대당 */
-  printer: 100_000,
+  /* 영수증형 즉석 프린터는 키오스크에 내장돼 있어 따로 받지 않는다 (2026-11-11 확인) */
   extraContent: 300_000,
   /** 상시 운영: 대당 월 */
   monthlyPerKiosk: 2_000_000,
