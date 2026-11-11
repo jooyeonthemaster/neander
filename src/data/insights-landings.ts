@@ -3,7 +3,7 @@
    행사 담당자가 실제로 찾는 말(포토부스 대여, 사주 키오스크 대여, 향수 만들기 체험 출장,
    송년회 체험 부스)마다 한 페이지씩 둔다 — 2026-11 검색·AI 노출 조사 기준.
    금액은 모두 온라인 견적 카탈로그(src/lib/quote/catalog.ts)에서 계산해 견적과 어긋나지 않게 하고,
-   사례는 공개 포트폴리오에 있는 것만 쓴다. 근거 없는 수치(시간당 인원 등)는 넣지 않는다.
+   사례는 공개 포트폴리오에 있는 것만 쓴다. 카탈로그에 없는 수치는 넣지 않는다.
    ───────────────────────────────────────────────────────── */
 
 import type { Insight } from './insights';
@@ -158,7 +158,7 @@ export const LANDINGS: Insight[] = [
           ['전라(광주 포함)·강원 영동', man(PERFUME.teamTravel.jeolla)],
           ['경상(부산·대구 포함)', man(PERFUME.teamTravel.gyeongsang)],
         ] },
-        { type: 'p', text: `인원이 많으면 조향 팀을 늘리고, ${PERFUME.standardTeams}팀을 넘으면 상담으로 운영 계획을 정합니다. ${NO_ISLANDS_KO}` },
+        { type: 'p', text: `조향 1팀(조향사 1명 + 보조 1명)이 시간당 최대 ${PERFUME.guestsPerTeamHour}명을 맡습니다. 인원과 운영 시간에 맞춰 팀 수를 정하고, ${PERFUME.standardTeams}팀을 넘으면 상담으로 운영 계획을 정합니다. ${NO_ISLANDS_KO}` },
         { type: 'h2', text: '등록·신고' },
         { type: 'ul', items: [
           '화장품책임판매업 등록 제42812호 (2024-01-24, 서울지방식품의약품안전청)',
@@ -179,6 +179,7 @@ export const LANDINGS: Insight[] = [
         ] },
         { type: 'faq', items: [
           { q: '몇 명부터 할 수 있나요?', a: `${PERFUME.minGuests}명부터 운영합니다. 서울 기준 최소 금액은 ${man(PERFUME.minimumCharge)}이고, 10ml 기준 32명까지는 이 금액이 적용됩니다.` },
+          { q: '시간당 몇 명까지 체험할 수 있나요?', a: `조향 1팀(조향사 1명 + 보조 1명)이 시간당 최대 ${PERFUME.guestsPerTeamHour}명입니다. 예상 인원과 운영 시간을 알려 주시면 필요한 팀 수를 맞춰 드리고, 온라인 견적에서도 자동으로 계산됩니다.` },
           { q: '행사에서 향수를 나눠 줘도 괜찮나요?', a: '네안데르는 화장품책임판매업 등록과 방향제 안전기준 적합확인 신고를 마쳤습니다. 자세한 인허가 내용은 「행사에서 향수·방향제를 나눠 주려면」 글에 정리해 두었습니다.' },
           { q: '키오스크가 꼭 있어야 하나요?', a: `아니요. 기본은 방문객이 휴대폰으로 QR을 찍어 AI 분석을 받는 방식입니다. 현장에 분석용 키오스크를 두려면 대당 ${man(PERFUME.analysisKiosk)}이 더해집니다.` },
           { q: '우리 브랜드만의 향을 만들 수 있나요?', a: `브랜드 전용 향 개발은 ${man(PERFUME.customScent)}입니다. ${PERFUME.customBox.minGuests}명 이상이면 전용 디자인 단박스도 ${man(PERFUME.customBox.minimum)}부터 만들 수 있습니다.` },
@@ -198,6 +199,7 @@ export const LANDINGS: Insight[] = [
           ['Per guest, 50 ml', PERFUME.tiers.map((t) => krw(t.unit['50ml'])).join(' / ')],
           ['Perfumer team travel (perfumer + assistant)', `${krw(PERFUME.teamTravel.seoul)} per team per day in Seoul`],
           ['Minimum', `${krw(PERFUME.minimumCharge)} (Seoul, up to 32 guests at 10 ml)`],
+          ['Capacity', `Up to ${PERFUME.guestsPerTeamHour} guests per hour per team (perfumer + assistant)`],
           ['Analysis kiosk (optional)', `${krw(PERFUME.analysisKiosk)}; otherwise guests use their phones via QR`],
           ['Signature scent for your brand', krw(PERFUME.customScent)],
         ] },

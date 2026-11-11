@@ -8,6 +8,8 @@
  *   비워 두면 카드에 "상담 시 안내"로 표시된다. 추정값을 넣지 말 것.
  */
 
+import { PERFUME } from '@/lib/quote/catalog';
+
 export type SpecInput = 'camera' | 'mic' | 'touch';
 export type SpecOutput = 'print' | 'qr' | 'screen';
 
@@ -28,7 +30,8 @@ export const EXPERIENCE_SPECS: Record<string, ExperienceSpec> = {
   'ai-personal-color': { input: ['touch'], output: ['print', 'qr'] }, // AI 퍼스널 컬러 진단
   'ai-skincare-analysis': { input: ['camera', 'touch'], output: ['print'] }, // AI 스킨케어 분석관
   'ai-virtual-makeup': { input: ['camera', 'touch'], output: ['print', 'qr'] }, // AI 버추얼 메이크업 스튜디오
-  'ai-scent-soulmate': { input: ['touch'], output: ['print'] }, // AI 향수 소울메이트
+  // 시간당 인원은 조향 1팀(조향사 1 + 보조 1) 기준, 온라인 견적 카탈로그 값 (2026-11-11 확인)
+  'ai-scent-soulmate': { input: ['touch'], output: ['print'], guestsPerHour: PERFUME.guestsPerTeamHour, staff: 2 }, // AI 향수 소울메이트
   'ai-nail-designer': { input: ['camera', 'touch'], output: ['print', 'qr'] }, // AI 네일 디자이너
   'ai-sommelier': { input: ['touch'], output: ['print', 'qr'] }, // AI 소믈리에
   'ai-cocktail-creator': { input: ['touch'], output: ['print'] }, // AI 칵테일 크리에이터

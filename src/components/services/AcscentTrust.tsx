@@ -1,5 +1,6 @@
 import { ScrollReveal } from '@/components/animations';
 import { Link } from '@/i18n/navigation';
+import { PERFUME } from '@/lib/quote/catalog';
 
 /* ─────────────────────────────────────────────────────────
    AC'SCENT 신뢰 정보 — 인허가 · 실적 · 공개 가격 · 운영 규모
@@ -23,7 +24,7 @@ const COPY = {
       { value: '150건', label: '2025년 생일카페·팬 이벤트 향수 제작' },
       { value: '30종', label: '운영 중인 향료' },
       { value: '2곳', label: "직영 매장 (홍대 AC'SCENT ID · AC'SCENT WOW)" },
-      { value: '약 20명', label: '시간당 체험 인원 (조향사 2인 기본 구성)' },
+      { value: `최대 ${PERFUME.guestsPerTeamHour}명`, label: '시간당 체험 인원 (조향사 1명 + 보조 1명, 1팀 기준)' },
     ],
     priceTitle: '매장 판매가',
     price: "AC'SCENT ID 매장 기준 AI 향수 10ml 24,000원 · 50ml 48,000원. 행사용 수량·구성은 견적으로 안내합니다.",
@@ -44,7 +45,7 @@ const COPY = {
       { value: '150', label: 'Birthday-café and fan-event perfume projects in 2025' },
       { value: '30', label: 'Fragrance notes in use' },
       { value: '2', label: "Own stores (AC'SCENT ID · AC'SCENT WOW, Hongdae)" },
-      { value: '~20', label: 'Guests per hour (standard 2-perfumer setup)' },
+      { value: `Up to ${PERFUME.guestsPerTeamHour}`, label: 'Guests per hour (one team: perfumer + assistant)' },
     ],
     priceTitle: 'Store prices',
     price: "At the AC'SCENT ID store: AI perfume 10ml KRW 24,000 · 50ml KRW 48,000. Event quantities and packages are quoted separately.",

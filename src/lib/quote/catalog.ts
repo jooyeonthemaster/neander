@@ -296,8 +296,8 @@ export const CUSTOM_DEV_TEXT: {
 
 /** 커스텀을 고르면 견적 화면·가견적서에 함께 적는 조건 */
 export const CUSTOM_TERMS: Text = {
-  ko: '커스텀 개발: 기획 미팅 1회·시안·오류 대응 포함, 수정 3회차부터·외부 시스템 연동·개인정보 수집 기능·다국어·데이터 리포트·소스코드 제공은 별도입니다. 개발한 프로그램의 권리는 네안데르에 있고, 고객 브랜드 자산은 고객에게 있으며 연예인·캐릭터 등 제3자 권리 확보는 고객이 맡습니다. 같은 고객이 같은 프로그램을 다시 쓰면 개발비 없이 운영비만 받습니다. 개발비는 선금 50%, 납품 후 잔금 50%입니다.',
-  en: 'Custom development includes one planning meeting, drafts and bug fixes. Revisions beyond the included ones, external system integration, personal-data collection, extra languages, data reports and source code are extra. NEANDER retains rights to the program; your brand assets stay yours, and securing third-party rights (celebrities, characters) is your responsibility. Reusing the same program for you again costs only operation. Development is billed 50% upfront and 50% on delivery.',
+  ko: '커스텀 개발: 기획 미팅 1회·시안·오류 대응 포함, 수정 3회차부터·외부 시스템 연동·개인정보 수집 기능·다국어·소스코드 제공은 별도입니다. 개발한 프로그램의 권리는 네안데르에 있고, 고객 브랜드 자산은 고객에게 있으며 연예인·캐릭터 등 제3자 권리 확보는 고객이 맡습니다. 같은 고객이 같은 프로그램을 다시 쓰면 개발비 없이 운영비만 받습니다. 개발비는 선금 50%, 납품 후 잔금 50%입니다.',
+  en: 'Custom development includes one planning meeting, drafts and bug fixes. Revisions beyond the included ones, external system integration, personal-data collection, extra languages and source code are extra. NEANDER retains rights to the program; your brand assets stay yours, and securing third-party rights (celebrities, characters) is your responsibility. Reusing the same program for you again costs only operation. Development is billed 50% upfront and 50% on delivery.',
 };
 
 export const CUSTOM = {

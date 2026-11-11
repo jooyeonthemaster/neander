@@ -1141,7 +1141,7 @@
         "shortTitle": "AI Fragrance",
         "description": "AI analyzes your taste and personality to recommend a fragrance uniquely yours.",
         "features": ["AI-powered personal scent profiling", "Live fragrance blending experience", "Custom label and package design", "Pop-up or permanent store deployment"],
-        "stat": "3 Stores Operating",
+        "stat": "2 Stores Operating",
         "tag": "Flagship"
       },
       "photobooth": {
@@ -2278,15 +2278,15 @@
       },
       "q3": {
         "question": "How far in advance should I plan?",
-        "answer": "It varies by service, but we generally recommend reaching out 4–6 weeks before your event. For custom interactive content, we suggest a lead time of 8 weeks or more."
+        "answer": "Existing experiences only need a free date and equipment, so 4–6 weeks before your event is usually enough. Custom content must be confirmed 6 weeks before the event, so please contact us earlier for custom work."
       },
       "q4": {
         "question": "Do you operate outside of Seoul or internationally?",
-        "answer": "Yes. We have experience with events outside Seoul and internationally. We develop logistics and installation plans tailored to each venue, wherever it may be."
+        "answer": "We operate anywhere in mainland Korea and plan transport and installation for each venue (regional transport fees apply; not Jeju or other islands). We do not take events outside Korea."
       },
       "q5": {
         "question": "Can I visit an AC'SCENT store?",
-        "answer": "Of course! We currently operate three stores: Sinchon, Wau, and ID. No reservation required — walk in anytime to experience AI fragrance profiling in person."
+        "answer": "Of course! We currently operate two stores: AC'SCENT ID and AC'SCENT WOW. No reservation required — walk in anytime to experience AI fragrance profiling in person."
       },
       "q6": {
         "question": "What does the data analytics report include?",
