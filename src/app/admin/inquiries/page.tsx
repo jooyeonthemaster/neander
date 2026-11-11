@@ -7,7 +7,8 @@ import { db } from '@/lib/firebase/config'
 import { setInquiryStatus, deleteInquiry } from '@/lib/firebase/inquiries'
 import type { Inquiry, InquiryStatus, QuoteSnapshot } from '@/types/inquiry'
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore'
-import { Inbox, Loader2, Mail, Phone, Trash2, Search, Building2, X } from 'lucide-react'
+import { describeAttribution, referralLabel } from '@/lib/inquiry-referral'
+import { Inbox, Loader2, Mail, Phone, Trash2, Search, Building2, X, Compass } from 'lucide-react'
 
 type FilterStatus = 'all' | InquiryStatus
 
@@ -257,6 +258,8 @@ export default function AdminInquiriesPage() {
                   {item.message}
                 </p>
 
+                <SourceLine item={item} />
+
                 {item.quote && <QuoteDetail quote={item.quote} />}
               </article>
             )
@@ -279,6 +282,23 @@ export default function AdminInquiriesPage() {
         </div>
       )}
     </div>
+  )
+}
+
+/** 어디서 보고 문의했는지 — 고객이 고른 답과 방문 기록의 유입 경로 (2026-11 이후 문의부터) */
+function SourceLine({ item }: { item: Inquiry }) {
+  const said = referralLabel(item.referral)
+  const tracked = describeAttribution(item.attribution)
+  if (!said && !tracked) return null
+  return (
+    <p className="mt-3 flex items-start gap-1.5 text-xs leading-relaxed text-gray-500">
+      <Compass className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+      <span>
+        {said && <><span className="font-semibold text-gray-700">알게 된 경로</span> {said}</>}
+        {said && tracked && <span className="mx-1.5 text-gray-300">|</span>}
+        {tracked && <><span className="font-semibold text-gray-700">유입 경로</span> {tracked}</>}
+      </span>
+    </p>
   )
 }
 

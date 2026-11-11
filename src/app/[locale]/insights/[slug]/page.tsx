@@ -6,6 +6,7 @@ import { routing } from '@/i18n/routing';
 import { INSIGHTS, getInsight, type InsightBlock } from '@/data/insights';
 import { SITE_URL } from '@/lib/constants';
 import { DEFAULT_OG_IMAGE, localeAlternates, localePath } from '@/lib/seo';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -35,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function Block({ block }: { block: InsightBlock }) {
+function Block({ block, lang }: { block: InsightBlock; lang: 'ko' | 'en' }) {
   switch (block.type) {
     case 'h2':
       return <h2 className="mt-12 text-xl font-bold text-slate-900 sm:text-2xl">{block.text}</h2>;
@@ -65,6 +66,32 @@ function Block({ block }: { block: InsightBlock }) {
             </tbody>
           </table>
         </div>
+      );
+    case 'links':
+      return (
+        <ul className="mt-4 space-y-2 text-base leading-relaxed">
+          {block.items.map((item) => (
+            <li key={item.href}>
+              <Link href={item.href} className="font-medium text-teal-700 underline-offset-4 hover:underline">
+                {item.text} →
+              </Link>
+            </li>
+          ))}
+        </ul>
+      );
+    case 'faq':
+      return (
+        <section className="mt-12">
+          <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">{lang === 'en' ? 'FAQ' : '자주 묻는 질문'}</h2>
+          <dl className="mt-4 divide-y divide-slate-200 border-y border-slate-200">
+            {block.items.map((item) => (
+              <div key={item.q} className="py-5">
+                <dt className="text-base font-semibold text-slate-900">{item.q}</dt>
+                <dd className="mt-2 text-base leading-relaxed text-slate-700">{item.a}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
       );
     case 'cta':
       return (
@@ -101,7 +128,18 @@ export default async function InsightPage({ params }: Props) {
     publisher: { '@type': 'Organization', name: 'NEANDER', logo: { '@type': 'ImageObject', url: `${SITE_URL}/icon.png` } },
   };
 
-  const others = INSIGHTS.filter((other) => other.slug !== slug).slice(0, 3);
+  // 질문·답 블록이 있으면 FAQPage 구조화 데이터도 함께 낸다
+  const faqs = copy.blocks.flatMap((block) => (block.type === 'faq' ? block.items : []));
+  const faqJsonLd = faqs.length
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+      }
+    : null;
+
+  // 랜딩끼리 서로 이어지도록 같은 종류를 먼저 보여 준다
+  const others = [...INSIGHTS.filter((o) => o.slug !== slug && o.kind === item.kind), ...INSIGHTS.filter((o) => o.slug !== slug && o.kind !== item.kind)].slice(0, 4);
 
   return (
     <article>
@@ -109,6 +147,7 @@ export default async function InsightPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
+      {faqJsonLd && <JsonLd data={faqJsonLd} />}
       <header className="bg-slate-950 pb-16 pt-32 sm:pb-20 sm:pt-40">
         <div className="container-wide">
           <div className="mx-auto max-w-3xl">
@@ -129,7 +168,7 @@ export default async function InsightPage({ params }: Props) {
       <div className="py-12 sm:py-20">
         <div className="container-wide">
           <div className="mx-auto max-w-3xl">
-            {copy.blocks.map((block, i) => <Block key={i} block={block} />)}
+            {copy.blocks.map((block, i) => <Block key={i} block={block} lang={lang} />)}
           </div>
         </div>
       </div>

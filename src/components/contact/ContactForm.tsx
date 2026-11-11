@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { createInquiry } from '@/lib/firebase/inquiries';
 import { trackEvent } from '@/lib/analytics/tracker';
 import { getExperienceBySlug } from '@/data/experiences';
+import { REFERRAL_OPTIONS } from '@/lib/inquiry-referral';
 
 // 최대 길이는 firestore.rules 의 inquiries 생성 규칙과 맞춘다 (넘으면 저장이 거부된다)
 const MAX_LENGTH = { name: 100, email: 200, message: 5000 } as const;
@@ -21,6 +22,7 @@ const contactSchema = z.object({
   phone: z.string().optional(),
   company: z.string().optional(),
   subject: z.string().min(1, 'required'),
+  referral: z.string().optional(),
   message: z.string().trim().min(10, 'minLength').max(MAX_LENGTH.message, 'maxLength'),
 });
 
@@ -57,6 +59,7 @@ export function ContactForm({ onRequestQuote, serviceSlug, developmentInquiry = 
       phone: '',
       company: '',
       subject: developmentInquiry ? 'development' : '',
+      referral: '',
       message: '',
     },
   });
@@ -90,6 +93,7 @@ export function ContactForm({ onRequestQuote, serviceSlug, developmentInquiry = 
         subject: experience ? `${data.subject} · ${tService(experience.nameKey)} [${experience.slug}]` : data.subject,
         message: data.message,
         locale,
+        referral: data.referral || null,
       });
       trackEvent('inquiry_submit', 'contact');
       setStatus('success');
@@ -250,6 +254,24 @@ export function ContactForm({ onRequestQuote, serviceSlug, developmentInquiry = 
               label={t('form.message')}
               error={getErrorMessage('message')}
               {...register('message')}
+            />
+
+            {/* 어디서 보고 문의했는지 (선택) — 유입 경로가 남지 않는 방문도 출처를 알 수 있게 */}
+            <Controller
+              name="referral"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  label={t('form.referral')}
+                  options={REFERRAL_OPTIONS.map((o) => ({ value: o.value, label: locale === 'en' ? o.en : o.ko }))}
+                  placeholder={t('form.referralPlaceholder')}
+                  name={field.name}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                />
+              )}
             />
 
             {/* Submit button */}

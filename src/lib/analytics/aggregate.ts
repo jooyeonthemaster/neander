@@ -11,7 +11,8 @@ export const EVENTS_COLLECTION = 'analytics_events'
 export const DAILY_COLLECTION = 'analytics_daily'
 
 /** 요약 구조가 바뀌면 올려서 저장된 일별 요약을 다시 계산하게 한다 */
-export const SUMMARY_VERSION = 5
+// 6: AI 답변 링크(utm_source=chatgpt.com 등)를 캠페인 대신 AI 채널로 다시 모은다
+export const SUMMARY_VERSION = 6
 
 /** 한 페이지만 보고 10초 안에 아무 행동 없이 떠난 세션을 이탈로 본다 */
 export const BOUNCE_MAX_MS = 10_000

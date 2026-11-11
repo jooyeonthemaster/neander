@@ -17,6 +17,23 @@ export interface InquiryInput {
   locale: string
   /** 견적 폼에서 계산된 내용 (contact 폼은 없음) */
   quote?: QuoteSnapshot | null
+  /** 「어떻게 알게 되셨나요?」 답 (src/lib/inquiry-referral.ts) */
+  referral?: string | null
+}
+
+/** 문의를 보낼 때의 유입 경로 (방문 기록 기준, src/lib/analytics/tracker.ts) */
+export interface InquiryAttribution {
+  channel: string
+  source: string
+  landing: string
+  campaign: string | null
+  first_channel: string | null
+  first_source: string | null
+  first_landing: string | null
+  first_at: string | null
+  visits: number | null
+  vid: string | null
+  sid: string | null
 }
 
 /** 견적 마법사에서 고른 내용의 스냅샷 */
@@ -56,4 +73,5 @@ export interface Inquiry extends Omit<InquiryInput, 'phone' | 'company'> {
   created_at: string
   updated_at?: string
   source_path?: string | null
+  attribution?: InquiryAttribution | null
 }

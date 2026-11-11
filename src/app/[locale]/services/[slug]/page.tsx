@@ -19,6 +19,8 @@ import { getExperienceSpec } from '@/data/experience-specs';
 import { AcscentTrust } from '@/components/services/AcscentTrust';
 import { serviceForExperience, startingPrice as quoteStartingPrice } from '@/lib/quote/engine';
 import { formatPrice } from '@/lib/quote/format';
+import { serviceJsonLd, serviceLanding, serviceSearchDescription, serviceSearchTitle } from '@/lib/seo-service';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -34,14 +36,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!exp) return { title: 'Not Found' };
 
   const t = await getTranslations({ locale, namespace: 'services' });
+  // 체험 이름만으로는 검색되지 않으므로 행사 담당자가 찾는 말과 시작가를 붙인다 (src/lib/seo-service.ts)
+  const title = serviceSearchTitle(t(exp.nameKey), slug, exp.pillar, locale);
+  const description = serviceSearchDescription(t(exp.oneLinerKey), slug, exp.pillar, locale);
 
   return {
     alternates: localeAlternates(`/services/${slug}`, locale),
-    title: t(exp.nameKey),
-    description: t(exp.oneLinerKey),
+    title,
+    description,
     openGraph: {
-      title: t(exp.nameKey),
-      description: t(exp.oneLinerKey),
+      title,
+      description,
       images: [DEFAULT_OG_IMAGE],
     },
   };
@@ -112,6 +117,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
   const spec = getExperienceSpec(slug);
   const tPricing = await getTranslations({ locale, namespace: 'pricingGuide' });
   const onRequest = t('spec.onRequest');
+  const landing = serviceLanding(slug, exp.pillar, locale);
   const quoteService = serviceForExperience(slug, exp.pillar);
   const startingPrice = quoteService ? quoteStartingPrice(quoteService) : 0;
   const specRows = spec
@@ -145,6 +151,16 @@ export default async function ExperienceDetailPage({ params }: Props) {
 
   return (
     <main>
+      <JsonLd
+        data={serviceJsonLd({
+          name,
+          description: serviceSearchDescription(oneLiner, slug, exp.pillar, locale),
+          slug,
+          pillar: exp.pillar,
+          locale,
+          servicesLabel: t('title'),
+        })}
+      />
       {/* Service introduction */}
         <section className="relative overflow-hidden bg-slate-950 pb-20 pt-32 sm:pb-28 sm:pt-44">
           {/* Grid background */}
@@ -424,6 +440,11 @@ export default async function ExperienceDetailPage({ params }: Props) {
                       ))}
                     </dl>
                     <p className="mt-3 text-xs leading-relaxed text-slate-400">{t('spec.note')}</p>
+                    {landing && (
+                      <Link href={landing.href} className="mt-4 inline-block text-sm font-semibold text-teal-700 underline-offset-4 hover:underline">
+                        {landing.text}
+                      </Link>
+                    )}
                   </div>
                 </ScrollReveal>
               )}

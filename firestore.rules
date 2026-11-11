@@ -42,10 +42,20 @@ service cloud.firestore {
     match /inquiries/{doc} {
       allow read, update, delete: if isAdmin();
 
+      // referral: 「어떻게 알게 되셨나요?」 답, attribution: 방문 기록에서 읽은 유입 경로 (개인 식별 정보 없음)
       allow create: if request.resource.data.keys().hasOnly([
             'kind', 'name', 'email', 'phone', 'company', 'subject', 'message',
-            'locale', 'quote', 'status', 'created_at', 'source_path'
+            'locale', 'quote', 'status', 'created_at', 'source_path',
+            'referral', 'attribution'
           ])
+        && (request.resource.data.get('referral', null) == null
+            || (request.resource.data.referral is string && request.resource.data.referral.size() <= 40))
+        && (request.resource.data.get('attribution', null) == null
+            || (request.resource.data.attribution is map
+                && request.resource.data.attribution.keys().hasOnly([
+                  'channel', 'source', 'landing', 'campaign', 'first_channel', 'first_source',
+                  'first_landing', 'first_at', 'visits', 'vid', 'sid'
+                ])))
         && request.resource.data.kind in ['contact', 'quote']
         && request.resource.data.status == 'new'
         && request.resource.data.name is string

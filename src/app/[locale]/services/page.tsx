@@ -21,11 +21,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     alternates: localeAlternates('/services', locale),
-    title: t('title'),
-    description: t('description'),
+    // 화면 제목(「서비스」)과 달리 검색 결과에는 행사 담당자가 찾는 말을 쓴다
+    title: t('metaTitle'),
+    description: t('metaDescription'),
     openGraph: {
-      title: t('subtitle'),
-      description: t('description'),
+      title: t('metaTitle'),
+      description: t('metaDescription'),
       images: [DEFAULT_OG_IMAGE],
     },
   };

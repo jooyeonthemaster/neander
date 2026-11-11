@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createRateLimiter, escapeHtml, mailerConfigured, sendStaffMail } from '@/lib/mailer';
+import { describeAttribution, referralLabel } from '@/lib/inquiry-referral';
 
 // 문의·견적 폼이 Firestore 저장에 성공한 뒤 호출한다 → 담당자 메일로 알림을 보낸다 (설정은 src/lib/mailer.ts).
 // 받는 사람이 고정이라 외부에서 호출해도 우리 메일함으로만 가지만, 도배를 막으려고 IP당 횟수를 제한한다.
@@ -38,6 +39,22 @@ const bodySchema = z.object({
   message: z.string().max(5000),
   locale: z.string().max(10),
   quote: quoteSchema,
+  referral: z.string().max(40).nullish(),
+  attribution: z
+    .object({
+      channel: z.string().max(20),
+      source: z.string().max(100),
+      landing: z.string().max(300),
+      campaign: z.string().max(100).nullable(),
+      first_channel: z.string().max(20).nullable(),
+      first_source: z.string().max(100).nullable(),
+      first_landing: z.string().max(300).nullable(),
+      first_at: z.string().max(40).nullable(),
+      visits: z.number().nullable(),
+      vid: z.string().max(40).nullable(),
+      sid: z.string().max(40).nullable(),
+    })
+    .nullish(),
 });
 
 type Body = z.infer<typeof bodySchema>;
@@ -70,6 +87,8 @@ function rows(body: Body): [string, string][] {
     for (const l of q.lines ?? []) list.push([`  ${l.label}`, `${l.detail ? `${l.detail} = ` : ''}${l.tbd ? '상담 후 산정' : `${l.amount.toLocaleString('ko-KR')}원`}`]);
     if (q.estimateNo) list.push(['견적번호', q.estimateNo]);
   }
+  list.push(['알게 된 경로', referralLabel(body.referral) ?? '(선택 안 함)']);
+  list.push(['유입 경로', describeAttribution(body.attribution) ?? '-']);
   list.push(['언어', body.locale]);
   return list;
 }

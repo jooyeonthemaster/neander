@@ -5,12 +5,18 @@
    messages/ko.json. Do not add numbers without a source.
    ───────────────────────────────────────────────────────── */
 
+import { LANDINGS } from './insights-landings';
+
 export type InsightBlock =
   | { type: 'h2'; text: string }
   | { type: 'p'; text: string }
   | { type: 'ul'; items: string[] }
   | { type: 'table'; head: string[]; rows: string[][] }
-  | { type: 'cta'; text: string; href: string };
+  | { type: 'cta'; text: string; href: string }
+  /** 관련 페이지 링크 목록 (사례·체험) */
+  | { type: 'links'; items: { text: string; href: string }[] }
+  /** 자주 묻는 질문 — 화면에 그대로 보이고 FAQPage 구조화 데이터로도 나간다 */
+  | { type: 'faq'; items: { q: string; a: string }[] };
 
 export interface InsightCopy {
   title: string;
@@ -27,7 +33,7 @@ export interface Insight {
   en: InsightCopy;
 }
 
-const CREDENTIALS_KO = [
+export const CREDENTIALS_KO = [
   '화장품책임판매업 등록 제42812호 (2024-01-24, 서울지방식품의약품안전청)',
   '방향제 안전기준 적합확인 신고 HB24-12-2355 (일반용·섬유용, 분무기형, 2024-12)',
   '방향제 안전기준 적합확인 신고 HB23-12-1949 (실내공간용·자동차용, 함침물형, 2023-12)',
@@ -286,94 +292,6 @@ export const INSIGHTS: Insight[] = [
     },
   },
 
-  /* 4 ── Landing: AI perfume experience ─────────────────── */
-  {
-    slug: 'event-ai-perfume-experience',
-    kind: 'landing',
-    date: '2026-09-26',
-    keywords: ['행사 AI 조향 체험', 'AI 향수 체험', '조향 체험 부스', '팝업 향수 만들기', '축제 조향 체험', "AC'SCENT"],
-    ko: {
-      title: "행사 AI 조향 체험 (AC'SCENT)",
-      description: 'AI가 취향·이미지를 분석해 향을 추천하고, 조향사가 현장에서 향수를 만들어 드립니다. 행사 렌탈과 월 단위 상시 운영이 가능합니다.',
-      blocks: [
-        { type: 'p', text: "AC'SCENT AI 조향 체험은 AI가 방문객의 취향과 이미지를 분석해 향을 추천하고, 조향사가 현장에서 그 향으로 향수를 만들어 드리는 체험입니다. 방문객은 자신만의 향수를 기념품으로 가져갑니다." },
-        { type: 'h2', text: '규모 가이드' },
-        {
-          type: 'table',
-          head: ['구성', '시간당 체험 인원'],
-          rows: [
-            ['조향 1팀 (조향사 1 + 조수 1, 기본)', '약 20명'],
-            ['조향 2팀', '약 40명'],
-            ['조향 3팀', '약 60명'],
-          ],
-        },
-        { type: 'h2', text: '등록·신고' },
-        { type: 'ul', items: CREDENTIALS_KO },
-        { type: 'h2', text: '운영 경험' },
-        {
-          type: 'ul',
-          items: [
-            '2025년 생일카페·팬 이벤트 150건 운영',
-            "직영 매장 2곳: 홍대 AC'SCENT ID, AC'SCENT WOW",
-            '제천국제음악영화제 2026 — OST페어 체험 프로그램',
-            '제천국제음악영화제 2025 — AI 조향사 부스',
-            '엔플라잉 〈into REM〉 — 공식 향 MD',
-            '서울국제작가축제 — AI 북퍼퓸 전시',
-          ],
-        },
-        { type: 'h2', text: '운영 방식' },
-        {
-          type: 'ul',
-          items: [
-            '행사 렌탈(단기): 축제·팝업·기업 행사 기간에 맞춰 운영',
-            '상시 운영(월 단위): 매장·전시 공간에 월 단위로 운영',
-          ],
-        },
-        { type: 'cta', text: '조향 체험 견적 요청하기', href: '/quote' },
-      ],
-    },
-    en: {
-      title: "AI Perfume Experience for Events (AC'SCENT)",
-      description: 'AI recommends a scent from taste and image; a perfumer blends it on site. Event rental or monthly operation.',
-      blocks: [
-        { type: 'p', text: "The AC'SCENT AI perfume experience uses AI to analyze a visitor’s taste and image and recommend a scent, which a perfumer then blends into a perfume on site. Visitors take home their own perfume." },
-        { type: 'h2', text: 'Scale guide' },
-        {
-          type: 'table',
-          head: ['Setup', 'Visitors per hour'],
-          rows: [
-            ['1 team (perfumer + assistant, base)', 'About 20'],
-            ['2 teams', 'About 40'],
-            ['3 teams', 'About 60'],
-          ],
-        },
-        { type: 'h2', text: 'Registrations and reports' },
-        { type: 'ul', items: CREDENTIALS_EN },
-        { type: 'h2', text: 'Track record' },
-        {
-          type: 'ul',
-          items: [
-            '150 birthday-café and fan events operated in 2025',
-            "Two directly operated stores in Hongdae: AC'SCENT ID and AC'SCENT WOW",
-            'JIMFF 2026 — OST Fair Experience Program',
-            'JIMFF 2025 — AI Perfumer Booth',
-            'N.Flying 〈into REM〉 — Official Fragrance Merchandise',
-            'Seoul International Writers’ Festival — AI Book Perfume',
-          ],
-        },
-        { type: 'h2', text: 'Engagement types' },
-        {
-          type: 'ul',
-          items: [
-            'Event rental (short-term): for festivals, pop-ups and corporate events',
-            'Ongoing operation (monthly): in stores or exhibition spaces',
-          ],
-        },
-        { type: 'cta', text: 'Request a quote', href: '/quote' },
-      ],
-    },
-  },
-
   /* 5 ── Landing: AI experience content ─────────────────── */
   {
     slug: 'event-ai-experience-content',
@@ -464,6 +382,9 @@ export const INSIGHTS: Insight[] = [
     },
   },
 ];
+
+// 구매 의도 검색어용 랜딩 (포토부스 대여·사주 키오스크·향수 체험·송년회) — src/data/insights-landings.ts
+INSIGHTS.push(...LANDINGS);
 
 export function getInsight(slug: string): Insight | undefined {
   return INSIGHTS.find((i) => i.slug === slug);

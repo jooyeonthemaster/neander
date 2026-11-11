@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "title": "NEANDERco — AI-Powered Experiential Content",
+    "title": "NEANDER — AI Experience Booths for Events in Korea: AI Perfume, AI Photo Booth, AI Kiosks",
     "description": "We transform offline spaces with AI-driven experiential content. Pop-ups, festivals, exhibitions, concerts — NEANDERco.ltd designs unforgettable experiences.",
     "keywords": "AI content, experiential content, pop-up store, interactive media, AI fragrance, photo booth, spatial design, NEANDERco",
     "ogTitle": "NEANDERco — Design the Experience",
@@ -65,6 +65,8 @@
   },
 
   "services": {
+    "metaTitle": "AI Experience Booth & AI Photo Booth Rental for Events in Korea",
+    "metaDescription": "AI perfume making, AI photo booths, AI fortune-telling and personal-color kiosks — AI experiences delivered with equipment and on-site staff to pop-ups, corporate events, festivals and exhibitions in Korea. Published starting prices and an instant online estimate.",
     "consultationOnly": "On request",
     "inquire": "Contact us",
     "title": "Services",
@@ -1867,6 +1869,8 @@
       "company": "Company (Optional)",
       "companyPlaceholder": "Enter your company name",
       "subject": "Inquiry Type",
+      "referral": "How did you hear about us? (Optional)",
+      "referralPlaceholder": "Choose one",
       "subjectOptions": {
         "general": "General Inquiry",
       "development": "Development / AX consultation",

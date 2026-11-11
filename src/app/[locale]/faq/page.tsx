@@ -5,6 +5,7 @@ import { ScrollReveal } from '@/components/animations';
 import { Link } from '@/i18n/navigation';
 import { QUOTE_HREF } from '@/lib/constants';
 import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -42,6 +43,18 @@ export default async function FaqPage({ params }: Props) {
 
   return (
     <div>
+      {/* 검색엔진·AI 답변용 질문·답 구조화 데이터 */}
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: items.map((item) => ({
+            '@type': 'Question',
+            name: item.title,
+            acceptedAnswer: { '@type': 'Answer', text: item.content },
+          })),
+        }}
+      />
       {/* Hero */}
       <section className="bg-slate-950 pb-20 pt-32 sm:pb-28 sm:pt-40">
         <div className="container-wide">

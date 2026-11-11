@@ -4,7 +4,8 @@
 // 개인 식별 정보는 보내지 않고, 브라우저마다 무작위 방문자 ID만 둔다.
 // ============================================================
 
-import type { SessionOrigin } from './sources'
+import { classifyOrigin, parseUserAgent, type SessionOrigin } from './sources'
+import type { InquiryAttribution } from '@/types/inquiry'
 
 const ENDPOINT = '/api/track'
 const VISITOR_KEY = 'neander:analytics-vid'
@@ -13,6 +14,9 @@ const OPT_OUT_KEY = 'neander:analytics-optout'
 const INTERNAL_KEY = 'neander:analytics-internal'
 const MIGRATED_KEY = 'neander:analytics-internal-migrated'
 const DEBUG_KEY = 'neander:analytics-debug'
+/** 이 브라우저의 첫 방문 경로·시각, 방문 횟수 (문의 유입 정보용) */
+const FIRST_TOUCH_KEY = 'neander:analytics-first'
+const VISITS_KEY = 'neander:analytics-visits'
 /** 이 값이 붙은 주소로 한 번 들어오면 그 기기를 내부 방문으로 표시한다 */
 const INTERNAL_PARAM = 'nd_internal'
 
@@ -248,12 +252,79 @@ function resolveSession(landingPath: string): StoredSession {
   }
 
   const visitor = readVisitor()
+  const origin: SessionOrigin = { ref: firstPageOfLoad ? externalReferrer() : '', utm, landing: landingPath }
+  rememberVisit(origin, now)
   return {
     id: randomId(16),
     last: now,
     seq: 0,
     nv: visitor.created,
-    origin: { ref: firstPageOfLoad ? externalReferrer() : '', utm, landing: landingPath },
+    origin,
+  }
+}
+
+/** 이 브라우저의 첫 방문 경로와 방문 횟수를 남긴다 (문의가 어디서 왔는지 알려주기 위해) */
+function rememberVisit(origin: SessionOrigin, now: number) {
+  try {
+    const store = local()
+    if (!store) return
+    if (!store.getItem(FIRST_TOUCH_KEY)) store.setItem(FIRST_TOUCH_KEY, JSON.stringify({ at: now, origin }))
+    store.setItem(VISITS_KEY, String((Number(store.getItem(VISITS_KEY)) || 0) + 1))
+  } catch {
+    // 저장소를 못 쓰면 문의에 첫 방문 정보 없이 보낸다
+  }
+}
+
+function readFirstTouch(): { at: number; origin: SessionOrigin } | null {
+  try {
+    const raw = local()?.getItem(FIRST_TOUCH_KEY)
+    return raw ? (JSON.parse(raw) as { at: number; origin: SessionOrigin }) : null
+  } catch {
+    return null
+  }
+}
+
+
+/**
+ * 지금 방문(세션)과 이 브라우저의 첫 방문이 어디서 왔는지 정리한다.
+ * 방문 기록을 끈 브라우저에서는 보내지 않는다. 기록 대상이 아닌 주소(로컬 등)에서도 현재 페이지 기준으로 채운다.
+ */
+export function inquiryAttribution(): InquiryAttribution | null {
+  if (typeof window === 'undefined' || isAnalyticsOptedOut()) return null
+  try {
+    const now = Date.now()
+    const saved = readSession()
+    const fresh = saved && now - saved.last < SESSION_IDLE_MS ? saved : null
+    const origin: SessionOrigin = fresh?.origin ?? {
+      ref: externalReferrer(),
+      utm: readUtm(),
+      landing: normalizePath(window.location.pathname).path,
+    }
+    const inApp = parseUserAgent(navigator.userAgent, navigator.maxTouchPoints || 0).inApp
+    const current = classifyOrigin(origin, inApp, TRACKED_HOSTS)
+    const first = readFirstTouch()
+    const firstClass = first ? classifyOrigin(first.origin, inApp, TRACKED_HOSTS) : null
+    let visitor: string | null = null
+    try {
+      visitor = local()?.getItem(VISITOR_KEY) ?? memoryVisitor
+    } catch {
+      visitor = memoryVisitor
+    }
+    return {
+      channel: current.channel,
+      source: current.source.slice(0, 100),
+      landing: origin.landing.slice(0, 300),
+      campaign: current.campaign,
+      first_channel: firstClass?.channel ?? null,
+      first_source: firstClass?.source.slice(0, 100) ?? null,
+      first_landing: first?.origin.landing.slice(0, 300) ?? null,
+      first_at: first ? new Date(first.at).toISOString() : null,
+      visits: Number(local()?.getItem(VISITS_KEY)) || null,
+      vid: visitor,
+      sid: fresh?.id ?? null,
+    }
+  } catch {
+    return null
   }
 }
 

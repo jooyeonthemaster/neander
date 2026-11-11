@@ -47,6 +47,7 @@ export function summarizeDay(events: AnalyticsEvent[]): DaySummaries {
   return { external: summarize(external), internal: summarize(internal) }
 }
 import { dayEnd, dayKeyOf, dayStart, daysBetween, todayKey } from './period'
+import { normalizeStoredOrigin, type Channel } from './sources'
 
 /** 하루가 끝난 뒤에도 체류시간 갱신이 늦게 도착할 수 있어 이만큼 지난 뒤 요약을 확정한다 */
 const FINALIZE_GRACE_MS = 60 * 60 * 1000
@@ -56,6 +57,7 @@ const MAX_RUN_DAYS = 31
 function toEvent(snapshot: QueryDocumentSnapshot<DocumentData>): AnalyticsEvent {
   const data = snapshot.data()
   const ts = data.ts instanceof Timestamp ? data.ts.toDate() : new Date()
+  const origin = normalizeStoredOrigin((data.channel ?? 'direct') as Channel, data.source ?? 'direct')
   return {
     id: snapshot.id,
     type: data.type === 'event' ? 'event' : 'pageview',
@@ -68,8 +70,8 @@ function toEvent(snapshot: QueryDocumentSnapshot<DocumentData>): AnalyticsEvent 
     new_visitor: data.new_visitor === true,
     entry: data.entry === true,
     internal: data.internal === true,
-    channel: data.channel ?? 'direct',
-    source: data.source ?? 'direct',
+    channel: origin.channel,
+    source: origin.source,
     medium: data.medium ?? null,
     campaign: data.campaign ?? null,
     keyword: data.keyword ?? null,

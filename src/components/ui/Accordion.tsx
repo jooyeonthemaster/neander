@@ -105,6 +105,12 @@ export function Accordion({
                 </motion.div>
               )}
             </AnimatePresence>
+            {/* 닫힌 답도 HTML에 남겨 검색엔진·AI가 읽을 수 있게 한다 (화면에는 숨김) */}
+            {!isOpen && (
+              <div id={panelId} role="region" aria-labelledby={triggerId} hidden>
+                <div className="pb-4 text-sm text-slate-600 leading-relaxed">{item.content}</div>
+              </div>
+            )}
           </div>
         );
       })}

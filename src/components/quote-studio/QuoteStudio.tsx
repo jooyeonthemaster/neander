@@ -15,6 +15,7 @@ import { smoothScrollIntoView } from '@/lib/smooth-scroll';
 import { trackEvent } from '@/lib/analytics/tracker';
 import { recordQuote, recordQuoteScreen, recordQuoteTotal, startQuoteJourney } from '@/lib/analytics/quote-journey';
 import { createInquiry } from '@/lib/firebase/inquiries';
+import { REFERRAL_OPTIONS } from '@/lib/inquiry-referral';
 import { experiences, getExperienceBySlug } from '@/data/experiences';
 import { PRODUCTS } from '@/data/products';
 import { QUOTE_PRESET_IMAGES } from '@/data/quote-preset-images';
@@ -396,7 +397,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
     scrollToTop();
   };
 
-  async function saveInquiry(form: { name: string; email: string; company: string; phone: string; note: string }, subject: string, estimate?: { no: string; token: string | null }) {
+  async function saveInquiry(form: { name: string; email: string; company: string; phone: string; note: string; referral: string }, subject: string, estimate?: { no: string; token: string | null }) {
     if (previewMode) return;
     // 담당자가 보는 수신함은 한국어로 남긴다 (영문 화면에서 보낸 견적도)
     const ko = calculateQuote(input, 'ko');
@@ -425,6 +426,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
       subject,
       message: summary.slice(0, 4900),
       locale,
+      referral: form.referral || null,
       quote: {
         eventName: eventLabel,
         eventType: input.eventType,
@@ -468,6 +470,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
       company: String(fd.get('company') ?? '').trim(),
       phone: String(fd.get('phone') ?? '').trim(),
       note: String(fd.get('note') ?? '').trim(),
+      referral: String(fd.get('referral') ?? ''),
     };
     if (input.items.length === 0) { setStatus('error'); setMessage(c.needItems); return; }
     const invalidEmail = form.email !== '' && !isValidEmail(form.email);
@@ -795,6 +798,13 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                         <Field label={c.phone}><input id="q-phone" name="phone" type="tel" autoComplete="tel" maxLength={40} value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} className={inputClass} /></Field>
                       </div>
                       <Field label={c.message}><textarea id="q-note" name="note" rows={3} maxLength={1000} value={contact.note} onChange={(e) => setContact({ ...contact, note: e.target.value })} className={cn(inputClass, 'h-auto py-3')} /></Field>
+                      {/* 어디서 보고 왔는지 (선택) — 유입 경로가 남지 않는 방문도 출처를 알 수 있게 */}
+                      <Field label={lang === 'ko' ? '어떻게 알게 되셨나요? (선택)' : 'How did you hear about us? (optional)'}>
+                        <select id="q-referral" name="referral" defaultValue="" className={inputClass}>
+                          <option value="">{lang === 'ko' ? '선택해 주세요' : 'Choose one'}</option>
+                          {REFERRAL_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o[lang]}</option>)}
+                        </select>
+                      </Field>
                       <div>
                         <label data-track="consent" className={cn('flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-xs leading-relaxed text-slate-500', missing.consent && 'bg-red-50/60 ring-1 ring-red-300')}><Checkbox name="consent" required checked={contact.consent} aria-invalid={missing.consent || undefined} aria-describedby={missing.consent ? 'q-consent-error' : undefined} onChange={(e) => { setContact({ ...contact, consent: e.target.checked }); if (missing.consent && e.target.checked) setMissing({ ...missing, consent: false }); }} className="mt-0.5 size-4" /><span>{c.consent} <Link href="/privacy" className="font-medium text-teal-700 underline underline-offset-2">{c.privacy}</Link></span></label>
                         {missing.consent && <p id="q-consent-error" data-testid="quote-consent-error" className="mt-1.5 text-xs font-medium text-red-600">{c.consentRequired}</p>}

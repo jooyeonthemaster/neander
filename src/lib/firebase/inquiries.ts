@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore'
 import { db } from './config'
 import type { Inquiry, InquiryInput, InquiryStatus } from '@/types/inquiry'
+import { inquiryAttribution } from '@/lib/analytics/tracker'
 
 const COLLECTION = 'inquiries'
 
@@ -65,6 +66,9 @@ export async function createInquiry(input: InquiryInput): Promise<string> {
     locale: input.locale,
     // 스팸 유입 파악용 (개인 식별 정보는 저장하지 않는다)
     source_path: typeof window !== 'undefined' ? window.location.pathname : null,
+    // 어디서 보고 왔는지: 고객이 고른 답(referral)과 방문 기록에서 읽은 유입 경로(attribution)
+    referral: input.referral || null,
+    attribution: inquiryAttribution(),
   }
 
   let timer: ReturnType<typeof setTimeout> | undefined
@@ -72,11 +76,22 @@ export async function createInquiry(input: InquiryInput): Promise<string> {
     timer = setTimeout(() => reject(new Error('문의 저장 시간이 초과되었습니다')), WRITE_TIMEOUT_MS)
   })
 
+  // 유입 정보 필드(referral·attribution)를 허용하는 규칙이 아직 배포되지 않았으면 거부된다 →
+  // 문의 자체를 잃지 않도록 그 두 필드를 빼고 한 번 더 저장한다
+  const save = async () => {
+    try {
+      return await addDoc(collection(db, COLLECTION), stripUndefined(payload))
+    } catch (error) {
+      if ((error as { code?: string })?.code !== 'permission-denied') throw error
+      const { referral: _referral, attribution: _attribution, ...rest } = payload
+      void _referral
+      void _attribution
+      return addDoc(collection(db, COLLECTION), stripUndefined(rest))
+    }
+  }
+
   try {
-    const ref = await Promise.race([
-      addDoc(collection(db, COLLECTION), stripUndefined(payload)),
-      timeout,
-    ])
+    const ref = await Promise.race([save(), timeout])
     notifyInquiry(ref.id, payload)
     return ref.id
   } finally {

@@ -14,6 +14,7 @@ import Footer from '@/components/layout/Footer';
 import SmoothScrollProvider from '@/components/layout/SmoothScrollProvider';
 import CustomCursor from '@/components/layout/CustomCursor';
 import AnalyticsTracker from '@/components/analytics/AnalyticsTracker';
+import KoreanPageSuggestion from '@/components/layout/KoreanPageSuggestion';
 
 /* ─────────────────────────────────────────────────────────
    Locale Layout
@@ -134,6 +135,7 @@ export default async function LocaleLayout({
             </main>
             <Footer />
             <AnalyticsTracker />
+            {locale === 'en' && <KoreanPageSuggestion />}
           </SmoothScrollProvider>
         </NextIntlClientProvider>
       </body>

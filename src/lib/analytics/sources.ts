@@ -183,6 +183,22 @@ function extractKeyword(url: URL): string | null {
   return null
 }
 
+/** utm_source 값(예: chatgpt.com, perplexity.ai)이 AI 서비스 도메인이면 그 규칙을 돌려준다 */
+function aiRuleForHost(value: string): SourceRule | null {
+  const host = value.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0]
+  return SOURCE_RULES.find((rule) => rule.channel === 'ai' && (rule.key === host || rule.host.test(host))) ?? null
+}
+
+/**
+ * 예전 기록 보정: 위 규칙이 생기기 전에는 AI 답변 링크가 campaign 채널, 소스 'chatgpt.com' 으로 저장됐다.
+ * 관리자 화면이 읽을 때 지금 규칙과 같은 값으로 바꿔 한 줄로 모은다.
+ */
+export function normalizeStoredOrigin(channel: Channel, source: string): { channel: Channel; source: string } {
+  if (channel !== 'campaign') return { channel, source }
+  const aiRule = aiRuleForHost(source)
+  return aiRule ? { channel: 'ai', source: aiRule.key } : { channel, source }
+}
+
 /**
  * 세션 시작 정보(리퍼러·UTM)와 인앱 브라우저 여부로 유입 채널과 소스를 정한다.
  * @param ownHosts 사이트 자신의 호스트 (여기서 온 리퍼러는 내부 이동으로 보고 직접 유입 처리)
@@ -199,6 +215,11 @@ export function classifyOrigin(
   const utmSource = clean(origin.utm.source, 60)?.toLowerCase() ?? null
   const utmMedium = clean(origin.utm.medium, 60)?.toLowerCase() ?? null
   if (utmSource || utmMedium) {
+    // ChatGPT·Perplexity 등은 답변 속 링크에 utm_source=chatgpt.com 처럼 자기 도메인을 붙인다 → 캠페인이 아니라 AI 유입
+    const aiRule = utmSource ? aiRuleForHost(utmSource) : null
+    if (aiRule) {
+      return { channel: 'ai', source: aiRule.key, medium: utmMedium, campaign: null, keyword, referrer: refHost }
+    }
     const source = utmSource ? UTM_SOURCE_ALIASES[utmSource] ?? utmSource : refHost ?? 'unknown'
     return {
       channel: utmMedium === 'email' || utmMedium === 'newsletter' ? 'email' : 'campaign',

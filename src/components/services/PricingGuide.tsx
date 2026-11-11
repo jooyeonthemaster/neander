@@ -144,7 +144,35 @@ export async function PricingGuide({ locale, variant = 'full' }: { locale: strin
               >
                 {t('ctaSecondary')}
               </Link>
+              {/* 항목별 금액·옵션을 정리한 비용 가이드 (검색 유입용 글이라 서비스 페이지에서 링크를 건다) */}
+              <Link
+                href="/insights/event-ai-experience-cost-guide-2026"
+                className="inline-flex h-12 items-center justify-center px-2 text-sm font-semibold text-teal-700 underline-offset-4 hover:underline"
+              >
+                {locale === 'en' ? 'Read the full cost guide →' : '항목별 비용 가이드 보기 →'}
+              </Link>
             </div>
+            {/* 상품·행사별 가격·조건 안내 (구매 의도 검색어용 랜딩) */}
+            <nav aria-label={locale === 'en' ? 'Prices by experience' : '체험·행사별 가격 안내'} className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+              {(locale === 'en'
+                ? [
+                    ['/insights/ai-photo-booth-rental', 'AI photo booth rental'],
+                    ['/insights/ai-fortune-kiosk-rental', 'AI fortune kiosk rental'],
+                    ['/insights/event-ai-perfume-experience', 'AI perfume experience'],
+                    ['/insights/corporate-year-end-event-ai-booth', 'Corporate & year-end events'],
+                  ]
+                : [
+                    ['/insights/ai-photo-booth-rental', 'AI 포토부스 대여'],
+                    ['/insights/ai-fortune-kiosk-rental', 'AI 사주·관상 키오스크 대여'],
+                    ['/insights/event-ai-perfume-experience', 'AI 향수 만들기 체험'],
+                    ['/insights/corporate-year-end-event-ai-booth', '송년회·기업 행사 체험 부스'],
+                  ]
+              ).map(([href, label]) => (
+                <Link key={href} href={href} className="text-slate-600 underline underline-offset-4 hover:text-teal-700">
+                  {label}
+                </Link>
+              ))}
+            </nav>
           </ScrollReveal>
         )}
       </div>
