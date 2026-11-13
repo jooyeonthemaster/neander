@@ -10,12 +10,9 @@ import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
 
 const VALID_PILLARS: PillarId[] = ['ai-photo', 'ai-diagnosis', 'ai-fortune', 'ai-creative', 'ai-immersive'];
 
-// 히어로: K-WAVE DANCE FESTIVAL 2026의 「AI 사주&퍼스널 향수」 · 「AI 포토부스」 두 부스 앞에 모인 관람객
-const HERO_PHOTO = {
-  src: '/images/services/services-hero.webp',
-  eventKo: 'K-WAVE DANCE FESTIVAL 2026',
-  eventEn: 'K-WAVE DANCE FESTIVAL 2026',
-};
+// 히어로: 향수 바 · AI 키오스크 · AI 포토부스가 함께 있는 행사장을 그린 생성 이미지(실제 기기 사진 참고).
+// 실제 행사 사진이 아니므로 카드의 콘셉트 이미지처럼 「체험 콘셉트 이미지」로 표시한다.
+const HERO_IMAGE = '/images/services/services-hero-concept.webp';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -78,22 +75,22 @@ export default async function ServicesPage({ params, searchParams }: Props) {
           </div>
         </div>
 
-        {/* 실제 운영 현장 사진 — 다른 사례 사진처럼 「운영 사례 · 행사명」을 붙인다 */}
+        {/* 생성 이미지라 카드와 같은 규칙으로 「체험 콘셉트 이미지」를 붙인다 */}
         <figure className="relative aspect-[4/3] sm:aspect-video lg:absolute lg:inset-0 lg:aspect-auto">
           <Image
-            src={HERO_PHOTO.src}
+            src={HERO_IMAGE}
             alt=""
             fill
             priority
             sizes="100vw"
-            className="object-cover object-[70%_50%] sm:object-center lg:object-[50%_40%]"
+            className="object-cover object-center lg:object-[50%_55%]"
           />
           <div
             className="absolute inset-0 bg-gradient-to-b from-slate-950 via-transparent to-transparent lg:bg-gradient-to-r lg:from-slate-950/95 lg:via-slate-950/40 lg:to-transparent"
             aria-hidden="true"
           />
           <figcaption className="absolute bottom-3 right-4 rounded bg-slate-950/60 px-2 py-0.5 text-[11px] font-medium text-white/90 sm:right-6 lg:bottom-5 lg:right-8">
-            {t('photoCase')} · {locale === 'ko' ? HERO_PHOTO.eventKo : HERO_PHOTO.eventEn}
+            {t('photoConcept')}
           </figcaption>
         </figure>
       </section>
