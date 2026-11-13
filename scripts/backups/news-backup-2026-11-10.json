@@ -1,0 +1,2348 @@
+{
+  "documents": [
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/997J0J6x9TnFrAanBfcH",
+      "fields": {
+        "content": {
+          "stringValue": ""
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "source_url": {
+          "stringValue": "https://www.gukjenews.com/news/articleView.html?idxno=3677640"
+        },
+        "updated_at": {
+          "stringValue": "2026-09-18T06:40:07.716998Z"
+        },
+        "title": {
+          "stringValue": "제천국제음악영화제, 9월 4~7일 'OST페어' 개최…영화음악·전시·굿즈 한자리에"
+        },
+        "summary": {
+          "stringValue": "관객이 직접 향수를 만들어볼 수 있는 'JIMFF X AC'SCENT - AI 조향사' 체험 부스가 운영된다. AI가 관객의 영화 취향과 장면 선택을 바탕으로 맞춤 향기를 제안하며, AC'SCENT가 협력한다."
+        },
+        "source_name": {
+          "stringValue": "국제뉴스"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "published_at": {
+          "stringValue": "2026-08-28T00:00:00.000Z"
+        },
+        "created_at": {
+          "stringValue": "2026-09-18T06:40:07.716998Z"
+        }
+      },
+      "createTime": "2026-09-18T06:40:08.374145Z",
+      "updateTime": "2026-09-18T06:40:08.374145Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/BvCtpjmXEv6smGeWNNd8",
+      "fields": {
+        "is_sample": {
+          "booleanValue": true
+        },
+        "title": {
+          "stringValue": "네안데르, 시리즈A 투자 유치… AI 공간 디자인 사업 확대"
+        },
+        "summary": {
+          "stringValue": "AI 체험 콘텐츠 전문 기업 네안데르가 시리즈A 투자를 유치하며 공간 디자인 사업을 본격 확대한다고 밝혔다."
+        },
+        "content": {
+          "stringValue": "<p>AI 체험 콘텐츠 전문 기업 네안데르가 시리즈A 투자를 유치하며 공간 디자인 사업을 본격 확대한다고 밝혔다.</p>"
+        },
+        "source_name": {
+          "stringValue": "스타트업투데이"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "created_at": {
+          "stringValue": "2025-07-22T00:00:00.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "published_at": {
+          "stringValue": "2025-07-22T00:00:00.000Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "source_url": {
+          "nullValue": null
+        },
+        "updated_at": {
+          "stringValue": "2025-07-22T00:00:00.000Z"
+        }
+      },
+      "createTime": "2026-09-18T06:06:08.416170Z",
+      "updateTime": "2026-09-18T06:39:29.839871Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/JOivS3wTcKkYzZp8Wzw6",
+      "fields": {
+        "updated_at": {
+          "stringValue": "2025-11-20T00:00:00.000Z"
+        },
+        "source_url": {
+          "nullValue": null
+        },
+        "title": {
+          "stringValue": "“감각을 설계하다” 네안데르의 AI 포토부스, 누적 체험 1만 명 돌파"
+        },
+        "summary": {
+          "stringValue": "AI 포토부스를 운영하는 네안데르가 누적 체험 인원 1만 명을 돌파했다고 밝혔다."
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "content": {
+          "stringValue": "<p>AI 포토부스를 운영하는 네안데르가 누적 체험 인원 1만 명을 돌파했다고 밝혔다. 행사 맞춤형 AI 이미지 생성 기술이 핵심 경쟁력이다.</p>"
+        },
+        "created_at": {
+          "stringValue": "2025-11-20T00:00:00.000Z"
+        },
+        "published_at": {
+          "stringValue": "2025-11-20T00:00:00.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "source_name": {
+          "stringValue": "한국경제"
+        },
+        "is_sample": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-09-18T06:06:08.538252Z",
+      "updateTime": "2026-09-18T06:39:30.005315Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/L9uFH46DyXreKA8WAF3E",
+      "fields": {
+        "updated_at": {
+          "stringValue": "2026-09-18T06:40:07.716998Z"
+        },
+        "source_url": {
+          "stringValue": "https://magazine.hankyung.com/job-joy/article/202511230497d"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "created_at": {
+          "stringValue": "2026-09-18T06:40:07.716998Z"
+        },
+        "published_at": {
+          "stringValue": "2025-11-23T00:00:00.000Z"
+        },
+        "source_name": {
+          "stringValue": "한경 JOB&JOY"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "content": {
+          "stringValue": ""
+        },
+        "title": {
+          "stringValue": "[2025 중앙대학교 캠퍼스타운 스타트업 CEO] AI 기술과 예술 그리고 향기를 융합한 콘텐츠 전문 기업 '네안데르'"
+        },
+        "summary": {
+          "stringValue": "네안데르는 AI 기술과 예술, 향기를 융합한 콘텐츠 전문기업이다. 전시·팝업 공간 기획부터 관객이 경험을 다시 떠올릴 수 있는 향기 상품 제작까지 아우르는 토탈 솔루션을 선보인다."
+        }
+      },
+      "createTime": "2026-09-18T06:40:07.886907Z",
+      "updateTime": "2026-09-18T06:40:07.886907Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/OUbS7YkEq4DqUwglFOSq",
+      "fields": {
+        "created_at": {
+          "stringValue": "2025-09-05T00:00:00.000Z"
+        },
+        "title": {
+          "stringValue": "체험형 AI 콘텐츠, 브랜드 마케팅의 새 트랜드로 부상"
+        },
+        "is_sample": {
+          "booleanValue": true
+        },
+        "published_at": {
+          "stringValue": "2025-09-05T00:00:00.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "content": {
+          "stringValue": "<p>오프라인 매장과 행사에서 AI 기술을 활용한 체험형 콘텐츠가 새로운 마케팅 수단으로 주목받고 있다. 네안데르는 190회 이상의 행사 운영 경험을 보유하고 있다.</p>"
+        },
+        "updated_at": {
+          "stringValue": "2025-09-05T00:00:00.000Z"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "source_url": {
+          "nullValue": null
+        },
+        "source_name": {
+          "stringValue": "동아일보"
+        },
+        "summary": {
+          "stringValue": "오프라인 매장과 행사에서 AI 기술을 활용한 체험형 콘텐츠가 새로운 마케팅 수단으로 주목받고 있다."
+        }
+      },
+      "createTime": "2026-09-18T06:06:08.869598Z",
+      "updateTime": "2026-09-18T06:39:30.314672Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/PfKRbBmt2WmF19wbyy5x",
+      "fields": {
+        "summary": {
+          "stringValue": "지난해 큰 호응을 얻은 'JIMFF X AC'SCENT AI 조향사' 체험 부스도 재등장한다. 관객이 좋아하는 영화 장르와 장면을 고르면 AI가 맞춤형 향기를 제안하고 직접 향수를 만드는 재미를 무료로 즐길 수 있다."
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "published_at": {
+          "stringValue": "2026-08-30T00:00:00.000Z"
+        },
+        "source_url": {
+          "stringValue": "https://www.inews365.com/news/article.html?no=933530"
+        },
+        "updated_at": {
+          "stringValue": "2026-09-18T06:40:07.716998Z"
+        },
+        "content": {
+          "stringValue": ""
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "title": {
+          "stringValue": "제22회 제천국제음악영화제 'OST페어', 9월 4일부터 엽연초살롱에서 개최"
+        },
+        "source_name": {
+          "stringValue": "충북일보"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "created_at": {
+          "stringValue": "2026-09-18T06:40:07.716998Z"
+        }
+      },
+      "createTime": "2026-09-18T06:40:08.762029Z",
+      "updateTime": "2026-09-18T06:40:08.762029Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/Qht7WRFKa9UebhQ7oeRC",
+      "fields": {
+        "source_name": {
+          "stringValue": "씨네21"
+        },
+        "source_url": {
+          "stringValue": "https://cine21.com/news/view/?mag_id=110688"
+        },
+        "updated_at": {
+          "stringValue": "2026-09-18T06:40:07.716998Z"
+        },
+        "summary": {
+          "stringValue": "서부극, 스릴러, 뮤지컬 등 관객이 좋아하는 장르와 특정 장면을 고르면, AC'SCENT에서 개발에 참여한 AI 기술이 각 참여자에게 어울리는 향수를 만들 수 있는 원료의 배합 비율을 소개해준다."
+        },
+        "title": {
+          "stringValue": "JIMFF #2호 [스코프] 엽연초살롱으로 오세요"
+        },
+        "published_at": {
+          "stringValue": "2026-09-05T00:00:00.000Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "content": {
+          "stringValue": ""
+        },
+        "created_at": {
+          "stringValue": "2026-09-18T06:40:07.716998Z"
+        },
+        "category": {
+          "stringValue": "press"
+        }
+      },
+      "createTime": "2026-09-18T06:40:08.880824Z",
+      "updateTime": "2026-09-18T06:40:08.880824Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/SWP5tYc8SS16DomJ4N99",
+      "fields": {
+        "source_url": {
+          "stringValue": "https://www.slist.kr/news/articleView.html?idxno=761949"
+        },
+        "updated_at": {
+          "stringValue": "2026-09-18T06:40:07.716998Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "title": {
+          "stringValue": "트와이스 다현·문상훈·안재홍…제천국제음악영화제 'OST페어' 개최"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "source_name": {
+          "stringValue": "싱글리스트"
+        },
+        "content": {
+          "stringValue": ""
+        },
+        "created_at": {
+          "stringValue": "2026-09-18T06:40:07.716998Z"
+        },
+        "published_at": {
+          "stringValue": "2026-08-28T00:00:00.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "summary": {
+          "stringValue": "지난해 선보였던 'JIMFF X AC'SCENT - AI 조향사'도 다시 운영된다. 관객이 좋아하는 영화 장르와 장면을 선택하면 AI가 이를 분석해 향기를 제안하고 직접 향수를 만들어볼 수 있다."
+        }
+      },
+      "createTime": "2026-09-18T06:40:08.599615Z",
+      "updateTime": "2026-09-18T06:40:08.599615Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/ezLnbTeGf2zFYlw8RNVS",
+      "fields": {
+        "is_sample": {
+          "booleanValue": true
+        },
+        "source_name": {
+          "stringValue": "뷰티경제"
+        },
+        "title": {
+          "stringValue": "글로벌 뷰티 브랜드 X 네안데르, AI 향기 팝업 스토어 성료"
+        },
+        "source_url": {
+          "nullValue": null
+        },
+        "updated_at": {
+          "stringValue": "2025-06-10T00:00:00.000Z"
+        },
+        "summary": {
+          "stringValue": "글로벌 뷰티 브랜드와 네안데르가 협업한 AI 향기 팝업 스토어가 성공적으로 마무리됐다. 방문객 만족도 95%를 기록했다."
+        },
+        "content": {
+          "stringValue": "<p>글로벌 뷰티 브랜드와 네안데르가 협업한 AI 향기 팝업 스토어가 성공적으로 마무리됐다. 방문객 만족도 95%를 기록했다.</p>"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "published_at": {
+          "stringValue": "2025-06-10T00:00:00.000Z"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "created_at": {
+          "stringValue": "2025-06-10T00:00:00.000Z"
+        }
+      },
+      "createTime": "2026-09-18T06:06:09.062135Z",
+      "updateTime": "2026-09-18T06:39:30.484903Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/hR8OzWnBxvefD5Kjuw6b",
+      "fields": {
+        "title": {
+          "stringValue": "네안데르, 서울 디자인 페스티벌서 인터랙티브 미디어아트 전시"
+        },
+        "created_at": {
+          "stringValue": "2025-10-08T00:00:00.000Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "published_at": {
+          "stringValue": "2025-10-08T00:00:00.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "is_sample": {
+          "booleanValue": true
+        },
+        "content": {
+          "stringValue": "<p>네안데르가 서울 디자인 페스티벌에 참가해 AI 기반 인터랙티브 미디어아트를 선보였다. 관람객의 움직임에 반응하는 실시간 영상 기술이 화제를 모았다.</p>"
+        },
+        "source_url": {
+          "nullValue": null
+        },
+        "updated_at": {
+          "stringValue": "2025-10-08T00:00:00.000Z"
+        },
+        "source_name": {
+          "stringValue": "조선일보"
+        },
+        "summary": {
+          "stringValue": "네안데르가 서울 디자인 페스티벌에 참가해 AI 기반 인터랙티브 미디어아트를 선보였다."
+        }
+      },
+      "createTime": "2026-09-18T06:06:09.375895Z",
+      "updateTime": "2026-09-18T06:39:30.623145Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/mETZWvAen0FeCgjRBUBz",
+      "fields": {
+        "category": {
+          "stringValue": "press"
+        },
+        "content": {
+          "stringValue": ""
+        },
+        "created_at": {
+          "stringValue": "2026-09-18T06:40:07.716998Z"
+        },
+        "summary": {
+          "stringValue": "제천국제음악영화제 OST페어에서 'JIMFF X AC'SCENT - AI 조향사' 부스가 운영된다. 관객이 좋아하는 영화 장르와 장면을 고르면 AI가 취향을 분석해 향기를 제안한다."
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "source_url": {
+          "stringValue": "https://www.newspim.com/news/view/20260828000411"
+        },
+        "title": {
+          "stringValue": "\"영화음악, 듣고 보고 고르고 경험한다\"…제천서 'OST페어' 열린다"
+        },
+        "updated_at": {
+          "stringValue": "2026-09-18T06:40:07.716998Z"
+        },
+        "source_name": {
+          "stringValue": "뉴스핌"
+        },
+        "published_at": {
+          "stringValue": "2026-08-28T00:00:00.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-09-18T06:40:08.261038Z",
+      "updateTime": "2026-09-18T06:40:08.261038Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-artkoreatv-20260825-104066",
+      "fields": {
+        "is_published": {
+          "booleanValue": true
+        },
+        "published_at": {
+          "stringValue": "2026-08-25T14:05:06.000Z"
+        },
+        "content": {
+          "stringValue": "<p>한국현대무용진흥회가 주최하는 2026 K-Wave Dance Festival이 10월 3~4일 이태원로 약 480m 구간을 거리무대로 바꿔 참여형 축제로 열린다고 보도했습니다.</p>"
+        },
+        "source_name": {
+          "stringValue": "아트코리아방송"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "title": {
+          "stringValue": "K팝 댄스의 뿌리 이태원 480m가 거대한 무대로"
+        },
+        "source_url": {
+          "stringValue": "https://www.artkoreatv.com/news/articleView.html?idxno=104066"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "summary": {
+          "stringValue": "한국현대무용진흥회가 주최하는 2026 K-Wave Dance Festival이 10월 3~4일 이태원로 약 480m 구간을 거리무대로 바꿔 참여형 축제로 열린다고 보도했습니다."
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-artkoreatv-20261009-104945",
+      "fields": {
+        "source_name": {
+          "stringValue": "아트코리아방송"
+        },
+        "source_url": {
+          "stringValue": "https://www.artkoreatv.com/news/articleView.html?idxno=104945"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "title": {
+          "stringValue": "[김한정의 문화예술 시선] 이태원로가 춤추기 시작했다"
+        },
+        "published_at": {
+          "stringValue": "2026-10-09T02:48:58.000Z"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "summary": {
+          "stringValue": "이태원로에서 열린 2026 K-Wave Dance Festival을 보며 공연장 밖으로 나온 문화예술의 방향을 짚은 칼럼입니다."
+        },
+        "content": {
+          "stringValue": "<p>이태원로에서 열린 2026 K-Wave Dance Festival을 보며 공연장 밖으로 나온 문화예술의 방향을 짚은 칼럼입니다.</p>"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-cbdaily-20260825-63306",
+      "fields": {
+        "source_url": {
+          "stringValue": "https://www.cbdaily.co.kr/news/article.html?no=63306"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_name": {
+          "stringValue": "충북데일리"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "summary": {
+          "stringValue": "이태원로 약 480m를 거리무대로 바꾸는 축제의 참여 프로그램으로 세계문화마을, 세계미식거리, AI 포토부스 등을 소개했습니다."
+        },
+        "title": {
+          "stringValue": "K팝 댄스의 뿌리 이태원 480m가 거대한 무대로… ‘2026 K-Wave Dance Festival’ 10월 3일~4일 개최"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "published_at": {
+          "stringValue": "2026-08-25T10:41:27.000Z"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "content": {
+          "stringValue": "<p>이태원로 약 480m를 거리무대로 바꾸는 축제의 참여 프로그램으로 세계문화마을, 세계미식거리, AI 포토부스 등을 소개했습니다.</p>"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-classian-20260831-4206815",
+      "fields": {
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "content": {
+          "stringValue": "<p>축제 기간 세계미식거리와 거리 노래방, 버스킹, 연희패 놀이, AI 포토부스 등이 운영된다고 보도했습니다.</p>"
+        },
+        "source_url": {
+          "stringValue": "https://classian.co.kr/View.aspx?No=4206815"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "summary": {
+          "stringValue": "축제 기간 세계미식거리와 거리 노래방, 버스킹, 연희패 놀이, AI 포토부스 등이 운영된다고 보도했습니다."
+        },
+        "published_at": {
+          "stringValue": "2026-08-31T22:56:49.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_name": {
+          "stringValue": "클래시안"
+        },
+        "title": {
+          "stringValue": "한국현대무용진흥회, '2026 K-Wave Dance Festival' 오는 10월 3일 개최"
+        },
+        "category": {
+          "stringValue": "press"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-cnbizm-20261005-317084",
+      "fields": {
+        "title": {
+          "stringValue": "김경대 용산구청장, ‘2026 K-Wave 댄스 페스티벌’ 개막식에 참석해 국내외 관람객을 환영"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_url": {
+          "stringValue": "https://www.cnbizm.com/news/articleView.html?idxno=317084"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "published_at": {
+          "stringValue": "2026-10-05T10:45:45.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_name": {
+          "stringValue": "문화경제 CNB저널"
+        },
+        "summary": {
+          "stringValue": "김경대 용산구청장이 개막식 환영사에서 다양한 문화가 공존하는 이태원의 의미를 되새기고 나비 모양 무인기 공연에 함께했다고 보도했습니다."
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "content": {
+          "stringValue": "<p>김경대 용산구청장이 개막식 환영사에서 다양한 문화가 공존하는 이태원의 의미를 되새기고 나비 모양 무인기 공연에 함께했다고 보도했습니다.</p>"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-culturegb-20260920-2180",
+      "fields": {
+        "title": {
+          "stringValue": "이태원로 480m 세계 춤으로 물든다"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "published_at": {
+          "stringValue": "2026-09-20T17:07:00.000Z"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "source_url": {
+          "stringValue": "https://m.culturegb.com/view.php?idx=2180"
+        },
+        "summary": {
+          "stringValue": "2026 K-Wave Dance Festival의 세계문화마을과 세계미식거리, AI 포토부스, 페이스페인팅 등 상설 프로그램이 운영된다고 보도했습니다."
+        },
+        "source_name": {
+          "stringValue": "컬처GB신문"
+        },
+        "content": {
+          "stringValue": "<p>2026 K-Wave Dance Festival의 세계문화마을과 세계미식거리, AI 포토부스, 페이스페인팅 등 상설 프로그램이 운영된다고 보도했습니다.</p>"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-dailytw-20260826-31665",
+      "fields": {
+        "content": {
+          "stringValue": "<p>한국현대무용진흥회가 10월 3~4일 이태원로 약 480m 구간에서 공연과 퍼레이드, 댄스 배틀, 체험 프로그램을 동시에 펼치는 거리 축제를 연다고 보도했습니다.</p>"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "title": {
+          "stringValue": "이태원 한복판서 펼쳐지는 세계 춤의 향연…K-Wave Dance Festival"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "source_name": {
+          "stringValue": "데일리투머로우"
+        },
+        "summary": {
+          "stringValue": "한국현대무용진흥회가 10월 3~4일 이태원로 약 480m 구간에서 공연과 퍼레이드, 댄스 배틀, 체험 프로그램을 동시에 펼치는 거리 축제를 연다고 보도했습니다."
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "published_at": {
+          "stringValue": "2026-08-26T12:33:38.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "source_url": {
+          "stringValue": "https://www.dailytw.kr/news/articleView.html?idxno=31665"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-donga-20261008-134809936",
+      "fields": {
+        "image_url": {
+          "nullValue": null
+        },
+        "source_url": {
+          "stringValue": "https://www.donga.com/news/Economy/article/all/20261008/134809936/1"
+        },
+        "source_name": {
+          "stringValue": "동아일보"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "content": {
+          "stringValue": "<p>2026 K-Wave Dance Festival의 방문객이 이틀간 약 6만 명으로 추정된다며 세계 춤 퍼레이드와 Global Open Dance Stage, 시민 참여 프로그램을 보도했습니다.</p>"
+        },
+        "published_at": {
+          "stringValue": "2026-10-08T17:55:00.000Z"
+        },
+        "title": {
+          "stringValue": "이태원 480m가 세계 춤 무대로…27개국 춤꾼 한자리에"
+        },
+        "summary": {
+          "stringValue": "2026 K-Wave Dance Festival의 방문객이 이틀간 약 6만 명으로 추정된다며 세계 춤 퍼레이드와 Global Open Dance Stage, 시민 참여 프로그램을 보도했습니다."
+        },
+        "is_sample": {
+          "booleanValue": false
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-edaily-20261005-03030726645609968",
+      "fields": {
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "published_at": {
+          "stringValue": "2026-10-05T19:38:51.000Z"
+        },
+        "source_url": {
+          "stringValue": "https://www.edaily.co.kr/News/Read?newsId=03030726645609968&mediaCodeNo=257"
+        },
+        "content": {
+          "stringValue": "<p>김경대 용산구청장 등이 2026 K-Wave 댄스 페스티벌 개막식에 참석한 모습을 사진으로 전했습니다.</p>"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "source_name": {
+          "stringValue": "이데일리"
+        },
+        "title": {
+          "stringValue": "[포토] 용산구, K-Wave 댄스 페스티벌"
+        },
+        "summary": {
+          "stringValue": "김경대 용산구청장 등이 2026 K-Wave 댄스 페스티벌 개막식에 참석한 모습을 사진으로 전했습니다."
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-ekn-20260909-20260909029372707",
+      "fields": {
+        "category": {
+          "stringValue": "press"
+        },
+        "title": {
+          "stringValue": "[패트롤] 수원시-안성시-오산시-평택시-화성시"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "created_at": {
+          "stringValue": "2026-10-14T13:30:03.930Z"
+        },
+        "published_at": {
+          "stringValue": "2026-09-09T08:44:00.000Z"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "summary": {
+          "stringValue": "평택아트센터에서 열린 ‘2026 AI FESTA’의 AI 분석 조향사와 포토부스 등 시민 참여형 체험 프로그램을 소개했습니다."
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "source_name": {
+          "stringValue": "에너지경제신문"
+        },
+        "content": {
+          "stringValue": "<p>평택아트센터에서 열린 ‘2026 AI FESTA’의 AI 분석 조향사와 포토부스 등 시민 참여형 체험 프로그램을 소개했습니다.</p>"
+        },
+        "updated_at": {
+          "stringValue": "2026-10-14T13:30:03.930Z"
+        },
+        "source_url": {
+          "stringValue": "https://www.ekn.kr/web/view.php?key=20260909029372707"
+        }
+      },
+      "createTime": "2026-10-14T13:30:04.025601Z",
+      "updateTime": "2026-10-14T13:30:04.025601Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-fn1966-20261007-43434",
+      "fields": {
+        "summary": {
+          "stringValue": "김경대 용산구청장이 개막식에 참석해 환영사에서 이태원이 다양한 문화가 공존하는 지역임을 강조했다고 보도했습니다."
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "source_name": {
+          "stringValue": "금융계"
+        },
+        "source_url": {
+          "stringValue": "https://www.fn1966.com/news/articleView.html?idxno=43434"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "published_at": {
+          "stringValue": "2026-10-07T18:06:30.000Z"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "content": {
+          "stringValue": "<p>김경대 용산구청장이 개막식에 참석해 환영사에서 이태원이 다양한 문화가 공존하는 지역임을 강조했다고 보도했습니다.</p>"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "title": {
+          "stringValue": "김경대 용산구청장, ‘2026 K-Wave 댄스 페스티벌’ 개막 축하…이태원 문화 강조"
+        },
+        "image_url": {
+          "nullValue": null
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-fntimes-20261006-202610010814447966b372994c95_18",
+      "fields": {
+        "source_name": {
+          "stringValue": "한국금융신문"
+        },
+        "published_at": {
+          "stringValue": "2026-10-06T09:08:27.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "source_url": {
+          "stringValue": "https://www.fntimes.com/html/view.php?ud=202610010814447966b372994c95_18"
+        },
+        "content": {
+          "stringValue": "<p>김경대 용산구청장이 2026 K-Wave 댄스 페스티벌 개막식에 참석해 축제 개최를 축하하고 국내외 관람객을 맞았다고 보도했습니다.</p>"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "summary": {
+          "stringValue": "김경대 용산구청장이 2026 K-Wave 댄스 페스티벌 개막식에 참석해 축제 개최를 축하하고 국내외 관람객을 맞았다고 보도했습니다."
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "title": {
+          "stringValue": "김경대 용산구청장, K-Wave 댄스 페스티벌 개막 참석"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "category": {
+          "stringValue": "press"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-foodnews-20260915-1644597",
+      "fields": {
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "content": {
+          "stringValue": "<p>2026 K-Wave Dance Festival의 세계미식거리 바로 옆 세계문화마을에서 각국 문화체험과 페이스페인팅, 하늘그네, DDR 게임, AI 포토사진을 즐길 수 있다고 보도했습니다.</p>"
+        },
+        "title": {
+          "stringValue": "1만원대로 세계문화 한 바퀴… 이태원, ‘지구촌 춤 × 미식 놀이터’로"
+        },
+        "summary": {
+          "stringValue": "2026 K-Wave Dance Festival의 세계미식거리 바로 옆 세계문화마을에서 각국 문화체험과 페이스페인팅, 하늘그네, DDR 게임, AI 포토사진을 즐길 수 있다고 보도했습니다."
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "source_url": {
+          "stringValue": "https://www.foodnews.news/mobile/article.html?no=1644597"
+        },
+        "source_name": {
+          "stringValue": "식품외식경영"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "published_at": {
+          "stringValue": "2026-09-15T14:14:19.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-genews-20261018-202610161456119388b065b72042_1",
+      "fields": {
+        "source_url": {
+          "stringValue": "https://www.g-enews.com/article/Bio-Pharma/2026/10/202610161456119388b065b72042_1"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "content": {
+          "stringValue": "<p>경기남부금연지원센터가 노담 베어·노담 타이거를 활용한 ‘금연 성공 디퓨저 클릭커’를 제작해 금연상담 참여자들에게 제공하고 있다고 보도했습니다.</p>"
+        },
+        "summary": {
+          "stringValue": "경기남부금연지원센터가 노담 베어·노담 타이거를 활용한 ‘금연 성공 디퓨저 클릭커’를 제작해 금연상담 참여자들에게 제공하고 있다고 보도했습니다."
+        },
+        "source_name": {
+          "stringValue": "글로벌이코노믹"
+        },
+        "title": {
+          "stringValue": "경기남부금연지원센터, ‘금연 성공 디퓨저 클릭커’ 흡연 욕구에 새로운 대처법 제시"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "published_at": {
+          "stringValue": "2026-10-18T08:00:00.000Z"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-globalnewsagency-20261005-497372",
+      "fields": {
+        "category": {
+          "stringValue": "press"
+        },
+        "summary": {
+          "stringValue": "김경대 용산구청장이 2026 K-Wave 댄스 페스티벌 개막식에 참석해 축제 개최를 축하하고 국내외 관람객을 환영했다고 보도했습니다."
+        },
+        "title": {
+          "stringValue": "김경대 용산구청장, ‘K-Wave 댄스 페스티벌’개막 축하"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "source_url": {
+          "stringValue": "https://www.globalnewsagency.kr/news/articleView.html?idxno=497372"
+        },
+        "content": {
+          "stringValue": "<p>김경대 용산구청장이 2026 K-Wave 댄스 페스티벌 개막식에 참석해 축제 개최를 축하하고 국내외 관람객을 환영했다고 보도했습니다.</p>"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_name": {
+          "stringValue": "글로벌뉴스통신GNA"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "published_at": {
+          "stringValue": "2026-10-05T08:37:45.000Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-globalnewsagency-20261009-498109",
+      "fields": {
+        "image_url": {
+          "nullValue": null
+        },
+        "content": {
+          "stringValue": "<p>축제의 폐막 소식을 전하며 AI 포토부스, 페이스페인팅, 하늘그네 등 무료 체험 부스에 가족 단위 방문객의 발길이 이어졌다고 보도했습니다.</p>"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "published_at": {
+          "stringValue": "2026-10-09T08:45:12.000Z"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "title": {
+          "stringValue": "이태원 ‘2026 K-Wave Dance Festival’ 성황리 폐막"
+        },
+        "summary": {
+          "stringValue": "축제의 폐막 소식을 전하며 AI 포토부스, 페이스페인팅, 하늘그네 등 무료 체험 부스에 가족 단위 방문객의 발길이 이어졌다고 보도했습니다."
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "source_name": {
+          "stringValue": "글로벌뉴스통신GNA"
+        },
+        "source_url": {
+          "stringValue": "https://www.globalnewsagency.kr/news/articleView.html?idxno=498109"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-gukjenews-20261008-3716641",
+      "fields": {
+        "is_sample": {
+          "booleanValue": false
+        },
+        "summary": {
+          "stringValue": "이틀간 약 6만 명이 찾은 축제의 개막 퍼레이드와 초청공연, 예술학교·대학 무용 전공생 무대 등 행사 내용을 보도했습니다."
+        },
+        "content": {
+          "stringValue": "<p>이틀간 약 6만 명이 찾은 축제의 개막 퍼레이드와 초청공연, 예술학교·대학 무용 전공생 무대 등 행사 내용을 보도했습니다.</p>"
+        },
+        "source_url": {
+          "stringValue": "https://www.gukjenews.com/news/articleView.html?idxno=3716641"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "title": {
+          "stringValue": "이태원로서 'K-Wave Dance Festival' 성황…이틀간 6만 명 몰려"
+        },
+        "source_name": {
+          "stringValue": "국제뉴스"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "published_at": {
+          "stringValue": "2026-10-08T16:43:14.000Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-hansbiz-20260908-863338",
+      "fields": {
+        "created_at": {
+          "stringValue": "2026-10-14T13:30:03.930Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "summary": {
+          "stringValue": "평택 AI 페스타의 AI 분석 조향사 체험에 시민 250명 이상이 참여했으며, 준비된 체험이 조기에 마감됐다고 보도했습니다."
+        },
+        "title": {
+          "stringValue": "평택시, 시민 참여형 AI 페스타로 첨단기술 체험 운영"
+        },
+        "source_name": {
+          "stringValue": "한스경제"
+        },
+        "updated_at": {
+          "stringValue": "2026-10-14T13:30:03.930Z"
+        },
+        "source_url": {
+          "stringValue": "https://www.hansbiz.co.kr/news/articleView.html?idxno=863338"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "published_at": {
+          "stringValue": "2026-09-08T11:15:55.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "content": {
+          "stringValue": "<p>평택 AI 페스타의 AI 분석 조향사 체험에 시민 250명 이상이 참여했으며, 준비된 체험이 조기에 마감됐다고 보도했습니다.</p>"
+        },
+        "is_sample": {
+          "booleanValue": false
+        }
+      },
+      "createTime": "2026-10-14T13:30:04.025601Z",
+      "updateTime": "2026-10-14T13:30:04.025601Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-heraldcorp-20261005-10893106",
+      "fields": {
+        "is_published": {
+          "booleanValue": true
+        },
+        "source_url": {
+          "stringValue": "https://biz.heraldcorp.com/article/10893106"
+        },
+        "published_at": {
+          "stringValue": "2026-10-05T08:34:57.000Z"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "source_name": {
+          "stringValue": "헤럴드경제"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "summary": {
+          "stringValue": "김경대 용산구청장이 개막식에 참석해 축제 개최를 축하했으며, 초청공연과 세계 춤 행진, 문화체험·미식 공간 등 프로그램이 마련됐다고 보도했습니다."
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "title": {
+          "stringValue": "김경대 용산구청장 ‘K-Wave 댄스 페스티벌’ 개막 축하"
+        },
+        "content": {
+          "stringValue": "<p>김경대 용산구청장이 개막식에 참석해 축제 개최를 축하했으며, 초청공연과 세계 춤 행진, 문화체험·미식 공간 등 프로그램이 마련됐다고 보도했습니다.</p>"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "is_sample": {
+          "booleanValue": false
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-heraldcorp-20261015-10904121",
+      "fields": {
+        "image_url": {
+          "nullValue": null
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_name": {
+          "stringValue": "헤럴드경제"
+        },
+        "title": {
+          "stringValue": "이태원 거리가 K-pop 댄스 무대로…세계 27개국 댄서 한자리에"
+        },
+        "source_url": {
+          "stringValue": "https://biz.heraldcorp.com/article/10904121"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "summary": {
+          "stringValue": "2026 K-Wave Dance Festival에 AI 포토부스와 페이스페인팅, 하늘그네 등 가족 단위 방문객을 위한 체험 공간이 마련됐다고 보도했습니다."
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "content": {
+          "stringValue": "<p>2026 K-Wave Dance Festival에 AI 포토부스와 페이스페인팅, 하늘그네 등 가족 단위 방문객을 위한 체험 공간이 마련됐다고 보도했습니다.</p>"
+        },
+        "published_at": {
+          "stringValue": "2026-10-15T16:48:47.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-hynews-20260826-87913",
+      "fields": {
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_url": {
+          "stringValue": "https://www.hynews.co.kr/default/index_view_page.php?idx=87913"
+        },
+        "content": {
+          "stringValue": "<p>2026 K-Wave Dance Festival의 일정과 프로그램을 소개하며 세계문화마을, 세계미식거리, AI 포토부스 등을 참여 프로그램으로 안내했습니다.</p>"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "summary": {
+          "stringValue": "2026 K-Wave Dance Festival의 일정과 프로그램을 소개하며 세계문화마을, 세계미식거리, AI 포토부스 등을 참여 프로그램으로 안내했습니다."
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_name": {
+          "stringValue": "인터넷함양신문"
+        },
+        "title": {
+          "stringValue": "K팝 댄스의 뿌리 이태원 480m가 거대한 무대로"
+        },
+        "published_at": {
+          "stringValue": "2026-08-26T00:00:00.000Z"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "is_published": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-justeconomix-20261005-153566",
+      "fields": {
+        "is_published": {
+          "booleanValue": true
+        },
+        "published_at": {
+          "stringValue": "2026-10-05T17:03:59.000Z"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "source_url": {
+          "stringValue": "https://www.justeconomix.com/ko-kr/articles/153566"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "title": {
+          "stringValue": "김경대 용산구청장,‘K-Wave 댄스 페스티벌’개막 축하"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_name": {
+          "stringValue": "저스트 이코노믹스"
+        },
+        "summary": {
+          "stringValue": "김경대 용산구청장이 개막식에 참석해 축제 개최를 축하했으며, 세계 춤 행진과 공연, 문화체험 등 이틀간의 프로그램을 소개했습니다."
+        },
+        "content": {
+          "stringValue": "<p>김경대 용산구청장이 개막식에 참석해 축제 개최를 축하했으며, 세계 춤 행진과 공연, 문화체험 등 이틀간의 프로그램을 소개했습니다.</p>"
+        },
+        "is_sample": {
+          "booleanValue": false
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-kclassicnews-20261009-228606",
+      "fields": {
+        "is_sample": {
+          "booleanValue": false
+        },
+        "summary": {
+          "stringValue": "세계미식거리와 세계문화마을을 소개하며 AI 포토부스, 페이스페인팅, 하늘그네 등 무료 체험 부스에 가족 단위 방문객의 발길이 이어졌다고 보도했습니다."
+        },
+        "source_name": {
+          "stringValue": "K-Classic News"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "published_at": {
+          "stringValue": "2026-10-09T16:34:15.000Z"
+        },
+        "source_url": {
+          "stringValue": "https://www.kclassicnews.com/news/article.html?no=228606"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "content": {
+          "stringValue": "<p>세계미식거리와 세계문화마을을 소개하며 AI 포토부스, 페이스페인팅, 하늘그네 등 무료 체험 부스에 가족 단위 방문객의 발길이 이어졌다고 보도했습니다.</p>"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "title": {
+          "stringValue": "이태원로가 통째로 춤 무대로… ‘2026 K-Wave Dance Festival’ 성황리 폐막"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-kfm-20260909-2026090968650",
+      "fields": {
+        "source_url": {
+          "stringValue": "https://www.kfm.co.kr/news/2026090968650"
+        },
+        "content": {
+          "stringValue": "<p>2026 K-Wave Dance Festival의 세계미식거리 옆 세계문화마을에서 페이스페인팅, 하늘그네, DDR 게임, AI 포토사진 등을 즐길 수 있다고 보도했습니다.</p>"
+        },
+        "title": {
+          "stringValue": "1만원대로 세계문화 한 바퀴… 이태원, 10월 3~4일 ‘지구촌 춤 × 미식 놀이터’로"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "published_at": {
+          "stringValue": "2026-09-09T10:00:00.000Z"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "summary": {
+          "stringValue": "2026 K-Wave Dance Festival의 세계미식거리 옆 세계문화마을에서 페이스페인팅, 하늘그네, DDR 게임, AI 포토사진 등을 즐길 수 있다고 보도했습니다."
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "source_name": {
+          "stringValue": "AI경기방송"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-knewstv-20260825-13544",
+      "fields": {
+        "is_sample": {
+          "booleanValue": false
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "published_at": {
+          "stringValue": "2026-08-25T16:17:27.000Z"
+        },
+        "source_url": {
+          "stringValue": "https://www.knewstv.kr/news/articleView.html?idxno=13544"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "summary": {
+          "stringValue": "이태원로 축제에서 세계문화마을과 K푸드·세계음식 부스, 거리 노래방, 버스킹, AI 포토부스 등 부대 프로그램이 함께 운영된다고 보도했습니다."
+        },
+        "title": {
+          "stringValue": "이태원로 480m가 춤 무대로…‘K-Wave Dance Festival’ 10월 개최"
+        },
+        "source_name": {
+          "stringValue": "K뉴스통신"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "content": {
+          "stringValue": "<p>이태원로 축제에서 세계문화마을과 K푸드·세계음식 부스, 거리 노래방, 버스킹, AI 포토부스 등 부대 프로그램이 함께 운영된다고 보도했습니다.</p>"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-mk-20260909-12148064",
+      "fields": {
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "title": {
+          "stringValue": "여권 없이 세계여행, 10월 이태원서 열린다 [페스티벌 플러스]"
+        },
+        "content": {
+          "stringValue": "<p>2026 K-Wave Dance Festival의 세계미식거리와 문화 프로그램을 소개하며 페이스페인팅, 하늘그네, 인공지능(AI) 사진 등도 함께 즐길 수 있다고 보도했습니다.</p>"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "source_url": {
+          "stringValue": "https://www.mk.co.kr/news/culture/12148064"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "published_at": {
+          "stringValue": "2026-09-09T11:14:27.000Z"
+        },
+        "source_name": {
+          "stringValue": "매일경제"
+        },
+        "summary": {
+          "stringValue": "2026 K-Wave Dance Festival의 세계미식거리와 문화 프로그램을 소개하며 페이스페인팅, 하늘그네, 인공지능(AI) 사진 등도 함께 즐길 수 있다고 보도했습니다."
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-mssnews-20260825-2844",
+      "fields": {
+        "content": {
+          "stringValue": "<p>이태원로 약 480m를 거리 무대로 바꾸는 축제의 세계 춤 퍼레이드, 로봇과 무용수의 협동 무대, 세계문화마을과 세계미식거리 등을 소개했습니다.</p>"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "title": {
+          "stringValue": "480m 이태원로가 춤판으로… ‘2026 K-Wave Dance Festival’ 10월 개최"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "summary": {
+          "stringValue": "이태원로 약 480m를 거리 무대로 바꾸는 축제의 세계 춤 퍼레이드, 로봇과 무용수의 협동 무대, 세계문화마을과 세계미식거리 등을 소개했습니다."
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "source_name": {
+          "stringValue": "중소벤처기업신문"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "source_url": {
+          "stringValue": "https://www.mssnews.com/news/articleView.html?idxno=2844"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "published_at": {
+          "stringValue": "2026-08-25T16:20:00.000Z"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-newsin-20261008-134316",
+      "fields": {
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "source_name": {
+          "stringValue": "뉴스인"
+        },
+        "summary": {
+          "stringValue": "이태원로 축제의 폐막 소식을 전하며 AI 포토부스, 페이스페인팅, 하늘그네 등 무료 체험 부스에 가족 단위 방문객의 발길이 이어졌다고 보도했습니다."
+        },
+        "content": {
+          "stringValue": "<p>이태원로 축제의 폐막 소식을 전하며 AI 포토부스, 페이스페인팅, 하늘그네 등 무료 체험 부스에 가족 단위 방문객의 발길이 이어졌다고 보도했습니다.</p>"
+        },
+        "title": {
+          "stringValue": "‘2026 K-Wave Dance Festival’ 이태원로가 통째로 춤 무대로…성황리 폐막"
+        },
+        "published_at": {
+          "stringValue": "2026-10-08T18:11:47.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_url": {
+          "stringValue": "http://www.newsin.co.kr/news/articleView.html?idxno=134316"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "category": {
+          "stringValue": "press"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-newsis-20260909-0003783088",
+      "fields": {
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "published_at": {
+          "stringValue": "2026-09-09T16:59:10.000Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "title": {
+          "stringValue": "이태원 거리가 무용수 놀이터로…'K-웨이브 댄스 페스티벌' 10월 개막"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "source_url": {
+          "stringValue": "https://www.newsis.com/view/NISX20260909_0003783088"
+        },
+        "content": {
+          "stringValue": "<p>세계문화마을에서 페이스페인팅, 하늘그네, DDR 게임, AI 포토사진 등을 즐길 수 있으며 조직위가 이틀간 누적 3만 명의 방문을 예상한다고 보도했습니다.</p>"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_name": {
+          "stringValue": "뉴시스"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "summary": {
+          "stringValue": "세계문화마을에서 페이스페인팅, 하늘그네, DDR 게임, AI 포토사진 등을 즐길 수 있으며 조직위가 이틀간 누적 3만 명의 방문을 예상한다고 보도했습니다."
+        },
+        "category": {
+          "stringValue": "press"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-newsis-20261005-20261005100545623",
+      "fields": {
+        "title": {
+          "stringValue": "김경대 \"다양한 문화 어우러지는 이태원의 매력 살리겠다\""
+        },
+        "summary": {
+          "stringValue": "김경대 용산구청장이 2026 K-Wave 댄스 페스티벌 개막식에 참석해 이태원만의 매력을 살려 나가겠다고 말했다고 보도했습니다."
+        },
+        "published_at": {
+          "stringValue": "2026-10-05T10:05:45.000Z"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "content": {
+          "stringValue": "<p>김경대 용산구청장이 2026 K-Wave 댄스 페스티벌 개막식에 참석해 이태원만의 매력을 살려 나가겠다고 말했다고 보도했습니다.</p>"
+        },
+        "source_name": {
+          "stringValue": "뉴시스"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "source_url": {
+          "stringValue": "https://v.daum.net/v/20261005100545623"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "image_url": {
+          "nullValue": null
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-newskorea-20261009-21711",
+      "fields": {
+        "summary": {
+          "stringValue": "세계미식거리와 세계문화마을과 함께 AI 포토부스, 페이스페인팅, 하늘그네 등 무료 체험 프로그램이 운영됐다고 보도했습니다."
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "source_name": {
+          "stringValue": "뉴스코리아"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "content": {
+          "stringValue": "<p>세계미식거리와 세계문화마을과 함께 AI 포토부스, 페이스페인팅, 하늘그네 등 무료 체험 프로그램이 운영됐다고 보도했습니다.</p>"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "published_at": {
+          "stringValue": "2026-10-09T01:04:00.000Z"
+        },
+        "source_url": {
+          "stringValue": "https://www.newskorea.ne.kr/news/articleView.html?idxno=21711"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "title": {
+          "stringValue": "이태원로 480m가 거대한 춤판으로…‘2026 K-Wave Dance Festival’ 성황"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-newsphere-20261008-2839",
+      "fields": {
+        "content": {
+          "stringValue": "<p>2026 K-Wave Dance Festival에 연계 프로그램을 포함해 약 6만 명이 방문한 것으로 주최 측이 추산했으며, 9개국 퍼레이드와 27개국 시민 무대가 펼쳐졌다고 보도했습니다.</p>"
+        },
+        "source_name": {
+          "stringValue": "뉴스환경"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "title": {
+          "stringValue": "이태원 480m가 춤 무대…이틀간 6만명 찾았다"
+        },
+        "summary": {
+          "stringValue": "2026 K-Wave Dance Festival에 연계 프로그램을 포함해 약 6만 명이 방문한 것으로 주최 측이 추산했으며, 9개국 퍼레이드와 27개국 시민 무대가 펼쳐졌다고 보도했습니다."
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "published_at": {
+          "stringValue": "2026-10-08T16:39:43.000Z"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_url": {
+          "stringValue": "https://www.newsphere.kr/news/articleView.html?idxno=2839"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-newswire-20260825-1041036",
+      "fields": {
+        "source_name": {
+          "stringValue": "뉴스와이어"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "content": {
+          "stringValue": "<p>2026 K-Wave Dance Festival 개최 소식을 전하며 참여 프로그램으로 세계문화마을, 세계미식거리, AI 포토부스 등을 소개했습니다.</p>"
+        },
+        "summary": {
+          "stringValue": "2026 K-Wave Dance Festival 개최 소식을 전하며 참여 프로그램으로 세계문화마을, 세계미식거리, AI 포토부스 등을 소개했습니다."
+        },
+        "published_at": {
+          "stringValue": "2026-08-25T10:30:00.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "source_url": {
+          "stringValue": "https://www.newswire.co.kr/newsRead.php?no=1041036"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "title": {
+          "stringValue": "K팝 댄스의 뿌리 이태원 480m가 거대한 무대로… ‘2026 K-Wave Dance Festival’ 10월 3일~4일 개최"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-newswire-20260909-1042133",
+      "fields": {
+        "is_sample": {
+          "booleanValue": false
+        },
+        "source_name": {
+          "stringValue": "뉴스와이어"
+        },
+        "published_at": {
+          "stringValue": "2026-09-09T10:00:00.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_url": {
+          "stringValue": "https://www.newswire.co.kr/newsRead.php?no=1042133"
+        },
+        "summary": {
+          "stringValue": "2026 K-Wave Dance Festival의 세계미식거리와 세계문화마을을 소개하며 페이스페인팅, 하늘그네, DDR 게임, AI 포토사진 등 즐길 거리를 전했습니다."
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "title": {
+          "stringValue": "1만원대로 세계문화 한 바퀴… 이태원, 10월 3~4일 ‘지구촌 춤 × 미식 놀이터’로"
+        },
+        "content": {
+          "stringValue": "<p>2026 K-Wave Dance Festival의 세계미식거리와 세계문화마을을 소개하며 페이스페인팅, 하늘그네, DDR 게임, AI 포토사진 등 즐길 거리를 전했습니다.</p>"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-newswire-20261008-1044202",
+      "fields": {
+        "source_name": {
+          "stringValue": "뉴스와이어"
+        },
+        "content": {
+          "stringValue": "<p>이틀간 약 6만 명이 찾은 축제의 폐막 소식을 전하며 AI 포토부스, 페이스페인팅, 하늘그네 등 무료 체험 부스에 가족 단위 방문객의 발길이 이어졌다고 전했습니다.</p>"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "source_url": {
+          "stringValue": "https://www.newswire.co.kr/newsRead.php?no=1044202"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "title": {
+          "stringValue": "이태원로가 통째로 춤 무대로… ‘2026 K-Wave Dance Festival’ 성황리 폐막"
+        },
+        "summary": {
+          "stringValue": "이틀간 약 6만 명이 찾은 축제의 폐막 소식을 전하며 AI 포토부스, 페이스페인팅, 하늘그네 등 무료 체험 부스에 가족 단위 방문객의 발길이 이어졌다고 전했습니다."
+        },
+        "published_at": {
+          "stringValue": "2026-10-08T10:30:00.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "image_url": {
+          "nullValue": null
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-sijung-20261005-438349",
+      "fields": {
+        "is_published": {
+          "booleanValue": true
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "published_at": {
+          "stringValue": "2026-10-05T12:10:57.000Z"
+        },
+        "source_name": {
+          "stringValue": "시정일보"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_url": {
+          "stringValue": "https://www.sijung.co.kr/news/articleView.html?idxno=438349"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "content": {
+          "stringValue": "<p>김경대 용산구청장이 환영사에서 이태원의 특색을 강조하고 나비 모양 드론 공연에 함께하며 개막 분위기를 더했다고 보도했습니다.</p>"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "summary": {
+          "stringValue": "김경대 용산구청장이 환영사에서 이태원의 특색을 강조하고 나비 모양 드론 공연에 함께하며 개막 분위기를 더했다고 보도했습니다."
+        },
+        "title": {
+          "stringValue": "김경대 용산구청장 “이태원만의 매력 살린다”…K-Wave 축제 개막 참석"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-siminilbo-20261006-1160288062077697",
+      "fields": {
+        "source_name": {
+          "stringValue": "시민일보"
+        },
+        "summary": {
+          "stringValue": "김경대 용산구청장과 관계자들이 행사에 앞서 행사장을 둘러보며 안전 상황을 점검하는 모습을 사진으로 전했습니다."
+        },
+        "source_url": {
+          "stringValue": "https://www.siminilbo.co.kr/news/newsview.php?ncode=1160288062077697"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "content": {
+          "stringValue": "<p>김경대 용산구청장과 관계자들이 행사에 앞서 행사장을 둘러보며 안전 상황을 점검하는 모습을 사진으로 전했습니다.</p>"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "published_at": {
+          "stringValue": "2026-10-06T15:27:10.000Z"
+        },
+        "title": {
+          "stringValue": "김경대 용산구청장, K-Wave 댄스 페스티벌 현장 점검"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "image_url": {
+          "nullValue": null
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-specialtimes-20260825-453959",
+      "fields": {
+        "category": {
+          "stringValue": "press"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_url": {
+          "stringValue": "https://www.specialtimes.co.kr/news/articleView.html?idxno=453959"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "title": {
+          "stringValue": "한국현대무용진흥회, 이태원 480m 거리무대 축제 10월 3~4일 개최"
+        },
+        "published_at": {
+          "stringValue": "2026-08-25T10:45:49.000Z"
+        },
+        "content": {
+          "stringValue": "<p>2026 K-Wave Dance Festival의 참여 프로그램으로 거리 노래방, 버스킹, 연희패 놀이, AI 포토부스, 하늘그네 등이 마련된다고 보도했습니다.</p>"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "source_name": {
+          "stringValue": "스페셜타임스"
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "summary": {
+          "stringValue": "2026 K-Wave Dance Festival의 참여 프로그램으로 거리 노래방, 버스킹, 연희패 놀이, AI 포토부스, 하늘그네 등이 마련된다고 보도했습니다."
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-specialtimes-20260909-460415",
+      "fields": {
+        "source_name": {
+          "stringValue": "스페셜타임스"
+        },
+        "content": {
+          "stringValue": "<p>2026 K-Wave Dance Festival의 세계미식거리 40개 부스와 함께 세계문화마을에서 페이스페인팅, 하늘그네, DDR 게임, AI 포토사진 등을 즐길 수 있다고 보도했습니다.</p>"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "source_url": {
+          "stringValue": "https://www.specialtimes.co.kr/news/articleView.html?idxno=460415"
+        },
+        "published_at": {
+          "stringValue": "2026-09-09T10:20:56.000Z"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "title": {
+          "stringValue": "이태원 400m 세계미식거리, 1만원대 40개 부스로 즐기는 10월 축제"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "summary": {
+          "stringValue": "2026 K-Wave Dance Festival의 세계미식거리 40개 부스와 함께 세계문화마을에서 페이스페인팅, 하늘그네, DDR 게임, AI 포토사진 등을 즐길 수 있다고 보도했습니다."
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-specialtimes-20261008-471896",
+      "fields": {
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "summary": {
+          "stringValue": "2026 K-Wave Dance Festival에서 AI 포토부스, 페이스페인팅, 하늘그네 등 무료 체험 부스에 가족 단위 방문객의 발길이 이어졌다고 보도했습니다."
+        },
+        "title": {
+          "stringValue": "이태원로 480m 차량 통제, 춤 축제 이틀간 6만 명 무료 관람"
+        },
+        "is_sample": {
+          "booleanValue": false
+        },
+        "source_url": {
+          "stringValue": "https://www.specialtimes.co.kr/news/articleView.html?idxno=471896"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_name": {
+          "stringValue": "스페셜타임스"
+        },
+        "published_at": {
+          "stringValue": "2026-10-08T10:49:37.000Z"
+        },
+        "content": {
+          "stringValue": "<p>2026 K-Wave Dance Festival에서 AI 포토부스, 페이스페인팅, 하늘그네 등 무료 체험 부스에 가족 단위 방문객의 발길이 이어졌다고 보도했습니다.</p>"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "category": {
+          "stringValue": "press"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-trendkorea-20260909-1932",
+      "fields": {
+        "summary": {
+          "stringValue": "2026 K-Wave Dance Festival의 세계문화마을에서 각국 문화체험과 페이스페인팅, 하늘그네, DDR 게임, AI 포토사진 체험까지 마련된다고 보도했습니다."
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "content": {
+          "stringValue": "<p>2026 K-Wave Dance Festival의 세계문화마을에서 각국 문화체험과 페이스페인팅, 하늘그네, DDR 게임, AI 포토사진 체험까지 마련된다고 보도했습니다.</p>"
+        },
+        "source_name": {
+          "stringValue": "트렌드코리아"
+        },
+        "published_at": {
+          "stringValue": "2026-09-09T16:16:55.000Z"
+        },
+        "title": {
+          "stringValue": "“여권 없이 1만원대로 세계 한 바퀴”…이태원, 480m ‘춤·미식 놀이터’ 된다"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_url": {
+          "stringValue": "https://www.trend-korea.co.kr/news/articleView.html?idxno=1932"
+        },
+        "is_sample": {
+          "booleanValue": false
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/press-womannews-20261004-456508",
+      "fields": {
+        "is_sample": {
+          "booleanValue": false
+        },
+        "created_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "source_name": {
+          "stringValue": "여성종합뉴스"
+        },
+        "summary": {
+          "stringValue": "김경대 용산구청장이 개막식에 참석해 국내외 관람객을 환영했으며, 행사 기간 초청공연과 퍼레이드, 문화체험 프로그램, 미식 공간이 운영됐다고 보도했습니다."
+        },
+        "title": {
+          "stringValue": "김경대 용산구청장, 2026 K-Wave 댄스 페스티벌 개막식 참석"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "updated_at": {
+          "stringValue": "2026-11-09T12:52:30.575Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "content": {
+          "stringValue": "<p>김경대 용산구청장이 개막식에 참석해 국내외 관람객을 환영했으며, 행사 기간 초청공연과 퍼레이드, 문화체험 프로그램, 미식 공간이 운영됐다고 보도했습니다.</p>"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "source_url": {
+          "stringValue": "https://womannews.net/detail.php?number=456508&thread=22r12r01"
+        },
+        "published_at": {
+          "stringValue": "2026-10-04T21:36:45.000Z"
+        }
+      },
+      "createTime": "2026-11-09T12:52:30.791525Z",
+      "updateTime": "2026-11-09T12:52:30.791525Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/tCxt1lECRMXNlWM8qUQV",
+      "fields": {
+        "source_url": {
+          "stringValue": "https://plus.hankyung.com/apps/newsinside.view?aid=202511230569d"
+        },
+        "updated_at": {
+          "stringValue": "2026-09-18T06:40:07.716998Z"
+        },
+        "title": {
+          "stringValue": "[Chung-Ang University Campus Town Startups 2025] 'NEANDER,' a Content Company Specializing in the Fusion of AI Technology, Art, and Fragrance"
+        },
+        "source_name": {
+          "stringValue": "한경플러스 (영문)"
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "published_at": {
+          "stringValue": "2025-11-23T00:00:00.000Z"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "created_at": {
+          "stringValue": "2026-09-18T06:40:07.716998Z"
+        },
+        "summary": {
+          "stringValue": "AI 기술과 예술, 향기를 결합한 콘텐츠 기업 네안데르를 소개한 영문 기사. AC'SCENT ID에서 선보이는 자체 개발 AI 프로그램과 사업 모델을 다뤘다."
+        },
+        "content": {
+          "stringValue": ""
+        },
+        "image_url": {
+          "nullValue": null
+        }
+      },
+      "createTime": "2026-09-18T06:40:08.129125Z",
+      "updateTime": "2026-09-18T06:40:08.129125Z"
+    },
+    {
+      "name": "projects/neander-4968a/databases/(default)/documents/news/yzHNpz33drhXcH4S0G25",
+      "fields": {
+        "content": {
+          "stringValue": "<p>AI 기반 체험형 콘텐츠 기업 네안데르가 맞춤형 향수 제조 솔루션을 선보이며 팝업 스토어 시장에서 주목받고 있다.</p>"
+        },
+        "title": {
+          "stringValue": "네안데르, AI 향수 체험형 콘텐츠로 팝업 시장 공략"
+        },
+        "source_name": {
+          "stringValue": "매일경제"
+        },
+        "is_published": {
+          "booleanValue": true
+        },
+        "published_at": {
+          "stringValue": "2025-12-15T00:00:00.000Z"
+        },
+        "image_url": {
+          "nullValue": null
+        },
+        "source_url": {
+          "nullValue": null
+        },
+        "category": {
+          "stringValue": "press"
+        },
+        "summary": {
+          "stringValue": "AI 기반 체험형 콘텐츠 기업 네안데르가 맞춤형 향수 제조 솔루션을 선보이며 팝업 스토어 시장에서 주목받고 있다."
+        },
+        "updated_at": {
+          "stringValue": "2025-12-15T00:00:00.000Z"
+        },
+        "is_sample": {
+          "booleanValue": true
+        },
+        "created_at": {
+          "stringValue": "2025-12-15T00:00:00.000Z"
+        }
+      },
+      "createTime": "2026-09-18T06:06:09.504880Z",
+      "updateTime": "2026-09-18T06:39:30.889142Z"
+    }
+  ]
+}
