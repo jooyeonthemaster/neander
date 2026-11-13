@@ -780,49 +780,19 @@
     "result_ko": "공연별 향 구성 · 룸스프레이·사쉐 키링 제작",
     "result_en": "Concert-specific scents · room sprays and sachet keyrings",
     "images": [
-      "/images/portfolio/archive/nflying-into-the-rem-md-2026-01.webp",
-      "/images/portfolio/archive/nflying-into-the-rem-md-2026-02.webp",
-      "/images/portfolio/archive/nflying-into-the-rem-md-2026-03.webp",
-      "/images/portfolio/archive/nflying-into-the-rem-md-2026-04.webp",
-      "/images/portfolio/archive/nflying-into-the-rem-md-2026-05.webp",
-      "/images/portfolio/archive/nflying-into-the-rem-md-2026-06.webp",
-      "/images/portfolio/archive/nflying-into-the-rem-md-2026-07.webp"
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fnflying-into-the-rem-md-2026-studio-01.webp?alt=media&token=9dddd114-6e27-4d2b-bfd5-78118c608f76",
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fnflying-into-the-rem-md-2026-studio-02.webp?alt=media&token=16d7e0f4-082f-46a9-a7d0-791343bbf6a0"
     ],
-    "thumbnail": "/images/portfolio/archive/nflying-into-the-rem-md-2026-01.webp",
+    "thumbnail": "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fnflying-into-the-rem-md-2026-studio-01.webp?alt=media&token=9dddd114-6e27-4d2b-bfd5-78118c608f76",
     "image_metadata": {
-      "/images/portfolio/archive/nflying-into-the-rem-md-2026-01.webp": {
-        "caption_ko": "엔플라잉 into REM — 룸스프레이와 패키지 실물",
-        "caption_en": "N.Flying into REM — room spray and packaging",
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fnflying-into-the-rem-md-2026-studio-01.webp?alt=media&token=9dddd114-6e27-4d2b-bfd5-78118c608f76": {
+        "caption_ko": "엔플라잉 into REM — 룸스프레이·박스·포토카드 스튜디오 컷",
+        "caption_en": "N.Flying into REM — room spray, box and photo card, studio shot",
         "kind": "photo"
       },
-      "/images/portfolio/archive/nflying-into-the-rem-md-2026-02.webp": {
-        "caption_ko": "엔플라잉 into REM — 룸스프레이와 패키지 실물",
-        "caption_en": "N.Flying into REM — room spray and packaging",
-        "kind": "photo"
-      },
-      "/images/portfolio/archive/nflying-into-the-rem-md-2026-03.webp": {
-        "caption_ko": "엔플라잉 into REM — 룸스프레이와 패키지 실물",
-        "caption_en": "N.Flying into REM — room spray and packaging",
-        "kind": "photo"
-      },
-      "/images/portfolio/archive/nflying-into-the-rem-md-2026-04.webp": {
-        "caption_ko": "엔플라잉 into REM — 룸스프레이와 패키지 실물",
-        "caption_en": "N.Flying into REM — room spray and packaging",
-        "kind": "photo"
-      },
-      "/images/portfolio/archive/nflying-into-the-rem-md-2026-05.webp": {
-        "caption_ko": "엔플라잉 into REM — 룸스프레이와 패키지 실물",
-        "caption_en": "N.Flying into REM — room spray and packaging",
-        "kind": "photo"
-      },
-      "/images/portfolio/archive/nflying-into-the-rem-md-2026-06.webp": {
-        "caption_ko": "엔플라잉 into REM — 룸스프레이와 패키지 실물",
-        "caption_en": "N.Flying into REM — room spray and packaging",
-        "kind": "photo"
-      },
-      "/images/portfolio/archive/nflying-into-the-rem-md-2026-07.webp": {
-        "caption_ko": "엔플라잉 into REM — 룸스프레이와 패키지 실물",
-        "caption_en": "N.Flying into REM — room spray and packaging",
+      "https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fnflying-into-the-rem-md-2026-studio-02.webp?alt=media&token=16d7e0f4-082f-46a9-a7d0-791343bbf6a0": {
+        "caption_ko": "엔플라잉 into REM — 룸스프레이 분사 스튜디오 컷",
+        "caption_en": "N.Flying into REM — room spray in use, studio shot",
         "kind": "photo"
       }
     },
