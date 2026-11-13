@@ -1,5 +1,336 @@
 [
   {
+    "id": "ansan-science-festival-2026",
+    "tags": [
+      "Science Festival",
+      "AI Photo Booth",
+      "Family Experience"
+    ],
+    "services": [
+      "photoBooth",
+      "custom"
+    ],
+    "year": 2026,
+    "location": "한양대학교 ERICA",
+    "is_featured": true,
+    "title_ko": "2026 안산사이언스밸리 과학축제 — AI 포토부스 〈미래로 가는 타임캡슐〉",
+    "title_en": "Ansan Science Valley Science Festival 2026 — AI Photo Booth \"Time Capsule to the Future\"",
+    "description_ko": "2026 안산사이언스밸리 과학축제에서 AI 포토부스를 이틀간 운영했습니다. 가족이 함께 찍은 사진 한 장으로 지금의 모습과 10년·20년·30년 뒤 모습을 AI로 만들어 네 컷 띠지로 인화하고, QR로 휴대폰에도 저장할 수 있게 했습니다.",
+    "description_en": "We ran an AI photo booth for two days at the Ansan Science Valley Science Festival 2026. From a single family photo, AI created four frames — today and 10, 20 and 30 years later — printed as a photo strip and also saved to visitors' phones via QR.",
+    "slug": "ansan-science-festival-2026",
+    "category": "offline",
+    "tags_ko": [
+      "과학축제",
+      "AI 포토부스",
+      "가족 체험"
+    ],
+    "tags_en": [
+      "Science Festival",
+      "AI Photo Booth",
+      "Family Experience"
+    ],
+    "client": "안산사이언스밸리 과학축제",
+    "period": "2026.11.07–11.08",
+    "period_ko": "2026.11.07–11.08",
+    "period_en": "November 7–8, 2026",
+    "client_ko": "안산사이언스밸리 과학축제",
+    "client_en": "Ansan Science Valley Science Festival",
+    "location_ko": "한양대학교 ERICA",
+    "location_en": "Hanyang University ERICA",
+    "result_ko": "이틀간 316팀 완성 · 약 860명 참여",
+    "result_en": "316 groups completed over two days, about 860 participants",
+    "images": [
+      "/images/portfolio/archive/ansan-science-festival-2026-01.webp",
+      "/images/portfolio/archive/ansan-science-festival-2026-02.webp",
+      "/images/portfolio/archive/ansan-science-festival-2026-03.webp"
+    ],
+    "thumbnail": "/images/portfolio/archive/ansan-science-festival-2026-01.webp",
+    "image_metadata": {
+      "/images/portfolio/archive/ansan-science-festival-2026-01.webp": {
+        "caption_ko": "AI 포토존 부스에서 체험하는 가족",
+        "caption_en": "Families using the AI photo zone booth",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/ansan-science-festival-2026-02.webp": {
+        "caption_ko": "〈AI 포토존〉 텐트 부스 운영",
+        "caption_en": "The AI photo zone tent booth in operation",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/ansan-science-festival-2026-03.webp": {
+        "caption_ko": "AI 포토부스와 조명 세팅",
+        "caption_en": "AI photo booth and lighting setup",
+        "kind": "photo"
+      }
+    },
+    "is_published": true,
+    "display_order": 1,
+    "created_at": "2026-11-13T11:34:58.000Z",
+    "updated_at": "2026-11-13T11:34:58.000Z"
+  },
+  {
+    "id": "sowon-festa-saju-photobooth-2026",
+    "tags": [
+      "Local Festival",
+      "AI Saju",
+      "Photo Booth"
+    ],
+    "services": [
+      "photoBooth",
+      "custom"
+    ],
+    "year": 2026,
+    "location": "서울 금천구 오미생태공원 일대",
+    "is_featured": true,
+    "title_ko": "2026 소원성취페스타 — 한복 입은 AI 사주 포토부스",
+    "title_en": "Sowon Seongchwi Festa 2026 — AI Saju Photo Booth in Hanbok",
+    "description_ko": "서울시 민간축제 지원 사업인 2026 소원성취페스타(MAKE A WISH)에 AI 사주 포토부스를 선보였습니다. 포토부스에 한복을 입혀 공원 정자에 설치했고, 방문객이 화면에서 소원을 고르고 사진을 찍으면 사주 풀이가 담긴 결과 카드가 출력되고 휴대폰으로도 결과를 받아볼 수 있게 했습니다.",
+    "description_en": "For Sowon Seongchwi Festa 2026 (MAKE A WISH), a private festival supported by the Seoul Metropolitan Government, we presented an AI saju photo booth dressed in hanbok and set inside a park pavilion. Visitors chose a wish on screen and took a photo, then received a printed result card with their fortune reading and a copy on their phone.",
+    "slug": "sowon-festa-saju-photobooth-2026",
+    "category": "offline",
+    "tags_ko": [
+      "지역축제",
+      "AI 사주",
+      "포토부스"
+    ],
+    "tags_en": [
+      "Local Festival",
+      "AI Saju",
+      "Photo Booth"
+    ],
+    "client": "수상한협동조합 (SUSCOOP)",
+    "period": "2026.11.07",
+    "period_ko": "2026.11.07",
+    "period_en": "November 7, 2026",
+    "client_ko": "수상한협동조합 (SUSCOOP)",
+    "client_en": "SUSCOOP",
+    "location_ko": "서울 금천구 오미생태공원 일대",
+    "location_en": "Omi Ecological Park, Geumcheon-gu, Seoul",
+    "result_ko": "한복을 입힌 AI 사주 포토부스 기획·제공",
+    "result_en": "Concept and delivery of an AI saju photo booth dressed in hanbok",
+    "images": [
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-01.webp",
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-02.webp",
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-03.webp",
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-04.webp",
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-05.webp",
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-06.webp",
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-07.webp",
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-08.webp"
+    ],
+    "thumbnail": "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-01.webp",
+    "image_metadata": {
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-01.webp": {
+        "caption_ko": "한복을 입은 AI 사주 포토부스",
+        "caption_en": "The AI saju photo booth dressed in hanbok",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-02.webp": {
+        "caption_ko": "공원 정자에 설치한 부스 전경",
+        "caption_en": "The booth installed in a park pavilion",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-03.webp": {
+        "caption_ko": "화면에서 소원을 고르는 방문객",
+        "caption_en": "A visitor choosing a wish on screen",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-04.webp": {
+        "caption_ko": "출력된 사주 결과 카드",
+        "caption_en": "A printed saju result card",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-05.webp": {
+        "caption_ko": "저녁 시간 부스를 찾은 방문객",
+        "caption_en": "Visitors at the booth in the evening",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-06.webp": {
+        "caption_ko": "축제 현장의 사주 포토부스",
+        "caption_en": "The saju photo booth on site",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-07.webp": {
+        "caption_ko": "휴대폰으로 받아본 결과",
+        "caption_en": "The result received on a phone",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/sowon-festa-saju-photobooth-2026-08.webp": {
+        "caption_ko": "결과 화면을 확인하는 방문객",
+        "caption_en": "A visitor checking the result screen",
+        "kind": "photo"
+      }
+    },
+    "is_published": true,
+    "display_order": 2,
+    "created_at": "2026-11-13T11:34:58.000Z",
+    "updated_at": "2026-11-13T11:34:58.000Z"
+  },
+  {
+    "id": "jbnu-major-fair-2026",
+    "tags": [
+      "University Fair",
+      "AI Experience",
+      "Web Program"
+    ],
+    "services": [
+      "custom"
+    ],
+    "year": 2026,
+    "location": "전북대학교 진수당",
+    "is_featured": false,
+    "title_ko": "전북대학교 전공탐색 박람회 — AI 체험존 웹 프로그램 3종",
+    "title_en": "JBNU Major Exploration Fair — Three Web-Based AI Experiences",
+    "description_ko": "2026학년도 2학기 전북대학교 전공탐색 박람회의 AI 체험존에 쓰인 웹 체험 프로그램을 만들었습니다. 학생이 화면에서 AI 퍼스널컬러, AI 캐리커처, AI 미래직업 탐색 중 하나를 골라 바로 체험하고, 결과는 QR로 휴대폰에 저장할 수 있습니다.",
+    "description_en": "We built the web-based programs for the AI experience zone at Jeonbuk National University's Major Exploration Fair (fall semester 2026). Students picked AI Personal Color, AI Caricature or AI Future Career Explorer on screen, tried it right away, and saved their results to their phones via QR.",
+    "slug": "jbnu-major-fair-2026",
+    "category": "online",
+    "tags_ko": [
+      "대학 박람회",
+      "AI 체험",
+      "웹 프로그램"
+    ],
+    "tags_en": [
+      "University Fair",
+      "AI Experience",
+      "Web Program"
+    ],
+    "client": "잡담",
+    "period": "2026.11.04–11.05",
+    "period_ko": "2026.11.04–11.05",
+    "period_en": "November 4–5, 2026",
+    "client_ko": "잡담",
+    "client_en": "Japdam",
+    "location_ko": "전북대학교 진수당",
+    "location_en": "Jinsudang, Jeonbuk National University",
+    "result_ko": "AI 체험 웹 프로그램 3종 개발·제공",
+    "result_en": "Development and delivery of three web-based AI experiences",
+    "images": [
+      "/images/portfolio/archive/jbnu-major-fair-2026-01.webp",
+      "/images/portfolio/archive/jbnu-major-fair-2026-02.webp",
+      "/images/portfolio/archive/jbnu-major-fair-2026-03.webp",
+      "/images/portfolio/archive/jbnu-major-fair-2026-04.webp"
+    ],
+    "thumbnail": "/images/portfolio/archive/jbnu-major-fair-2026-01.webp",
+    "image_metadata": {
+      "/images/portfolio/archive/jbnu-major-fair-2026-01.webp": {
+        "caption_ko": "AI 체험존 첫 화면 — 체험 3종 선택",
+        "caption_en": "AI experience zone start screen with three programs",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/jbnu-major-fair-2026-02.webp": {
+        "caption_ko": "박람회 부스에 설치된 체험 화면",
+        "caption_en": "Experience screens set up at the fair booth",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/jbnu-major-fair-2026-03.webp": {
+        "caption_ko": "모니터·노트북으로 동시에 운영한 체험존",
+        "caption_en": "The zone running on several monitors and laptops",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/jbnu-major-fair-2026-04.webp": {
+        "caption_ko": "AI 체험존 부스 전경",
+        "caption_en": "Overview of the AI experience zone booth",
+        "kind": "photo"
+      }
+    },
+    "is_published": true,
+    "display_order": 3,
+    "created_at": "2026-11-13T11:34:58.000Z",
+    "updated_at": "2026-11-13T11:34:58.000Z"
+  },
+  {
+    "id": "eunpyeong-ai-festival-2026",
+    "tags": [
+      "Youth",
+      "Career Experience",
+      "AI Perfumer"
+    ],
+    "services": [
+      "acscent",
+      "custom"
+    ],
+    "year": 2026,
+    "location": "은평구진로직업체험지원센터 대강당",
+    "is_featured": false,
+    "title_ko": "은평구진로직업체험지원센터 AI 페스티벌 — AI 체험 부스 3종",
+    "title_en": "Eunpyeong Career Experience Center AI Festival — Three AI Experience Booths",
+    "description_ko": "제8회 인공지능과 청소년의 만남 「AI 페스티벌」에서 AI 조향사, AI 퍼스널컬러 진단, AI 타로 세 부스를 운영했습니다. 초등학생부터 청소년과 가족이 키오스크로 AI 분석을 받고, AI 조향사 부스에서는 분석 결과에 맞춘 나만의 향수를 직접 만들어 가져갔습니다.",
+    "description_en": "At the 8th \"AI Festival\" connecting AI and young people, we ran three booths: AI Perfumer, AI Personal Color and AI Tarot. Children, teens and families received AI analyses at kiosks, and at the AI Perfumer booth they blended and took home their own perfume based on the results.",
+    "slug": "eunpyeong-ai-festival-2026",
+    "category": "offline",
+    "tags_ko": [
+      "청소년",
+      "진로 체험",
+      "AI 조향사"
+    ],
+    "tags_en": [
+      "Youth",
+      "Career Experience",
+      "AI Perfumer"
+    ],
+    "client": "은평구진로직업체험지원센터",
+    "period": "2026.10.31",
+    "period_ko": "2026.10.31",
+    "period_en": "October 31, 2026",
+    "client_ko": "은평구진로직업체험지원센터",
+    "client_en": "Eunpyeong Career Experience Center",
+    "location_ko": "은평구진로직업체험지원센터 대강당",
+    "location_en": "Main hall, Eunpyeong Career Experience Center",
+    "result_ko": "AI 체험 부스 3종 운영 · 맞춤 향수 100인분",
+    "result_en": "Three AI booths operated, 100 custom perfumes made",
+    "images": [
+      "/images/portfolio/archive/eunpyeong-ai-festival-2026-01.webp",
+      "/images/portfolio/archive/eunpyeong-ai-festival-2026-02.webp",
+      "/images/portfolio/archive/eunpyeong-ai-festival-2026-03.webp",
+      "/images/portfolio/archive/eunpyeong-ai-festival-2026-04.webp",
+      "/images/portfolio/archive/eunpyeong-ai-festival-2026-05.webp",
+      "/images/portfolio/archive/eunpyeong-ai-festival-2026-06.webp",
+      "/images/portfolio/archive/eunpyeong-ai-festival-2026-07.webp"
+    ],
+    "thumbnail": "/images/portfolio/archive/eunpyeong-ai-festival-2026-01.webp",
+    "image_metadata": {
+      "/images/portfolio/archive/eunpyeong-ai-festival-2026-01.webp": {
+        "caption_ko": "AI 조향사 부스를 찾은 가족 방문객",
+        "caption_en": "Families visiting the AI Perfumer booth",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/eunpyeong-ai-festival-2026-02.webp": {
+        "caption_ko": "키오스크로 향 취향을 분석하는 방문객",
+        "caption_en": "A visitor analyzing scent preferences at the kiosk",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/eunpyeong-ai-festival-2026-03.webp": {
+        "caption_ko": "AI 조향사 조향 테이블",
+        "caption_en": "The AI Perfumer blending table",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/eunpyeong-ai-festival-2026-04.webp": {
+        "caption_ko": "AI 퍼스널컬러 진단 부스",
+        "caption_en": "The AI Personal Color booth",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/eunpyeong-ai-festival-2026-05.webp": {
+        "caption_ko": "AI 타로 부스",
+        "caption_en": "The AI Tarot booth",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/eunpyeong-ai-festival-2026-06.webp": {
+        "caption_ko": "키오스크 앞에 모인 방문객",
+        "caption_en": "Visitors gathered at a kiosk",
+        "kind": "photo"
+      },
+      "/images/portfolio/archive/eunpyeong-ai-festival-2026-07.webp": {
+        "caption_ko": "AI 페스티벌 부스 전경",
+        "caption_en": "Overview of the AI Festival booths",
+        "kind": "photo"
+      }
+    },
+    "is_published": true,
+    "display_order": 4,
+    "created_at": "2026-11-13T11:34:58.000Z",
+    "updated_at": "2026-11-13T11:34:58.000Z"
+  },
+  {
     "id": "kwave-dance-festival-2026",
     "tags": [
       "Festival",
@@ -105,7 +436,7 @@
       }
     },
     "is_published": true,
-    "display_order": 1,
+    "display_order": 5,
     "created_at": "2026-10-07T09:35:02.000Z",
     "updated_at": "2026-10-07T09:35:02.000Z"
   },
@@ -269,7 +600,7 @@
       }
     },
     "is_published": true,
-    "display_order": 2,
+    "display_order": 6,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -404,7 +735,7 @@
       }
     },
     "is_published": true,
-    "display_order": 3,
+    "display_order": 7,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -496,7 +827,7 @@
       }
     },
     "is_published": true,
-    "display_order": 4,
+    "display_order": 8,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -570,7 +901,7 @@
       }
     },
     "is_published": true,
-    "display_order": 5,
+    "display_order": 9,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -644,7 +975,7 @@
       }
     },
     "is_published": true,
-    "display_order": 6,
+    "display_order": 10,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -815,7 +1146,7 @@
       }
     },
     "is_published": true,
-    "display_order": 7,
+    "display_order": 11,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1071,7 +1402,7 @@
       }
     },
     "is_published": true,
-    "display_order": 8,
+    "display_order": 12,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1242,7 +1573,7 @@
       }
     },
     "is_published": true,
-    "display_order": 9,
+    "display_order": 13,
     "created_at": "2025-01-01T00:00:00.000Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1334,7 +1665,7 @@
       }
     },
     "is_published": true,
-    "display_order": 10,
+    "display_order": 14,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1408,7 +1739,7 @@
       }
     },
     "is_published": true,
-    "display_order": 11,
+    "display_order": 15,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1578,7 +1909,7 @@
       }
     },
     "is_published": true,
-    "display_order": 12,
+    "display_order": 16,
     "created_at": "2025-01-01T00:00:00.000Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1670,7 +2001,7 @@
       }
     },
     "is_published": true,
-    "display_order": 13,
+    "display_order": 17,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1768,7 +2099,7 @@
       }
     },
     "is_published": true,
-    "display_order": 14,
+    "display_order": 18,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1843,7 +2174,7 @@
       }
     },
     "is_published": true,
-    "display_order": 15,
+    "display_order": 19,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -1899,7 +2230,7 @@
       }
     },
     "is_published": true,
-    "display_order": 16,
+    "display_order": 20,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2004,7 +2335,7 @@
       }
     },
     "is_published": true,
-    "display_order": 17,
+    "display_order": 21,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2102,7 +2433,7 @@
       }
     },
     "is_published": true,
-    "display_order": 18,
+    "display_order": 22,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2212,7 +2543,7 @@
       }
     },
     "is_published": true,
-    "display_order": 19,
+    "display_order": 23,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2298,7 +2629,7 @@
       }
     },
     "is_published": true,
-    "display_order": 20,
+    "display_order": 24,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2396,7 +2727,7 @@
       }
     },
     "is_published": true,
-    "display_order": 21,
+    "display_order": 25,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2458,7 +2789,7 @@
       }
     },
     "is_published": true,
-    "display_order": 22,
+    "display_order": 26,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2520,7 +2851,7 @@
       }
     },
     "is_published": true,
-    "display_order": 23,
+    "display_order": 27,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2576,7 +2907,7 @@
       }
     },
     "is_published": true,
-    "display_order": 24,
+    "display_order": 28,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2644,7 +2975,7 @@
       }
     },
     "is_published": true,
-    "display_order": 25,
+    "display_order": 29,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2706,7 +3037,7 @@
       }
     },
     "is_published": true,
-    "display_order": 26,
+    "display_order": 30,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2786,7 +3117,7 @@
       }
     },
     "is_published": true,
-    "display_order": 28,
+    "display_order": 32,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2896,7 +3227,7 @@
       }
     },
     "is_published": true,
-    "display_order": 29,
+    "display_order": 33,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -2988,7 +3319,7 @@
       }
     },
     "is_published": true,
-    "display_order": 30,
+    "display_order": 34,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3152,7 +3483,7 @@
       }
     },
     "is_published": true,
-    "display_order": 31,
+    "display_order": 35,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3274,7 +3605,7 @@
       }
     },
     "is_published": true,
-    "display_order": 32,
+    "display_order": 36,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3439,7 +3770,7 @@
       }
     },
     "is_published": true,
-    "display_order": 33,
+    "display_order": 37,
     "created_at": "2025-01-01T00:00:00.000Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3526,7 +3857,7 @@
       }
     },
     "is_published": true,
-    "display_order": 34,
+    "display_order": 38,
     "created_at": "2025-01-01T00:00:00.000Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3661,7 +3992,7 @@
       }
     },
     "is_published": true,
-    "display_order": 35,
+    "display_order": 39,
     "created_at": "2025-01-01T00:00:00.000Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3729,7 +4060,7 @@
       }
     },
     "is_published": true,
-    "display_order": 36,
+    "display_order": 40,
     "created_at": "2025-01-01T00:00:00.000Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3803,7 +4134,7 @@
       }
     },
     "is_published": true,
-    "display_order": 37,
+    "display_order": 41,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3877,7 +4208,7 @@
       }
     },
     "is_published": true,
-    "display_order": 38,
+    "display_order": 42,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -3939,7 +4270,7 @@
       }
     },
     "is_published": true,
-    "display_order": 39,
+    "display_order": 43,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -4001,7 +4332,7 @@
       }
     },
     "is_published": true,
-    "display_order": 41,
+    "display_order": 45,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -4069,7 +4400,7 @@
       }
     },
     "is_published": true,
-    "display_order": 42,
+    "display_order": 46,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -4125,7 +4456,7 @@
       }
     },
     "is_published": true,
-    "display_order": 43,
+    "display_order": 47,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -4247,7 +4578,7 @@
       }
     },
     "is_published": true,
-    "display_order": 44,
+    "display_order": 48,
     "created_at": "2026-09-23T10:04:34.426Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   },
@@ -4299,7 +4630,7 @@
       }
     },
     "is_published": true,
-    "display_order": 45,
+    "display_order": 49,
     "created_at": "2025-01-01T00:00:00.000Z",
     "updated_at": "2026-09-23T10:04:34.426Z"
   }
