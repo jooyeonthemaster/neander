@@ -129,6 +129,8 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
   const lang = locale === 'en' ? 'en' : 'ko';
   const usedForQuote = project.services.filter(isServiceKey);
   const firstQuoteKey = usedForQuote[0];
+  // 축제·페스타·영화제 사례에서는 축제 체험 부스 안내로도 잇는다 (축제부스·체험부스 검색어용 랜딩)
+  const isFestival = project.category === 'offline' && /축제|페스타|페스티벌|영화제|festival|festa/i.test(`${project.title} ${project.tags.join(' ')}`);
 
   // Find next project for navigation
   const nextProject =
@@ -339,6 +341,17 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
                       );
                     })}
                   </ul>
+                  {isFestival && (
+                    <p className="mt-5 text-sm text-slate-600">
+                      {lang === 'ko' ? '축제에 체험 부스를 준비 중이라면 ' : 'Planning booths for a festival? '}
+                      <Link
+                        href="/insights/festival-experience-booth"
+                        className="font-medium text-teal-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 rounded-sm"
+                      >
+                        {lang === 'ko' ? '축제 체험 부스 — 구성·비용 안내 →' : 'Festival experience booths — setup and costs →'}
+                      </Link>
+                    </p>
+                  )}
                 </section>
               )}
             </div>

@@ -1,7 +1,8 @@
 /* ─────────────────────────────────────────────────────────
    NEANDERco.  |  구매 의도 검색어용 랜딩 (insights 의 kind: 'landing')
    행사 담당자가 실제로 찾는 말(포토부스 대여, 사주 키오스크 대여, 향수 만들기 체험 출장,
-   송년회 체험 부스)마다 한 페이지씩 둔다 — 2026-11 검색·AI 노출 조사 기준.
+   연말행사·송년회, 축제 체험 부스)마다 한 페이지씩 둔다 — 2026-11 검색·AI 노출 조사와
+   2026-11-14 네이버 키워드 도구 검색량 기준.
    금액은 모두 온라인 견적 카탈로그(src/lib/quote/catalog.ts)에서 계산해 견적과 어긋나지 않게 하고,
    사례는 공개 포트폴리오에 있는 것만 쓴다. 카탈로그에 없는 수치는 넣지 않는다.
    ───────────────────────────────────────────────────────── */
@@ -40,13 +41,23 @@ export const LANDINGS: Insight[] = [
   {
     slug: 'ai-photo-booth-rental',
     kind: 'landing',
-    date: '2026-11-11',
-    keywords: ['AI 포토부스 대여', 'AI 포토부스 렌탈', 'AI 포토부스 가격', '행사 포토부스 대여', '기업행사 포토부스', '팝업 포토부스', '포토부스 출장'],
+    // 2026-11-14 네이버 키워드 도구: 「포토부스 대여」 월 3,820회·「포토부스 렌탈」 920회인데 「AI 포토부스 대여」는 50회라,
+    // 제목·설명을 포토부스 대여 전체로 넓히고 일반 포토부스와의 차이를 보여 준다. 주소는 검색엔진에 제출한 그대로 둔다.
+    date: '2026-11-14',
+    keywords: ['포토부스 대여', '포토부스 렌탈', '포토부스 가격', '행사 포토부스', 'AI 포토부스', 'AI 포토부스 대여', '네컷 사진 부스 대여', '축제 포토부스', '기업행사 포토부스', '포토부스 출장'],
     ko: {
-      title: 'AI 포토부스 대여·렌탈 — 행사·팝업·기업 행사 전국 출장',
-      description: `사진 한 장을 AI가 아이돌 컨셉·패션 화보·미래 가족 사진으로 바꿔 즉석 인화하는 AI 포토부스를 행사장에 설치하고 운영합니다. 1대 1일 ${man(PHOTO_BOOTH.firstBooth)}부터(VAT 별도, 운송·설치 포함), 전국 출장.`,
+      title: '포토부스 대여·렌탈 — AI 포토부스 행사·축제·기업 행사 전국 출장',
+      description: `행사·축제·기업 행사용 포토부스 대여. 찍은 사진을 AI가 아이돌 컨셉·패션 화보·미래 모습으로 새로 그려 바로 인화합니다. 1대 1일 ${man(PHOTO_BOOTH.firstBooth)}부터(VAT 별도, 운송·설치·인화 ${PHOTO_BOOTH.printsPerRoll}장 포함), 전국 출장.`,
       blocks: [
-        { type: 'p', text: '방문객이 부스에서 사진을 찍으면 AI가 고른 컨셉으로 이미지를 새로 만들고, 그 자리에서 인화해 드립니다. 브랜드 팝업, 축제, 기업 행사, 대학 행사에서 줄을 세우는 체험으로 많이 씁니다.' },
+        { type: 'p', text: '포토부스는 방문객이 사진을 찍고 인화해 가져가는, 행사에서 가장 익숙한 이벤트입니다. 네안데르의 AI 포토부스는 여기서 한 단계 더 나아가, 찍은 사진을 AI가 아이돌 컨셉·패션 화보·10년 뒤 모습 같은 새 이미지로 바꿔 그 자리에서 인화합니다. 브랜드 팝업, 지역 축제, 과학축제, 기업 행사, 대학 행사에서 운영합니다.' },
+        { type: 'h2', text: '일반 포토부스와 AI 포토부스' },
+        { type: 'table', head: ['', '일반 포토부스', '네안데르 AI 포토부스'], rows: [
+          ['결과물', '찍은 사진에 프레임을 씌워 인화', '찍은 사진을 AI가 고른 컨셉으로 새로 그려 인화'],
+          ['방문객이 고르는 것', '포즈·프레임', `AI 스타일 (기본 ${PHOTO_BOOTH.includedStyles}종, 추가 가능)`],
+          ['가져가는 것', '즉석 인화 사진', '즉석 인화 사진 + QR로 휴대폰에 저장'],
+          ['행사 맞춤', '프레임 디자인', `프레임 1종 기본 포함 + 행사 전용 AI 스타일(1종 ${man(CUSTOM_DEV.boothStyle)})`],
+        ] },
+        { type: 'p', text: '네 컷 띠지로도 인화할 수 있습니다. 2026 안산사이언스밸리 과학축제에서는 가족사진 한 장으로 지금 모습과 10년·20년·30년 뒤 모습을 네 컷으로 만들어 인화했고, 이틀 동안 316팀(약 860명)이 참여했습니다.' },
         { type: 'links', items: [
           { text: 'AI 아이돌 메이크업 포토부스 — 아이돌 메이크업 변신', href: '/services/ai-idol-makeup-booth' },
           { text: 'AI 패션 타임머신 — 시대별 패션 화보', href: '/services/ai-fashion-timemachine' },
@@ -80,25 +91,36 @@ export const LANDINGS: Insight[] = [
         { type: 'p', text: NO_ISLANDS_KO },
         { type: 'h2', text: '운영 사례' },
         { type: 'links', items: [
+          { text: '2026 안산사이언스밸리 과학축제 (한양대 ERICA) — AI 포토부스 〈미래로 가는 타임캡슐〉, 이틀간 316팀·약 860명', href: '/portfolio/ansan-science-festival-2026' },
+          { text: '2026 소원성취페스타 (금천 오미생태공원) — 한복을 입힌 AI 사주 포토부스, 결과 카드 출력', href: '/portfolio/sowon-festa-saju-photobooth-2026' },
           { text: 'K-WAVE DANCE FESTIVAL 2026 (서울 이태원) — AI 포토부스·AI 조향사 2개 부스, 4개 언어 운영', href: '/portfolio/kwave-dance-festival-2026' },
           { text: '평택 AI 페스타 2026 (평택아트센터) — AI 포토부스·미래 가족 상상 등 체험 4종', href: '/portfolio/pyeongtaek-ai-festa-2026' },
         ] },
         { type: 'faq', items: [
-          { q: 'AI 포토부스 대여 비용은 얼마인가요?', a: `1대 1일 ${man(PHOTO_BOOTH.firstBooth)}부터입니다(VAT 별도). AI 스타일 ${PHOTO_BOOTH.includedStyles}종, 즉석 인화 ${PHOTO_BOOTH.printsPerRoll}장, 프레임 1종, 서울 운송·설치가 들어 있고 운영 인력은 1인 1일 ${man(COMMON.staffPerDay)}로 따로 받습니다.` },
+          { q: '포토부스 대여 비용은 얼마인가요?', a: `AI 포토부스는 1대 1일 ${man(PHOTO_BOOTH.firstBooth)}부터입니다(VAT 별도). AI 스타일 ${PHOTO_BOOTH.includedStyles}종, 즉석 인화 ${PHOTO_BOOTH.printsPerRoll}장, 프레임 1종, 서울 운송·설치가 들어 있고 운영 인력은 1인 1일 ${man(COMMON.staffPerDay)}로 따로 받습니다.` },
+          { q: '일반 포토부스와 무엇이 다른가요?', a: '일반 포토부스는 찍은 사진에 프레임을 씌워 인화하고, AI 포토부스는 AI가 사진을 아이돌 컨셉·패션 화보·미래 모습처럼 새 이미지로 그려 인화합니다. 결과가 사람마다 달라 행사 기념품으로 남기기 좋고, QR로 휴대폰에도 저장할 수 있습니다.' },
+          { q: '방문객이 많으면 인화지가 모자라지 않나요?', a: `기본으로 인화 ${PHOTO_BOOTH.printsPerRoll}장(1롤)이 들어 있고, ${PHOTO_BOOTH.printsPerRoll}장 1롤씩 ${man(PHOTO_BOOTH.extraPrintRoll)}에 더할 수 있습니다. 부스는 최대 ${PHOTO_BOOTH.maxBooths}대까지 늘릴 수 있습니다.` },
           { q: '몇 대까지 빌릴 수 있나요?', a: `보유한 부스가 ${PHOTO_BOOTH.maxBooths}대라 한 행사에 최대 ${PHOTO_BOOTH.maxBooths}대까지 운영합니다. 연말처럼 행사가 몰리는 시기에는 일찍 일정을 확정해 주세요.` },
           { q: '지방 행사도 되나요?', a: `네, 전국 출장합니다. 지역에 따라 운송비가 행사당 한 번 더해집니다(부산·대구 등 경상 +${man(COMMON.travel.gyeongsang)}). ${NO_ISLANDS_KO}` },
           { q: '우리 브랜드에 맞게 바꿀 수 있나요?', a: `프레임 1종은 기본으로 맞춰 드리고, 브랜드 전용 AI 스타일은 1종 ${man(CUSTOM_DEV.boothStyle)}(행사 ${CUSTOM_DEV.leadDays.style}일 전 확정), 촬영 흐름·화면 커스텀은 ${man(CUSTOM_DEV.booth.flow)}(${CUSTOM_DEV.leadDays.flow}일 전 확정)입니다.` },
           { q: '설치 장소에 무엇이 필요한가요?', a: POWER_KO },
           { q: '견적서는 어떻게 받나요?', a: '온라인 견적에서 행사 조건을 고르면 연락처 없이 금액을 바로 볼 수 있고, 내부 결재용 가견적서 PDF도 받을 수 있습니다.' },
         ] },
-        { type: 'cta', text: 'AI 포토부스 견적 바로 보기', href: '/quote' },
+        { type: 'cta', text: '포토부스 견적 바로 보기', href: '/quote?item=photoBooth' },
       ],
     },
     en: {
-      title: 'AI Photo Booth Rental for Events in Korea — Pop-ups, Corporate Events, Festivals',
-      description: `An AI photo booth that turns one photo into an idol concept, fashion editorial or future-family picture and prints it on the spot. From ${krw(PHOTO_BOOTH.firstBooth)} per booth per day (excl. VAT, delivery and setup included), anywhere in mainland Korea.`,
+      title: 'Photo Booth Rental in Korea — AI Photo Booths for Events, Festivals and Corporate Parties',
+      description: `Photo booth rental for events, festivals and corporate parties: AI redraws each photo as an idol concept, fashion editorial or future look and prints it on the spot. From ${krw(PHOTO_BOOTH.firstBooth)} per booth per day (excl. VAT, delivery, setup and ${PHOTO_BOOTH.printsPerRoll} prints included), anywhere in mainland Korea.`,
       blocks: [
         { type: 'p', text: 'Guests take a photo, AI redraws it in the chosen concept, and the booth prints it right away. Brands, festivals, corporate events and campuses use it as a crowd-drawing experience.' },
+        { type: 'h2', text: 'A regular photo booth vs. the AI photo booth' },
+        { type: 'table', head: ['', 'Regular photo booth', 'NEANDER AI photo booth'], rows: [
+          ['Result', 'Your photo with a frame', 'Your photo redrawn by AI in a chosen concept'],
+          ['Guests choose', 'Pose and frame', `AI style (${PHOTO_BOOTH.includedStyles} included, more available)`],
+          ['Take-home', 'Instant print', 'Instant print + QR download'],
+        ] },
+        { type: 'p', text: 'Four-frame photo strips are possible too: at the Ansan Science Valley Science Festival 2026, families got today and 10, 20 and 30 years later in four frames, and 316 groups (about 860 people) took part over two days.' },
         { type: 'links', items: [
           { text: 'AI Idol Makeup Photo Booth', href: '/services/ai-idol-makeup-booth' },
           { text: 'AI Fashion Time Machine', href: '/services/ai-fashion-timemachine' },
@@ -119,10 +141,12 @@ export const LANDINGS: Insight[] = [
         { type: 'p', text: `${NO_ISLANDS_EN} ${POWER_EN}` },
         { type: 'h2', text: 'Recent work' },
         { type: 'links', items: [
+          { text: 'Ansan Science Valley Science Festival 2026 — AI photo booth "Time Capsule to the Future", 316 groups in two days', href: '/portfolio/ansan-science-festival-2026' },
+          { text: 'Sowon Seongchwi Festa 2026 — AI saju photo booth dressed in hanbok', href: '/portfolio/sowon-festa-saju-photobooth-2026' },
           { text: 'K-WAVE DANCE FESTIVAL 2026 (Itaewon, Seoul) — AI photo booth and AI perfumer, in four languages', href: '/portfolio/kwave-dance-festival-2026' },
           { text: 'Pyeongtaek AI Festa 2026 — four AI experiences including the photo booth', href: '/portfolio/pyeongtaek-ai-festa-2026' },
         ] },
-        { type: 'cta', text: 'Get an instant estimate', href: '/quote' },
+        { type: 'cta', text: 'Get an instant estimate', href: '/quote?item=photoBooth' },
       ],
     },
   },
@@ -303,19 +327,23 @@ export const LANDINGS: Insight[] = [
   {
     slug: 'corporate-year-end-event-ai-booth',
     kind: 'landing',
-    date: '2026-11-11',
-    keywords: ['송년회 이벤트 부스', '기업 행사 체험 부스', '시상식 이벤트', '사내 행사 이벤트', '워크숍 체험 프로그램', '연말 행사 이벤트 업체', '기업 행사 포토부스'],
+    // 2026-11-14 네이버 키워드 도구: 크리스마스행사 월 2,540회·연말행사 1,340회·기업행사 890회·송년회 이벤트 560회·창립기념행사 1,130회.
+    // 송년회만 다루던 제목을 연말·크리스마스·시무식·창립기념까지 넓힌다. 주소는 검색엔진에 제출한 그대로 둔다.
+    date: '2026-11-14',
+    keywords: ['연말행사', '연말 이벤트', '송년회 이벤트', '크리스마스 행사', '크리스마스 이벤트 부스', '기업행사 이벤트', '시무식 이벤트', '신년회 이벤트', '창립기념행사', '사내 행사 이벤트', '기업 행사 포토부스'],
     ko: {
-      title: '송년회·기업 행사 AI 체험 부스 — 시상식·워크숍·사내 행사 이벤트',
-      description: `송년회·시상식·워크숍·사내 행사에서 임직원이 직접 해 보고 결과물을 들고 가는 AI 체험. AI 포토부스, AI 사주·관상 키오스크, AI 향수 만들기를 장비와 운영 인력까지 함께 보내 드립니다. ${man(KIOSK.firstKiosk)}부터(VAT 별도).`,
+      title: '연말행사·송년회·크리스마스 행사 이벤트 — AI 체험 부스 출장 운영',
+      description: `송년회·연말행사·크리스마스 행사·시무식·창립기념행사에서 참석자가 직접 해 보고 결과물을 가져가는 AI 체험. AI 포토부스, AI 사주·관상 키오스크, AI 향수 만들기를 장비와 운영 인력까지 함께 보내 드립니다. ${man(KIOSK.firstKiosk)}부터(VAT 별도).`,
       blocks: [
-        { type: 'p', text: '기업 행사는 짧은 시간에 많은 사람이 지나가고, 참석자가 무언가를 들고 돌아가야 기억에 남습니다. 네안데르의 AI 체험은 모두 결과물(사진, 운세 풀이, 향수)을 그 자리에서 건네는 방식이라 행사 사이사이 대기 시간을 채우기 좋습니다.' },
-        { type: 'h2', text: '행사 성격별 추천 구성' },
+        { type: 'p', text: '연말 행사는 짧은 시간에 많은 사람이 지나가고, 참석자가 무언가를 들고 돌아가야 기억에 남습니다. 네안데르의 AI 체험은 모두 결과물(사진, 운세 풀이, 향수)을 그 자리에서 건네는 방식이라 송년회·크리스마스 파티의 대기 시간과 쉬는 시간을 채우기 좋습니다.' },
+        { type: 'h2', text: '연말·연초 행사별 추천 구성' },
         { type: 'table', head: ['행사', '추천 체험', '이유'], rows: [
-          ['송년회·사내 파티', 'AI 포토부스 + AI 사주·관상 키오스크', '단체 사진과 새해 운세로 분위기를 띄우고 결과물을 출력해 가져갑니다'],
+          ['송년회·사내 파티', 'AI 포토부스 + AI 사주·관상 키오스크', '연말 프레임을 씌운 단체 사진과 새해 운세를 출력해 가져갑니다'],
+          ['크리스마스 행사·고객 초청', 'AI 포토부스 (크리스마스 프레임)', '기본 포함된 프레임 1종을 크리스마스 디자인으로 맞춥니다. 크리스마스 컨셉 AI 스타일도 새로 만들 수 있습니다'],
           ['시상식·VIP 초청', 'AI 향수 만들기 + 고급 선물 포장', '참석자마다 다른 향수를 기념품으로 건넵니다'],
+          ['시무식·신년회', 'AI 사주 키오스크', '생년월일로 새해 운세를 풀어 영수증형 결과지로 출력합니다'],
+          ['창립기념행사', '회사 맞춤 포토부스·키오스크', '로고·색·결과 문구를 회사에 맞게 바꿉니다'],
           ['워크숍·팀 빌딩', 'AI 향수 원데이 클래스', 'AI 추천 향을 시향하고 직접 조향하는 클래스로 진행합니다'],
-          ['고객 초청·브랜드 행사', '브랜드 맞춤 포토부스·키오스크', '로고·스타일·결과 문구를 브랜드에 맞게 바꿉니다'],
         ] },
         { type: 'h2', text: '시작가 (VAT 별도, 서울 1일 기준)' },
         { type: 'table', head: ['체험', '시작가'], rows: [
@@ -339,17 +367,19 @@ export const LANDINGS: Insight[] = [
           { text: '평택 AI 페스타 2026 — 체험 콘텐츠 4종 기획·현장 운영', href: '/portfolio/pyeongtaek-ai-festa-2026' },
         ] },
         { type: 'faq', items: [
+          { q: '크리스마스 분위기로 꾸밀 수 있나요?', a: `포토부스 프레임 1종은 기본으로 행사에 맞춰 디자인합니다. 크리스마스·연말 컨셉 AI 스타일을 새로 만들려면 1종 ${man(CUSTOM_DEV.boothStyle)}이고 행사 ${CUSTOM_DEV.leadDays.style}일 전까지 확정해 주세요. 부스 외관 랩핑은 대당 ${man(PHOTO_BOOTH.wrapping)}입니다.` },
+          { q: '12월 송년회 일정은 언제까지 잡아야 하나요?', a: `보유 장비가 포토부스 ${PHOTO_BOOTH.maxBooths}대, 키오스크 ${KIOSK.maxKiosks}대라 12월 같은 성수기에는 장비가 먼저 마감될 수 있습니다. 기존 체험을 그대로 쓰면 일정과 장비만 맞으면 되고, 로고·색 적용은 ${CUSTOM_DEV.leadDays.brand}일 전, 전용 AI 스타일은 ${CUSTOM_DEV.leadDays.style}일 전까지 확정하면 됩니다.` },
           { q: '호텔 연회장이나 사내 강당에서도 되나요?', a: `네. ${POWER_KO} 부스 크기와 동선은 장소 도면을 보고 함께 정합니다.` },
           { q: '참석자가 많으면 어떻게 하나요?', a: `포토부스는 최대 ${PHOTO_BOOTH.maxBooths}대, 키오스크는 최대 ${KIOSK.maxKiosks}대까지 늘리고, 향수 체험은 조향 팀을 늘립니다. 예상 인원을 알려 주시면 대수를 맞춰 드립니다.` },
           { q: '지방 사업장 행사도 되나요?', a: `네, 전국 출장합니다. 지역별 운송비가 행사당 한 번 더해집니다. ${NO_ISLANDS_KO}` },
           { q: '내부 결재용 견적서가 필요해요.', a: '온라인 견적에서 조건을 고르면 연락처 없이 금액을 바로 보고 가견적서 PDF를 받을 수 있습니다. 확정 견적은 상담 후 보내 드립니다.' },
         ] },
-        { type: 'cta', text: '송년회·기업 행사 견적 바로 보기', href: '/quote' },
+        { type: 'cta', text: '연말행사·송년회 견적 바로 보기', href: '/quote' },
       ],
     },
     en: {
-      title: 'AI Experience Booths for Corporate and Year-End Events in Korea',
-      description: `AI photo booths, AI fortune-telling kiosks and AI perfume making for year-end parties, award ceremonies, workshops and company events, delivered with equipment and staff. From ${krw(KIOSK.firstKiosk)} (excl. VAT).`,
+      title: 'Year-End Party, Christmas and Corporate Event Experiences in Korea — AI Booths',
+      description: `AI photo booths, AI fortune-telling kiosks and AI perfume making for year-end parties, Christmas events, new-year kickoffs, anniversaries and company events, delivered with equipment and staff. From ${krw(KIOSK.firstKiosk)} (excl. VAT).`,
       blocks: [
         { type: 'p', text: 'Every NEANDER experience hands guests something to take home — a photo, a reading or a perfume — which makes it a good fit for the gaps in a corporate program.' },
         { type: 'h2', text: 'Starting prices (excl. VAT, Seoul, 1 day)' },
@@ -361,6 +391,94 @@ export const LANDINGS: Insight[] = [
         ] },
         { type: 'p', text: `${STAFF_EN} ${NO_ISLANDS_EN}` },
         { type: 'cta', text: 'Get an instant estimate', href: '/quote' },
+      ],
+    },
+  },
+
+  /* ── 축제 체험 부스 ─────────────────────────────────────── */
+  // 2026-11-14 네이버 키워드 도구: 축제부스 월 820회·체험부스 540회·행사부스 340회·축제 체험 부스 170회.
+  // 사례는 공개 포트폴리오의 축제·페스타·영화제 사례만, 숫자는 각 사례의 결과 문구에 있는 것만 쓴다.
+  {
+    slug: 'festival-experience-booth',
+    kind: 'landing',
+    date: '2026-11-14',
+    keywords: ['축제 체험 부스', '축제부스', '체험부스', '행사부스', '축제 부스 운영', '지역축제 체험 프로그램', '대학 축제 부스', '과학축제 체험', '축제 포토부스', 'AI 체험 부스'],
+    ko: {
+      title: '축제 체험 부스 운영 — 지역축제·과학축제·대학 축제 AI 체험 부스 출장',
+      description: `지역축제·과학축제·대학 축제·영화제에 AI 포토부스, AI 사주·관상 키오스크, AI 향수 만들기 체험 부스를 장비와 운영 인력까지 함께 보내 드립니다. 키오스크 1대 1일 ${man(KIOSK.firstKiosk)}부터(VAT 별도), 전국 출장.`,
+      blocks: [
+        { type: 'p', text: '축제 체험 부스는 지나가던 방문객이 짧게 참여하고, 무언가를 들고 돌아가야 기억에 남습니다. 네안데르의 AI 체험은 사진·운세 풀이·향수처럼 결과물을 그 자리에서 건네는 방식이라 가족 방문객과 학생이 많은 축제에서 많이 운영합니다. 2026 안산사이언스밸리 과학축제의 AI 포토부스에는 이틀 동안 316팀(약 860명)이 참여했습니다.' },
+        { type: 'h2', text: '축제에서 운영하는 AI 체험 부스' },
+        { type: 'table', head: ['체험', '방문객이 하는 것 → 가져가는 것', '시작가 (VAT 별도, 1일)'], rows: [
+          ['AI 포토부스', '사진을 찍고 AI 컨셉을 고릅니다 → 즉석 인화 사진·QR 저장', `1대 ${man(PHOTO_BOOTH.firstBooth)} (인화 ${PHOTO_BOOTH.printsPerRoll}장 포함)`],
+          ['AI 키오스크 (사주·관상·손금·퍼스널컬러 등)', '생년월일을 넣거나 얼굴·손바닥을 비춥니다 → 영수증형 결과지', `1대 ${man(KIOSK.firstKiosk)}`],
+          ['AI 향수 만들기', 'AI가 추천한 향으로 조향사와 향수를 만듭니다 → 내 향수 (10ml·50ml)', `${man(PERFUME.minimumCharge)}부터`],
+        ] },
+        { type: 'p', text: `예: 서울 1일 축제에 AI 포토부스 1대와 AI 사주 키오스크 1대를 두고 운영 인력 1명을 쓰면 ${man(PHOTO_BOOTH.firstBooth + KIOSK.firstKiosk + COMMON.staffPerDay)}(VAT 별도)입니다. 운영일을 더하면 포토부스는 대당 1일 ${man(PHOTO_BOOTH.extraDayPerBooth)}, 키오스크는 대당 1일 ${man(KIOSK.extraDayPerKiosk)}가 더해집니다.` },
+        { type: 'links', items: [
+          { text: '포토부스 대여 — 가격·진행 안내', href: '/insights/ai-photo-booth-rental' },
+          { text: 'AI 사주·관상·손금 키오스크 대여 — 가격·진행 안내', href: '/insights/ai-fortune-kiosk-rental' },
+          { text: 'AI 향수 만들기 체험 — 비용·진행 안내', href: '/insights/event-ai-perfume-experience' },
+        ] },
+        { type: 'h2', text: '부스 수와 처리량' },
+        { type: 'ul', items: [
+          `AI 포토부스는 최대 ${PHOTO_BOOTH.maxBooths}대, AI 키오스크는 최대 ${KIOSK.maxKiosks}대까지 한 축제에 운영합니다.`,
+          `AI 향수 만들기는 조향 1팀(조향사 1명 + 보조 1명)이 시간당 최대 ${PERFUME.guestsPerTeamHour}명을 맡고, 예상 인원에 맞춰 팀을 늘립니다.`,
+          `포토부스 인화지는 기본 ${PHOTO_BOOTH.printsPerRoll}장이고, ${PHOTO_BOOTH.printsPerRoll}장 1롤씩 ${man(PHOTO_BOOTH.extraPrintRoll)}에 더할 수 있습니다.`,
+        ] },
+        { type: 'h2', text: '야외 축제 운영 전 확인할 것' },
+        { type: 'ul', items: [
+          POWER_KO,
+          '비와 직사광선을 피할 수 있는 천막·정자·실내 공간에 설치합니다. 천막과 테이블을 누가 준비할지는 상담 때 함께 정합니다.',
+          STAFF_KO,
+          '외국인 방문객이 많은 축제는 한국어·영어·일본어·중국어로 운영한 사례가 있습니다 (K-WAVE DANCE FESTIVAL 2026).',
+        ] },
+        { type: 'h2', text: '전국 출장 — 지역별 운송비 (행사당 1회)' },
+        { type: 'table', head: ['지역', '추가 운송비'], rows: travelRowsKo(COMMON.travel) },
+        { type: 'p', text: `키오스크만 빌리면 운송비가 더 낮습니다(경상 +${man(KIOSK.travel.gyeongsang)}). AI 향수 만들기는 조향 팀 출장비가 따로 있습니다. ${NO_ISLANDS_KO}` },
+        { type: 'h2', text: '축제 운영 사례' },
+        { type: 'links', items: [
+          { text: '2026 안산사이언스밸리 과학축제 (한양대 ERICA) — AI 포토부스 〈미래로 가는 타임캡슐〉, 이틀간 316팀·약 860명', href: '/portfolio/ansan-science-festival-2026' },
+          { text: '2026 소원성취페스타 (금천 오미생태공원) — 한복을 입힌 AI 사주 포토부스', href: '/portfolio/sowon-festa-saju-photobooth-2026' },
+          { text: 'K-WAVE DANCE FESTIVAL 2026 (서울 이태원) — AI 조향사·AI 포토부스, 4개 언어 운영', href: '/portfolio/kwave-dance-festival-2026' },
+          { text: '평택 AI 페스타 2026 (평택아트센터) — 방문객이 직접 조작하는 키오스크 체험 4종', href: '/portfolio/pyeongtaek-ai-festa-2026' },
+          { text: '은평구진로직업체험지원센터 AI 페스티벌 2026 — AI 조향사·퍼스널컬러·타로 부스 3종, 맞춤 향수 100인분', href: '/portfolio/eunpyeong-ai-festival-2026' },
+          { text: '제천국제음악영화제 2026 — OST페어 AI 조향 체험 프로그램', href: '/portfolio/jimff-2026-ost-fair' },
+          { text: '제천국제음악영화제 2025 — AI 조향사 부스', href: '/portfolio/jecheon-music-film-festival' },
+        ] },
+        { type: 'faq', items: [
+          { q: '축제 체험 부스 비용은 얼마인가요?', a: `AI 키오스크는 1대 1일 ${man(KIOSK.firstKiosk)}, AI 포토부스는 1대 1일 ${man(PHOTO_BOOTH.firstBooth)}부터이고, AI 향수 만들기는 ${man(PERFUME.minimumCharge)}부터입니다(VAT 별도). 현장 운영 인력은 1인 1일 ${man(COMMON.staffPerDay)}입니다.` },
+          { q: '며칠짜리 축제도 되나요?', a: `네. 운영일을 더할 때마다 포토부스는 대당 ${man(PHOTO_BOOTH.extraDayPerBooth)}, 키오스크는 대당 ${man(KIOSK.extraDayPerKiosk)}가 더해지고, 운영 인력은 1인 1일 ${man(COMMON.staffPerDay)}입니다.` },
+          { q: '지방 축제도 가나요?', a: `네, 전국 출장합니다. 운송비가 행사당 한 번 더해집니다(경상 +${man(COMMON.travel.gyeongsang)}, 키오스크만이면 +${man(KIOSK.travel.gyeongsang)}). ${NO_ISLANDS_KO}` },
+          { q: '축제 이름이나 지역 특색을 넣을 수 있나요?', a: `포토부스 프레임 1종은 기본으로 축제에 맞춰 디자인합니다. 키오스크 화면에 로고·색을 넣는 작업은 ${man(CUSTOM_DEV.kiosk.brand)}(행사 ${CUSTOM_DEV.leadDays.brand}일 전 확정), 축제 전용 AI 스타일은 1종 ${man(CUSTOM_DEV.boothStyle)}(${CUSTOM_DEV.leadDays.style}일 전 확정)입니다. 소원성취페스타에서는 포토부스에 한복을 입혀 공원 정자에 설치했습니다.` },
+          { q: '어린이·가족 방문객도 할 수 있나요?', a: '네. 은평구 AI 페스티벌에서는 초등학생부터 청소년과 가족이 키오스크로 AI 분석을 받고 맞춤 향수를 만들어 갔고, 안산 과학축제에서는 가족사진으로 10년·20년·30년 뒤 모습을 만들었습니다.' },
+          { q: '견적서는 어떻게 받나요?', a: '온라인 견적에서 행사 조건을 고르면 연락처 없이 금액을 바로 볼 수 있고, 내부 결재용 가견적서 PDF도 받을 수 있습니다.' },
+        ] },
+        { type: 'cta', text: '축제 부스 견적 바로 보기', href: '/quote?preset=campus-festival' },
+      ],
+    },
+    en: {
+      title: 'Festival Experience Booths in Korea — AI Photo Booths, Fortune Kiosks and Perfume Making',
+      description: `AI photo booths, AI fortune-telling kiosks and AI perfume making for local festivals, science festivals, campus festivals and film festivals, delivered with equipment and staff. From ${krw(KIOSK.firstKiosk)} per kiosk per day (excl. VAT), anywhere in mainland Korea.`,
+      blocks: [
+        { type: 'p', text: 'Every NEANDER experience hands guests something to take home — a photo, a reading or a perfume. At the Ansan Science Valley Science Festival 2026, 316 groups (about 860 people) used our AI photo booth over two days.' },
+        { type: 'h2', text: 'Booths we run at festivals (excl. VAT, 1 day)' },
+        { type: 'table', head: ['Experience', 'From'], rows: [
+          ['AI photo booth', `${krw(PHOTO_BOOTH.firstBooth)} per booth (${PHOTO_BOOTH.printsPerRoll} prints)`],
+          ['AI kiosk (saju, face reading, palm reading, personal color…)', `${krw(KIOSK.firstKiosk)} per kiosk`],
+          ['AI perfume making', `${krw(PERFUME.minimumCharge)} minimum`],
+          ['On-site staff', `${krw(COMMON.staffPerDay)} per person per day`],
+        ] },
+        { type: 'p', text: `${POWER_EN} ${NO_ISLANDS_EN}` },
+        { type: 'h2', text: 'Festival work' },
+        { type: 'links', items: [
+          { text: 'Ansan Science Valley Science Festival 2026 — AI photo booth, 316 groups in two days', href: '/portfolio/ansan-science-festival-2026' },
+          { text: 'Sowon Seongchwi Festa 2026 — AI saju photo booth dressed in hanbok', href: '/portfolio/sowon-festa-saju-photobooth-2026' },
+          { text: 'K-WAVE DANCE FESTIVAL 2026 — AI perfumer and AI photo booth, in four languages', href: '/portfolio/kwave-dance-festival-2026' },
+          { text: 'Pyeongtaek AI Festa 2026 — four kiosk experiences', href: '/portfolio/pyeongtaek-ai-festa-2026' },
+          { text: 'Eunpyeong AI Festival 2026 — three AI booths, 100 custom perfumes', href: '/portfolio/eunpyeong-ai-festival-2026' },
+        ] },
+        { type: 'cta', text: 'Get an instant estimate', href: '/quote?preset=campus-festival' },
       ],
     },
   },
