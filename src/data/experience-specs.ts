@@ -50,7 +50,7 @@ export const EXPERIENCE_SPECS: Record<string, ExperienceSpec> = {
   'ai-future-career': { input: ['touch'], output: ['print', 'qr'] }, // AI 미래직업 진단
   'ai-science-kiosk': { input: ['touch'], output: ['print'] }, // AI 과학 체험 키오스크
   'ai-history-travel': { input: ['camera', 'touch'], output: ['print'] }, // AI 역사 속 나
-  'ai-timecapsule-photo': { input: ['camera', 'touch'], output: ['qr'] }, // AI 타임캡슐 포토
+  'ai-timecapsule-photo': { input: ['camera', 'touch'], output: ['print', 'qr'] }, // AI 타임캡슐 포토 (안산 과학축제 2026: 네 컷 띠지 인화 + QR 저장)
   'ai-fortune-robot': { input: ['touch'], output: ['print'] }, // AI 원소 운세
   'ai-face-reading': { input: ['camera', 'touch'], output: ['print'] }, // AI 관상 분석
   'ai-palm-reading': { input: ['camera', 'touch'], output: ['print'] }, // AI 손금 로봇

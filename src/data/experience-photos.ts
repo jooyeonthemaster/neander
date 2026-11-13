@@ -45,4 +45,39 @@ export const EXPERIENCE_PHOTOS: Partial<Record<string, ExperiencePhoto>> = {
     eventEn: 'Pyeongtaek AI Festa 2026',
     portfolioSlug: 'pyeongtaek-ai-festa-2026',
   },
+  // 소원성취페스타: 한복을 입힌 AI 사주 부스 화면에서 소원을 고르는 방문객
+  'ai-fortune-robot': {
+    src: '/images/services/experiences/ai-fortune-robot.webp',
+    eventKo: '소원성취페스타 2026',
+    eventEn: 'Sowon Seongchwi Festa 2026',
+    portfolioSlug: 'sowon-festa-saju-photobooth-2026',
+  },
+  // 은평구 AI 페스티벌: 'AI 퍼스널컬러 진단' 부스에서 키오스크로 진단받는 방문객
+  'ai-personal-color': {
+    src: '/images/services/experiences/ai-personal-color.webp',
+    eventKo: '은평구 AI 페스티벌 2026',
+    eventEn: 'Eunpyeong AI Festival 2026',
+    portfolioSlug: 'eunpyeong-ai-festival-2026',
+  },
+  // 안산사이언스밸리 과학축제: AI 포토존 텐트에서 포토부스를 이용하는 가족
+  'ai-timecapsule-photo': {
+    src: '/images/services/experiences/ai-timecapsule-photo.webp',
+    eventKo: '안산사이언스밸리 과학축제 2026',
+    eventEn: 'Ansan Science Valley Science Festival 2026',
+    portfolioSlug: 'ansan-science-festival-2026',
+  },
+  // K-WAVE DANCE FESTIVAL: 'IDOL! 오늘, 나도 K-POP 아이돌' 배너와 AI 포토부스
+  'ai-idol-makeup-booth': {
+    src: '/images/services/experiences/ai-idol-makeup-booth.webp',
+    eventKo: 'K-WAVE DANCE FESTIVAL 2026',
+    eventEn: 'K-WAVE DANCE FESTIVAL 2026',
+    portfolioSlug: 'kwave-dance-festival-2026',
+  },
+  // 전북대 전공탐색 박람회: AI 체험존 화면(AI 미래직업 탐색 포함 3종)
+  'ai-future-career': {
+    src: '/images/services/experiences/ai-future-career.webp',
+    eventKo: '전북대학교 전공탐색 박람회 2026',
+    eventEn: 'JBNU Major Exploration Fair 2026',
+    portfolioSlug: 'jbnu-major-fair-2026',
+  },
 };

@@ -142,6 +142,13 @@ function ExperienceSuggestions({ experiences, lang, onSelect, renderIllustration
       return experience && image ? [{ ...experience, image }] : [];
     });
   if (!suggestions.length) return null;
+  // 실제 운영 사진(EXPERIENCE_PHOTOS)과 연출 예시가 섞일 수 있어서, 실제 사진에는 표시를 달고 안내 문구도 그에 맞춘다
+  const photoCases = renderIllustration ? 0 : suggestions.filter(({ image }) => image.kind === 'case').length;
+  const note = photoCases === 0
+    ? (lang === 'ko' ? '이해를 돕기 위한 연출 예시예요.' : 'Illustrative examples of each experience.')
+    : photoCases === suggestions.length
+      ? (lang === 'ko' ? '실제 행사에서 운영한 현장 사진이에요.' : 'Photos from events we have run.')
+      : (lang === 'ko' ? '「운영 사례」 표시가 있는 사진은 실제 행사 현장이고, 나머지는 이해를 돕기 위한 연출 예시예요.' : 'Photos marked “On site” are from real events; the rest are illustrative examples.');
 
   return (
     <div>
@@ -152,12 +159,13 @@ function ExperienceSuggestions({ experiences, lang, onSelect, renderIllustration
             className="group min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white text-left transition-colors hover:border-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600">
             <span className="relative block aspect-[4/3] overflow-hidden">
               {renderIllustration ? renderIllustration(value, label) : <Image src={image.src} alt="" fill sizes="(max-width: 640px) 28vw, 190px" className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none" />}
+              {!renderIllustration && image.kind === 'case' && <span className="absolute left-1.5 top-1.5 rounded bg-slate-950/70 px-1.5 py-0.5 text-[9px] font-medium leading-none text-white">{lang === 'ko' ? '운영 사례' : 'On site'}</span>}
             </span>
             <span className="block px-2.5 pb-2.5 pt-2 text-xs font-semibold leading-relaxed text-slate-700">{label}</span>
           </button>
         ))}
       </div>
-      <p className="mt-2 text-[10px] text-slate-500">{lang === 'ko' ? '이해를 돕기 위한 연출 예시예요.' : 'Illustrative examples of each experience.'}</p>
+      <p className="mt-2 text-[10px] text-slate-500">{note}</p>
     </div>
   );
 }
