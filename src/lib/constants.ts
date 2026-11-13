@@ -94,9 +94,9 @@ export const CONTACT = {
  * 공개되는 값이라 저장소에 둬도 된다.
  */
 export const SEARCH_VERIFICATION: { google: string; naver: string } = {
-  google: '',
-  naver: '',
+  google: 'GSupGu8FcfvEaW9HTsvJtyGiuS_De1MXpFsLgFAu9Xs',
+  naver: 'b1000b7ed8d3203d14f5e90502982cb7842ebc16',
 };
 
 /** 카카오톡 채널 1:1 채팅 주소 (예: https://pf.kakao.com/_xxxxx/chat). 비어 있으면 상담 버튼을 숨긴다 */
-export const KAKAO_CHANNEL_CHAT_URL = '';
+export const KAKAO_CHANNEL_CHAT_URL = 'https://pf.kakao.com/_MaPNX/chat';
