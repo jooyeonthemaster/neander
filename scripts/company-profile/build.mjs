@@ -53,6 +53,17 @@ html = html.replace(/src="(\.\.\/\.\.\/public\/[^"]+)"/g, (m, rel) => {
   }
   return `src="${pathToFileURL(out).href}"`;
 });
+// Firebase Storage 등 https 이미지도 내려받아 같은 방식으로 축소합니다.
+const remote = [...html.matchAll(/src="(https:\/\/[^"]+)"/g)].map((m) => m[1]);
+for (const [i, url] of [...new Set(remote)].entries()) {
+  const res = await fetch(url.replace(/&amp;/g, '&'));
+  if (!res.ok) throw new Error(`이미지를 받지 못했습니다 (${res.status}): ${url}`);
+  const raw = path.join(work, `remote-${i}.img`);
+  const out = path.join(work, `remote-${i}.jpg`);
+  fs.writeFileSync(raw, Buffer.from(await res.arrayBuffer()));
+  execFileSync('sips', ['-s', 'format', 'jpeg', '-s', 'formatOptions', '70', '-Z', String(MAX_PX), raw, '--out', out], { stdio: 'ignore' });
+  html = html.split(`src="${url}"`).join(`src="${pathToFileURL(out).href}"`);
+}
 // 폰트 등 나머지 상대경로는 절대 file:// URL 로 바꿉니다.
 html = html.replace(/url\('(\.\.\/\.\.\/public\/[^']+)'\)/g, (_, rel) => `url('${pathToFileURL(path.resolve(HERE, rel)).href}')`);
 const tmpHtml = path.join(work, 'profile.html');

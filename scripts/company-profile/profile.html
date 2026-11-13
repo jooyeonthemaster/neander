@@ -71,14 +71,14 @@
   .facts > div { display: grid; grid-template-columns: 26mm 1fr; padding: 4.2mm 0; border-bottom: 1px solid var(--line); font-size: 11pt; }
   .facts dt { color: var(--mute); font-size: 9.5pt; padding-top: .5mm; }
   .facts dd { font-weight: 600; }
-  .biz { display: flex; flex-direction: column; gap: 5mm; }
-  .biz .b { background: var(--soft); border-radius: 3mm; padding: 6mm 7mm; display: grid; grid-template-columns: 12mm 1fr; align-items: start; }
+  .biz { display: flex; flex-direction: column; gap: 3.5mm; }
+  .biz .b { background: var(--soft); border-radius: 3mm; padding: 4.6mm 7mm; display: grid; grid-template-columns: 12mm 1fr; align-items: start; }
   .biz .n { font-size: 20pt; font-weight: 800; color: var(--teal); line-height: 1; }
   .biz h3 { font-size: 13pt; font-weight: 700; }
   .biz p { font-size: 9.5pt; color: var(--ink-2); margin-top: 1.5mm; }
 
   /* 3. history */
-  .tl { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5mm; height: 100%; position: relative; }
+  .tl { display: grid; grid-template-columns: repeat(4, 1fr) 1.45fr; gap: 5mm; height: 100%; position: relative; }
   .tl::before { content: ''; position: absolute; left: 0; right: 0; top: 4mm; height: 1px; background: var(--line); }
   .yr { position: relative; padding-top: 11mm; }
   .yr::before { content: ''; position: absolute; top: 2.4mm; left: 0; width: 3.2mm; height: 3.2mm; border-radius: 50%; background: var(--teal); }
@@ -130,7 +130,12 @@
   .step:first-child .line { background: var(--teal); }
   .step h3 { font-size: 14pt; font-weight: 700; }
   .step p { font-size: 10pt; color: var(--ink-2); margin-top: 2mm; }
-  .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; margin-top: 16mm; }
+  .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; margin-top: 10mm; }
+  .infos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; margin-top: 6mm; }
+  .info { background: var(--soft); border-radius: 3mm; padding: 5mm 6mm; }
+  .info .k { font-size: 8.5pt; font-weight: 700; color: var(--teal); letter-spacing: .14em; }
+  .info p { font-size: 9.5pt; color: var(--ink-2); margin-top: 1.5mm; line-height: 1.55; }
+  .info p b { color: var(--ink); font-weight: 700; }
   .mode { border: 1px solid var(--line); border-radius: 3mm; padding: 7mm 8mm; }
   .mode .k { font-size: 8.5pt; font-weight: 700; color: var(--teal); letter-spacing: .14em; }
   .mode h3 { font-size: 15pt; font-weight: 700; margin-top: 1.5mm; }
@@ -160,9 +165,9 @@
   .pj dl > div { display: grid; grid-template-columns: 9mm 1fr; padding: 1.8mm 0; border-top: 1px solid var(--line); }
   .pj dt { font-size: 8pt; font-weight: 700; color: var(--teal); padding-top: .3mm; }
   .pj dd { font-size: 8.5pt; color: var(--ink-2); line-height: 1.5; }
-  .clients { margin-top: 7mm; padding-top: 4mm; border-top: 1.5px solid var(--ink); display: flex; gap: 6mm; align-items: baseline; }
+  .clients { margin-top: 5mm; padding-top: 3.5mm; border-top: 1.5px solid var(--ink); display: flex; gap: 6mm; align-items: baseline; }
   .clients h4 { font-size: 9.5pt; font-weight: 700; white-space: nowrap; }
-  .clients p { font-size: 9pt; color: var(--ink-2); line-height: 1.7; }
+  .clients p { font-size: 9pt; color: var(--ink-2); line-height: 1.6; }
   .clients p span::after { content: '·'; margin: 0 2mm; color: #B5BCC2; }
   .clients p span:last-child::after { content: ''; }
 
@@ -211,12 +216,14 @@
         <div><dt>대표</dt><dd>유재영</dd></div>
         <div><dt>주소</dt><dd>서울 마포구 독막로36길 10-6 1층</dd></div>
         <div><dt>브랜드</dt><dd>NEANDER · AC'SCENT</dd></div>
+        <div><dt>운영 실적</dt><dd>행사 190건 이상 운영</dd></div>
         <div><dt>웹사이트</dt><dd>neander.co.kr</dd></div>
       </dl>
       <div class="biz">
         <div class="b"><div class="n">①</div><div><h3>행사·팝업 AI 체험 콘텐츠 기획·운영</h3><p>브랜드 행사, 축제, 팝업스토어에 맞는 AI 체험을 기획하고 현장 운영까지 맡습니다.</p></div></div>
         <div class="b"><div class="n">②</div><div><h3>AC'SCENT AI 조향(향수) 체험·제품</h3><p>AI가 취향·이미지를 분석해 향을 추천하고, 조향사가 그 자리에서 향수를 만듭니다.</p></div></div>
         <div class="b"><div class="n">③</div><div><h3>IP 콜라보 굿즈·향 MD</h3><p>공연·아티스트·브랜드 IP에 맞춘 향을 설계하고 굿즈와 향 MD로 제작합니다.</p></div></div>
+        <div class="b"><div class="n">④</div><div><h3>프로그램 개발 · AX</h3><p>웹사이트·자사몰·플랫폼·AI 솔루션을 기획부터 운영까지 만들고, AI 도입과 업무 자동화를 돕습니다. 개발 프로젝트 21건.</p></div></div>
       </div>
     </div>
   </div>
@@ -238,7 +245,7 @@
       <div class="yr"><div class="y">2025</div><div class="t">AC'SCENT ID 론칭</div><ul>
         <li>청년창업사관학교 선정</li><li>AC'SCENT ID 론칭 (3호점)</li><li>제천국제음악영화제 AI 조향사 부스 운영</li><li>서울국제작가축제 AI 북퍼퓸 전시</li><li>안산국제과학영상제 AI 체험존 운영</li></ul></div>
       <div class="yr"><div class="y">2026</div><div class="t">딥테크 밸류업 선정</div><ul>
-        <li>딥테크 밸류업 지원사업 선정</li><li>한국관광공사 AI 조향 클래스 운영</li><li>엔플라잉 〈into REM〉 콘서트 공식 향 MD 제작</li><li>제22회 제천국제음악영화제 OST페어 체험 프로그램 운영</li></ul></div>
+        <li>딥테크 밸류업 지원사업 선정</li><li>한국관광공사 AI 조향 클래스 운영</li><li>엔플라잉 〈into REM〉 콘서트 공식 향 MD 제작</li><li>제22회 제천국제음악영화제 OST페어 체험 프로그램 운영</li><li>평택 AI 페스타 체험 콘텐츠 4종 운영</li><li>2026 K-WAVE DANCE FESTIVAL AI 조향사·AI 포토부스 운영</li><li>은평 AI 페스티벌 · 전북대학교 전공탐색 박람회 AI 체험 운영</li><li>안산사이언스밸리 과학축제 · 소원성취페스타 AI 포토부스 운영</li></ul></div>
     </div>
   </div>
   <div class="foot"><b>NEANDER</b><span>03</span></div>
@@ -257,7 +264,7 @@
       <div class="cat"><img src="../../public/images/ai-experiences/ai-creative.webp"><div class="k">AI CREATIVE</div><h3>AI 크리에이티브 체험</h3><div class="tg">AI가 만드는 세상에 하나뿐인 결과물</div><p>AI가 방문자를 위해 유일한 창작물(레시피, 디자인, 음악 등)을 생성하는 체험</p></div>
       <div class="cat"><img src="../../public/images/ai-experiences/ai-immersive.webp"><div class="k">AI IMMERSIVE</div><h3>AI 이머시브 체험</h3><div class="tg">공간 전체가 AI 체험</div><p>프로젝션 맵핑, 대형 LED, 인터랙티브 설치 등으로 공간 전체를 AI 체험으로 만드는 대규모 콘텐츠</p></div>
     </div>
-    <div class="demo"><span class="big">41개 체험 모두 웹 데모로 미리 체험할 수 있습니다.</span><span class="url">neander.co.kr/services</span></div>
+    <div class="demo"><span class="big">공개 체험 프로그램 18종의 소개와 운영 사진을 사이트에서 볼 수 있습니다.</span><span class="url">neander.co.kr/services</span></div>
     <p class="note" style="margin-top:3mm">카테고리 이미지는 체험 연출 예시입니다.</p>
   </div>
   <div class="foot"><b>NEANDER</b><span>04</span></div>
@@ -291,8 +298,8 @@
         <div class="blk">
           <h4><span>■</span>행사 규모 가이드</h4>
           <div class="cap">
-            <div class="base"><div class="v">시간당 약 20명</div><div class="l">조향 1팀 (조향사 1 + 조수 1)</div></div>
-            <div><div class="v">40명 · 60명</div><div class="l">조향 팀 2·3팀으로 확장</div></div>
+            <div class="base"><div class="v">시간당 최대 40명</div><div class="l">조향 1팀 (조향사 1 + 보조 1)</div></div>
+            <div><div class="v">80명 · 120명</div><div class="l">조향 2·3팀으로 확장 · 그 이상은 상담</div></div>
           </div>
         </div>
       </div>
@@ -317,6 +324,11 @@
       <div class="mode"><div class="k">운영 형태 A</div><h3>행사 렌탈 (단기)</h3><p>행사·팝업 기간에 맞춰 체험 콘텐츠와 장비를 구성하고 운영합니다.</p></div>
       <div class="mode"><div class="k">운영 형태 B</div><h3>상시 운영 (월 단위)</h3><p>매장·전시 공간에 월 단위로 설치하고, 콘텐츠를 주기적으로 교체합니다.</p></div>
     </div>
+    <div class="infos">
+      <div class="info"><div class="k">운영 지역</div><p><b>전국 출장 운영</b>합니다. 금액은 서울 기준이며 지역별 운송비가 더해집니다. 제주·도서 지역과 해외 행사는 진행하지 않습니다.</p></div>
+      <div class="info"><div class="k">준비 기간</div><p>기존 체험은 <b>행사 4~6주 전</b> 문의면 충분합니다. 커스텀 콘텐츠는 <b>행사 6주 전까지 내용 확정</b>이 필요합니다.</p></div>
+      <div class="info"><div class="k">기본 제공</div><p>키오스크에는 <b>영수증형 즉석 프린터가 내장</b>돼 있습니다. 커스텀 개발에는 기획 미팅 1회·시안·오류 대응과 <b>데이터 리포트</b>가 포함됩니다.</p></div>
+    </div>
   </div>
   <div class="foot"><b>NEANDER</b><span>06</span></div>
 </section>
@@ -325,13 +337,13 @@
 <section class="page">
   <div class="eyebrow">06 · Pricing</div>
   <h2>서비스별 시작가</h2>
-  <p class="lead">옵션을 최소로 고른 시작가입니다. 모두 VAT 별도·서울 기준, 1일 기본 운영 6시간입니다.</p>
+  <p class="lead">옵션을 최소로 고른 시작가입니다. 모두 VAT 별도·서울 기준(서울 외 지역은 운송비 별도), 1일 기본 운영 6시간입니다.</p>
   <div class="body">
     <div class="pr">
       <div class="plist">
         <div><span class="nm">AI 향수 체험 <small>(최소 금액 · 10ml 32명까지 · 출장비 포함)</small></span><span class="pz">99만원<small>부터</small></span></div>
         <div><span class="nm">AI 포토부스 <small>(1일·AI 스타일 2종·인화 700장·운영 인력 별도)</small></span><span class="pz">120만원<small>부터</small></span></div>
-        <div><span class="nm">AI 키오스크 <small>(1일·기존 체험 그대로·운영 인력 별도)</small></span><span class="pz">89만원<small>부터</small></span></div>
+        <div><span class="nm">AI 키오스크 <small>(1일·기존 체험 그대로·영수증 프린터 내장·운영 인력 별도)</small></span><span class="pz">89만원<small>부터</small></span></div>
         <div><span class="nm">공간 디자인 <small>(조립식 부스 3×3m)</small></span><span class="pz">300만원<small>부터</small></span></div>
         <div><span class="nm">인터랙티브 미디어 아트 <small>(제작 + 1일 운영)</small></span><span class="pz">580만원<small>부터</small></span></div>
         <div><span class="nm">커스텀 AI 콘텐츠 <small>(웹·미디어·대형 콘텐츠)</small></span><span class="pz">800만원<small>부터</small></span></div>
@@ -359,24 +371,24 @@
   <h2>주요 프로젝트</h2>
   <div class="body">
     <div class="projs">
-      <div class="pj"><img src="../../public/images/portfolio/archive/jimff-2026-ost-fair-01.webp">
-        <div class="meta"><b>제천국제음악영화제</b><span>2026.09</span></div>
-        <h3>제천국제음악영화제 2026 — OST페어 체험 프로그램</h3>
-        <dl><div><dt>목적</dt><dd>제22회 제천국제음악영화제 OST페어에서 영화제의 이야기를 관객이 직접 참여하는 경험과 기념품으로 확장하고자 했습니다.</dd></div>
-        <div><dt>실행</dt><dd>AI 조향 체험과 영화제 게임 짐프러너를 개발해 키오스크로 운영하고, 영화제 굿즈로 디퓨저 키캡 키링을 제작했습니다.</dd></div>
-        <div><dt>결과</dt><dd>OST페어 현장에서 AI 조향 체험과 짐프러너를 운영하고, 디퓨저 키캡 키링을 제작해 납품했습니다.</dd></div></dl></div>
+      <div class="pj"><img src="https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fkwave-dance-festival-2026-01.webp?alt=media&amp;token=fcf1b88b-e0bb-40c5-863c-e939785b882f">
+        <div class="meta"><b>K-WAVE DANCE FESTIVAL</b><span>2026.10.03–04</span></div>
+        <h3>K-WAVE DANCE FESTIVAL 2026 — AI 조향사 · AI 포토부스</h3>
+        <dl><div><dt>목적</dt><dd>이태원로 일대에서 열린 축제에서 국내외 관람객이 K-컬처를 직접 체험하고 결과물을 가져갈 수 있는 부스를 선보이고자 했습니다.</dd></div>
+        <div><dt>실행</dt><dd>사주 오행을 분석해 향을 처방·조향하는 AI 조향사와, 사진 한 장으로 아이돌 컨셉 포토 4종을 만드는 AI 포토부스를 한·영·일·중 4개 언어로 구성했습니다.</dd></div>
+        <div><dt>결과</dt><dd>10월 3·4일 이틀간 두 부스를 현장 운영하며 방문객에게 맞춤 향수와 아이돌 컨셉 포토를 제공했습니다.</dd></div></dl></div>
+      <div class="pj"><img src="../../public/images/portfolio/archive/ansan-science-festival-2026-01.webp">
+        <div class="meta"><b>안산사이언스밸리 과학축제</b><span>2026.11.07–08</span></div>
+        <h3>2026 안산사이언스밸리 과학축제 — AI 포토부스 〈미래로 가는 타임캡슐〉</h3>
+        <dl><div><dt>목적</dt><dd>과학축제를 찾은 가족 방문객이 함께 참여하고 결과물을 가져가는 AI 포토 체험을 제공하고자 했습니다.</dd></div>
+        <div><dt>실행</dt><dd>가족 사진 한 장으로 지금의 모습과 10·20·30년 뒤 모습을 AI로 만들어 네 컷 띠지로 인화하고, QR로 휴대폰에도 저장하게 했습니다.</dd></div>
+        <div><dt>결과</dt><dd>이틀간 316팀이 사진을 완성했고, 약 860명이 참여했습니다.</dd></div></dl></div>
       <div class="pj"><img src="../../public/images/portfolio/archive/pyeongtaek-ai-festa-2026-01.webp">
         <div class="meta"><b>미리내컴</b><span>2026.09.05</span></div>
         <h3>평택 AI 페스타 — 체험 콘텐츠 4종</h3>
         <dl><div><dt>목적</dt><dd>평택아트센터 AI 페스타에서 방문객이 AI 기술을 직접 조작하고 결과물을 받아 가는 체험을 제공하고자 했습니다.</dd></div>
         <div><dt>실행</dt><dd>AI 조향사, 뮤직비디오 메이커, AI 포토부스, 미래가족 상상 콘텐츠를 키오스크 체험 부스로 구성했습니다.</dd></div>
         <div><dt>결과</dt><dd>AI 체험 4종을 기획하고 현장 부스를 운영해 방문객에게 체험 결과물을 제공했습니다.</dd></div></dl></div>
-      <div class="pj"><img src="../../public/images/portfolio/archive/nflying-into-the-rem-md-2026-01.webp">
-        <div class="meta"><b>FNC엔터테인먼트</b><span>2026.06–08</span></div>
-        <h3>엔플라잉 〈into REM〉 — 공식 향 MD</h3>
-        <dl><div><dt>목적</dt><dd>FNC엔터테인먼트는 엔플라잉 〈into REM〉 공연의 분위기를 팬이 간직할 수 있는 공식 향 MD로 전하고자 했습니다.</dd></div>
-        <div><dt>실행</dt><dd>서울·대구·부산·광주 공연별로 향을 달리 구성하고, 룸스프레이와 포토카드를 담은 필로우 사쉐 키링을 제작했습니다.</dd></div>
-        <div><dt>결과</dt><dd>공연별 향 구성의 룸스프레이·사쉐 키링 공식 MD를 1·2차에 걸쳐 제작·납품했습니다.</dd></div></dl></div>
     </div>
   </div>
   <div class="foot"><b>NEANDER</b><span>08</span></div>
@@ -388,26 +400,26 @@
   <h2>주요 프로젝트</h2>
   <div class="body">
     <div class="projs">
+      <div class="pj"><img src="../../public/images/portfolio/archive/jimff-2026-ost-fair-01.webp">
+        <div class="meta"><b>제천국제음악영화제</b><span>2026.09</span></div>
+        <h3>제천국제음악영화제 2026 — OST페어 체험 프로그램</h3>
+        <dl><div><dt>목적</dt><dd>제22회 제천국제음악영화제 OST페어에서 영화제의 이야기를 관객이 직접 참여하는 경험과 기념품으로 확장하고자 했습니다.</dd></div>
+        <div><dt>실행</dt><dd>AI 조향 체험과 영화제 게임 짐프러너를 개발해 키오스크로 운영하고, 영화제 굿즈로 디퓨저 키캡 키링을 제작했습니다.</dd></div>
+        <div><dt>결과</dt><dd>OST페어 현장에서 AI 조향 체험과 짐프러너를 운영하고, 디퓨저 키캡 키링을 제작해 납품했습니다.</dd></div></dl></div>
+      <div class="pj"><img src="https://firebasestorage.googleapis.com/v0/b/neander-4968a.firebasestorage.app/o/portfolio%2Fnflying-into-the-rem-md-2026-studio-01.webp?alt=media&amp;token=9dddd114-6e27-4d2b-bfd5-78118c608f76">
+        <div class="meta"><b>FNC엔터테인먼트</b><span>2026.06–08</span></div>
+        <h3>엔플라잉 〈into REM〉 — 공식 향 MD</h3>
+        <dl><div><dt>목적</dt><dd>FNC엔터테인먼트는 엔플라잉 〈into REM〉 공연의 분위기를 팬이 간직할 수 있는 공식 향 MD로 전하고자 했습니다.</dd></div>
+        <div><dt>실행</dt><dd>서울·대구·부산·광주 공연별로 향을 달리 구성하고, 룸스프레이와 포토카드를 담은 필로우 사쉐 키링을 제작했습니다.</dd></div>
+        <div><dt>결과</dt><dd>공연별 향 구성의 룸스프레이·사쉐 키링 공식 MD를 1·2차에 걸쳐 제작·납품했습니다.</dd></div></dl></div>
       <div class="pj"><img src="../../public/images/portfolio/archive/hurease-launch-2025-01.webp">
         <div class="meta"><b>HUREASE</b><span>2025.11</span></div>
         <h3>휴리즈 HUREASE — 브랜드 런칭 공간·운영</h3>
         <dl><div><dt>목적</dt><dd>셀프케어 브랜드 HUREASE는 런칭 행사에서 방문객이 브랜드와 제품을 직접 경험하도록 하고자 했습니다.</dd></div>
         <div><dt>실행</dt><dd>브랜드 체험존, 제품 테스트, 무드 공간과 시향 요소를 배치하고 안내물과 현장 운영을 함께 구성했습니다.</dd></div>
         <div><dt>결과</dt><dd>런칭 행사 공간을 기획하고 체험존·시향지·안내물을 제작해 현장을 운영했습니다.</dd></div></dl></div>
-      <div class="pj"><img src="../../public/images/portfolio/archive/seoul-writers-festival-01.webp">
-        <div class="meta"><b>서울국제작가축제</b><span>2025.09</span></div>
-        <h3>서울국제작가축제 — AI 북퍼퓸 전시</h3>
-        <dl><div><dt>목적</dt><dd>2025 서울국제작가축제는 참가 도서의 이야기를 관객이 새로운 감각으로 만나는 전시를 원했습니다.</dd></div>
-        <div><dt>실행</dt><dd>참가 도서 29종의 향수와 책 시향지를 만들고, 이미지 기반 책·향 추천, 음성 내레이션, 필사 연동 인터랙션을 구성했습니다.</dd></div>
-        <div><dt>결과</dt><dd>도서 29종의 향수와 시향지, 책·향·미디어 인터랙션을 갖춘 AI 북퍼퓸 전시를 제작했습니다.</dd></div></dl></div>
-      <div class="pj"><img src="../../public/images/portfolio/archive/acscent-id-01.webp">
-        <div class="meta"><b>자체 프로젝트</b><span>2025 오픈</span></div>
-        <h3>AC’SCENT ID — 맞춤 조향 공간</h3>
-        <dl><div><dt>목적</dt><dd>AC’SCENT는 이미지 분석을 바탕으로 방문객이 자신의 취향을 향수로 완성하는 매장을 만들고자 했습니다.</dd></div>
-        <div><dt>실행</dt><dd>향료 진열, 체험 도구, 디지털 분석 화면과 제품 구성을 연결해 맞춤 조향 동선을 설계했습니다.</dd></div>
-        <div><dt>결과</dt><dd>홍대에 세 번째 매장 AC’SCENT ID를 열고 맞춤 조향 서비스를 운영하고 있습니다.</dd></div></dl></div>
     </div>
-    <div class="clients"><h4>함께한 곳</h4><p><span>한국관광공사</span><span>한국콘텐츠진흥원</span><span>종로문화재단</span><span>코리아그랜드세일</span><span>남산골한옥마을</span><span>관광벤처 이음주간</span><span>한국엡손</span><span>중앙대학교</span><span>안산사이언스밸리 과학축제</span><span>경기남부금연지원센터</span><span>이화52번가</span><span>아테리어</span><span>크래커스 스튜디오</span></p></div>
+    <div class="clients"><h4>함께한 곳</h4><p><span>한국관광공사</span><span>한국콘텐츠진흥원</span><span>FNC엔터테인먼트</span><span>제천국제음악영화제</span><span>K-WAVE DANCE FESTIVAL</span><span>서울국제작가축제</span><span>안산사이언스밸리 과학축제</span><span>전북대학교</span><span>은평구진로직업체험지원센터</span><span>수상한협동조합</span><span>종로문화재단</span><span>코리아그랜드세일</span><span>남산골한옥마을</span><span>관광벤처 이음주간</span><span>한국엡손</span><span>중앙대학교</span><span>경기남부금연지원센터</span><span>이화52번가</span><span>아테리어</span><span>크래커스 스튜디오</span></p></div>
   </div>
   <div class="foot"><b>NEANDER</b><span>09</span></div>
 </section>
