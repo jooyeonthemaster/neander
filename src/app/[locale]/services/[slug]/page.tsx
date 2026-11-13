@@ -21,6 +21,27 @@ import { serviceForExperience, startingPrice as quoteStartingPrice } from '@/lib
 import { formatPrice } from '@/lib/quote/format';
 import { serviceJsonLd, serviceLanding, serviceSearchDescription, serviceSearchTitle } from '@/lib/seo-service';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { EXPERIENCE_PHOTOS } from '@/data/experience-photos';
+import { fetchPublishedPortfolio } from '@/lib/firebase/rest';
+import type { PortfolioItem } from '@/types/admin';
+
+// 이 체험을 실제로 운영한 행사 사례 (최대 3건).
+// 서비스 카드 사진의 출처 사례(EXPERIENCE_PHOTOS)를 먼저, AI 향수·AI 포토부스는 같은 서비스를 쓴 행사 사례를 더한다.
+// 사례 ↔ 서비스를 서로 이어 검색엔진이 실적을 함께 읽고, 방문자도 실제 현장을 볼 수 있게 한다.
+async function operatedCases(slug: string, serviceKey: string | null): Promise<PortfolioItem[]> {
+  const portfolio = await fetchPublishedPortfolio();
+  const picked: PortfolioItem[] = [];
+  const exact = EXPERIENCE_PHOTOS[slug]?.portfolioSlug;
+  const exactItem = exact ? portfolio.find((p) => p.slug === exact) : undefined;
+  if (exactItem) picked.push(exactItem);
+  if (serviceKey === 'acscent' || serviceKey === 'photoBooth') {
+    for (const p of portfolio) {
+      if (picked.length >= 3) break;
+      if (p.category === 'offline' && p.services?.includes(serviceKey) && !picked.includes(p)) picked.push(p);
+    }
+  }
+  return picked;
+}
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -74,6 +95,8 @@ export default async function ExperienceDetailPage({ params }: Props) {
     .slice(0, 3);
 
   const related = [...relatedByPillar, ...relatedByIndustry].slice(0, 4);
+  const cases = await operatedCases(slug, serviceForExperience(slug, exp.pillar));
+  const caseLang = locale === 'en' ? 'en' : 'ko';
 
   /* -- Pre-translate all strings -------------------------- */
   const name = t(exp.nameKey);
@@ -709,6 +732,45 @@ export default async function ExperienceDetailPage({ params }: Props) {
           aria-hidden="true"
         />
       </section>
+
+      {/* ══════════════════════════════════════════════════════
+          6-1. 운영 사례 — 이 체험을 실제로 운영한 행사
+          ══════════════════════════════════════════════════════ */}
+      {cases.length > 0 && (
+        <section aria-labelledby="operated-cases-title" className="border-t border-slate-200 bg-white py-16 sm:py-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <h2 id="operated-cases-title" className="font-display text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+              {caseLang === 'ko' ? `${name} 운영 사례` : `${name} in action`}
+            </h2>
+            <p className="mt-2 text-sm text-slate-500">
+              {caseLang === 'ko' ? '네안데르가 현장에서 직접 운영한 행사입니다.' : 'Events where our team ran it on site.'}
+            </p>
+            <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {cases.map((c) => {
+                const title = caseLang === 'ko' ? c.title_ko : c.title_en || c.title_ko;
+                const period = (caseLang === 'ko' ? c.period_ko : c.period_en) || c.period || (c.year ? String(c.year) : '');
+                const thumb = c.thumbnail || c.images?.[0];
+                return (
+                  <li key={c.slug}>
+                    <Link
+                      href={`/portfolio/${c.slug}`}
+                      className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+                    >
+                      {thumb && (
+                        <img src={thumb} alt="" loading="lazy" className="aspect-[16/10] w-full object-cover" />
+                      )}
+                      <div className="p-4">
+                        {period && <p className="text-xs text-slate-400">{period}</p>}
+                        <p className="mt-1 text-sm font-semibold leading-snug text-slate-900 group-hover:text-teal-700">{title}</p>
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {/* ══════════════════════════════════════════════════════
           7. RELATED EXPERIENCES

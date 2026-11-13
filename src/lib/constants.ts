@@ -82,3 +82,21 @@ export const CONTACT = {
     en: '1F, 10-6, Dongmak-ro 36-gil, Mapo-gu, Seoul, South Korea',
   },
 } as const;
+
+/* ─────────────────────────────────────────────────────────
+   검색엔진 소유 확인 · 카카오톡 채널
+   ───────────────────────────────────────────────────────── */
+
+/**
+ * 구글 서치 콘솔·네이버 서치어드바이저에서 「HTML 태그」 방식으로 받은 content 값.
+ * 예: <meta name="naver-site-verification" content="abc123" /> 이면 naver: 'abc123'.
+ * 비어 있으면 Vercel 환경변수(NEXT_PUBLIC_*_SITE_VERIFICATION)를 쓰고, 그것도 없으면 태그를 넣지 않는다.
+ * 공개되는 값이라 저장소에 둬도 된다.
+ */
+export const SEARCH_VERIFICATION: { google: string; naver: string } = {
+  google: '',
+  naver: '',
+};
+
+/** 카카오톡 채널 1:1 채팅 주소 (예: https://pf.kakao.com/_xxxxx/chat). 비어 있으면 상담 버튼을 숨긴다 */
+export const KAKAO_CHANNEL_CHAT_URL = '';

@@ -4,7 +4,7 @@ import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { DEFAULT_OG_IMAGE } from '@/lib/seo';
-import { COMPANY_NAME_EN, COMPANY_NAME_KO, CONTACT, SITE_URL, SOCIAL_LINKS } from '@/lib/constants';
+import { COMPANY_NAME_EN, COMPANY_NAME_KO, CONTACT, SEARCH_VERIFICATION, SITE_URL, SOCIAL_LINKS } from '@/lib/constants';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -15,6 +15,7 @@ import SmoothScrollProvider from '@/components/layout/SmoothScrollProvider';
 import CustomCursor from '@/components/layout/CustomCursor';
 import AnalyticsTracker from '@/components/analytics/AnalyticsTracker';
 import KoreanPageSuggestion from '@/components/layout/KoreanPageSuggestion';
+import MobileContactBar from '@/components/layout/MobileContactBar';
 
 /* ─────────────────────────────────────────────────────────
    Locale Layout
@@ -30,6 +31,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'metadata' });
+  const googleVerification = SEARCH_VERIFICATION.google || process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+  const naverVerification = SEARCH_VERIFICATION.naver || process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION;
 
   return {
     // 상대 경로 og:image 등을 운영 도메인 기준 절대 URL로 만든다
@@ -55,12 +58,10 @@ export async function generateMetadata({
       index: true,
       follow: true,
     },
-    // 서치어드바이저·서치 콘솔에서 받은 HTML 태그 인증값을 Vercel 환경변수로 넣는다
+    // 서치어드바이저·서치 콘솔에서 받은 HTML 태그 인증값 (src/lib/constants.ts, 없으면 Vercel 환경변수)
     verification: {
-      google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
-      other: process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION
-        ? { 'naver-site-verification': process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION }
-        : undefined,
+      google: googleVerification || undefined,
+      other: naverVerification ? { 'naver-site-verification': naverVerification } : undefined,
     },
   };
 }
@@ -135,6 +136,7 @@ export default async function LocaleLayout({
             </main>
             <Footer />
             <AnalyticsTracker />
+            <MobileContactBar />
             {locale === 'en' && <KoreanPageSuggestion />}
           </SmoothScrollProvider>
         </NextIntlClientProvider>

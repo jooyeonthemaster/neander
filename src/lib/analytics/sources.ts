@@ -337,6 +337,8 @@ export const EVENT_LABELS: Record<string, string> = {
   quote_step: '견적 단계 진행',
   quote_pdf: '가견적서 PDF 발급',
   quote_request: '확정 견적 요청',
+  click_cta: '연락·견적 버튼 클릭',
+  ko_suggest: '한국어 페이지 안내',
 }
 
 export const INQUIRY_KIND_LABELS: Record<string, string> = {

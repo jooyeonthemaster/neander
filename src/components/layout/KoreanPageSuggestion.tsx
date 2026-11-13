@@ -4,6 +4,7 @@ import { useState, useSyncExternalStore } from 'react';
 import { useLocale } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { X } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics/tracker';
 
 /* ─────────────────────────────────────────────────────────
    영문 페이지에 한국어 브라우저로 들어온 방문자에게 한국어 페이지를 권한다.
@@ -49,12 +50,13 @@ export default function KoreanPageSuggestion() {
       role="dialog"
       aria-label="한국어 페이지 안내"
       lang="ko"
-      className="fixed inset-x-4 bottom-4 z-[60] mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-slate-200 bg-white/95 p-3 pl-4 shadow-xl backdrop-blur sm:bottom-6"
+      className="fixed inset-x-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-[60] mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-slate-200 bg-white/95 p-3 pl-4 shadow-xl backdrop-blur lg:bottom-6"
     >
       <p className="min-w-0 flex-1 text-sm text-slate-700">한국어 페이지가 있어요.</p>
       <button
         type="button"
         onClick={() => {
+          trackEvent('ko_suggest', 'switch');
           dismiss();
           router.replace(pathname, { locale: 'ko' });
         }}
@@ -64,7 +66,10 @@ export default function KoreanPageSuggestion() {
       </button>
       <button
         type="button"
-        onClick={dismiss}
+        onClick={() => {
+          trackEvent('ko_suggest', 'dismiss');
+          dismiss();
+        }}
         aria-label="닫기"
         className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
       >

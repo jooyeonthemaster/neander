@@ -10,6 +10,17 @@ import { ScrollReveal } from '@/components/animations';
 import { Badge } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
+import { SERVICE_TEXT, type ServiceKey } from '@/lib/quote/catalog';
+
+// 사례에 쓴 서비스 → 자세한 안내 페이지 (구매 의도 검색어용 랜딩·개발 의뢰).
+// 포트폴리오 상세로 바로 들어온 방문 96회 중 서비스·견적·문의로 넘어간 경우가 5회뿐이라 (2026-11 방문 분석)
+// 사례 아래에 같은 구성의 안내와 견적으로 가는 길을 둔다.
+const SERVICE_GUIDE: Partial<Record<ServiceKey, { href: string; ko: string; en: string }>> = {
+  acscent: { href: '/insights/event-ai-perfume-experience', ko: 'AI 향수 만들기 체험 — 비용·진행 안내', en: 'AI perfume-making experience — cost & process' },
+  photoBooth: { href: '/insights/ai-photo-booth-rental', ko: 'AI 포토부스 대여 — 가격·진행 안내', en: 'AI photo booth rental — pricing & process' },
+  custom: { href: '/development', ko: '맞춤 AI 콘텐츠 개발 의뢰 안내', en: 'Custom AI content development' },
+};
+const isServiceKey = (k: string): k is ServiceKey => k in SERVICE_TEXT;
 
 // 관리자 페이지에서 수정한 내용이 5분 안에 반영되도록 ISR 적용
 export const revalidate = 300;
@@ -113,6 +124,11 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
   const t = await getTranslations({ locale, namespace: 'portfolio' });
   const tServices = await getTranslations({ locale, namespace: 'services' });
   const tCommon = await getTranslations({ locale, namespace: 'common' });
+
+  // 이 사례에 쓴 서비스 (견적 카탈로그에 있는 것만)
+  const lang = locale === 'en' ? 'en' : 'ko';
+  const usedForQuote = project.services.filter(isServiceKey);
+  const firstQuoteKey = usedForQuote[0];
 
   // Find next project for navigation
   const nextProject =
@@ -284,6 +300,47 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
                 locale={locale}
                 heading={t('detail.gallery')}
               />
+
+              {/* 이 프로젝트에 쓴 서비스 → 안내·견적 */}
+              {usedForQuote.length > 0 && (
+                <section aria-labelledby="used-services-title" className="mt-14 border-t border-slate-200 pt-10">
+                  <h2 id="used-services-title" className="text-xl font-bold text-slate-900">
+                    {lang === 'ko' ? '이 프로젝트에 쓴 서비스' : 'Services used in this project'}
+                  </h2>
+                  <p className="mt-2 text-sm text-slate-500">
+                    {lang === 'ko'
+                      ? '비슷한 행사를 준비 중이라면 같은 구성으로 금액을 바로 확인해 보세요.'
+                      : 'Planning something similar? Check the price for the same setup right away.'}
+                  </p>
+                  <ul className="mt-6 grid gap-4 sm:grid-cols-2">
+                    {usedForQuote.map((key) => {
+                      const guide = SERVICE_GUIDE[key];
+                      return (
+                        <li key={key} className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5">
+                          <h3 className="text-base font-semibold text-slate-900">{SERVICE_TEXT[key].name[lang]}</h3>
+                          <p className="mt-1.5 flex-1 text-sm leading-relaxed text-slate-600">{SERVICE_TEXT[key].summary[lang]}</p>
+                          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium">
+                            <Link
+                              href={{ pathname: '/quote', query: { item: key } }}
+                              className="text-teal-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 rounded-sm"
+                            >
+                              {lang === 'ko' ? '이 구성으로 견적 내기 →' : 'Get a quote for this →'}
+                            </Link>
+                            {guide && (
+                              <Link
+                                href={guide.href}
+                                className="text-slate-600 underline-offset-4 hover:text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 rounded-sm"
+                              >
+                                {guide[lang]}
+                              </Link>
+                            )}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              )}
             </div>
 
             {/* Sidebar metadata */}
@@ -356,6 +413,12 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
                       className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2"
                     >
                       {t('detail.ctaButton')}
+                    </Link>
+                    <Link
+                      href={firstQuoteKey ? { pathname: '/quote', query: { item: firstQuoteKey } } : '/quote'}
+                      className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-teal-600 bg-white px-5 py-2.5 text-sm font-medium text-teal-700 transition-colors hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2"
+                    >
+                      {lang === 'ko' ? '온라인 견적으로 금액 보기' : 'See the price online'}
                     </Link>
                   </div>
                 </div>

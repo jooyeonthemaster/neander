@@ -55,6 +55,8 @@ const payloadSchema = z.discriminatedUnion('t', [
       'inquiry_submit', 'click_tel', 'click_email', 'click_outbound', 'brochure_request',
       // 온라인 견적(/quote) 단계별 이용
       'quote_view', 'quote_preset', 'quote_step', 'quote_pdf', 'quote_request',
+      // 휴대폰 하단 연락 버튼·사례 페이지 버튼, 영문 페이지의 한국어 안내
+      'click_cta', 'ko_suggest',
     ]),
     label: z.string().max(200).nullable(),
   }),
