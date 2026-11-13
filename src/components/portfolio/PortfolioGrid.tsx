@@ -1,10 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ComponentProps } from 'react';
 import { useLocale } from 'next-intl';
 import { AnimatePresence, motion } from 'motion/react';
-import { Search, X } from 'lucide-react';
+import { ArrowRight, Search, X } from 'lucide-react';
 import { useFirestorePortfolio, type DisplayPortfolio } from '@/hooks/useFirestorePortfolio';
+import { DEVELOPMENT_PROJECTS, type DevelopmentProject } from '@/data/development-projects';
+import { DEVELOPMENT_COPY } from '@/components/development/copy';
+import { Link } from '@/i18n/navigation';
 import { PortfolioCard } from './PortfolioCard';
 import { ScrollReveal } from '@/components/animations';
 import { cn } from '@/lib/utils';
@@ -21,16 +24,8 @@ interface DivisionConfig {
   borderActive: string
 }
 
+// 온라인 솔루션(프로그램 개발)은 맨 뒤에 둔다
 const DIVISIONS: DivisionConfig[] = [
-  {
-    id: 'online',
-    labelKo: '온라인 솔루션',
-    labelEn: 'Online Solution',
-    descKo: '디지털 AI 솔루션으로 브랜드 경험을 확장합니다',
-    descEn: 'Expanding brand experiences with digital AI solutions',
-    dotColor: 'bg-blue-500',
-    borderActive: 'border-blue-500',
-  },
   {
     id: 'offline',
     labelKo: '오프라인 솔루션',
@@ -58,7 +53,68 @@ const DIVISIONS: DivisionConfig[] = [
     dotColor: 'bg-rose-500',
     borderActive: 'border-rose-500',
   },
+  {
+    id: 'online',
+    labelKo: '온라인 솔루션',
+    labelEn: 'Online Solution',
+    descKo: '디지털 AI 솔루션으로 브랜드 경험을 확장합니다',
+    descEn: 'Expanding brand experiences with digital AI solutions',
+    dotColor: 'bg-blue-500',
+    borderActive: 'border-blue-500',
+  },
 ];
+
+/** 목록에 함께 보여 주는 항목: 행사 사례(Firestore)와 프로그램 개발 프로젝트(/development) */
+interface GridItem {
+  key: string;
+  category: Exclude<Division, 'all'>;
+  title: string;
+  searchText: string;
+  card: ComponentProps<typeof PortfolioCard>;
+}
+
+function caseItem(project: DisplayPortfolio, locale: string): GridItem {
+  const card = toCardProps(project, locale);
+  return {
+    key: project.slug,
+    category: project.category,
+    title: card.titleOverride,
+    searchText: [project.title_ko, project.title_en, project.description_ko, project.description_en,
+      project.client, project.client_ko, project.client_en, project.location, project.location_ko, project.location_en, project.year, ...(project.tags ?? []),
+      ...(project.tags_ko ?? []), ...(project.tags_en ?? [])].join(' '),
+    card,
+  };
+}
+
+// 프로그램 개발 페이지의 프로젝트는 상세 페이지가 없어서 카드가 실제 사이트로 바로 이어진다 (/development 와 같은 데이터)
+function developmentItem(project: DevelopmentProject, locale: 'ko' | 'en'): GridItem {
+  return {
+    key: `development-${project.id}`,
+    category: 'online',
+    title: project.name[locale],
+    searchText: [project.name.ko, project.name.en, project.client, project.description.ko, project.description.en, ...project.tags,
+      DEVELOPMENT_COPY.ko.categories[project.category], DEVELOPMENT_COPY.en.categories[project.category]].join(' '),
+    card: {
+      project: {
+        slug: `development-${project.id}`,
+        titleKey: project.id,
+        descriptionKey: project.id,
+        year: null,
+        category: 'online',
+        tags: [...project.tags],
+        image: project.image,
+        images: [],
+        services: [],
+        client: project.client,
+        location: DEVELOPMENT_COPY[locale].categories[project.category],
+        featured: false,
+      },
+      titleOverride: project.name[locale],
+      externalUrl: project.url,
+      description: project.description[locale],
+    },
+  };
+}
 
 function toCardProps(project: DisplayPortfolio, locale: string) {
   return {
@@ -97,13 +153,22 @@ export function PortfolioGrid() {
   }
 
   const terms = search.normalize('NFC').toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
-  const matching = projects.filter((project) => {
-    const text = [project.title_ko, project.title_en, project.description_ko, project.description_en,
-      project.client, project.client_ko, project.client_en, project.location, project.location_ko, project.location_en, project.year, ...(project.tags ?? []),
-      ...(project.tags_ko ?? []), ...(project.tags_en ?? [])].join(' ').normalize('NFC').toLocaleLowerCase();
+  const items: GridItem[] = [
+    ...projects.map((project) => caseItem(project, locale)),
+    ...DEVELOPMENT_PROJECTS.map((project) => developmentItem(project, locale === 'ko' ? 'ko' : 'en')),
+  ];
+  const matching = items.filter((item) => {
+    const text = item.searchText.normalize('NFC').toLocaleLowerCase();
     return terms.every((term) => text.includes(term));
   });
   const filtered = active === 'all' ? matching : matching.filter((p) => p.category === active);
+  const developmentLink = (
+    // 모바일에서는 제목 아래 줄, 넓은 화면에서는 제목 오른쪽
+    <Link href="/development" className="inline-flex basis-full items-center gap-1 rounded-lg pl-6 text-sm font-medium text-teal-700 hover:text-teal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 sm:ml-auto sm:basis-auto sm:px-3 sm:py-2 sm:hover:bg-teal-50">
+      {locale === 'ko' ? '프로그램 개발 자세히 보기' : 'About our development work'}
+      <ArrowRight className="size-4" aria-hidden="true" />
+    </Link>
+  );
 
   return (
     <div>
@@ -129,7 +194,7 @@ export function PortfolioGrid() {
           )}
         </div>
         <p className="mt-3 text-sm text-slate-500" role="status" aria-live="polite" aria-atomic="true">
-          {locale === 'ko' ? `전체 ${projects.length}개 중 ${filtered.length}개 프로젝트` : `${filtered.length} of ${projects.length} projects`}
+          {locale === 'ko' ? `전체 ${items.length}개 중 ${filtered.length}개 프로젝트` : `${filtered.length} of ${items.length} projects`}
         </p>
       </div>
       {/* ─── Structure Map ─── */}
@@ -195,11 +260,11 @@ export function PortfolioGrid() {
                       {hasProjects ? (
                         <div className="ml-[11px] border-l border-slate-200 pl-4 space-y-1.5 mt-2">
                           {divProjects.slice(0, 5).map((proj) => (
-                            <div key={proj.slug} className="relative flex items-center text-xs text-slate-600">
+                            <div key={proj.key} className="relative flex items-center text-xs text-slate-600">
                               {/* Horizontal tick mark from the vertical border-l */}
                               <div className="absolute -left-4 top-1/2 h-px w-3 bg-slate-200" />
                               <span className="truncate">
-                                {locale === 'ko' ? proj.title_ko : proj.title_en}
+                                {proj.title}
                               </span>
                             </div>
                           ))}
@@ -253,9 +318,9 @@ export function PortfolioGrid() {
             return (
               <section key={div.id}>
                 <ScrollReveal>
-                  <div className="mb-8 flex items-center gap-3">
+                  <div className="mb-8 flex flex-wrap items-center gap-3">
                     <div className={cn('h-3 w-3 rounded-full shrink-0', div.dotColor)} />
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <h3 className="text-xl font-bold text-slate-900">
                         {locale === 'ko' ? div.labelKo : div.labelEn}
                         <span className="ml-2 text-base font-normal text-slate-400">{divProjects.length}</span>
@@ -264,13 +329,14 @@ export function PortfolioGrid() {
                         {locale === 'ko' ? div.descKo : div.descEn}
                       </p>
                     </div>
+                    {div.id === 'online' && developmentLink}
                   </div>
                 </ScrollReveal>
 
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8" role="list">
-                  {divProjects.map((project) => (
-                    <div key={project.slug} role="listitem">
-                      <PortfolioCard {...toCardProps(project, locale)} />
+                  {divProjects.map((item) => (
+                    <div key={item.key} role="listitem">
+                      <PortfolioCard {...item.card} />
                     </div>
                   ))}
                 </div>
@@ -280,13 +346,13 @@ export function PortfolioGrid() {
         </div>
       ) : (
         <div>
-          <div className="mb-8 flex items-center gap-3">
+          <div className="mb-8 flex flex-wrap items-center gap-3">
             {(() => {
               const div = DIVISIONS.find((d) => d.id === active)!;
               return (
                 <>
                   <div className={cn('h-3 w-3 rounded-full shrink-0', div.dotColor)} />
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <h3 className="text-xl font-bold text-slate-900">
                       {locale === 'ko' ? div.labelKo : div.labelEn}
                     </h3>
@@ -294,6 +360,7 @@ export function PortfolioGrid() {
                       {locale === 'ko' ? div.descKo : div.descEn}
                     </p>
                   </div>
+                  {div.id === 'online' && developmentLink}
                 </>
               );
             })()}
@@ -301,9 +368,9 @@ export function PortfolioGrid() {
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8" role="list">
             <AnimatePresence mode="popLayout">
-              {filtered.map((project) => (
-                <div key={project.slug} role="listitem">
-                  <PortfolioCard {...toCardProps(project, locale)} />
+              {filtered.map((item) => (
+                <div key={item.key} role="listitem">
+                  <PortfolioCard {...item.card} />
                 </div>
               ))}
             </AnimatePresence>
