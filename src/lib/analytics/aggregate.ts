@@ -12,7 +12,8 @@ export const DAILY_COLLECTION = 'analytics_daily'
 
 /** 요약 구조가 바뀌면 올려서 저장된 일별 요약을 다시 계산하게 한다 */
 // 6: AI 답변 링크(utm_source=chatgpt.com 등)를 캠페인 대신 AI 채널로 다시 모은다
-export const SUMMARY_VERSION = 6
+// 7: 팀 PC 2대를 내부로 분류하고, 프로그램(/services/<slug>)별 관심도를 모은다
+export const SUMMARY_VERSION = 7
 
 /** 한 페이지만 보고 10초 안에 아무 행동 없이 떠난 세션을 이탈로 본다 */
 export const BOUNCE_MAX_MS = 10_000
@@ -87,6 +88,27 @@ export interface PageStat {
   exits: number
 }
 
+/** 체험 프로그램 상세(/services/<slug>) 관심도 — 방문(세션) 기준 */
+export interface ProgramStat {
+  /** 이 프로그램 상세를 연 방문 수 */
+  ss: number
+  /** 조회수 */
+  pv: number
+  /** 체류시간 합계(ms)와 표본 수 */
+  dur: number
+  durN: number
+  /** 상세를 본 뒤 같은 방문에서 견적·문의로 넘어간 방문 수 */
+  next: number
+}
+
+/** /services/<slug> 경로에서 프로그램 slug를 꺼낸다 (목록 페이지는 null) */
+export function programSlugOf(path: string): string | null {
+  const m = /^\/services\/([a-z0-9-]+)\/?$/.exec(path)
+  return m ? m[1] : null
+}
+
+const NEXT_STEP_PATHS = new Set(['/quote', '/contact'])
+
 export interface HourStat {
   pv: number
   ss: number
@@ -160,6 +182,8 @@ export interface Summary {
   hours: HourStat[]
   /** 온라인 견적 이용 */
   quote: QuoteStats
+  /** 체험 프로그램별 관심도 (slug) */
+  programs: Record<string, ProgramStat>
 }
 
 export function emptyStat(): Stat {
@@ -197,6 +221,7 @@ export function emptySummary(): Summary {
     pages: {},
     hours: Array.from({ length: 24 }, () => ({ pv: 0, ss: 0, uv: 0 })),
     quote: emptyQuoteStats(),
+    programs: {},
   }
 }
 
@@ -360,6 +385,7 @@ export function summarize(events: AnalyticsEvent[]): Summary {
     const exit = session.pageviews[session.pageviews.length - 1]
     if (exit) page(summary.pages, exit.path).exits += 1
     addQuoteSession(summary.quote, session)
+    addProgramSession(summary.programs, session)
   }
 
   summary.vids = [...vids]
@@ -368,6 +394,33 @@ export function summarize(events: AnalyticsEvent[]): Summary {
     hour.uv = hourVisitors[i].size
   })
   return summary
+}
+
+/** 한 방문에서 본 체험 프로그램과, 본 뒤 견적·문의로 넘어갔는지를 더한다 */
+function addProgramSession(programs: Record<string, ProgramStat>, session: SessionRecord) {
+  const firstSeen = new Map<string, number>()
+  session.pageviews.forEach((pv, i) => {
+    const slug = programSlugOf(pv.path)
+    if (!slug) return
+    const stat = (programs[slug] ??= { ss: 0, pv: 0, dur: 0, durN: 0, next: 0 })
+    stat.pv += 1
+    if (pv.dur && pv.dur > 0) {
+      stat.dur += pv.dur
+      stat.durN += 1
+    }
+    if (!firstSeen.has(slug)) firstSeen.set(slug, i)
+  })
+  for (const [slug, index] of firstSeen) {
+    const stat = programs[slug]
+    stat.ss += 1
+    const seenAt = session.pageviews[index].ts.getTime()
+    const moved =
+      session.pageviews.slice(index + 1).some((pv) => NEXT_STEP_PATHS.has(pv.path)) ||
+      session.actions.some(
+        (a) => (a.name === 'quote_view' || a.name === 'inquiry_submit') && a.ts.getTime() >= seenAt
+      )
+    if (moved) stat.next += 1
+  }
 }
 
 /** 한 방문의 온라인 견적 이용을 더한다 */
@@ -488,6 +541,14 @@ export function mergeSummaries(list: Summary[]): Summary {
       merged.hours[i].uv += hour.uv
     })
     mergeQuote(merged.quote, summary.quote)
+    for (const [slug, stat] of Object.entries(summary.programs ?? {})) {
+      const target = (merged.programs[slug] ??= { ss: 0, pv: 0, dur: 0, durN: 0, next: 0 })
+      target.ss += stat.ss
+      target.pv += stat.pv
+      target.dur += stat.dur
+      target.durN += stat.durN
+      target.next += stat.next
+    }
   }
 
   merged.vids = [...vids]

@@ -54,6 +54,13 @@ const FINALIZE_GRACE_MS = 60 * 60 * 1000
 /** 한 번에 원본을 읽을 최대 날짜 수 */
 const MAX_RUN_DAYS = 31
 
+/**
+ * 「내부 기기」로 표시하지 않은 채 쓰는 팀 PC 브라우저 (방문자 ID).
+ * 사무실 PC 2대가 2026-09부터 기록돼 실제 방문자 수를 부풀려서, 내부 방문으로 돌린다.
+ * 다른 팀 기기는 관리자 화면 아래 「이 브라우저를 내부 기기로 표시」로 표시한다.
+ */
+const TEAM_VISITOR_IDS = new Set(['wTfORm98OOP30JCu', 'R4wbBF0nwSyXkugi'])
+
 function toEvent(snapshot: QueryDocumentSnapshot<DocumentData>): AnalyticsEvent {
   const data = snapshot.data()
   const ts = data.ts instanceof Timestamp ? data.ts.toDate() : new Date()
@@ -69,7 +76,7 @@ function toEvent(snapshot: QueryDocumentSnapshot<DocumentData>): AnalyticsEvent 
     sid: data.sid ?? snapshot.id,
     new_visitor: data.new_visitor === true,
     entry: data.entry === true,
-    internal: data.internal === true,
+    internal: data.internal === true || TEAM_VISITOR_IDS.has(data.vid),
     channel: origin.channel,
     source: origin.source,
     medium: data.medium ?? null,

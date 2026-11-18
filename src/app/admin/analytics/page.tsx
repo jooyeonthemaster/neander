@@ -9,6 +9,8 @@ import AdminHeader from '../components/AdminHeader'
 import KpiGrid from './components/KpiGrid'
 import TrendChart from './components/TrendChart'
 import PagesTable from './components/PagesTable'
+import ProgramTable from './components/ProgramTable'
+import WeekdaySplit from './components/WeekdaySplit'
 import SessionLog from './components/SessionLog'
 import StatTable, { type StatRow } from './components/StatTable'
 import Heatmap from './components/Heatmap'
@@ -485,6 +487,8 @@ export default function AdminAnalyticsPage() {
 
           <TrendChart granularity={report.granularity} buckets={report.buckets} onDrill={goTo} />
 
+          <WeekdaySplit period={report.period} days={report.days} />
+
           <div className="grid gap-6 lg:grid-cols-2">
             <BarListCard
               title="유입 채널 성과"
@@ -516,6 +520,8 @@ export default function AdminAnalyticsPage() {
               />
             </BarListCard>
           </div>
+
+          <ProgramTable summary={summary} />
 
           <PagesTable summary={summary} />
 
@@ -602,7 +608,8 @@ export default function AdminAnalyticsPage() {
             <li>이탈은 한 페이지만 10초 미만 보고 아무 행동 없이 떠난 방문입니다.</li>
             <li>방문 기록(개별 여정)은 7일 이하 기간을 볼 때만 표시됩니다. 더 긴 기간은 저장된 일별 요약으로 계산합니다.</li>
             <li>검색 로봇·크롤러로 보이는 방문은 기록하지 않습니다.</li>
-            <li>내부(팀) 기기로 표시된 방문은 기본 화면에서 빠지며, 위 전환 버튼으로 포함해서 볼 수 있습니다.</li>
+            <li>내부(팀) 기기로 표시된 방문은 기본 화면에서 빠지며, 위 전환 버튼으로 포함해서 볼 수 있습니다. 표시하지 않은 사무실 PC 2대도 내부 방문으로 분류합니다.</li>
+            <li>체험 프로그램 관심도는 서비스 상세(/services/…)를 연 방문 기준이며, 「견적·문의로」는 같은 방문 안에서 그 뒤에 견적 화면·문의 페이지로 간 비율입니다.</li>
           </ul>
         </details>
         </div>
