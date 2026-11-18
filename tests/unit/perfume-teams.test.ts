@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { PERFUME, REGIONS, type RegionKey } from '../../src/lib/quote/catalog';
+import { COMMON, PERFUME, REGIONS, type RegionKey } from '../../src/lib/quote/catalog';
 import { calculateQuote, defaultOptions, getPerfumeStaffing, normalizePerfumeStaffing, sanitizeInput, type QuoteInput } from '../../src/lib/quote/engine';
 import { loadPreviewFlow, QUOTE_PREVIEW_FLOW_STORAGE_KEY } from '../../src/lib/quote-preview/flow-storage';
 import { PREVIEW_STORAGE_KEY, resolvePreview } from '../../src/lib/quote-preview/model';
@@ -12,6 +12,9 @@ import { optionSummary } from '../../src/components/quote-studio/option-summary'
 function inputWith(extraTeams: unknown, region: RegionKey = 'seoul', days = 1): QuoteInput {
   return sanitizeInput({ region, days, hoursPerDay: 8, items: [{ key: 'acscent', options: { guests: 100, extraTeams } }] });
 }
+
+/** 조향 1팀(2명)이 8시간 운영에서 더 내는 하루 연장 운영비 — 기본 6시간 초과 2시간 */
+const TEAM_OVERTIME_PER_DAY = 2 * (8 - COMMON.baseHours) * COMMON.extraHourPerDay;
 
 test('a perfume experience includes one team and preserves larger team selections', () => {
   const initial = defaultOptions('acscent');
@@ -39,7 +42,7 @@ test('direct calculations bill every selected team and request consultation with
   const expected = calculateQuote(input);
   perfume.options.extraTeams = 10;
   const before = structuredClone(input);
-  assert.equal(calculateQuote(input).total - expected.total, Math.round(8 * PERFUME.teamTravel.seoul * 1.1));
+  assert.equal(calculateQuote(input).total - expected.total, Math.round(8 * (PERFUME.teamTravel.seoul + TEAM_OVERTIME_PER_DAY) * 1.1));
   assert.deepEqual(input, before);
   perfume.options.guests = 1000;
   for (const lang of ['ko', 'en'] as const) {
@@ -61,8 +64,11 @@ test('small and large team selections keep matching travel fees, summaries and p
           const travel = quote.lines.find((line) => /조향 팀 출장비|Perfumer team travel/.test(line.label))!;
           assert.equal(travel.amount, PERFUME.teamTravel[region] * teams * days);
           assert.ok(travel.detail.includes(lang === 'ko' ? `${teams}팀` : `${teams} team`));
-          assert.equal(quote.supply - baseline.supply, PERFUME.teamTravel[region] * (teams - 1) * days);
-          assert.equal(quote.total - baseline.total, Math.round(PERFUME.teamTravel[region] * (teams - 1) * days * 1.1));
+          const perTeamDay = PERFUME.teamTravel[region] + TEAM_OVERTIME_PER_DAY;
+          assert.equal(quote.supply - baseline.supply, perTeamDay * (teams - 1) * days);
+          assert.equal(quote.total - baseline.total, Math.round(perTeamDay * (teams - 1) * days * 1.1));
+          const overtime = quote.lines.find((line) => /연장 운영|Extended hours/.test(line.label))!;
+          assert.equal(overtime.amount, TEAM_OVERTIME_PER_DAY * teams * days);
           const summary = optionSummary(input.items[0], lang).join(' · ');
           assert.match(summary, lang === 'ko' ? new RegExp(`조향(?: 팀)? ${teams}팀`) : new RegExp(`${teams} (?:perfumer )?team`, 'i'));
           assert.doesNotMatch(summary, /조향 팀 \+|\+\d+ team/);

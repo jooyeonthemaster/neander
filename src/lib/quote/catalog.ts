@@ -112,7 +112,7 @@ export const EVENT_TYPES: { key: string; label: Text }[] = [
 export const COMMON = {
   /** 1일 기본 운영 시간 */
   baseHours: 6,
-  /** 기본 시간을 넘는 운영, 시간당·일당 */
+  /** 기본 시간을 넘는 운영 — 기기 1대·인력 1명(조향 팀은 2명)마다, 시간당·일당 */
   extraHourPerDay: 50_000,
   /** 현장 운영 인력 1인 1일 */
   staffPerDay: 300_000,

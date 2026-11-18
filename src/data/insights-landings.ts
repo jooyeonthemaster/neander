@@ -29,8 +29,8 @@ const travelRowsEn = (t: Record<string, number>, unit = '') => [
   ['Gyeongsang (Busan, Daegu, Ulsan, Changwon…)', `+${krw(t.gyeongsang)}${unit}`],
 ];
 
-const STAFF_KO = `현장 운영 인력은 1인 1일 ${man(COMMON.staffPerDay)}이고, 1일 기본 운영은 ${COMMON.baseHours}시간입니다 (초과 시 시간당 ${man(COMMON.extraHourPerDay)}). 전날 사전 설치는 ${man(COMMON.setupDayBefore)}입니다.`;
-const STAFF_EN = `On-site staff are ${krw(COMMON.staffPerDay)} per person per day; a day covers ${COMMON.baseHours} hours (extra hours ${krw(COMMON.extraHourPerDay)} each). Setup the day before is ${krw(COMMON.setupDayBefore)}.`;
+const STAFF_KO = `현장 운영 인력은 1인 1일 ${man(COMMON.staffPerDay)}이고, 1일 기본 운영은 ${COMMON.baseHours}시간입니다 (초과 시 기기 1대·인력 1명마다 시간당 ${man(COMMON.extraHourPerDay)}). 전날 사전 설치는 ${man(COMMON.setupDayBefore)}입니다.`;
+const STAFF_EN = `On-site staff are ${krw(COMMON.staffPerDay)} per person per day; a day covers ${COMMON.baseHours} hours (extra hours ${krw(COMMON.extraHourPerDay)} per device or person). Setup the day before is ${krw(COMMON.setupDayBefore)}.`;
 const POWER_KO = '220V 콘센트와 인터넷이 필요합니다. 클라우드 AI로 분석·생성하기 때문입니다.';
 const POWER_EN = 'A 220V outlet and an internet connection are required, because the analysis and generation run on cloud AI.';
 const NO_ISLANDS_KO = '제주 및 도서 지역은 운영하지 않습니다.';

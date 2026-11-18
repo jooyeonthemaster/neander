@@ -236,6 +236,24 @@ export function perfumeGuestCost(guests: number, volume: '10ml' | '50ml') {
   return best;
 }
 
+/** 연장 운영비를 받는 단위 — 행사 현장의 기기 대수와 인력 수.
+ * 기기: 포토부스 + 행사용 AI 키오스크 + 향수 분석용 키오스크 (상시 운영 키오스크는 빼고)
+ * 인력: 조향 팀(팀당 조향사 1 + 조수 1 = 2명) + 추가 현장 운영 인력
+ * 상담 후 견적인 상품(미디어 아트·공간 디자인·커스텀)은 금액이 없으므로 세지 않는다. */
+export function getOvertimeUnits(input: QuoteInput): { devices: number; staff: number } {
+  let devices = 0;
+  let staff = input.extraStaff;
+  for (const item of input.items) {
+    if (item.key === 'photoBooth') devices += item.options.booths;
+    else if (item.key === 'rental' && item.options.mode !== 'monthly') devices += item.options.kiosks;
+    else if (item.key === 'acscent') {
+      devices += item.options.analysisKiosks ?? 0;
+      staff += getPerfumeStaffing(item.options, input).teams * 2;
+    }
+  }
+  return { devices, staff };
+}
+
 export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResult {
   const L = (ko: string, en: string) => (lang === 'ko' ? ko : en);
   const lines: QuoteLine[] = [];
@@ -396,9 +414,18 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
   }
   const extraHours = Math.max(0, input.hoursPerDay - COMMON.baseHours);
   if (hasOnsite && extraHours > 0) {
-    lines.push({ service: 'common', label: L('연장 운영', 'Extended hours'), detail: L(
-      `기본 ${COMMON.baseHours}시간 초과 ${extraHours}시간 × ${days}일 × ${won(COMMON.extraHourPerDay, lang)}`,
-      `${extraHours} h beyond ${COMMON.baseHours} h × ${days} day(s) × ${won(COMMON.extraHourPerDay, lang)}`), amount: COMMON.extraHourPerDay * extraHours * days });
+    // 연장 운영은 현장에서 돌아가는 기기 1대·인력 1명마다 받는다
+    const { devices, staff } = getOvertimeUnits(input);
+    const units = devices + staff;
+    if (units > 0) {
+      const who = [
+        devices ? L(`기기 ${devices}대`, `${devices} device(s)`) : '',
+        staff ? L(`인력 ${staff}명`, `${staff} staff`) : '',
+      ].filter(Boolean).join(' + ');
+      lines.push({ service: 'common', label: L('연장 운영', 'Extended hours'), detail: L(
+        `${who} · 기본 ${COMMON.baseHours}시간 초과 ${extraHours}시간 × ${days}일 × ${won(COMMON.extraHourPerDay, lang)}`,
+        `${who} · ${extraHours} h beyond ${COMMON.baseHours} h × ${days} day(s) × ${won(COMMON.extraHourPerDay, lang)}`), amount: COMMON.extraHourPerDay * units * extraHours * days });
+    }
   }
   // 지역 운송비 (행사당 1회): 용달이 필요한 상품이 있으면 용달 기준, 키오스크만 있으면 직접 운반 기준
   const needsTruck = input.items.some((i) => i.key === 'photoBooth');
