@@ -35,8 +35,8 @@ export const PRODUCTS: ProductEntry[] = [
   {
     key: 'spatialDesign',
     href: '/portfolio',
-    image: '/images/flagship/acscent-wow.webp',
-    caption: { ko: "직영 공간 · AC'SCENT WOW", en: "Our own space · AC'SCENT WOW" },
+    image: '/images/flagship/acscent-id.webp',
+    caption: { ko: "직영 공간 · AC'SCENT ID", en: "Our own space · AC'SCENT ID" },
   },
   {
     key: 'mediaArt',

@@ -23,7 +23,7 @@ const COPY = {
     facts: [
       { value: '150건', label: '2025년 생일카페·팬 이벤트 향수 제작' },
       { value: '30종', label: '운영 중인 향료' },
-      { value: '2곳', label: "직영 매장 (홍대 AC'SCENT ID · AC'SCENT WOW)" },
+      { value: '홍대', label: "직영 매장 AC'SCENT ID" },
       { value: `최대 ${PERFUME.guestsPerTeamHour}명`, label: '시간당 체험 인원 (조향사 1명 + 보조 1명, 1팀 기준)' },
     ],
     priceTitle: '매장 판매가',
@@ -44,7 +44,7 @@ const COPY = {
     facts: [
       { value: '150', label: 'Birthday-café and fan-event perfume projects in 2025' },
       { value: '30', label: 'Fragrance notes in use' },
-      { value: '2', label: "Own stores (AC'SCENT ID · AC'SCENT WOW, Hongdae)" },
+      { value: 'Hongdae', label: "Our own store, AC'SCENT ID" },
       { value: `Up to ${PERFUME.guestsPerTeamHour}`, label: 'Guests per hour (one team: perfumer + assistant)' },
     ],
     priceTitle: 'Store prices',

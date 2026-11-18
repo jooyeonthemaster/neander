@@ -38,7 +38,6 @@
     "acscent-packaging-design",
     "acscent-fandom-goods",
     "acscent-id",
-    "acscent-wau",
     "acscent-sinchon",
     "cross-the-line",
     "chungang-coming-of-age-perfume-2023",
@@ -3621,8 +3620,8 @@
       "is_featured": true,
       "title_ko": "AC’SCENT ID — 맞춤 조향 공간",
       "title_en": "AC’SCENT ID — Personal Fragrance Space",
-      "description_ko": "AC’SCENT의 세 번째 매장으로 이미지 기반 맞춤 조향과 향 탐색을 위한 공간을 만들었습니다. 향료 진열, 체험 도구, 디지털 분석 화면과 제품 구성을 연결해 방문객이 자신의 취향을 향수로 완성하도록 설계했습니다.",
-      "description_en": "We created AC’SCENT’s third store as a space for image-based custom perfume blending and scent discovery. Fragrance displays, blending tools, digital analysis screens and product formats guide visitors from their preferences to a finished perfume.",
+      "description_ko": "AC’SCENT ID는 이미지 기반 맞춤 조향과 향 탐색을 위해 만든 매장입니다. 향료 진열, 체험 도구, 디지털 분석 화면과 제품 구성을 연결해 방문객이 자신의 취향을 향수로 완성하도록 설계했습니다.",
+      "description_en": "We created AC’SCENT ID as a space for image-based custom perfume blending and scent discovery. Fragrance displays, blending tools, digital analysis screens and product formats guide visitors from their preferences to a finished perfume.",
       "slug": "acscent-id",
       "category": "service",
       "tags_ko": [
@@ -3770,90 +3769,6 @@
     {
       "tags": [
         "In-house Brand",
-        "Media Art",
-        "Fan Events"
-      ],
-      "services": [
-        "acscent",
-        "mediaArt",
-        "spatialDesign"
-      ],
-      "year": 2024,
-      "location": "서울 홍대",
-      "is_featured": false,
-      "title_ko": "AC’SCENT 와우 — 향과 미디어아트 체험 공간",
-      "title_en": "AC’SCENT WOW — Fragrance and Media Art Space",
-      "description_ko": "홍대 와우산로에 AC’SCENT의 두 번째 매장을 열었습니다. 향수 조향에 미디어아트와 팬 이벤트 공간을 결합하고, 행사 테마에 맞춰 시각 연출과 향 제품을 함께 구성했습니다.",
-      "description_en": "We opened AC’SCENT’s second store on Wausan-ro in Hongdae. Perfume blending, media art and fan events share a space where visual treatments and fragrance products can be adapted to each event’s theme.",
-      "slug": "acscent-wau",
-      "category": "service",
-      "tags_ko": [
-        "자체 브랜드",
-        "미디어아트",
-        "팬 이벤트"
-      ],
-      "tags_en": [
-        "In-house Brand",
-        "Media Art",
-        "Fan Events"
-      ],
-      "client": "자체 프로젝트",
-      "period": "2024 오픈",
-      "period_ko": "2024 오픈",
-      "period_en": "Opened in 2024",
-      "client_ko": "자체 프로젝트",
-      "client_en": "In-house Project",
-      "location_ko": "서울 홍대",
-      "location_en": "Hongdae, Seoul",
-      "result_ko": "조향 체험 · 미디어아트 · 팬 이벤트 공간 운영",
-      "result_en": "Perfume blending · media art · fan event space",
-      "images": [
-        "/images/portfolio/archive/acscent-wau-01.webp",
-        "/images/portfolio/archive/acscent-wau-02.webp",
-        "/images/portfolio/archive/acscent-wau-03.webp",
-        "/images/portfolio/archive/acscent-wau-04.webp",
-        "/images/portfolio/archive/acscent-wau-05.webp",
-        "/images/portfolio/archive/acscent-wau-06.webp"
-      ],
-      "thumbnail": "/images/portfolio/archive/acscent-wau-01.webp",
-      "image_metadata": {
-        "/images/portfolio/archive/acscent-wau-01.webp": {
-          "caption_ko": "AC’SCENT 와우점 — 시향 공간과 매장 전경",
-          "caption_en": "AC’SCENT WOW — fragrance displays and store interior",
-          "kind": "photo"
-        },
-        "/images/portfolio/archive/acscent-wau-02.webp": {
-          "caption_ko": "AC’SCENT 와우점 — 시향 공간과 매장 전경",
-          "caption_en": "AC’SCENT WOW — fragrance displays and store interior",
-          "kind": "photo"
-        },
-        "/images/portfolio/archive/acscent-wau-03.webp": {
-          "caption_ko": "AC’SCENT 와우점 — 시향 공간과 매장 전경",
-          "caption_en": "AC’SCENT WOW — fragrance displays and store interior",
-          "kind": "photo"
-        },
-        "/images/portfolio/archive/acscent-wau-04.webp": {
-          "caption_ko": "AC’SCENT 와우점 — 시향 공간과 매장 전경",
-          "caption_en": "AC’SCENT WOW — fragrance displays and store interior",
-          "kind": "photo"
-        },
-        "/images/portfolio/archive/acscent-wau-05.webp": {
-          "caption_ko": "AC’SCENT 와우점 — 시향 공간과 매장 전경",
-          "caption_en": "AC’SCENT WOW — fragrance displays and store interior",
-          "kind": "photo"
-        },
-        "/images/portfolio/archive/acscent-wau-06.webp": {
-          "caption_ko": "AC’SCENT 와우점 — 시향 공간과 매장 전경",
-          "caption_en": "AC’SCENT WOW — fragrance displays and store interior",
-          "kind": "photo"
-        }
-      },
-      "is_published": true,
-      "display_order": 38
-    },
-    {
-      "tags": [
-        "In-house Brand",
         "Perfume Workshop",
         "Spatial Planning"
       ],
@@ -3981,7 +3896,7 @@
         }
       },
       "is_published": true,
-      "display_order": 39
+      "display_order": 38
     },
     {
       "tags": [
@@ -4046,7 +3961,7 @@
         }
       },
       "is_published": true,
-      "display_order": 40
+      "display_order": 39
     },
     {
       "tags": [
@@ -4117,7 +4032,7 @@
         }
       },
       "is_published": true,
-      "display_order": 41
+      "display_order": 40
     },
     {
       "tags": [
@@ -4188,7 +4103,7 @@
         }
       },
       "is_published": true,
-      "display_order": 42
+      "display_order": 41
     },
     {
       "tags": [
@@ -4247,7 +4162,7 @@
         }
       },
       "is_published": true,
-      "display_order": 43
+      "display_order": 42
     },
     {
       "tags": [
@@ -4312,7 +4227,7 @@
         }
       },
       "is_published": true,
-      "display_order": 44
+      "display_order": 43
     },
     {
       "tags": [
@@ -4371,7 +4286,7 @@
         }
       },
       "is_published": true,
-      "display_order": 45
+      "display_order": 44
     },
     {
       "tags": [
@@ -4436,7 +4351,7 @@
         }
       },
       "is_published": true,
-      "display_order": 46
+      "display_order": 45
     },
     {
       "tags": [
@@ -4489,7 +4404,7 @@
         }
       },
       "is_published": true,
-      "display_order": 47
+      "display_order": 46
     },
     {
       "tags": [
@@ -4608,7 +4523,7 @@
         }
       },
       "is_published": true,
-      "display_order": 48
+      "display_order": 47
     },
     {
       "tags": [
@@ -4657,7 +4572,7 @@
         }
       },
       "is_published": true,
-      "display_order": 49
+      "display_order": 48
     }
   ]
 }

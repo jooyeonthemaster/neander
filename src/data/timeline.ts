@@ -75,12 +75,6 @@ export const timelineData: TimelineEntry[] = [
         icon: '🏫',
       },
       {
-        titleKey: 'acscentWau',
-        descriptionKey: 'acscentWauDesc',
-        icon: '🧪',
-        image: '/images/portfolio/acscent-wau-1.webp',
-      },
-      {
         titleKey: 'hahyunsangElegy',
         descriptionKey: 'hahyunsangElegyDesc',
         icon: '🎵',

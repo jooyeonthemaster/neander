@@ -250,18 +250,10 @@
   "acscent-id": {
     "objective_ko": "AC’SCENT는 이미지 분석을 바탕으로 방문객이 자신의 취향을 향수로 완성하는 매장을 만들고자 했습니다.",
     "execution_ko": "향료 진열, 체험 도구, 디지털 분석 화면과 제품 구성을 연결해 맞춤 조향 동선을 설계했습니다.",
-    "outcome_ko": "홍대에 세 번째 매장 AC’SCENT ID를 열고 맞춤 조향 서비스를 운영하고 있습니다.",
+    "outcome_ko": "홍대에 AC’SCENT ID를 열고 맞춤 조향 서비스를 운영하고 있습니다.",
     "objective_en": "AC'SCENT wanted a store where visitors turn their personal taste into a perfume, guided by image analysis.",
     "execution_en": "We linked fragrance displays, experience tools, digital analysis screens and products into a custom blending flow.",
-    "outcome_en": "Opened AC'SCENT ID, our third store, in Hongdae, where we run a custom perfume service."
-  },
-  "acscent-wau": {
-    "objective_ko": "AC’SCENT는 조향 체험에 미디어아트와 팬 이벤트를 더한 두 번째 매장을 만들고자 했습니다.",
-    "execution_ko": "홍대 와우산로 매장에 조향 공간, 미디어아트, 팬 이벤트 공간을 결합하고 행사 테마별 연출과 향 제품을 구성했습니다.",
-    "outcome_ko": "조향 체험·미디어아트·팬 이벤트를 운영하는 두 번째 매장을 열었습니다.",
-    "objective_en": "AC'SCENT set out to build a second store that adds media art and fan events to the perfume experience.",
-    "execution_en": "On Wausan-ro in Hongdae, we combined blending space, media art and fan event space, with visuals and fragrance products for each event theme.",
-    "outcome_en": "Opened our second store, running perfume blending, media art and fan events."
+    "outcome_en": "Opened AC'SCENT ID in Hongdae, where we run a custom perfume service."
   },
   "acscent-sinchon": {
     "objective_ko": "AC’SCENT는 향을 맡고 고르고 만드는 과정을 한 공간에서 경험하는 첫 매장을 만들고자 했습니다.",

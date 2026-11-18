@@ -11,8 +11,6 @@ import { FitToViewport, ScrollReveal, StaggerChildren, StaggerItem } from '@/com
 const ACCENT_ID_MAP =
   'https://map.naver.com/p/entry/place/1274492663?placePath=%252Fhome%253Fentry%253Dplt&searchType=place&lng=126.9267345&lat=37.5549328';
 
-const ACCENT_WOW_MAP =
-  'https://map.naver.com/p/search/%EC%95%85%EC%84%BC%ED%8A%B8%EC%99%80%EC%9A%B0/place/1205808970?c=15.00,0,0,0,dh&isCorrectAnswer=true&placePath=/home?from=map&fromPanelNum=1&additionalHeight=76&timestamp=202602142112&locale=ko&svcName=map_pcv5&searchText=%EC%95%85%EC%84%BC%ED%8A%B8%EC%99%80%EC%9A%B0';
 
 const KEY_COLOR = '#24ADB5';
 
@@ -23,14 +21,6 @@ function FlaskIcon() {
       <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2" />
       <path d="M8.5 2h7" />
       <path d="M7 16.5h10" />
-    </svg>
-  );
-}
-
-function SparklesIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3Z" />
     </svg>
   );
 }
@@ -99,8 +89,8 @@ export function FlagshipStore() {
           </p>
         </ScrollReveal>
 
-        {/* ── Store cards (2 columns) ──────────────────────── */}
-        <StaggerChildren staggerDelay={0.1} className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 mb-8 lg:mb-[3vh] lg-short:mb-3">
+        {/* ── Store card ───────────────────────────────────── */}
+        <StaggerChildren staggerDelay={0.1} className="mx-auto grid w-full max-w-3xl grid-cols-1 gap-4 lg:gap-5 mb-8 lg:mb-[3vh] lg-short:mb-3">
           {/* AC'SCENT ID */}
           <StaggerItem>
             <StoreCard
@@ -116,25 +106,6 @@ export function FlagshipStore() {
                 t('stores.accentId.features.2'),
               ]}
               mapUrl={ACCENT_ID_MAP}
-              mapLabel={t('viewMap')}
-            />
-          </StaggerItem>
-
-          {/* AC'SCENT WOW */}
-          <StaggerItem>
-            <StoreCard
-              imageSrc="/images/flagship/acscent-wow.webp"
-              icon={<SparklesIcon />}
-              name={t('stores.accentWow.nameEn')}
-              nameKo={t('stores.accentWow.name')}
-              description={t('stores.accentWow.description')}
-              detail={t('stores.accentWow.detail')}
-              features={[
-                t('stores.accentWow.features.0'),
-                t('stores.accentWow.features.1'),
-                t('stores.accentWow.features.2'),
-              ]}
-              mapUrl={ACCENT_WOW_MAP}
               mapLabel={t('viewMap')}
             />
           </StaggerItem>
@@ -207,7 +178,7 @@ function StoreCard({
         alt=""
         fill
         loading="eager"
-        sizes="(min-width: 1280px) 610px, (min-width: 1024px) 50vw, calc(100vw - 48px)"
+        sizes="(min-width: 816px) 768px, calc(100vw - 48px)"
         className="pointer-events-none object-cover object-center transition-transform duration-700 ease-out motion-safe:group-hover:scale-[1.035] motion-reduce:transition-none"
       />
       <div
