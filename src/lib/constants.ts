@@ -98,5 +98,6 @@ export const SEARCH_VERIFICATION: { google: string; naver: string } = {
   naver: 'b1000b7ed8d3203d14f5e90502982cb7842ebc16',
 };
 
-/** 카카오톡 채널 1:1 채팅 주소 (예: https://pf.kakao.com/_xxxxx/chat). 비어 있으면 상담 버튼을 숨긴다 */
-export const KAKAO_CHANNEL_CHAT_URL = 'https://pf.kakao.com/_MaPNX/chat';
+/** 카카오톡 채널 1:1 채팅 주소 (예: https://pf.kakao.com/_xxxxx/chat). 비어 있으면 상담 버튼을 숨긴다.
+ *  2026-11-19 사용자 요청으로 숨김 — 다시 켜려면 'https://pf.kakao.com/_MaPNX/chat' 를 넣는다 */
+export const KAKAO_CHANNEL_CHAT_URL: string = '';
