@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { IndustryShowcase } from '@/components/services/IndustryShowcase';
-import { ProcessFlow } from '@/components/services/ProcessFlow';
 import { ServiceCTA } from '@/components/services/ServiceCTA';
 import { PricingGuide } from '@/components/services/PricingGuide';
 import { EventGuides } from '@/components/services/EventGuides';
@@ -101,9 +100,6 @@ export default async function ServicesPage({ params, searchParams }: Props) {
 
       {/* ── 행사별 안내 (인사이트의 서비스 안내 페이지, 주소는 /insights 그대로) ── */}
       <EventGuides locale={locale} />
-
-      {/* ── Process Flow ────────────────────────────────── */}
-      <ProcessFlow />
 
       {/* ── 비용·운영 안내 ─────────────────────────────── */}
       <PricingGuide locale={locale} variant="compact" />
