@@ -21,8 +21,8 @@ export default function HomePage() {
     <ScrollOverlayHome>
       <HeroSection />
       <ServicesOverview />
-      <FlagshipStore />
       <FeaturedPortfolio />
+      <FlagshipStore />
       <CTASection />
     </ScrollOverlayHome>
   );

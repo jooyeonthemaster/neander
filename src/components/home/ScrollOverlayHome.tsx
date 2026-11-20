@@ -52,8 +52,8 @@ export function ScrollOverlayHome({ children }: ScrollOverlayHomeProps) {
   const BG_COLORS = [
     'bg-neutral-950', // 0: Hero
     'bg-white',       // 1: Services
-    'bg-neutral-950', // 2: Flagship store
-    'bg-neutral-50',  // 3: Portfolio
+    'bg-neutral-50',  // 2: Portfolio
+    'bg-neutral-950', // 3: Flagship store
     'bg-neutral-950', // 4: CTA
   ];
 
