@@ -76,6 +76,10 @@ const PIC = {
   jbnuRow: pic(`${AR}jbnu-major-fair-2026-03.webp`, '여러 대를 나란히 둔 체험존 — 전북대 전공탐색 박람회', 'A row of stations — Jeonbuk National University major fair'),
   ansan: pic(`${AR}ansan-science-festival-2026-01.webp`, '안산 과학축제 2026 — 가족 타임캡슐 AI 포토부스 (이틀 316팀)', 'Ansan Science Festival 2026 — family time-capsule AI photo booth (316 groups in 2 days)'),
   jongno: pic(`${PF}jongno-open-book-maru-2026-3.webp`, '종로 열린 책마루 — 야외도서관의 독서 취향·향 체험', 'Jongno Open Book Maru — reading taste and scent in an outdoor library'),
+  ptPhoto: pic(`${AR}pyeongtaek-ai-festa-2026-09.webp`, '평택 AI 페스타 2026 — AI 포토부스', 'Pyeongtaek AI Festa 2026 — AI photo booths'),
+  ptCrowd: pic(`${AR}pyeongtaek-ai-festa-2026-01.webp`, '평택 AI 페스타 2026 — 체험 부스 앞에 줄 선 방문객', 'Pyeongtaek AI Festa 2026 — visitors lining up at the booths'),
+  fortune: pic('/images/services/experiences/ai-fortune-robot.webp', 'AI 사주 키오스크 체험', 'AI fortune kiosk'),
+  epson: pic(`${AR}epson-oneday-class-2025-01.webp`, '한국엡손 원데이클래스 — 기업 행사 AI 향수 만들기', 'Epson Korea one-day class — AI perfume making at a corporate event'),
   giftHero: pic(`${ST}gift-hero.webp`, '행사 답례품 향수를 준비한 모습', 'Perfume gifts set out for guests', true),
   giftHand: pic(`${ST}gift-handover.webp`, '조향사가 참석자에게 향수를 건네는 모습', 'A perfumer handing a perfume gift to a guest', true),
   brandExpo: pic(`${ST}brand-collab.webp`, '브랜드 부스 안에 차린 향 콜라보 코너 — AI 향 키오스크와 시향대', 'A scent collaboration corner inside a brand booth — AI scent kiosks and a tasting counter', true),
@@ -91,6 +95,7 @@ export const LANDINGS: Insight[] = [
   {
     slug: 'ai-photo-booth-rental',
     kind: 'landing',
+    cover: coverOf(PIC.ptPhoto),
     // 2026-11-14 네이버 키워드 도구: 「포토부스 대여」 월 3,820회·「포토부스 렌탈」 920회인데 「AI 포토부스 대여」는 50회라,
     // 제목·설명을 포토부스 대여 전체로 넓히고 일반 포토부스와의 차이를 보여 준다. 주소는 검색엔진에 제출한 그대로 둔다.
     date: '2026-11-14',
@@ -340,6 +345,7 @@ export const LANDINGS: Insight[] = [
   {
     slug: 'ai-fortune-kiosk-rental',
     kind: 'landing',
+    cover: coverOf(PIC.fortune),
     date: '2026-11-11',
     keywords: ['사주 키오스크 대여', 'AI 사주 키오스크', 'AI 관상 체험 부스', 'AI 손금', '운세 키오스크 렌탈', '행사 사주 이벤트', '축제 사주 부스'],
     ko: {
@@ -417,6 +423,7 @@ export const LANDINGS: Insight[] = [
   {
     slug: 'corporate-year-end-event-ai-booth',
     kind: 'landing',
+    cover: coverOf(PIC.epson),
     // 2026-11-14 네이버 키워드 도구: 크리스마스행사 월 2,540회·연말행사 1,340회·기업행사 890회·송년회 이벤트 560회·창립기념행사 1,130회.
     // 송년회만 다루던 제목을 연말·크리스마스·시무식·창립기념까지 넓힌다. 주소는 검색엔진에 제출한 그대로 둔다.
     date: '2026-11-14',
@@ -491,6 +498,7 @@ export const LANDINGS: Insight[] = [
   {
     slug: 'festival-experience-booth',
     kind: 'landing',
+    cover: coverOf(PIC.ptCrowd),
     date: '2026-11-14',
     keywords: ['축제 체험 부스', '축제부스', '체험부스', '행사부스', '축제 부스 운영', '지역축제 체험 프로그램', '대학 축제 부스', '과학축제 체험', '축제 포토부스', 'AI 체험 부스'],
     ko: {

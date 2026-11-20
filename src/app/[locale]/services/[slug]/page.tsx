@@ -21,6 +21,8 @@ import { serviceForExperience, startingPrice as quoteStartingPrice } from '@/lib
 import { formatPrice } from '@/lib/quote/format';
 import { serviceJsonLd, serviceLanding, serviceSearchDescription, serviceSearchTitle } from '@/lib/seo-service';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { GuideCards } from '@/components/services/GuideCards';
+import { guidesForExperience } from '@/data/event-guides';
 import { EXPERIENCE_PHOTOS } from '@/data/experience-photos';
 import { fetchPublishedPortfolio } from '@/lib/firebase/rest';
 import type { PortfolioItem } from '@/types/admin';
@@ -771,6 +773,23 @@ export default async function ExperienceDetailPage({ params }: Props) {
           </div>
         </section>
       )}
+
+      {/* ══════════════════════════════════════════════════════
+          6-2. 행사별 안내 — 이 체험을 쓰는 방법별 비용·진행 안내
+          ══════════════════════════════════════════════════════ */}
+      <section aria-labelledby="event-guides-title" className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 id="event-guides-title" className="font-display text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+            {caseLang === 'ko' ? '행사별 안내' : 'Guides by use'}
+          </h2>
+          <p className="mt-2 text-sm text-slate-500">
+            {caseLang === 'ko' ? '쓰임새별 비용 · 현장 진행 · 운영 사례를 정리했습니다.' : 'Prices, how it runs on the day, and past events.'}
+          </p>
+          <div className="mt-8">
+            <GuideCards slugs={guidesForExperience(slug, exp.pillar)} lang={caseLang} />
+          </div>
+        </div>
+      </section>
 
       {/* ══════════════════════════════════════════════════════
           7. RELATED EXPERIENCES

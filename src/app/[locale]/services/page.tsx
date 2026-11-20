@@ -5,6 +5,7 @@ import { IndustryShowcase } from '@/components/services/IndustryShowcase';
 import { ProcessFlow } from '@/components/services/ProcessFlow';
 import { ServiceCTA } from '@/components/services/ServiceCTA';
 import { PricingGuide } from '@/components/services/PricingGuide';
+import { EventGuides } from '@/components/services/EventGuides';
 import { type PillarId } from '@/data/experiences';
 import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
 
@@ -97,6 +98,9 @@ export default async function ServicesPage({ params, searchParams }: Props) {
 
       {/* ── Industry Showcase (Main Selling Section) ──── */}
       <IndustryShowcase key={initialPillar ?? 'all'} initialPillar={initialPillar} />
+
+      {/* ── 행사별 안내 (인사이트의 서비스 안내 페이지, 주소는 /insights 그대로) ── */}
+      <EventGuides locale={locale} />
 
       {/* ── Process Flow ────────────────────────────────── */}
       <ProcessFlow />

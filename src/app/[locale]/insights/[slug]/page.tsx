@@ -183,6 +183,19 @@ export default async function InsightPage({ params }: Props) {
   const [titleMain, titleSub] = splitTitle(copy.title);
   const cover = item.cover;
   const url = `${SITE_URL}${localePath(`/insights/${slug}`, locale)}`;
+  // 서비스 안내(landing)는 체험서비스 소개 아래에 있는 것으로 보여 준다 — 주소는 /insights 그대로
+  const isGuide = item.kind === 'landing';
+  const parent = isGuide
+    ? { href: '/services', label: lang === 'ko' ? '체험서비스 소개' : 'Services' }
+    : { href: '/insights', label: lang === 'ko' ? '인사이트' : 'Insights' };
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: parent.label, item: `${SITE_URL}${localePath(parent.href, locale)}` },
+      { '@type': 'ListItem', position: 2, name: copy.title, item: url },
+    ],
+  };
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -217,12 +230,13 @@ export default async function InsightPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       {faqJsonLd && <JsonLd data={faqJsonLd} />}
+      <JsonLd data={breadcrumbJsonLd} />
       <header className="bg-slate-950 pb-16 pt-32 sm:pb-20 sm:pt-40">
         <div className="container-wide">
           <div className={cover ? 'mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1.05fr_1fr]' : 'mx-auto max-w-3xl'}>
             <div>
-              <Link href="/insights" className="text-sm text-slate-400 hover:text-white">
-                ← {lang === 'ko' ? '인사이트' : 'Insights'}
+              <Link href={parent.href} className="text-sm text-slate-400 hover:text-white">
+                ← {parent.label}
               </Link>
               <h1 className="mt-6 font-display text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl">
                 <span className="block">{titleMain}</span>
@@ -258,7 +272,7 @@ export default async function InsightPage({ params }: Props) {
           <div className="container-wide">
             <div className="mx-auto max-w-3xl">
               <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
-                {lang === 'ko' ? '함께 보면 좋은 글' : 'More to read'}
+                {isGuide ? (lang === 'ko' ? '다른 행사별 안내' : 'More guides') : lang === 'ko' ? '함께 보면 좋은 글' : 'More to read'}
               </h2>
               <ul className="mt-4 space-y-3">
                 {others.map((other) => (

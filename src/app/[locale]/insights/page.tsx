@@ -15,6 +15,8 @@ const COPY = {
     article: '가이드',
     landing: '서비스 안내',
     read: '읽기',
+    guides: '행사별 비용·진행 안내는 체험서비스 소개로 옮겼습니다',
+    guidesLink: '행사별 안내 보기 →',
   },
   en: {
     title: 'Insights',
@@ -22,6 +24,8 @@ const COPY = {
     article: 'Guide',
     landing: 'Service',
     read: 'Read',
+    guides: 'Guides by use (prices and process) are now under Services',
+    guidesLink: 'See the guides →',
   },
 } as const;
 
@@ -41,8 +45,8 @@ export default async function InsightsPage({ params }: Props) {
   setRequestLocale(locale);
   const lang = locale === 'en' ? 'en' : 'ko';
   const c = COPY[lang];
-  // 가이드 글을 먼저, 서비스 안내(키워드 랜딩)를 뒤에
-  const items = [...INSIGHTS].sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'article' ? -1 : 1));
+  // 읽을거리(가이드 글)만 — 서비스 안내(키워드 랜딩)는 체험서비스 소개의 「행사별 안내」에서 보여 준다 (주소는 그대로)
+  const items = INSIGHTS.filter((item) => item.kind === 'article');
 
   return (
     <div>
@@ -72,6 +76,13 @@ export default async function InsightsPage({ params }: Props) {
               </li>
             ))}
           </ul>
+          <Link
+            href="/services#guides"
+            className="mx-auto mt-8 flex max-w-5xl flex-col gap-1 rounded-2xl border border-teal-200 bg-teal-50/60 p-6 transition-colors hover:border-teal-400 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <span className="text-sm text-slate-700">{c.guides}</span>
+            <span className="text-sm font-semibold text-teal-700">{c.guidesLink}</span>
+          </Link>
         </div>
       </section>
     </div>
