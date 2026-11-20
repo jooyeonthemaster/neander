@@ -8,6 +8,10 @@ interface QuotePresetImage {
 
 /** 견적 템플릿 전용 사진. 생성한 장면은 실제 운영 사진과 구분해 표시한다. */
 export const QUOTE_PRESET_IMAGES: Record<string, QuotePresetImage> = {
+  'perfume-gift': {
+    src: '/images/portfolio/archive/eunpyeong-ai-festival-2026-01.webp',
+    caption: { ko: '운영 사례 · 은평 AI 페스티벌 2026 (맞춤 향수 100인분)', en: 'Eunpyeong AI Festival 2026 — 100 custom perfumes' },
+  },
   'campus-festival': {
     src: '/images/quote/campus-festival-generated.webp',
     caption: { ko: 'AI 생성 · 대학 축제 연출 예시', en: 'AI-generated campus festival example' },

@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
-import { INSIGHTS, getInsight, type InsightBlock } from '@/data/insights';
+import { INSIGHTS, getInsight, type InsightBlock, type InsightImage } from '@/data/insights';
 import { SITE_URL } from '@/lib/constants';
 import { DEFAULT_OG_IMAGE, localeAlternates, localePath } from '@/lib/seo';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -31,9 +32,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: copy.title,
       description: copy.description,
       publishedTime: item.date,
-      images: [DEFAULT_OG_IMAGE],
+      images: item.cover ? [{ url: item.cover.src, alt: item.cover.caption[locale === 'en' ? 'en' : 'ko'] }] : [DEFAULT_OG_IMAGE],
     },
   };
+}
+
+/** 제목은 「 — 」 앞뒤로 나눠 두 줄로 보여 준다 (검색·공유용 제목 문자열은 그대로) */
+function splitTitle(title: string): [string, string | null] {
+  const i = title.indexOf(' — ');
+  return i < 0 ? [title, null] : [title.slice(0, i), title.slice(i + 3)];
+}
+
+function Photo({ image, ratio, sizes, priority }: { image: InsightImage; ratio: string; sizes: string; priority?: boolean }) {
+  return (
+    <div className={`relative overflow-hidden rounded-2xl bg-slate-100 ${ratio}`}>
+      <Image src={image.src} alt={image.alt} fill sizes={sizes} priority={priority} className="object-cover" />
+    </div>
+  );
 }
 
 function Block({ block, lang }: { block: InsightBlock; lang: 'ko' | 'en' }) {
@@ -93,6 +108,57 @@ function Block({ block, lang }: { block: InsightBlock; lang: 'ko' | 'en' }) {
           </dl>
         </section>
       );
+    case 'figure':
+      return (
+        <figure className="mt-8">
+          <Photo image={block.image} ratio="aspect-[16/9]" sizes="(min-width: 768px) 768px, 100vw" />
+          {block.image.caption && <figcaption className="mt-2 text-sm text-slate-500">{block.image.caption}</figcaption>}
+        </figure>
+      );
+    case 'gallery':
+      return (
+        <div className={`mt-6 grid gap-3 ${block.cols === 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3'}`}>
+          {block.images.map((image) => (
+            <figure key={image.src}>
+              <Photo image={image} ratio="aspect-[4/3]" sizes={block.cols === 2 ? '(min-width: 768px) 380px, 50vw' : '(min-width: 768px) 250px, 50vw'} />
+              {image.caption && <figcaption className="mt-1.5 text-xs leading-snug text-slate-500">{image.caption}</figcaption>}
+            </figure>
+          ))}
+        </div>
+      );
+    case 'steps':
+      return (
+        <ol className="mt-6 grid gap-4 sm:grid-cols-2">
+          {block.items.map((step, i) => (
+            <li key={step.title} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+              {step.image && (
+                <div className="relative aspect-[16/10] bg-slate-100">
+                  <Image src={step.image.src} alt={step.image.alt} fill sizes="(min-width: 768px) 380px, 100vw" className="object-cover" />
+                </div>
+              )}
+              <div className="p-4">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white">{i + 1}</span>
+                  <h3 className="text-base font-semibold text-slate-900">{step.title}</h3>
+                </div>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">{step.text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      );
+    case 'stats':
+      return (
+        <dl className={`mt-6 grid gap-3 ${block.items.length === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`}>
+          {block.items.map((stat) => (
+            <div key={stat.label} className="rounded-2xl border border-teal-100 bg-teal-50/60 px-4 py-4">
+              <dt className="sr-only">{stat.label}</dt>
+              <dd className="text-xl font-extrabold tracking-tight text-teal-700 sm:text-2xl">{stat.value}</dd>
+              <dd className="mt-1 text-xs leading-snug text-slate-600 sm:text-sm">{stat.label}</dd>
+            </div>
+          ))}
+        </dl>
+      );
     case 'cta':
       return (
         <div className="mt-8">
@@ -114,6 +180,8 @@ export default async function InsightPage({ params }: Props) {
   if (!item) notFound();
   const lang = locale === 'en' ? 'en' : 'ko';
   const copy = item[lang];
+  const [titleMain, titleSub] = splitTitle(copy.title);
+  const cover = item.cover;
   const url = `${SITE_URL}${localePath(`/insights/${slug}`, locale)}`;
 
   const jsonLd = {
@@ -122,6 +190,7 @@ export default async function InsightPage({ params }: Props) {
     headline: copy.title,
     description: copy.description,
     datePublished: item.date,
+    ...(cover ? { image: `${SITE_URL}${cover.src}` } : {}),
     inLanguage: lang,
     mainEntityOfPage: url,
     author: { '@type': 'Organization', name: 'NEANDER', url: SITE_URL },
@@ -150,17 +219,28 @@ export default async function InsightPage({ params }: Props) {
       {faqJsonLd && <JsonLd data={faqJsonLd} />}
       <header className="bg-slate-950 pb-16 pt-32 sm:pb-20 sm:pt-40">
         <div className="container-wide">
-          <div className="mx-auto max-w-3xl">
-            <Link href="/insights" className="text-sm text-slate-400 hover:text-white">
-              ← {lang === 'ko' ? '인사이트' : 'Insights'}
-            </Link>
-            <h1 className="mt-6 font-display text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl">
-              {copy.title}
-            </h1>
-            <p className="mt-4 text-base leading-relaxed text-neutral-400">{copy.description}</p>
-            <p className="mt-6 text-xs text-slate-500">
-              <time dateTime={item.date}>{item.date}</time> · NEANDER
-            </p>
+          <div className={cover ? 'mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1.05fr_1fr]' : 'mx-auto max-w-3xl'}>
+            <div>
+              <Link href="/insights" className="text-sm text-slate-400 hover:text-white">
+                ← {lang === 'ko' ? '인사이트' : 'Insights'}
+              </Link>
+              <h1 className="mt-6 font-display text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl">
+                <span className="block">{titleMain}</span>
+                {titleSub && <span className="mt-3 block text-lg font-bold leading-snug text-teal-300 sm:text-2xl" style={{ fontFamily: 'var(--font-body)' }}>{titleSub}</span>}
+              </h1>
+              <p className="mt-5 text-base leading-relaxed text-neutral-400">{copy.description}</p>
+              <p className="mt-6 text-xs text-slate-500">
+                <time dateTime={item.date}>{item.date}</time> · NEANDER
+              </p>
+            </div>
+            {cover && (
+              <figure>
+                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-slate-800 ring-1 ring-white/10">
+                  <Image src={cover.src} alt={cover.caption[lang]} fill priority sizes="(min-width: 1024px) 560px, 100vw" className="object-cover" />
+                </div>
+                <figcaption className="mt-2 text-xs text-slate-500">{cover.caption[lang]}</figcaption>
+              </figure>
+            )}
           </div>
         </div>
       </header>

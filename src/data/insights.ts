@@ -7,6 +7,14 @@
 
 import { LANDINGS } from './insights-landings';
 
+/** 본문 사진 한 장. staged = AI로 만든 연출 이미지(관리용 표시, 화면에는 따로 표시하지 않음 — 2026-11-21 사용자 결정) */
+export interface InsightImage {
+  src: string;
+  alt: string;
+  caption?: string;
+  staged?: boolean;
+}
+
 export type InsightBlock =
   | { type: 'h2'; text: string }
   | { type: 'p'; text: string }
@@ -16,7 +24,15 @@ export type InsightBlock =
   /** 관련 페이지 링크 목록 (사례·체험) */
   | { type: 'links'; items: { text: string; href: string }[] }
   /** 자주 묻는 질문 — 화면에 그대로 보이고 FAQPage 구조화 데이터로도 나간다 */
-  | { type: 'faq'; items: { q: string; a: string }[] };
+  | { type: 'faq'; items: { q: string; a: string }[] }
+  /** 넓은 사진 한 장 */
+  | { type: 'figure'; image: InsightImage }
+  /** 사진 여러 장 (2·3열) */
+  | { type: 'gallery'; images: InsightImage[]; cols?: 2 | 3 }
+  /** 진행 순서 — 번호 · 사진 · 설명 카드 */
+  | { type: 'steps'; items: { title: string; text: string; image?: InsightImage }[] }
+  /** 숫자로 보는 요점 — 큰 숫자 타일 */
+  | { type: 'stats'; items: { value: string; label: string }[] };
 
 export interface InsightCopy {
   title: string;
@@ -29,6 +45,8 @@ export interface Insight {
   kind: 'article' | 'landing';
   date: string;
   keywords: string[];
+  /** 제목 옆 대표 사진 (공유 미리보기 이미지로도 쓴다) */
+  cover?: { src: string; staged?: boolean; caption: { ko: string; en: string } };
   ko: InsightCopy;
   en: InsightCopy;
 }

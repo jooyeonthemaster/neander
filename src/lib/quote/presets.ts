@@ -14,6 +14,18 @@ export interface QuotePreset {
 
 export const QUOTE_PRESETS: QuotePreset[] = [
   {
+    // 2026-11 문의가 가장 많은 AI 향수를 맨 앞에 둔다 — 참석자 답례품형 (150명 · 고급 포장)
+    id: 'perfume-gift',
+    title: { ko: '행사 답례품 향수', en: 'Perfume gifts for guests' },
+    caption: { ko: '1일 · 150명 · AI 맞춤 향수 10ml + 고급 포장', en: '1 day · 150 guests · AI-matched 10ml perfume, gift-wrapped' },
+    input: {
+      eventType: 'corporate', eventDate: '', days: 1, hoursPerDay: 6, attendees: 150, region: 'seoul', extraStaff: 0,
+      items: [
+        { key: 'acscent', options: { guests: 150, volume: '10ml', extraTeams: 0, customScent: false, premiumPackaging: true } },
+      ],
+    },
+  },
+  {
     id: 'campus-festival',
     title: { ko: '대학 축제 부스', en: 'Campus festival booth' },
     caption: { ko: '1일 · 300명 · AI 포토부스 + AI 키오스크', en: '1 day · 300 guests · photo booth + kiosk' },

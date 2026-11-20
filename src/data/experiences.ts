@@ -241,7 +241,16 @@ experienceCatalog.push({
   highlightCount: 3, highlightsKey: 'exp.tour05.highlights', useCaseCount: 3, useCasesKey: 'exp.tour05.useCases',
 });
 
-export const experiences: Experience[] = experienceCatalog.filter((experience) => publishedSlugs.has(experience.slug));
+/** 공개 목록 맨 앞에 둘 프로그램 — 관심도·문의 1위인 AI 향수 (2026-11-20). 나머지는 카탈로그 순서 그대로 */
+const LIST_FIRST = ['ai-scent-soulmate'];
+const listRank = (slug: string) => {
+  const i = LIST_FIRST.indexOf(slug);
+  return i < 0 ? LIST_FIRST.length : i;
+};
+
+export const experiences: Experience[] = experienceCatalog
+  .filter((experience) => publishedSlugs.has(experience.slug))
+  .sort((a, b) => listRank(a.slug) - listRank(b.slug));
 
 export const industries: Industry[] = industryCatalog
   .map((industry) => ({ ...industry, experiences: experiences.filter((experience) => experience.industry === industry.id).map((experience) => experience.id) }))

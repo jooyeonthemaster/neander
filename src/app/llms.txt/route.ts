@@ -66,7 +66,7 @@ ${cases.join('\n')}
 
 ## 주요 페이지
 
-- [서비스 소개](${SITE_URL}/services)
+- [체험서비스 소개](${SITE_URL}/services)
 - [온라인 견적](${SITE_URL}/quote)
 - [포트폴리오](${SITE_URL}/portfolio)
 - [회사 소개](${SITE_URL}/about)

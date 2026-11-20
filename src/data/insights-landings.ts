@@ -7,7 +7,7 @@
    사례는 공개 포트폴리오에 있는 것만 쓴다. 카탈로그에 없는 수치는 넣지 않는다.
    ───────────────────────────────────────────────────────── */
 
-import type { Insight } from './insights';
+import type { Insight, InsightImage } from './insights';
 import { COMMON, CUSTOM_DEV, KIOSK, PERFUME, PHOTO_BOOTH } from '@/lib/quote/catalog';
 
 const man = (n: number) => `${(n / 10_000).toLocaleString('ko-KR')}만원`;
@@ -35,6 +35,56 @@ const POWER_KO = '220V 콘센트와 인터넷이 필요합니다. 클라우드 A
 const POWER_EN = 'A 220V outlet and an internet connection are required, because the analysis and generation run on cloud AI.';
 const NO_ISLANDS_KO = '제주 및 도서 지역은 운영하지 않습니다.';
 const NO_ISLANDS_EN = 'We do not operate on Jeju or other islands.';
+
+/* 본문 사진 — 실제 운영 사진은 공개 포트폴리오에 올라간 것만 쓴다(public/images/portfolio).
+   실제 사진이 없는 장면만 AI 연출 이미지(public/images/insights/staged-*, 2026-11-21 Seedream 5.5로 생성)를 쓰고,
+   화면에는 따로 표시하지 않는다(2026-11-21 사용자 결정). 캡션에 실제 행사 이름을 붙이지 않는다. */
+type Pic = { ko: InsightImage; en: InsightImage };
+const pic = (src: string, ko: string, en: string, staged = false): Pic => ({
+  ko: { src, alt: ko, caption: ko, staged },
+  en: { src, alt: en, caption: en, staged },
+});
+const coverOf = (p: Pic) => ({ src: p.ko.src, staged: p.ko.staged, caption: { ko: p.ko.caption ?? '', en: p.en.caption ?? '' } });
+const AR = '/images/portfolio/archive/';
+const PF = '/images/portfolio/';
+const ST = '/images/insights/staged-';
+const PIC = {
+  ptBlend: pic(`${AR}pyeongtaek-ai-festa-2026-06.webp`, '평택 AI 페스타 2026 — 조향 테이블에서 향을 고르는 방문객', 'Pyeongtaek AI Festa 2026 — guests choosing scents at the blending table'),
+  ptBooth: pic(`${AR}pyeongtaek-ai-festa-2026-10.webp`, '평택 AI 페스타 2026 — AI 조향사 부스', 'Pyeongtaek AI Festa 2026 — AI perfumer booth'),
+  jcPhone: pic(`${AR}jecheon-music-film-festival-08.webp`, '휴대폰으로 받는 AI 향 분석 결과 — 제천국제음악영화제 2025', "AI scent analysis on a guest's phone — JIMFF 2025"),
+  jcScale: pic(`${AR}jecheon-music-film-festival-04.webp`, '추천 받은 향료를 계량해 섞습니다 — 제천국제음악영화제 2025', 'Weighing and blending the recommended oils — JIMFF 2025'),
+  jcBlend: pic(`${AR}jecheon-music-film-festival-03.webp`, '조향 테이블에서 향을 섞는 방문객 — 제천국제음악영화제 2025', 'A guest blending at the perfumer table — JIMFF 2025'),
+  jcBooth: pic(`${AR}jecheon-music-film-festival-01.webp`, '제천국제음악영화제 2025 — AI 조향사 부스', 'JIMFF 2025 — AI perfumer booth'),
+  jimffKiosk: pic(`${AR}jimff-2026-ost-fair-03.webp`, 'AI 향 추천 키오스크 2대와 시향 테이블 — 제천국제음악영화제 2026', 'Two AI scent kiosks and a tasting table — JIMFF 2026'),
+  jimffBooth: pic(`${AR}jimff-2026-ost-fair-01.webp`, '제천국제음악영화제 2026 — OST페어 AI 조향 부스', 'JIMFF 2026 — AI perfume booth at the OST Fair'),
+  jimffMake: pic(`${AR}jimff-2026-ost-fair-02.webp`, '현장에서 향수를 만드는 방문객 — 제천국제음악영화제 2026', 'Guests making perfume on site — JIMFF 2026'),
+  jimffDone: pic(`${AR}jimff-2026-ost-fair-06.webp`, '완성한 향수를 들고 — 제천국제음악영화제 2026', 'Guests with the perfume they made — JIMFF 2026'),
+  epPerf: pic(`${AR}eunpyeong-ai-festival-2026-01.webp`, '은평 AI 페스티벌 2026 — AI 조향사 부스 (맞춤 향수 100인분)', 'Eunpyeong AI Festival 2026 — AI perfumer booth (100 custom perfumes)'),
+  epKiosk: pic(`${AR}eunpyeong-ai-festival-2026-02.webp`, '은평 AI 페스티벌 2026 — 키오스크로 받는 AI 향 분석', 'Eunpyeong AI Festival 2026 — AI scent analysis at the kiosk'),
+  epColor: pic(`${AR}eunpyeong-ai-festival-2026-04.webp`, '은평 AI 페스티벌 2026 — AI 퍼스널컬러 진단 부스', 'Eunpyeong AI Festival 2026 — AI personal color booth'),
+  epHall: pic(`${AR}eunpyeong-ai-festival-2026-07.webp`, '은평 AI 페스티벌 2026 — 나란히 선 AI 체험 부스', 'Eunpyeong AI Festival 2026 — AI booths side by side'),
+  kgs2: pic(`${PF}korea-grand-sale-2026-2.webp`, '코리아그랜드세일 2026 (서울 북촌) — AI 맞춤 향수 체험', 'Korea Grand Sale 2026 (Bukchon, Seoul) — AI custom perfume'),
+  kgs3: pic(`${PF}korea-grand-sale-2026-3.webp`, '시향용 향료 선반 — 코리아그랜드세일 2026', 'Scent shelf for tasting — Korea Grand Sale 2026'),
+  tvw1: pic(`${PF}tourism-venture-week-2025-1.webp`, '관광벤처 이음주간 2025 — 맞춤형 향수 조향 체험', 'Tourism Venture Week 2025 — custom perfume blending'),
+  pack: pic(`${AR}acscent-packaging-design-01.webp`, "AC'SCENT 쇼핑백·패키지 — 포장 디자인 예시", "AC'SCENT bag and box — packaging example"),
+  store: pic(`${AR}acscent-id-01.webp`, "직영 AI 맞춤 조향 매장 AC'SCENT ID (서울 마포)", "AC'SCENT ID, our AI custom perfume store in Mapo, Seoul"),
+  swfShelf: pic(`${AR}seoul-writers-festival-17.webp`, '서울국제작가축제 — 참가 도서마다 만든 향수와 시향지', 'Seoul International Writers’ Festival — a perfume made for each book'),
+  swfBook: pic(`${AR}seoul-writers-festival-10.webp`, '책 한 권에 향 하나 — 서울국제작가축제 북퍼퓸', 'One scent per book — book perfumes at the Writers’ Festival'),
+  swfVisit: pic(`${AR}seoul-writers-festival-13.webp`, '시향지를 들고 책과 향을 고르는 관람객 — 서울국제작가축제', 'Visitors choosing books and scents — Writers’ Festival'),
+  swfSmell: pic(`${AR}seoul-writers-festival-16.webp`, '책 향을 시향하는 관람객 — 서울국제작가축제', 'A visitor smelling a book perfume — Writers’ Festival'),
+  jbnu: pic(`${AR}jbnu-major-fair-2026-01.webp`, '전북대 전공탐색 박람회 — AI 퍼스널컬러·캐리커처·미래직업 웹 체험', 'Jeonbuk National University major fair — AI personal color, caricature and career'),
+  jbnuRow: pic(`${AR}jbnu-major-fair-2026-03.webp`, '여러 대를 나란히 둔 체험존 — 전북대 전공탐색 박람회', 'A row of stations — Jeonbuk National University major fair'),
+  ansan: pic(`${AR}ansan-science-festival-2026-01.webp`, '안산 과학축제 2026 — 가족 타임캡슐 AI 포토부스 (이틀 316팀)', 'Ansan Science Festival 2026 — family time-capsule AI photo booth (316 groups in 2 days)'),
+  jongno: pic(`${PF}jongno-open-book-maru-2026-3.webp`, '종로 열린 책마루 — 야외도서관의 독서 취향·향 체험', 'Jongno Open Book Maru — reading taste and scent in an outdoor library'),
+  giftHero: pic(`${ST}gift-hero.webp`, '행사 답례품 향수를 준비한 모습', 'Perfume gifts set out for guests', true),
+  giftHand: pic(`${ST}gift-handover.webp`, '조향사가 참석자에게 향수를 건네는 모습', 'A perfumer handing a perfume gift to a guest', true),
+  brandExpo: pic(`${ST}brand-collab.webp`, '브랜드 부스 안에 차린 향 콜라보 코너 — AI 향 키오스크와 시향대', 'A scent collaboration corner inside a brand booth — AI scent kiosks and a tasting counter', true),
+  colorResult: pic(`${ST}color-result-k.webp`, '퍼스널 컬러 결과 화면 — 어울리는 색 팔레트', 'Personal color result — the palette that suits you', true),
+  colorSchool: pic(`${ST}color-school-k.webp`, '학교 축제에서 결과를 함께 보는 학생들', 'Students checking results together at a school festival', true),
+  colorLight: pic(`${ST}color-light-k.webp`, '주광색 조명 아래 설치한 진단 부스', 'A booth set up under daylight-balanced lighting', true),
+  schoolLib: pic(`${ST}school-library-k.webp`, '학교도서관 행사에 AI 키오스크를 둔 모습', 'AI kiosks at a school library event', true),
+};
+const GIFT150 = PERFUME.tiers[2].unit['10ml'] * 150 + PERFUME.teamTravel.seoul + PERFUME.premiumPackaging['10ml'] * 150;
 
 export const LANDINGS: Insight[] = [
   /* ── AI 포토부스 대여 ─────────────────────────────────── */
@@ -155,13 +205,27 @@ export const LANDINGS: Insight[] = [
   {
     slug: 'event-ai-perfume-experience',
     kind: 'landing',
-    date: '2026-11-11',
+    date: '2026-11-20',
+    cover: coverOf(PIC.ptBlend),
     keywords: ['AI 향수 만들기 체험', 'AI 향수 체험 부스', '향수 만들기 체험 출장', '조향 클래스 출장', '기업 조향 클래스', '행사 조향 체험', "AC'SCENT"],
     ko: {
       title: 'AI 향수 만들기 체험 부스 — 행사·기업·팝업 조향사 출장',
       description: `AI가 방문객의 취향을 분석해 향을 추천하고, 출장 온 조향사가 그 자리에서 향수를 만들어 건넵니다. ${man(PERFUME.minimumCharge)}부터(VAT 별도), 1인 ${man(PERFUME.tiers[2].unit['10ml'])}~${man(PERFUME.tiers[0].unit['10ml'])}(10ml), 전국 출장.`,
       blocks: [
         { type: 'p', text: "AC'SCENT AI 향수 체험은 AI가 방문객의 취향과 이미지를 분석해 향을 추천하고, 조향사가 현장에서 그 향으로 향수를 만들어 드리는 체험입니다. 방문객은 자신만의 향수를 기념품으로 가져갑니다. 축제·팝업·기업 행사·원데이 클래스로 운영합니다." },
+        { type: 'stats', items: [
+          { value: man(PERFUME.tiers[2].unit['10ml']), label: '1인 단가 (10ml · 100명 이상)' },
+          { value: `시간당 ${PERFUME.guestsPerTeamHour}명`, label: '조향 1팀이 맡는 인원' },
+          { value: `${PERFUME.minGuests}명부터`, label: `서울 최소 ${man(PERFUME.minimumCharge)}` },
+          { value: '10ml', label: '방문객이 가져가는 내 향수' },
+        ] },
+        { type: 'h2', text: '체험은 이렇게 진행됩니다' },
+        { type: 'steps', items: [
+          { title: '취향 분석', text: '방문객이 휴대폰으로 QR을 찍어 몇 가지 질문에 답하거나 사진을 올립니다. 분석용 키오스크를 둘 수도 있습니다.', image: PIC.jcPhone.ko },
+          { title: 'AI 향 추천', text: 'AI가 분석 결과에 맞는 향 조합을 추천하고, 방문객은 추천 받은 향을 시향합니다.', image: PIC.jimffKiosk.ko },
+          { title: '조향사와 블렌딩', text: '조향사가 옆에서 도와 추천 향료를 계량해 섞습니다.', image: PIC.jcScale.ko },
+          { title: '내 향수 완성', text: '10ml 향수와 결과 카드를 기념품으로 가져갑니다.', image: PIC.jimffDone.ko },
+        ] },
         { type: 'h2', text: '가격 (VAT 별도)' },
         { type: 'table', head: ['항목', '금액'], rows: [
           ['1인 단가 10ml', `${PERFUME.tiers.map((t) => man(t.unit['10ml'])).join(' / ')} (20~49명 / 50~99명 / 100명 이상)`],
@@ -190,8 +254,20 @@ export const LANDINGS: Insight[] = [
           '방향제 안전기준 적합확인 신고 HB23-12-1949 (실내공간용·자동차용, 함침물형, 2023-12)',
           '향료 30종 운영',
         ] },
-        { type: 'h2', text: '운영 사례' },
+        { type: 'h2', text: '어떻게 쓰나요 — 체험 부스 · 답례품 · 브랜드 향' },
+        { type: 'table', head: ['방식', '이럴 때', '자세히'], rows: [
+          ['체험 부스', '축제·팝업에서 방문객이 직접 향수를 만들어 가져갑니다', '이 페이지'],
+          ['행사 답례품', '기업 행사·송년회 참석자 전원에게 맞춤 향수를 나눠 줍니다 (150명 고급 포장 기준 1인 약 2만원)', '행사 답례품 맞춤 향수'],
+          ['브랜드 향 + 키오스크', '전시·박람회 부스에서 방문객에게 맞는 브랜드 향을 찾아 줍니다', '브랜드 향 개발 + AI 향수 키오스크'],
+        ] },
         { type: 'links', items: [
+          { text: '행사 답례품 맞춤 향수 — 참석자마다 AI가 고른 향수 10ml', href: '/insights/event-perfume-gift' },
+          { text: '브랜드 향 개발 + AI 향수 키오스크 — 전시·박람회 부스', href: '/insights/brand-scent-kiosk' },
+        ] },
+        { type: 'h2', text: '운영 사례' },
+        { type: 'gallery', images: [PIC.epPerf.ko, PIC.jimffBooth.ko, PIC.kgs2.ko, PIC.tvw1.ko, PIC.ptBooth.ko, PIC.jcBooth.ko] },
+        { type: 'links', items: [
+          { text: '은평구진로직업체험지원센터 AI 페스티벌 2026 — 맞춤 향수 100인분', href: '/portfolio/eunpyeong-ai-festival-2026' },
           { text: '제천국제음악영화제 2026 — OST페어 체험 프로그램', href: '/portfolio/jimff-2026-ost-fair' },
           { text: '종로문화재단 종로 열린 책마루 — 독서 취향과 향 체험', href: '/portfolio/jongno-open-book-maru-2026' },
           { text: '한국관광공사 — AI 조향 클래스 프로그램·교안', href: '/portfolio/kto-ai-perfume-class-2026' },
@@ -209,7 +285,7 @@ export const LANDINGS: Insight[] = [
           { q: '우리 브랜드만의 향을 만들 수 있나요?', a: `브랜드 전용 향 개발은 ${man(PERFUME.customScent)}입니다. ${PERFUME.customBox.minGuests}명 이상이면 전용 디자인 단박스도 ${man(PERFUME.customBox.minimum)}부터 만들 수 있습니다.` },
           { q: '지방 행사도 되나요?', a: `네, 조향 팀이 출장합니다. 출장비는 팀·운영일마다 서울 ${man(PERFUME.teamTravel.seoul)}, 경상 ${man(PERFUME.teamTravel.gyeongsang)} 등 지역별로 다릅니다. ${NO_ISLANDS_KO}` },
         ] },
-        { type: 'cta', text: 'AI 향수 체험 견적 바로 보기', href: '/quote' },
+        { type: 'cta', text: 'AI 향수 체험 견적 바로 보기', href: '/quote?item=acscent' },
       ],
     },
     en: {
@@ -217,6 +293,19 @@ export const LANDINGS: Insight[] = [
       description: `AI reads each guest's taste and recommends a scent; a visiting perfumer blends it into a perfume on the spot. From ${krw(PERFUME.minimumCharge)} (excl. VAT), ${krw(PERFUME.tiers[2].unit['10ml'])}–${krw(PERFUME.tiers[0].unit['10ml'])} per 10 ml guest.`,
       blocks: [
         { type: 'p', text: "The AC'SCENT AI perfume experience uses AI to analyze a guest's taste and image and recommend a scent, which a perfumer then blends on site. Guests take home their own perfume." },
+        { type: 'stats', items: [
+          { value: krw(PERFUME.tiers[2].unit['10ml']), label: 'Per guest (10 ml, 100+ guests)' },
+          { value: `${PERFUME.guestsPerTeamHour} / hour`, label: 'Guests per perfumer team' },
+          { value: `${PERFUME.minGuests}+ guests`, label: `Minimum ${krw(PERFUME.minimumCharge)} in Seoul` },
+          { value: '10 ml', label: 'Perfume each guest takes home' },
+        ] },
+        { type: 'h2', text: 'How it works' },
+        { type: 'steps', items: [
+          { title: 'Taste analysis', text: 'Guests scan a QR code and answer a few questions or upload a photo. An analysis kiosk is optional.', image: PIC.jcPhone.en },
+          { title: 'AI recommendation', text: 'AI recommends a scent combination and guests smell the suggested notes.', image: PIC.jimffKiosk.en },
+          { title: 'Blending with a perfumer', text: 'A perfumer helps each guest weigh and blend the oils.', image: PIC.jcScale.en },
+          { title: 'Their own perfume', text: 'Guests take home a 10 ml perfume and a result card.', image: PIC.jimffDone.en },
+        ] },
         { type: 'h2', text: 'Prices (excl. VAT)' },
         { type: 'table', head: ['Item', 'Price'], rows: [
           ['Per guest, 10 ml', `${PERFUME.tiers.map((t) => krw(t.unit['10ml'])).join(' / ')} (20–49 / 50–99 / 100+ guests)`],
@@ -234,6 +323,7 @@ export const LANDINGS: Insight[] = [
           '30 fragrance ingredients in operation',
         ] },
         { type: 'h2', text: 'Recent work' },
+        { type: 'gallery', images: [PIC.epPerf.en, PIC.jimffBooth.en, PIC.kgs2.en, PIC.tvw1.en, PIC.ptBooth.en, PIC.jcBooth.en] },
         { type: 'links', items: [
           { text: 'Jecheon International Music & Film Festival 2026 — OST Fair program', href: '/portfolio/jimff-2026-ost-fair' },
           { text: 'Korea Tourism Organization — AI perfume class program', href: '/portfolio/kto-ai-perfume-class-2026' },
@@ -478,6 +568,346 @@ export const LANDINGS: Insight[] = [
           { text: 'Pyeongtaek AI Festa 2026 — four kiosk experiences', href: '/portfolio/pyeongtaek-ai-festa-2026' },
           { text: 'Eunpyeong AI Festival 2026 — three AI booths, 100 custom perfumes', href: '/portfolio/eunpyeong-ai-festival-2026' },
         ] },
+        { type: 'cta', text: 'Get an instant estimate', href: '/quote?preset=campus-festival' },
+      ],
+    },
+  },
+  /* ── 행사 답례품 맞춤 향수 ─────────────────────────────── */
+  // 2026-11 문의(파트너스데이 160명, 기업 송년회 답례품 등)에서 「참석자 전원에게 나눠 줄 향수」 요청이 이어져 따로 둔다.
+  // 금액은 PERFUME 카탈로그로 계산(150명 10ml + 고급 포장 = 305만, 300명 2팀 = 610만 — calculateQuote로 확인).
+  {
+    slug: 'event-perfume-gift',
+    kind: 'landing',
+    date: '2026-11-20',
+    cover: coverOf(PIC.giftHero),
+    keywords: ['행사 답례품', '기업 답례품', '송년회 답례품', '행사 기념품', '단체 답례품 향수', '맞춤 향수 답례품', '참석자 기념품', '세미나 답례품'],
+    ko: {
+      title: '행사 답례품 맞춤 향수 — 참석자마다 AI가 고른 향수 10ml를 현장에서',
+      description: `기업 행사·송년회·세미나 답례품을 참석자마다 다른 맞춤 향수로. AI가 취향을 분석해 향을 고르고, 조향사가 현장에서 10ml 향수로 만들어 선물 포장까지 합니다. 100명 이상 1인 ${man(PERFUME.tiers[2].unit['10ml'])}(VAT 별도), 전국 출장.`,
+      blocks: [
+        { type: 'p', text: '똑같은 기념품을 나눠 주는 대신, 참석자 한 명 한 명이 자기 향수를 만들어 가져가는 답례품입니다. 참석자는 휴대폰으로 QR을 찍어 몇 가지 질문에 답하거나 사진 한 장을 올리고, AI가 그 사람에게 맞는 향을 고릅니다. 조향사가 그 자리에서 10ml 향수로 만들어 결과 카드와 함께 건넵니다. 줄을 서서 기다리는 시간도 행사의 볼거리가 됩니다.' },
+        { type: 'stats', items: [
+          { value: `약 ${man(Math.round(GIFT150 / 150 / 100) * 100)}`, label: '1인 비용 (서울 150명 · 고급 포장)' },
+          { value: `시간당 ${PERFUME.guestsPerTeamHour}명`, label: '조향 1팀이 만드는 인원' },
+          { value: '10ml', label: '참석자마다 다른 향수' },
+          { value: `${PERFUME.minGuests}명부터`, label: '운영 가능한 인원' },
+        ] },
+        { type: 'h2', text: '받아 가기까지' },
+        { type: 'steps', items: [
+          { title: 'QR로 취향 분석', text: '참석자가 휴대폰으로 질문에 답하거나 사진을 올립니다. 기다리는 동안 미리 해 둘 수 있습니다.', image: PIC.jcPhone.ko },
+          { title: '조향사와 함께 현장에서 블렌딩', text: 'AI가 고른 향으로 조향사가 그 자리에서 10ml 향수를 만듭니다.', image: PIC.jcBlend.ko },
+          { title: '선물 포장', text: '결과 카드와 함께 포장합니다. 고급 선물 포장·행사 전용 단박스를 고를 수 있습니다.', image: PIC.pack.ko },
+          { title: '참석자에게 전달', text: '참석자는 자기 이름의 향수를 답례품으로 받아 갑니다.', image: PIC.giftHand.ko },
+        ] },
+        { type: 'h2', text: '이런 행사에서 씁니다' },
+        { type: 'ul', items: [
+          '기업 송년회·시무식·창립기념행사 — 참석자 답례품',
+          '고객 초청 행사·파트너스데이·VIP 행사 — 기억에 남는 기념품',
+          '세미나·포럼·시상식 — 쉬는 시간 프로그램 겸 답례품',
+          '팬 이벤트·공연 — 아티스트 콘셉트 향(브랜드 전용 향 개발)',
+        ] },
+        { type: 'h2', text: '가격 (VAT 별도, 서울 1일 기준)' },
+        { type: 'table', head: ['항목', '금액'], rows: [
+          ['향수 10ml (1인)', `${PERFUME.tiers.map((t) => man(t.unit['10ml'])).join(' / ')} (20~49명 / 50~99명 / 100명 이상)`],
+          ['향수 50ml (1인)', PERFUME.tiers.map((t) => man(t.unit['50ml'])).join(' / ')],
+          ['조향 1팀 출장비 (조향사 1 + 보조 1)', `운영일마다 ${man(PERFUME.teamTravel.seoul)} (경기·인천 ${man(PERFUME.teamTravel.gyeongin)}, 경상 ${man(PERFUME.teamTravel.gyeongsang)} 등)`],
+          ['고급 선물 포장 (선택)', `병당 ${man(PERFUME.premiumPackaging['10ml'])}(10ml) · ${man(PERFUME.premiumPackaging['50ml'])}(50ml)`],
+          ['행사 전용 디자인 단박스 (선택)', `${PERFUME.customBox.minGuests}명 이상, ${man(PERFUME.customBox.minimum)}부터`],
+          ['행사·브랜드 전용 향 개발 (선택)', man(PERFUME.customScent)],
+        ] },
+        { type: 'p', text: `예: 서울에서 150명에게 10ml 향수를 고급 포장해 나눠 주면 ${man(PERFUME.tiers[2].unit['10ml'] * 150 + PERFUME.teamTravel.seoul + PERFUME.premiumPackaging['10ml'] * 150)}입니다(1인 ${man(PERFUME.tiers[2].unit['10ml'])} × 150명 + 조향 1팀 출장비 + 포장, VAT 별도). 1인당 약 ${man(Math.round((PERFUME.tiers[2].unit['10ml'] * 150 + PERFUME.teamTravel.seoul + PERFUME.premiumPackaging['10ml'] * 150) / 150 / 100) * 100)}입니다.` },
+        { type: 'h2', text: '몇 명까지, 얼마나 걸리나요' },
+        { type: 'ul', items: [
+          `조향 1팀(조향사 1명 + 보조 1명)이 시간당 최대 ${PERFUME.guestsPerTeamHour}명을 맡습니다. 6시간 행사면 1팀이 약 ${PERFUME.guestsPerTeamHour * COMMON.baseHours}명입니다.`,
+          `300명이 6시간 안에 받아 가야 하면 2팀이 갑니다. 이 경우 ${man(PERFUME.tiers[2].unit['10ml'] * 300 + PERFUME.teamTravel.seoul * 2 + PERFUME.premiumPackaging['10ml'] * 300)}(서울, 10ml, 고급 포장, VAT 별도)입니다.`,
+          '분석은 참석자 휴대폰(QR)으로 하므로 기다리는 동안 미리 해 둘 수 있습니다. 현장에 분석용 키오스크를 두려면 대당 ' + man(PERFUME.analysisKiosk) + '이 더해집니다.',
+          `${PERFUME.minGuests}명부터 운영하며, 서울 기준 최소 금액은 ${man(PERFUME.minimumCharge)}입니다.`,
+        ] },
+        { type: 'h2', text: '나눠 줘도 되는 향수인가요' },
+        { type: 'p', text: '네안데르는 화장품책임판매업 등록(제42812호)과 방향제 안전기준 적합확인 신고를 마친 회사이고, 직영 AI 맞춤 조향 매장 AC\'SCENT ID를 운영합니다. 행사에서 만드는 향수도 매장과 같은 향료와 공정으로 만듭니다.' },
+        { type: 'figure', image: PIC.store.ko },
+        { type: 'h2', text: '운영 사례' },
+        { type: 'gallery', images: [PIC.epPerf.ko, PIC.jimffMake.ko, PIC.kgs2.ko] },
+        { type: 'links', items: [
+          { text: '은평구진로직업체험지원센터 AI 페스티벌 2026 — 맞춤 향수 100인분', href: '/portfolio/eunpyeong-ai-festival-2026' },
+          { text: '제천국제음악영화제 2026 — OST페어 AI 조향 체험', href: '/portfolio/jimff-2026-ost-fair' },
+          { text: 'K-WAVE DANCE FESTIVAL 2026 — 사주 오행으로 향을 처방하는 AI 조향사', href: '/portfolio/kwave-dance-festival-2026' },
+          { text: '한국엡손 원데이클래스 — AI로 만드는 나만의 향수', href: '/portfolio/epson-oneday-class-2025' },
+          { text: 'AI 향수 만들기 체험 부스 — 비용·진행 전체 안내', href: '/insights/event-ai-perfume-experience' },
+        ] },
+        { type: 'faq', items: [
+          { q: '답례품 향수 비용은 1인당 얼마인가요?', a: `10ml 기준 1인 ${PERFUME.tiers.map((t) => man(t.unit['10ml'])).join(' · ')}(인원 구간별)에 조향 팀 출장비가 더해집니다. 서울 150명이면 고급 포장까지 1인 약 ${man(Math.round((PERFUME.tiers[2].unit['10ml'] * 150 + PERFUME.teamTravel.seoul + PERFUME.premiumPackaging['10ml'] * 150) / 150 / 100) * 100)}입니다(VAT 별도).` },
+          { q: '행사 로고를 넣은 포장이 되나요?', a: `${PERFUME.customBox.minGuests}명 이상이면 행사 전용 디자인 단박스를 ${man(PERFUME.customBox.minimum)}부터 만듭니다. 그보다 적으면 AC'SCENT 기본 패키지나 고급 선물 포장(병당 ${man(PERFUME.premiumPackaging['10ml'])})을 씁니다.` },
+          { q: '행사 콘셉트에 맞는 향을 따로 만들 수 있나요?', a: `행사·브랜드 전용 향 개발은 ${man(PERFUME.customScent)}입니다. 참석자 맞춤 향 대신, 또는 함께 쓸 수 있습니다.` },
+          { q: '참석자가 많아 줄이 길어지지 않을까요?', a: `조향 1팀이 시간당 최대 ${PERFUME.guestsPerTeamHour}명을 맡고, 인원과 운영 시간에 맞춰 팀을 늘립니다. 분석은 휴대폰으로 미리 해 두면 현장에서는 조향만 기다리면 됩니다.` },
+          { q: '견적서는 어떻게 받나요?', a: '온라인 견적에서 「행사 답례품 향수」를 고르면 연락처 없이 금액을 바로 보고, 내부 결재용 가견적서 PDF를 받을 수 있습니다.' },
+        ] },
+        { type: 'cta', text: '답례품 향수 견적 바로 보기', href: '/quote?preset=perfume-gift' },
+      ],
+    },
+    en: {
+      title: 'Custom Perfume Gifts for Events — AI-Matched 10 ml Perfume for Every Guest',
+      description: `Instead of one giveaway for everyone, each guest takes home a perfume AI matched to them, blended on site by our perfumers. ${krw(PERFUME.tiers[2].unit['10ml'])} per guest at 100+ guests (excl. VAT), anywhere in mainland Korea.`,
+      blocks: [
+        { type: 'p', text: 'Guests scan a QR code, answer a few questions or upload a photo, and AI picks a scent for them. A perfumer blends it into a 10 ml perfume on the spot and hands it over with a result card.' },
+        { type: 'stats', items: [
+          { value: `≈ ${krw(Math.round(GIFT150 / 150 / 100) * 100)}`, label: 'Per guest (150 guests in Seoul, gift-wrapped)' },
+          { value: `${PERFUME.guestsPerTeamHour} / hour`, label: 'Guests per perfumer team' },
+          { value: '10 ml', label: 'A different perfume for each guest' },
+          { value: `${PERFUME.minGuests}+`, label: 'Minimum guests' },
+        ] },
+        { type: 'h2', text: 'From analysis to gift' },
+        { type: 'steps', items: [
+          { title: 'Taste analysis by QR', text: 'Guests answer a few questions or upload a photo on their phones, even while they wait.', image: PIC.jcPhone.en },
+          { title: 'Blended on site with a perfumer', text: 'A perfumer makes a 10 ml perfume from the scent AI picked.', image: PIC.jcBlend.en },
+          { title: 'Gift wrapping', text: 'Wrapped with the result card; premium wrapping or a custom event box is available.', image: PIC.pack.en },
+          { title: 'Handed to each guest', text: 'Every guest leaves with a perfume made for them.', image: PIC.giftHand.en },
+        ] },
+        { type: 'h2', text: 'Prices' },
+        { type: 'table', head: ['Item', 'Price (excl. VAT)'], rows: [
+          ['10 ml per guest', `${PERFUME.tiers.map((t) => krw(t.unit['10ml'])).join(' / ')} (20–49 / 50–99 / 100+)`],
+          ['Perfumer team travel (Seoul)', `${krw(PERFUME.teamTravel.seoul)} per team per day`],
+          ['Gift packaging', `${krw(PERFUME.premiumPackaging['10ml'])} per 10 ml bottle`],
+          ['Capacity', `Up to ${PERFUME.guestsPerTeamHour} guests per team per hour`],
+        ] },
+        { type: 'p', text: `Example: 150 guests in Seoul with gift packaging come to ${krw(PERFUME.tiers[2].unit['10ml'] * 150 + PERFUME.teamTravel.seoul + PERFUME.premiumPackaging['10ml'] * 150)} (excl. VAT). NEANDER is a registered cosmetics distributor (No. 42812). ${NO_ISLANDS_EN}` },
+        { type: 'figure', image: PIC.store.en },
+        { type: 'h2', text: 'Recent work' },
+        { type: 'gallery', images: [PIC.epPerf.en, PIC.jimffMake.en, PIC.kgs2.en] },
+        { type: 'cta', text: 'Get an instant estimate', href: '/quote?preset=perfume-gift' },
+      ],
+    },
+  },
+
+  /* ── 브랜드 향 개발 + AI 향수 키오스크 (전시·박람회) ──────── */
+  // 2026-11 킨텍스 전시 문의(브랜드형 향 4종 개발 + 30초 설문 키오스크 → 유형 카드 출력 → 시향·샘플)에서 나온 구성.
+  // 키오스크 콘텐츠 커스텀(질문 8·결과 유형 8)과 브랜드 전용 향 개발은 카탈로그 금액, 샘플 제작은 카탈로그에 없어 상담으로 둔다.
+  {
+    slug: 'brand-scent-kiosk',
+    kind: 'landing',
+    date: '2026-11-20',
+    cover: coverOf(PIC.swfShelf),
+    keywords: ['브랜드 향 개발', '시그니처 향 제작', '브랜드 향수 제작', '박람회 부스 체험', '전시회 부스 이벤트', '향 마케팅', '향기 마케팅', 'AI 향수 키오스크'],
+    ko: {
+      title: '브랜드 향 개발 + AI 향수 키오스크 — 전시·박람회 부스용 향 체험',
+      description: `브랜드를 닮은 향을 만들고, 전시·박람회 부스에서 방문객이 30초 설문으로 「나에게 맞는 브랜드 향」을 찾게 합니다. 결과 카드 출력·시향·샘플 증정까지. 키오스크 1대 1일 ${man(KIOSK.firstKiosk)}부터, 브랜드 전용 향 개발 ${man(PERFUME.customScent)}(VAT 별도).`,
+      blocks: [
+        { type: 'p', text: '전시·박람회 부스에서 가장 어려운 일은 지나가는 방문객을 멈춰 세우는 것입니다. 브랜드 향 키오스크는 방문객이 화면에서 짧은 질문에 답하면, AI가 브랜드 향 몇 가지 중 그 사람에게 맞는 향을 골라 결과 카드로 출력합니다. 방문객은 그 향을 시향하거나 샘플로 가져가고, 브랜드는 「내 향」으로 기억됩니다.' },
+        { type: 'figure', image: PIC.brandExpo.ko },
+        { type: 'h2', text: '구성' },
+        { type: 'table', head: ['단계', '하는 일', '금액 (VAT 별도)'], rows: [
+          ['① 브랜드 향 개발', '브랜드 이야기·제품·공간에 맞춘 전용 향을 조향사가 개발합니다', `${man(PERFUME.customScent)} (1종 기준, 여러 종은 상담)`],
+          ['② 키오스크 콘텐츠', `질문(최대 8문항)·결과 유형(최대 8종)·결과 문구·화면을 브랜드에 맞게 만듭니다 (${CUSTOM_DEV.leadDays.content}일 전 확정)`, man(CUSTOM_DEV.kiosk.content)],
+          ['③ 현장 운영', '키오스크가 결과 카드를 바로 출력하고, 시향·샘플 증정 동선을 함께 짭니다', `키오스크 1대 1일 ${man(KIOSK.firstKiosk)} (추가 대수 ${man(KIOSK.extraKiosk)}, 추가 운영일 대당 ${man(KIOSK.extraDayPerKiosk)})`],
+          ['샘플·시향지', '수량과 용량에 따라 제작합니다', '상담 후 견적'],
+        ] },
+        { type: 'p', text: `예: 1일 전시에 키오스크 1대로 브랜드 맞춤 설문을 운영하면 ${man(KIOSK.firstKiosk + CUSTOM_DEV.kiosk.content)}(키오스크 + 콘텐츠 커스텀), 브랜드 향을 새로 개발하면 1종당 ${man(PERFUME.customScent)}이 더해집니다. ${STAFF_KO}` },
+        { type: 'gallery', cols: 2, images: [PIC.jimffKiosk.ko, PIC.epKiosk.ko] },
+        { type: 'h2', text: '조향사가 직접 만들어 주는 방식도 됩니다' },
+        { type: 'p', text: `샘플 대신 방문객에게 향수를 바로 만들어 주려면 조향 팀이 함께 갑니다. 이때는 AI 향수 만들기 체험 가격(10ml 1인 ${PERFUME.tiers.map((t) => man(t.unit['10ml'])).join(' · ')}, 조향 1팀 출장비 ${man(PERFUME.teamTravel.seoul)})이 적용됩니다.` },
+        { type: 'gallery', cols: 2, images: [PIC.jcBlend.ko, PIC.kgs3.ko] },
+        { type: 'h2', text: '향을 만든 사례' },
+        { type: 'gallery', images: [PIC.swfBook.ko, PIC.swfVisit.ko, PIC.swfSmell.ko] },
+        { type: 'links', items: [
+          { text: '서울국제작가축제 — 참가 도서 29종마다 다른 향(북퍼퓸 전시)', href: '/portfolio/seoul-writers-festival' },
+          { text: '엔플라잉 〈into REM〉 공식 향 MD — 공연 도시마다 다른 향', href: '/portfolio/nflying-into-the-rem-md-2026' },
+          { text: '제천국제음악영화제 2026 — OST페어 AI 조향 체험', href: '/portfolio/jimff-2026-ost-fair' },
+          { text: '평택 AI 페스타 2026 — 방문객이 직접 조작하는 키오스크 체험 4종', href: '/portfolio/pyeongtaek-ai-festa-2026' },
+        ] },
+        { type: 'faq', items: [
+          { q: '브랜드 향은 몇 가지까지 만들 수 있나요?', a: `결과 유형은 최대 8종까지 둘 수 있습니다. 브랜드 전용 향 개발은 1종 ${man(PERFUME.customScent)} 기준이고, 여러 종을 함께 개발하면 상담으로 금액을 정합니다.` },
+          { q: '준비 기간은 얼마나 걸리나요?', a: `키오스크 콘텐츠는 행사 ${CUSTOM_DEV.leadDays.content}일 전까지 질문·결과를 확정하면 됩니다. 향 개발은 시향과 수정이 필요해 그보다 여유 있게 시작하는 것을 권합니다.` },
+          { q: '결과는 어떻게 주나요?', a: '키오스크에 내장된 영수증형 프린터로 결과 카드를 바로 출력하고, QR로 휴대폰에 저장할 수 있게 할 수도 있습니다.' },
+          { q: '전시장에 무엇이 필요한가요?', a: `${POWER_KO} 키오스크 1대는 작은 테이블 하나 정도의 자리면 됩니다.` },
+          { q: '행사가 끝난 뒤 향을 제품으로 만들 수 있나요?', a: '네안데르는 화장품책임판매업 등록(제42812호)을 마쳤고, 엔플라잉 공식 향 MD처럼 룸스프레이·사쉐 등 제품 제작도 합니다. 수량과 사양은 상담으로 정합니다.' },
+        ] },
+        { type: 'cta', text: '키오스크 견적 바로 보기', href: '/quote?item=rental' },
+      ],
+    },
+    en: {
+      title: 'Signature Scent + AI Scent Kiosk — For Trade Shows and Exhibitions',
+      description: `We develop a scent for your brand and run a kiosk where visitors answer a short quiz and get matched to one of your scents, with a printed result card and a sampling station. Kiosk from ${krw(KIOSK.firstKiosk)} per day; signature scent ${krw(PERFUME.customScent)} (excl. VAT).`,
+      blocks: [
+        { type: 'p', text: 'The hardest part of a trade-show booth is getting people to stop. Visitors answer a few questions on the kiosk, AI matches them to one of your brand scents and prints a result card, and they smell it or take a sample home.' },
+        { type: 'figure', image: PIC.brandExpo.en },
+        { type: 'h2', text: 'What it costs' },
+        { type: 'table', head: ['Step', 'Price (excl. VAT)'], rows: [
+          ['Signature scent development', `${krw(PERFUME.customScent)} per scent`],
+          ['Kiosk content (up to 8 questions and 8 result types)', krw(CUSTOM_DEV.kiosk.content)],
+          ['Kiosk, 1 day', krw(KIOSK.firstKiosk)],
+          ['Samples', 'Quoted by quantity'],
+        ] },
+        { type: 'gallery', cols: 2, images: [PIC.jimffKiosk.en, PIC.epKiosk.en] },
+        { type: 'p', text: `${POWER_EN} ${NO_ISLANDS_EN}` },
+        { type: 'h2', text: 'Scents we have made' },
+        { type: 'p', text: 'For the Seoul International Writers’ Festival we made a perfume and scent strip for each of the 29 participating books.' },
+        { type: 'gallery', images: [PIC.swfBook.en, PIC.swfVisit.en, PIC.swfSmell.en] },
+        { type: 'cta', text: 'Get an instant estimate', href: '/quote?item=rental' },
+      ],
+    },
+  },
+
+  /* ── AI 퍼스널 컬러 부스 ─────────────────────────────── */
+  // 사이트 관심도 2위(10/30~11/17 상세 방문자 13명), 2026-11 문의(뷰티·패션 브랜드 팝업, 학교 도서관 행사)에서 이어져 따로 둔다.
+  {
+    slug: 'ai-personal-color-booth',
+    kind: 'landing',
+    date: '2026-11-20',
+    cover: coverOf(PIC.epColor),
+    keywords: ['퍼스널컬러 부스', '퍼스널컬러 진단 행사', '퍼스널컬러 이벤트', '퍼스널컬러 키오스크', 'AI 퍼스널컬러', '뷰티 팝업 체험', '퍼스널컬러 진단 출장'],
+    ko: {
+      title: 'AI 퍼스널 컬러 부스 — 행사·팝업·학교 축제 퍼스널컬러 진단 키오스크 대여',
+      description: `카메라로 얼굴을 비추면 AI가 봄웜·여름쿨·가을웜·겨울쿨 중 퍼스널 컬러를 진단하고 결과 카드를 바로 출력합니다. 키오스크 1대 1일 ${man(KIOSK.firstKiosk)}부터(VAT 별도), 전국 출장.`,
+      blocks: [
+        { type: 'p', text: '퍼스널 컬러 진단은 남녀노소가 결과를 궁금해하고, 친구끼리 결과를 비교하며 줄을 서는 체험입니다. 키오스크 카메라로 얼굴을 비추면 AI가 피부 톤을 분석해 봄웜·여름쿨·가을웜·겨울쿨 중 하나로 진단하고, 어울리는 색 팔레트가 담긴 결과 카드를 바로 출력합니다. 결과는 QR로 휴대폰에도 저장됩니다.' },
+        { type: 'stats', items: [
+          { value: man(KIOSK.firstKiosk), label: '키오스크 1대 1일부터' },
+          { value: '1분 안팎', label: '촬영부터 결과 카드까지' },
+          { value: '4계절', label: '봄웜·여름쿨·가을웜·겨울쿨' },
+        ] },
+        { type: 'gallery', cols: 2, images: [PIC.colorResult.ko, PIC.colorSchool.ko] },
+        { type: 'h2', text: '가격 (VAT 별도)' },
+        { type: 'table', head: ['항목', '금액'], rows: [
+          ['키오스크 1대 1일 (카메라·결과 카드 프린터 내장, 운반·설치 포함)', man(KIOSK.firstKiosk)],
+          ['같은 행사 키오스크 추가', `대당 ${man(KIOSK.extraKiosk)}`],
+          ['운영일 추가', `대당 1일 ${man(KIOSK.extraDayPerKiosk)}`],
+          ['브랜드 로고·컬러 적용', `${man(CUSTOM_DEV.kiosk.brand)} (행사 ${CUSTOM_DEV.leadDays.brand}일 전 확정)`],
+          ['결과에 브랜드 제품 연결 (최대 20개)·질문·결과 문구 교체', `${man(CUSTOM_DEV.kiosk.content)} (행사 ${CUSTOM_DEV.leadDays.content}일 전 확정)`],
+          ['현장 운영 인력', `1인 1일 ${man(COMMON.staffPerDay)}`],
+        ] },
+        { type: 'p', text: `예: 서울에서 이틀 동안 키오스크 1대와 운영 인력 1명으로 운영하면 ${man(KIOSK.firstKiosk + KIOSK.extraDayPerKiosk + COMMON.staffPerDay * 2)}(VAT 별도)입니다. 하루 행사에 브랜드 로고·컬러를 넣으면 ${man(KIOSK.firstKiosk + CUSTOM_DEV.kiosk.brand + COMMON.staffPerDay)}(운영 인력 1명 포함)입니다.` },
+        { type: 'h2', text: '이런 곳에서 씁니다' },
+        { type: 'ul', items: [
+          '뷰티·패션 브랜드 팝업 — 진단 결과에 맞는 자사 제품을 추천',
+          '백화점·쇼핑몰 이벤트, 웨딩 박람회',
+          '학교 축제·도서관 행사·진로 체험 — 청소년이 가장 많이 줄 서는 체험 중 하나',
+          '기업 행사·사내 축제의 쉬는 시간 프로그램',
+        ] },
+        { type: 'h2', text: '운영 전 확인할 것' },
+        { type: 'ul', items: [
+          '피부 톤 진단은 조명 색에 영향을 받습니다. 노란 조명이나 색 조명 바로 아래는 피하고, 설치 자리의 조명을 미리 알려 주시면 맞춰 둡니다.',
+          POWER_KO,
+          STAFF_KO,
+        ] },
+        { type: 'figure', image: PIC.colorLight.ko },
+        { type: 'h2', text: '운영 사례' },
+        { type: 'gallery', cols: 2, images: [PIC.jbnu.ko, PIC.epHall.ko] },
+        { type: 'links', items: [
+          { text: '은평구진로직업체험지원센터 AI 페스티벌 2026 — AI 퍼스널컬러 진단 부스', href: '/portfolio/eunpyeong-ai-festival-2026' },
+          { text: '전북대학교 전공탐색 박람회 — AI 퍼스널컬러·캐리커처·미래직업 체험', href: '/portfolio/jbnu-major-fair-2026' },
+          { text: 'AI 퍼스널 컬러 진단 — 체험 소개', href: '/services/ai-personal-color' },
+        ] },
+        { type: 'faq', items: [
+          { q: '퍼스널 컬러 부스 비용은 얼마인가요?', a: `키오스크 1대 1일 ${man(KIOSK.firstKiosk)}부터이고(VAT 별도), 현장 운영 인력은 1인 1일 ${man(COMMON.staffPerDay)}입니다.` },
+          { q: '한 명당 얼마나 걸리나요?', a: '촬영부터 결과 카드 출력까지 1분 안팎입니다. 방문객이 많으면 키오스크를 늘립니다(같은 행사 추가 대당 ' + man(KIOSK.extraKiosk) + ').' },
+          { q: '우리 브랜드 제품을 결과에 넣을 수 있나요?', a: `네. 결과 유형별로 브랜드 제품(최대 20개)을 연결하고 질문·결과 문구·화면을 바꾸는 작업은 ${man(CUSTOM_DEV.kiosk.content)}이며, 행사 ${CUSTOM_DEV.leadDays.content}일 전까지 확정합니다.` },
+          { q: '사진은 저장되나요?', a: '진단에 쓴 얼굴 사진은 결과를 만드는 데만 쓰고, 얼굴 인식이나 AI 학습에 쓰지 않습니다. 자세한 내용은 개인정보처리방침에 있습니다.' },
+          { q: '견적서는 어떻게 받나요?', a: '온라인 견적에서 AI 키오스크를 담고 체험을 퍼스널 컬러로 고르면 금액을 바로 보고 가견적서 PDF를 받을 수 있습니다.' },
+        ] },
+        { type: 'cta', text: '퍼스널 컬러 키오스크 견적 바로 보기', href: '/quote?item=rental' },
+      ],
+    },
+    en: {
+      title: 'AI Personal Color Booth — Personal Color Analysis Kiosk Rental for Events',
+      description: `Guests face the kiosk camera and AI diagnoses their personal color season (spring warm, summer cool, autumn warm, winter cool), printing a result card on the spot. From ${krw(KIOSK.firstKiosk)} per kiosk per day (excl. VAT).`,
+      blocks: [
+        { type: 'p', text: 'Guests face the kiosk camera, AI analyzes their skin tone, and a result card with their season and matching palette prints on the spot. Results can also be saved to a phone by QR.' },
+        { type: 'stats', items: [
+          { value: krw(KIOSK.firstKiosk), label: 'Per kiosk per day, from' },
+          { value: '~1 min', label: 'Photo to printed card' },
+          { value: '4 seasons', label: 'Spring warm · Summer cool · Autumn warm · Winter cool' },
+        ] },
+        { type: 'gallery', cols: 2, images: [PIC.colorResult.en, PIC.colorSchool.en] },
+        { type: 'h2', text: 'Prices' },
+        { type: 'table', head: ['Item', 'Price (excl. VAT)'], rows: [
+          ['Kiosk, 1 day', krw(KIOSK.firstKiosk)],
+          ['Branding (logo and colors)', krw(CUSTOM_DEV.kiosk.brand)],
+          ['Product matching and custom results', krw(CUSTOM_DEV.kiosk.content)],
+          ['On-site staff', `${krw(COMMON.staffPerDay)} per person per day`],
+        ] },
+        { type: 'p', text: `Lighting affects skin-tone analysis, so we avoid colored lights at the booth. ${POWER_EN} ${NO_ISLANDS_EN}` },
+        { type: 'figure', image: PIC.colorLight.en },
+        { type: 'h2', text: 'Recent work' },
+        { type: 'gallery', cols: 2, images: [PIC.jbnu.en, PIC.epHall.en] },
+        { type: 'cta', text: 'Get an instant estimate', href: '/quote?item=rental' },
+      ],
+    },
+  },
+
+  /* ── 학교·도서관·청소년 시설 AI 체험 ──────────────────────── */
+  // 2026-11 문의(학교도서관 행사, 청소년 공간 상설 설치)와 은평 진로센터·전북대·안산 과학축제 사례로 묶는다.
+  {
+    slug: 'school-library-ai-experience',
+    kind: 'landing',
+    date: '2026-11-20',
+    cover: coverOf(PIC.epPerf),
+    keywords: ['학교 축제 체험 부스', '학교 행사 체험 프로그램', '도서관 행사 체험', '진로 체험 프로그램', '청소년 AI 체험', 'AI 교육 체험 부스', '진로 박람회 부스', '청소년 축제 체험'],
+    ko: {
+      title: '학교·도서관·청소년 행사 AI 체험 부스 — 진로·퍼스널컬러·캐리커처·향수 만들기',
+      description: `학교 축제·도서관 행사·진로 박람회·청소년 시설에 AI 미래직업 진단, AI 퍼스널컬러, AI 캐리커처, AI 향수 만들기 체험을 장비와 운영 인력까지 함께 보내 드립니다. 키오스크 1대 1일 ${man(KIOSK.firstKiosk)}부터(VAT 별도), 상설 설치도 상담합니다.`,
+      blocks: [
+        { type: 'p', text: '학생과 가족이 오는 행사에는 결과를 바로 들고 갈 수 있는 체험이 잘 맞습니다. 미래직업 진단은 적성 질문에 답하면 AI가 직업을 추천하고 그 직업을 가진 내 모습을 그려 진로 카드로 출력합니다. 퍼스널컬러·캐리커처는 줄을 서서 친구와 결과를 비교하고, 향수 만들기는 분석 결과로 내 향수를 직접 만들어 갑니다.' },
+        { type: 'stats', items: [
+          { value: '316팀', label: '안산 과학축제 이틀 참여 (약 860명)' },
+          { value: '100인분', label: '은평 AI 페스티벌 맞춤 향수' },
+          { value: man(KIOSK.firstKiosk), label: '키오스크 1대 1일부터' },
+        ] },
+        { type: 'figure', image: PIC.schoolLib.ko },
+        { type: 'h2', text: '학교·청소년 행사에서 많이 고르는 체험' },
+        { type: 'table', head: ['체험', '학생이 하는 것 → 가져가는 것', '시작가 (VAT 별도, 1일)'], rows: [
+          ['AI 미래직업 진단', '적성 질문에 답합니다 → 미래 직업 모습이 담긴 진로 카드', `키오스크 1대 ${man(KIOSK.firstKiosk)}`],
+          ['AI 퍼스널컬러 진단', '카메라로 얼굴을 비춥니다 → 퍼스널 컬러 결과 카드', `키오스크 1대 ${man(KIOSK.firstKiosk)}`],
+          ['AI 캐리커처', '사진을 찍고 화풍을 고릅니다 → 캐리커처 출력', `키오스크 1대 ${man(KIOSK.firstKiosk)}`],
+          ['AI 향수 만들기', 'AI가 고른 향으로 조향사와 향수를 만듭니다 → 내 향수 10ml', `${man(PERFUME.minimumCharge)}부터 (20명~)`],
+          ['AI 포토부스', '사진을 찍고 AI 컨셉을 고릅니다 → 즉석 인화 사진', `1대 ${man(PHOTO_BOOTH.firstBooth)}`],
+        ] },
+        { type: 'p', text: `예: 하루 행사에 키오스크 2대(미래직업 + 퍼스널컬러)와 운영 인력 1명이면 ${man(KIOSK.firstKiosk + KIOSK.extraKiosk + COMMON.staffPerDay)}(VAT 별도)입니다. 키오스크마다 다른 체험을 넣을 수 있습니다.` },
+        { type: 'gallery', images: [PIC.jbnu.ko, PIC.epColor.ko, PIC.epKiosk.ko, PIC.ansan.ko, PIC.epHall.ko, PIC.jongno.ko] },
+        { type: 'h2', text: '학교·공공기관이 많이 묻는 것' },
+        { type: 'ul', items: [
+          '견적서·사업자등록증·통장 사본 등 수의계약 서류를 바로 드립니다. 온라인 견적에서 내부 결재용 가견적서 PDF를 연락처 없이 받을 수 있습니다.',
+          '사주·운세 체험은 청소년 행사에 맞게 공부·친구·진로 이야기로 풀이 문구를 순화할 수 있습니다.',
+          '촬영한 얼굴 사진은 결과를 만드는 데만 쓰고 얼굴 인식이나 AI 학습에 쓰지 않습니다.',
+          `청소년 시설·도서관에 계속 두고 쓰는 상설 설치도 상담합니다(키오스크 상시 운영 대당 월 ${man(KIOSK.monthlyPerKiosk)}부터).`,
+        ] },
+        { type: 'h2', text: '운영 사례' },
+        { type: 'gallery', cols: 2, images: [PIC.jbnuRow.ko, PIC.ansan.ko] },
+        { type: 'links', items: [
+          { text: '은평구진로직업체험지원센터 AI 페스티벌 2026 — AI 조향사·퍼스널컬러·타로 부스 3종, 맞춤 향수 100인분', href: '/portfolio/eunpyeong-ai-festival-2026' },
+          { text: '전북대학교 전공탐색 박람회 — AI 퍼스널컬러·캐리커처·미래직업 웹 체험 3종', href: '/portfolio/jbnu-major-fair-2026' },
+          { text: '2026 안산사이언스밸리 과학축제 (한양대 ERICA) — 가족 타임캡슐 AI 포토부스, 이틀간 316팀', href: '/portfolio/ansan-science-festival-2026' },
+          { text: '종로 열린 책마루 — 독서 취향과 향을 잇는 AI 체험', href: '/portfolio/jongno-open-book-maru-2026' },
+          { text: '축제 체험 부스 — 지역축제·과학축제·대학 축제 안내', href: '/insights/festival-experience-booth' },
+        ] },
+        { type: 'faq', items: [
+          { q: '학교 축제 체험 부스 비용은 얼마인가요?', a: `AI 키오스크는 1대 1일 ${man(KIOSK.firstKiosk)}, 같은 행사에 추가하는 키오스크는 대당 ${man(KIOSK.extraKiosk)}입니다. 현장 운영 인력은 1인 1일 ${man(COMMON.staffPerDay)}입니다(VAT 별도).` },
+          { q: '초등학생도 할 수 있나요?', a: '네. 은평구 AI 페스티벌에서는 초등학생부터 청소년과 가족이 키오스크로 AI 분석을 받고 맞춤 향수를 만들어 갔습니다.' },
+          { q: '학교 이름이나 행사 로고를 넣을 수 있나요?', a: `키오스크 화면에 로고·색을 넣는 작업은 ${man(CUSTOM_DEV.kiosk.brand)}이고 행사 ${CUSTOM_DEV.leadDays.brand}일 전에 확정합니다.` },
+          { q: '지방 학교도 가나요?', a: `네, 전국 출장합니다. 키오스크만 빌리면 운송비가 행사당 한 번 더해집니다(경상 +${man(KIOSK.travel.gyeongsang)}). ${NO_ISLANDS_KO}` },
+        ] },
+        { type: 'cta', text: '학교 행사 견적 바로 보기', href: '/quote?preset=campus-festival' },
+      ],
+    },
+    en: {
+      title: 'AI Experience Booths — For Schools, Libraries and Youth Events',
+      description: `AI career matching, personal color, caricature and perfume making for school festivals, library events, career fairs and youth centers, delivered with equipment and staff. From ${krw(KIOSK.firstKiosk)} per kiosk per day (excl. VAT).`,
+      blocks: [
+        { type: 'p', text: 'Students and families like experiences they can take home: a career card showing their future self, a personal color result, a caricature, or a perfume they blended themselves.' },
+        { type: 'stats', items: [
+          { value: '316 groups', label: 'Ansan Science Festival, 2 days (about 860 people)' },
+          { value: '100', label: 'Custom perfumes at Eunpyeong AI Festival' },
+          { value: krw(KIOSK.firstKiosk), label: 'Per kiosk per day, from' },
+        ] },
+        { type: 'figure', image: PIC.schoolLib.en },
+        { type: 'h2', text: 'Popular experiences' },
+        { type: 'table', head: ['Experience', 'From (excl. VAT, 1 day)'], rows: [
+          ['AI future career', krw(KIOSK.firstKiosk)],
+          ['AI personal color', krw(KIOSK.firstKiosk)],
+          ['AI caricature', krw(KIOSK.firstKiosk)],
+          ['AI perfume making', `${krw(PERFUME.minimumCharge)} minimum`],
+        ] },
+        { type: 'gallery', images: [PIC.jbnu.en, PIC.epColor.en, PIC.epKiosk.en, PIC.ansan.en, PIC.epHall.en, PIC.jongno.en] },
+        { type: 'p', text: `Long-term installations for youth centers and libraries are available. ${NO_ISLANDS_EN}` },
         { type: 'cta', text: 'Get an instant estimate', href: '/quote?preset=campus-festival' },
       ],
     },
