@@ -28,7 +28,9 @@ export function optionSummary(item: QuoteItem, lang: Lang, experienceName?: (slu
     }
     case 'photoBooth': {
       const o = item.options;
-      out.push(ko ? `${o.booths}대` : count(o.booths, 'booth'));
+      out.push(o.mode === 'monthly'
+        ? (ko ? `상시 운영 · ${o.booths}대 · ${o.months ?? 1}개월` : `Long-term · ${count(o.booths, 'booth')} · ${o.months ?? 1} mo`)
+        : (ko ? `${o.booths}대` : count(o.booths, 'booth')));
       const templates = getPhotoBoothTemplates(o.templateSlugs);
       if (templates.length) out.push(templates.map((template) => template.name[lang]).join(' · '));
       add(o.extraStyles > 0, `스타일 +${o.extraStyles}종`, `+${count(o.extraStyles, 'style')}`);
@@ -41,7 +43,7 @@ export function optionSummary(item: QuoteItem, lang: Lang, experienceName?: (slu
     case 'rental': {
       const o = item.options;
       out.push(o.mode === 'monthly'
-        ? (ko ? `월 이용 · ${o.kiosks}대 · ${o.months}개월` : `Monthly · ${count(o.kiosks, 'kiosk')} · ${o.months} mo`)
+        ? (ko ? `${o.autoMonthly ? '상시 운영' : '월 이용'} · ${o.kiosks}대 · ${o.months}개월` : `${o.autoMonthly ? 'Long-term' : 'Monthly'} · ${count(o.kiosks, 'kiosk')} · ${o.months} mo`)
         : (ko ? `${o.kiosks}대` : count(o.kiosks, 'kiosk')));
       if (o.experienceSlugs !== undefined) {
         // 체험별로 묶어 대수를 붙인다 — 'AI 퍼스널 컬러 2대 · AI 소믈리에 2대'

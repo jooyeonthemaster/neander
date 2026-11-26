@@ -23,7 +23,8 @@ export const QUOTE_COPY = {
     step2bHint: '아직 정해지지 않았다면 기본값 그대로 넘어가도 괜찮아요.',
     eventName: '행사명',
     eventDate: '행사 날짜 (선택)',
-    days: '며칠 동안 진행하나요?',
+    // 2026-11-27: 행사·프로모션 전체 기간(14일 · 50일)을 적어 금액이 부풀던 칸 — 부스를 여는 날 수로 묻는다
+    days: '부스를 며칠 운영하나요?',
     hours: '하루 운영 시간',
     hoursHint: '하루 6시간이 기본이에요. 넘는 시간은 기기 1대·인력 1명마다 추가돼요.',
     attendees: '예상 체험 인원',
@@ -146,7 +147,7 @@ export const QUOTE_COPY = {
     step2bHint: 'Not decided yet? The defaults are fine for now.',
     eventName: 'Event name',
     eventDate: 'Event date (optional)',
-    days: 'How many days?',
+    days: 'How many days will the booth run?',
     hours: 'Hours per day',
     hoursHint: '6 h included; extra hours are charged for each device and each staff member',
     attendees: 'Expected participants',

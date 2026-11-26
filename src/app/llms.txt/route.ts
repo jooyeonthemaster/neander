@@ -34,14 +34,14 @@ export async function GET() {
 
 - 누구를 위한 서비스인가: 브랜드 팝업, 기업 행사(시상식·송년회·워크숍·사내 행사), 지역 축제, 전시·박람회, 대학 행사, 공공기관·문화재단 체험 프로그램, 팬 이벤트·공연
 - 운영 지역: 전국 출장 운영 (서울 기준 금액, 지역별 운송비 추가). 제주 및 도서 지역은 운영하지 않습니다.
-- 견적: [온라인 견적](${SITE_URL}/quote)에서 행사 조건을 고르면 연락처 없이 금액을 바로 확인하고 내부 결재용 가견적서 PDF를 받을 수 있습니다. 모든 금액은 VAT 별도입니다.
+- 견적: [온라인 견적](${SITE_URL}/quote)에서 행사 조건을 고르면 연락처 없이 금액을 바로 확인하고, 이름과 이메일을 남기면 내부 결재용 가견적서 PDF를 받을 수 있습니다. 모든 금액은 VAT 별도입니다.
 - 문의: ${CONTACT.email} · ${CONTACT.phone} · [문의하기](${SITE_URL}/contact)
 
 ## 서비스와 시작가 (VAT 별도, 서울 기준)
 
 - AI 조향사 (AC'SCENT): AI가 취향·이미지를 분석해 향을 추천하고 조향사가 현장에서 향수를 만들어 건넵니다. ${man(startingPrice('acscent'))}부터 (1인 10ml ${man(PERFUME.tiers[2].unit['10ml'])}~${man(PERFUME.tiers[0].unit['10ml'])}, 조향 1팀(조향사 1 + 보조 1)이 시간당 최대 ${PERFUME.guestsPerTeamHour}명).
 ${byService('acscent').join('\n')}
-- AI 포토부스: 1대 1일 ${man(PHOTO_BOOTH.firstBooth)}부터 (AI 스타일 ${PHOTO_BOOTH.includedStyles}종·즉석 인화 ${PHOTO_BOOTH.printsPerRoll}장·운송·설치 포함, 최대 ${PHOTO_BOOTH.maxBooths}대).
+- AI 포토부스: 1대 1일 ${man(PHOTO_BOOTH.firstBooth)}부터 (AI 스타일 ${PHOTO_BOOTH.includedStyles}종·즉석 인화 ${PHOTO_BOOTH.printsPerRoll}장·운송·설치 포함, 최대 ${PHOTO_BOOTH.maxBooths}대, 상시 운영 대당 월 ${man(PHOTO_BOOTH.monthlyPerBooth)}). 키오스크·포토부스는 운영일이 길면 하루 단위보다 저렴한 상시 운영(월 단위) 요금으로 계산합니다.
 ${byService('photoBooth').join('\n')}
 - AI 체험 키오스크: 1대 1일 ${man(KIOSK.firstKiosk)}부터 (영수증형 즉석 프린터 내장, 추가 1대 ${man(KIOSK.extraKiosk)}, 상시 운영 대당 월 ${man(KIOSK.monthlyPerKiosk)}).
 ${byService('rental').join('\n')}

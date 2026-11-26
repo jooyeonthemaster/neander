@@ -9,9 +9,9 @@ import { getExperienceImage } from '@/data/experience-images';
 import {
   CUSTOM_DEV, CUSTOM_DEV_TEXT, KIOSK, PERFUME, PHOTO_BOOTH, type Lang,
 } from '@/lib/quote/catalog';
-import { getPerfumeStaffing, kioskRoom, perfumeGuestCost, type QuoteInput, type QuoteItem } from '@/lib/quote/engine';
+import { eventDeviceCost, getPerfumeStaffing, kioskRoom, monthlyDeviceCost, perfumeGuestCost, perfumeHoursSuggestion, type QuoteInput, type QuoteItem } from '@/lib/quote/engine';
 import { cn } from '@/lib/utils';
-import { Check, Field, formatPriceAmount, inputClass, Segmented, Stepper, type Price } from './QuoteControls';
+import { Bubble, Check, Field, formatPriceAmount, inputClass, Segmented, Stepper, type Price } from './QuoteControls';
 import { QUOTE_COPY } from './copy';
 import { optionInfo } from './option-info';
 import { perfumeBaseBreakdown } from './perfume-breakdown';
@@ -196,9 +196,25 @@ function PerfumeGuestsPrompt({ ko, onPick }: { ko: boolean; onPick: (guests: num
   );
 }
 
+/** 운영일이 길어 상시 운영(월 단위) 요금으로 바뀌었다는 말풍선 (2026-11-27 사용자) */
+function LongRunBubble({ service, units, months, schedule, lang }: { service: 'rental' | 'photoBooth'; units: number; months: number; schedule: QuoteInput; lang: Lang }) {
+  const ko = lang === 'ko';
+  const daily = formatPriceAmount(eventDeviceCost(service, units, schedule), lang);
+  const monthly = formatPriceAmount(monthlyDeviceCost(service, units, months), lang);
+  return (
+    <div className="sm:col-span-2">
+      <Bubble testId={`long-run-notice-${service}`} className="mt-0"
+        title={ko ? `${schedule.days}일 운영이라 상시 운영 요금으로 바꿨어요` : `Switched to the long-term rate for ${schedule.days} days`}>
+        {ko ? `하루 단위 ${daily} → 월 단위 ${monthly}${months > 1 ? ` (${months}개월)` : ''} · 부가세 별도` : `Daily rate ${daily} → monthly ${monthly}${months > 1 ? ` (${months} months)` : ''} · excl. VAT`}
+      </Bubble>
+    </div>
+  );
+}
+
 export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOptions, renderExperienceIllustration, enablePhotoBoothTemplates = false, enableKioskAssignments = false, allowKioskSubscription = true, paged = false, leadingPage, flowActive = true }: {
   item: QuoteItem;
-  schedule: Pick<QuoteInput, 'days' | 'hoursPerDay' | 'region' | 'items'>;
+  /** 행사 정보 전체 — 운영일·시간·지역과, 조향 팀 시간 제안(perfumeHoursSuggestion)에 쓴다 */
+  schedule: QuoteInput;
   lang: Lang;
   c: (typeof QUOTE_COPY)[Lang];
   kioskExperiences: { value: string; label: string }[];
@@ -255,6 +271,8 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
       // 열려 있는 옵션 창은 높이를 바꾸지 않으므로, 제목이 생기는 만큼 본문을 줄여 상자 높이가 늘지 않게 한다
       // (기준 줄을 따로 두지 않고 '1팀당 N명 기준'을 본문에 넣는다).
       const capacityBasis = ko ? `${staffing.days}일 · 하루 ${staffing.hoursPerDay}시간 기준, 1팀당 ${staffing.capacityPerTeam}명` : `${plural(staffing.days, 'day')} × ${staffing.hoursPerDay} hours/day: ${staffing.capacityPerTeam} guests per team`;
+      // 영문 옵션 창은 글이 길어 한 줄을 더하면 낮은 화면(1366×768)에서 안쪽 스크롤이 생긴다 — 영문은 펼친 화면에서만 보인다
+      const hoursTip = staffing.requiresConsultation || (paged && !ko) ? null : perfumeHoursSuggestion(schedule);
       const teamsNotice = <div data-testid="perfume-capacity-notice" role="status" aria-atomic="true"
         className={cn('rounded-xl px-3 py-2 text-[11px] leading-relaxed', staffing.requiresConsultation ? 'border border-amber-300 bg-amber-50 text-amber-900' : 'bg-teal-50/80 text-teal-800')}>
         {staffing.requiresConsultation ? <>
@@ -274,6 +292,10 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
               ? ko ? `${staffing.teams}팀으로 자동 조정 · 출장비 포함` : `Automatically adjusted to ${staffing.teams} teams, travel fees included`
               : ko ? `인원에 맞춰 ${staffing.teams}팀으로 자동 조정했어요. 팀 출장비도 반영돼요.` : `Automatically adjusted to ${staffing.teams} teams. Team travel fees are included.`
             : ko ? '팀당 조향사 1명과 보조 1명이에요. 필요한 팀 수보다 더 고를 수도 있어요.' : 'A perfumer and an assistant per team. You can choose more than the minimum.'}</p>}
+          {/* 인원이 한 팀 몫을 조금 넘어 팀이 늘었으면, 운영 시간을 늘리는 쪽이 더 싼지 알려 준다 (2026-11-27) */}
+          {hoursTip && <p data-testid="perfume-hours-tip" className="mt-1 font-semibold text-teal-900">{ko
+            ? paged ? `하루 ${hoursTip.hours}시간이면 ${hoursTip.teams}팀 · ${formatPriceAmount(hoursTip.saving, lang)} 절약` : `하루 ${hoursTip.hours}시간으로 늘리면 ${hoursTip.teams}팀으로 충분해 ${formatPriceAmount(hoursTip.saving, lang)} 줄어요`
+            : `At ${hoursTip.hours} hours a day, ${plural(hoursTip.teams, 'team')} would do — ${formatPriceAmount(hoursTip.saving, lang)} less`}</p>}
         </>}
       </div>;
       // 기본 1팀의 출장비도 합계에 들어간다 — 인원 비용만 보고 합계가 다르다고 느끼지 않게 식으로 풀어 보여 준다
@@ -370,13 +392,15 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
       const wrappingControl = <div className="sm:col-span-2"><Check id="b-wrap" checked={o.wrapping} onChange={(value) => setOptions('photoBooth', { wrapping: value })} label={c.wrapping} info={info('wrapping')} price={add(PHOTO_BOOTH.wrapping, u('대당', 'each'))} /></div>;
       return (
         <OptionsLayout key={item.key} {...layout}>
-          <Field label={c.booths} info={info('booths')} price={add(PHOTO_BOOTH.extraBooth, u('추가 대당', 'per extra booth'))} hint={ko ? '1대에 AI 스타일 2종, 인화 700장이 포함돼요.' : 'Each booth includes 2 AI styles and 700 prints.'}>
+          <Field label={c.booths} info={info('booths')} price={o.mode === 'monthly' ? base(PHOTO_BOOTH.monthlyPerBooth, u('대당', 'each'), u('/월', '/month')) : add(PHOTO_BOOTH.extraBooth, u('추가 대당', 'per extra booth'))} hint={ko ? '1대에 AI 스타일 2종, 인화 700장이 포함돼요.' : 'Each booth includes 2 AI styles and 700 prints.'}>
             <Stepper id="b-booths" value={o.booths} min={1} max={PHOTO_BOOTH.maxBooths} suffix={ko ? '대' : undefined} onChange={(value) => setOptions('photoBooth', { booths: value })} />
           </Field>
-          <div className="flex flex-col justify-center rounded-2xl bg-teal-50/70 px-4 py-3.5">
+          {o.mode === 'monthly'
+            ? <LongRunBubble service="photoBooth" units={o.booths} months={o.months ?? 1} schedule={schedule} lang={lang} />
+            : <div className="flex flex-col justify-center rounded-2xl bg-teal-50/70 px-4 py-3.5">
             <p className="text-xs font-semibold text-teal-800">{ko ? '사진은 이렇게 받아요' : 'A photo to take home'}</p>
             <p className="mt-1.5 text-xs leading-relaxed text-teal-700">{ko ? '현장에서 바로 인화하고, QR로 휴대폰에도 저장할 수 있어요.' : 'Guests get an instant print and can save a digital copy via QR.'}</p>
-          </div>
+          </div>}
           {enablePhotoBoothTemplates && <PhotoBoothTemplates options={o} lang={lang} onChange={(patch) => setOptions('photoBooth', patch)} />}
           <MoreOptions lang={lang} pageId="prints" pageLabel={combinePrintsAndWrapping ? (ko ? '인화·부스 외관' : 'Prints & wrapping') : (ko ? '인화 수량' : 'Prints')} title={combinePrintsAndWrapping ? (ko ? '인화와 부스 외관 고르기' : 'Choose prints and booth wrapping') : enablePhotoBoothTemplates ? (ko ? '인화 수량 더하기' : 'Extra prints') : (ko ? '인화·스타일 옵션 더하기' : 'Print & style options')}
             hint={combinePrintsAndWrapping ? (ko ? '추가 인화 수량과 부스의 브랜드 디자인을 함께 골라요.' : 'Choose extra prints and a branded booth exterior.') : enablePhotoBoothTemplates ? (ko ? '인화지를 더 준비하고 싶을 때 골라주세요.' : 'Add more paper for extra prints.') : (ko ? '인화 수량과 준비된 사진 스타일' : 'Extra prints and ready-made styles')}
@@ -427,7 +451,8 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
             <Stepper id="k-count" value={o.kiosks} min={1} max={Math.max(1, kioskRoom(schedule, 'rental'))} suffix={ko ? '대' : undefined} onChange={(value) => setOptions('rental', { kiosks: value })} />
           {kioskRoom(schedule, 'rental') < KIOSK.maxKiosks && <p data-testid="k-count-shared" className="mt-2 text-xs text-slate-500 [word-break:keep-all]">{ko ? `최대 ${kioskRoom(schedule, 'rental')}대 · ${KIOSK.maxKiosks - kioskRoom(schedule, 'rental')}대는 향수 분석용` : `Up to ${kioskRoom(schedule, 'rental')} · ${KIOSK.maxKiosks - kioskRoom(schedule, 'rental')} used for perfume analysis`}</p>}
           </Field>
-          {!allowKioskSubscription && <div data-testid="kiosk-event-rental-note" className="flex flex-col justify-center rounded-2xl bg-teal-50/70 px-4 py-3.5">
+          {o.autoMonthly && <LongRunBubble service="rental" units={o.kiosks} months={o.months} schedule={schedule} lang={lang} />}
+          {!allowKioskSubscription && !o.autoMonthly && <div data-testid="kiosk-event-rental-note" className="flex flex-col justify-center rounded-2xl bg-teal-50/70 px-4 py-3.5">
             <p className="text-xs font-semibold text-teal-800">{ko ? '행사 기간 동안 대여해요' : 'Rent for your event'}</p>
             <p className="mt-1.5 text-xs leading-relaxed text-teal-700">{ko ? '행사 정보에서 고른 운영 일수로 비용을 계산해요.' : 'Pricing uses the number of days in your event details.'}</p>
           </div>}

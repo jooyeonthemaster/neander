@@ -50,6 +50,7 @@ function rowsFor(key: CoreServiceKey, lang: 'ko' | 'en'): { base: Row[]; options
       base: [
         { label: ko ? '2 · 3번째 부스' : '2nd and 3rd booth', note: ko ? `대당 1일 · 최대 ${PHOTO_BOOTH.maxBooths}대` : `per booth per day · up to ${PHOTO_BOOTH.maxBooths}`, value: p(PHOTO_BOOTH.extraBooth) },
         { label: ko ? '대당 추가 1일' : 'Extra day per booth', value: p(PHOTO_BOOTH.extraDayPerBooth) },
+        { label: ko ? '상시 운영' : 'Long-term placement', note: ko ? `대당 월 · 인화 월 ${PHOTO_BOOTH.printsPerRoll}장 포함` : `per booth per month · ${PHOTO_BOOTH.printsPerRoll} prints a month`, value: p(PHOTO_BOOTH.monthlyPerBooth) },
         { label: ko ? '현장 운영 인력' : 'On-site staff', note: ko ? '1명 1일' : 'per person per day', value: p(COMMON.staffPerDay) },
       ],
       options: [

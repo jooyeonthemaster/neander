@@ -77,6 +77,18 @@ export interface Price {
   free?: string;
 }
 
+/** 말풍선 안내 — 바로 위 입력칸을 가리키는 꼬리가 달린 짙은 상자 (흐름 안에 놓여 아래 내용을 밀어낸다). 2026-11-27 */
+export function Bubble({ testId, title, children, className }: { testId?: string; title: ReactNode; children?: ReactNode; className?: string }) {
+  return (
+    <div data-testid={testId} role="status" aria-live="polite"
+      className={cn('relative mt-1 w-fit max-w-full rounded-lg bg-slate-900 px-3 py-2 text-white shadow-lg [word-break:keep-all]', className)}>
+      <span aria-hidden="true" className="absolute -top-1.5 left-5 size-3 rotate-45 bg-slate-900" />
+      <p className="relative text-[13px] font-semibold leading-snug">{title}</p>
+      {children && <p className="relative mt-0.5 text-[11.5px] leading-snug text-slate-300">{children}</p>}
+    </div>
+  );
+}
+
 export function formatPriceAmount(amount: number, lang: string): string {
   if (lang === 'en') return `KRW ${amount.toLocaleString('en-US')}`;
   return amount >= 10_000 ? `${(amount / 10_000).toLocaleString('ko-KR', { maximumFractionDigits: 1 })}만원` : `${amount.toLocaleString('ko-KR')}원`;

@@ -61,6 +61,32 @@ export const QUOTE_PRESETS: QuotePreset[] = [
     },
   },
   {
+    // 2026-11-27: 「AI 사주·관상·손금 체험 대여」 안내 글의 예시 구성 — 글의 견적 버튼이 연다
+    id: 'fortune-booth',
+    title: { ko: 'AI 사주·손금 체험', en: 'AI fortune-telling booth' },
+    caption: { ko: '1일 · 200명 · AI 사주 포토부스 + AI 손금 키오스크', en: '1 day · 200 guests · saju photo booth + palm-reading kiosk' },
+    input: {
+      eventType: 'festival', eventName: '', eventDate: '', days: 1, hoursPerDay: 6, attendees: 200, region: 'seoul', extraStaff: 0,
+      items: [
+        { key: 'photoBooth', options: { booths: 1, extraStyles: 0, extraPrintRolls: 0, photocard: false, wrapping: false, templateSlugs: ['ai-fortune-robot'] } },
+        { key: 'rental', options: { mode: 'event', kiosks: 1, months: 1, printer: false, extraContents: 0, custom: 'none', experienceSlug: 'ai-palm-reading' } },
+      ],
+    },
+  },
+  {
+    // 2026-11-27: 「연말행사·송년회」 안내 글의 예시 구성 (사주 포토부스 + 손금 키오스크 + 운영 인력 1명) — 글의 견적 버튼이 연다
+    id: 'year-end-party',
+    title: { ko: '연말 송년회', en: 'Year-end party' },
+    caption: { ko: '1일 · 150명 · AI 사주 포토부스 + AI 손금 키오스크 + 운영 인력', en: '1 day · 150 guests · saju photo booth + palm-reading kiosk + staff' },
+    input: {
+      eventType: 'corporate', eventName: '', eventDate: '', days: 1, hoursPerDay: 6, attendees: 150, region: 'seoul', extraStaff: 1,
+      items: [
+        { key: 'photoBooth', options: { booths: 1, extraStyles: 0, extraPrintRolls: 0, photocard: false, wrapping: false, templateSlugs: ['ai-fortune-robot'] } },
+        { key: 'rental', options: { mode: 'event', kiosks: 1, months: 1, printer: false, extraContents: 0, custom: 'none', experienceSlug: 'ai-palm-reading' } },
+      ],
+    },
+  },
+  {
     id: 'public-tourism',
     title: { ko: '공공·관광 행사', en: 'Public / tourism event' },
     caption: { ko: '2일 · 500명 · AI 키오스크 2대 + 운영 인력', en: '2 days · 500 guests · 2 kiosks + staff' },

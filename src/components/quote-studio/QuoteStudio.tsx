@@ -19,7 +19,7 @@ import { REFERRAL_OPTIONS } from '@/lib/inquiry-referral';
 import { getExperienceBySlug } from '@/data/experiences';
 import { PRODUCTS } from '@/data/products';
 import {
-  COMMON, ESTIMATE_DISCLAIMER, REGION_NOTE, REGIONS, SERVICE_ORDER, SERVICE_TEXT, isConsultationService,
+  COMMON, ESTIMATE_DISCLAIMER, LONG_RUN, REGION_NOTE, REGIONS, SERVICE_ORDER, SERVICE_TEXT, isConsultationService,
   type Lang, type RegionKey, type ServiceKey,
 } from '@/lib/quote/catalog';
 import {
@@ -32,7 +32,7 @@ import { getPhotoBoothTemplates } from '@/lib/quote/photo-booth-templates';
 import { QUOTE_KIOSK_EXPERIENCES } from '@/data/product-lines';
 import { QUOTE_PRESETS } from '@/lib/quote/presets';
 import { QUOTE_COPY } from './copy';
-import { Check, Field, NumberInput, Segmented, Stepper, inputClass } from './QuoteControls';
+import { Bubble, Check, Field, NumberInput, Segmented, Stepper, inputClass } from './QuoteControls';
 import { RegionMap } from './RegionMap';
 import { EventInfoSummary } from './EventInfoSummary';
 import { TotalDelta } from './TotalDelta';
@@ -756,7 +756,13 @@ export function QuoteStudio({ renderExperienceEditor, renderArtwork }: {
                         버튼 글자가 서너 줄로 꺾여서, 그때는 입력칸 아래로 지도를 쌓는다. */}
                     <div className="flex min-w-0 flex-col gap-y-7">
                       <Field label={c.eventName}><input id="q-event-name" type="text" maxLength={200} autoComplete="off" value={input.eventName ?? ''} onChange={(event) => update({ eventName: event.target.value })} placeholder={lang === 'ko' ? '예: 네안데르 브랜드 팝업' : 'e.g. NEANDER brand pop-up'} className={inputClass} /></Field>
-                      <Field label={c.days}><NumberInput id="q-days" value={input.days} min={1} max={60} suffix={lang === 'ko' ? '일' : 'days'} onChange={(value) => update({ days: value })} /></Field>
+                      <Field label={c.days}><NumberInput id="q-days" value={input.days} min={1} max={60} suffix={lang === 'ko' ? '일' : 'days'} onChange={(value) => update({ days: value })} />
+                        {/* 오래 운영한다고 적으면 — 행사 전체 기간이 아닌지, 그리고 월 단위 요금이 적용된다는 것을 말풍선으로 (2026-11-27) */}
+                        {input.days >= LONG_RUN.minDays && <Bubble testId="days-long-run-tip"
+                          title={lang === 'ko' ? '행사 전체 기간이 아니라 부스를 여는 날 수예요' : 'Count only the days the booth is open'}>
+                          {lang === 'ko' ? '오래 운영하면 키오스크·포토부스는 더 저렴한 월 단위 상시 운영 요금으로 계산해요.' : 'For long runs, kiosks and photo booths switch to the lower monthly rate.'}
+                        </Bubble>}
+                      </Field>
                       <Field label={c.attendees} hint={lang === 'ko' ? '행사 전체 기간에 체험할 인원이에요.' : 'Total participants across all event days.'}><NumberInput id="q-attendees" value={input.attendees} min={1} max={100000} suffix={lang === 'ko' ? '명' : 'guests'} onChange={(value) => update({ attendees: value })} /></Field>
                     </div>
                     <Field label={c.region} hint={REGION_NOTE[lang]}>

@@ -1,5 +1,5 @@
 import {
-  COMMON, CUSTOM_DEV, CUSTOM_DEV_TEXT, CUSTOM_TERMS, KIOSK, PERFUME, PHOTO_BOOTH, SERVICE_TEXT, SPACE, isConsultationService,
+  COMMON, CUSTOM_DEV, CUSTOM_DEV_TEXT, CUSTOM_TERMS, KIOSK, LONG_RUN, PERFUME, PHOTO_BOOTH, SERVICE_TEXT, SPACE, isConsultationService,
   type BoothBuild, type BoothCustom, type KioskCustom, type Lang, normalizeRegion, type RegionKey, type ServiceKey,
 } from './catalog';
 import { getPhotoBoothTemplates, normalizePhotoBoothTemplateSlugs } from './photo-booth-templates';
@@ -11,8 +11,8 @@ import { normalizePyeong, type AreaUnit } from './space-area';
    ───────────────────────────────────────────────────────── */
 
 export interface PerfumeOptions { guests: number; /** 담은 직후 — 향수 인원을 아직 직접 적지 않았다 (2026-11-23: 행사 인원을 그대로 쓰지 않고 고객이 적게 한다) */ guestsPending?: boolean; volume: '10ml' | '50ml'; extraTeams: number; /** 자동 증원 전 고객이 선택한 추가 팀 수. 자동 증원이 필요할 때만 저장한다. */ requestedExtraTeams?: number; customScent: boolean; premiumPackaging: boolean; /** 전용 디자인 단박스 (300명 이상) — premiumPackaging 대신 */ customBox?: boolean; /** 분석용 AI 키오스크 대수 (0 = QR 웹 분석) */ analysisKiosks?: number }
-export interface PhotoBoothOptions { booths: number; extraStyles: number; extraPrintRolls: number; photocard: boolean; wrapping: boolean; customStyles?: number; custom?: BoothCustom; /** Chosen existing demo templates; omitted for legacy quantity-only estimates. */ templateSlugs?: string[] }
-export interface KioskOptions { mode: 'event' | 'monthly'; kiosks: number; months: number; /** 쓰지 않음 — 영수증형 프린터는 키오스크에 내장돼 선택·비용이 없다. 예전 저장값 호환용으로 늘 false */ printer: boolean; extraContents: number; custom?: KioskCustom; experienceSlug?: string; /** One experience per kiosk, in kiosk-number order. Empty slots are undecided. */ experienceSlugs?: string[] }
+export interface PhotoBoothOptions { booths: number; extraStyles: number; extraPrintRolls: number; photocard: boolean; wrapping: boolean; customStyles?: number; custom?: BoothCustom; /** Chosen existing demo templates; omitted for legacy quantity-only estimates. */ templateSlugs?: string[]; /** 오래 운영해 상시 운영(월 단위) 요금으로 바뀐 경우에만 저장한다 — 고객이 고르지 않고 운영일로 정해진다 (applyLongRunPricing) */ mode?: 'monthly'; months?: number; autoMonthly?: true }
+export interface KioskOptions { mode: 'event' | 'monthly'; kiosks: number; months: number; /** 쓰지 않음 — 영수증형 프린터는 키오스크에 내장돼 선택·비용이 없다. 예전 저장값 호환용으로 늘 false */ printer: boolean; extraContents: number; custom?: KioskCustom; experienceSlug?: string; /** One experience per kiosk, in kiosk-number order. Empty slots are undecided. */ experienceSlugs?: string[]; /** 운영일이 길어 자동으로 상시 운영이 된 경우 (applyLongRunPricing) — 운영일을 줄이면 행사 대여로 돌아간다 */ autoMonthly?: true }
 export interface MediaArtOptions { grade: 'standard' | 'premium' | 'fullCustom'; extraSensors: number; sensorType?: 'image' | 'depth' }
 export interface SpaceOptions {
   size: 'booth3x3' | 'booth6x3' | 'large'; pyeong: number; areaUnit?: AreaUnit; photoZone: boolean; lighting: boolean;
@@ -105,7 +105,8 @@ export function kioskRoom(input: Pick<QuoteInput, 'items'>, key: 'rental' | 'acs
  * 키오스크 합계도 보유 대수 안으로 맞춘다 — 넘치면 향수 분석용 키오스크를 줄인다(AI 키오스크는 최소 1대라서). */
 export function normalizePerfumeStaffing(input: QuoteInput): QuoteInput {
   const analysisRoom = kioskRoom(input, 'acscent');
-  return { ...input, items: input.items.map((item) => {
+  // 운영일이 길면 키오스크·포토부스를 상시 운영 요금으로 (2026-11-27) — 견적 화면의 모든 변경이 이 함수를 지나므로 여기서 함께 맞춘다
+  return applyLongRunPricing({ ...input, items: input.items.map((item) => {
     if (item.key !== 'acscent') return item;
     const staffing = getPerfumeStaffing(item.options, input);
     const options = { ...item.options, extraTeams: staffing.teams - PERFUME.includedTeams };
@@ -113,7 +114,100 @@ export function normalizePerfumeStaffing(input: QuoteInput): QuoteInput {
     if (staffing.automaticTeams > 0) options.requestedExtraTeams = staffing.requestedExtraTeams;
     else delete options.requestedExtraTeams;
     return { ...item, options };
-  }) };
+  }) });
+}
+
+/** AI 조향사 팀이 인원 때문에 자동으로 늘었을 때, 하루 운영 시간을 조금 늘리면 팀이 줄어 더 싸지는지 (2026-11-27)
+ *  예: 경상 250명 · 하루 6시간이면 2팀(출장비 2배)인데 7시간이면 1팀 — 연장 운영비보다 출장비가 더 줄어든다.
+ *  하루 2시간 안에서 가장 많이 줄어드는 시간을 고르고, 공급가(부가세 별도) 차이를 돌려준다. */
+export function perfumeHoursSuggestion(input: QuoteInput): { hours: number; teams: number; saving: number } | null {
+  const perfume = input.items.find((i) => i.key === 'acscent');
+  if (!perfume || perfume.key !== 'acscent' || perfume.options.guestsPending) return null;
+  const now = getPerfumeStaffing(perfume.options, input);
+  if (now.automaticTeams <= 0) return null;
+  const current = calculateQuote(input).supply;
+  let best: { hours: number; teams: number; saving: number } | null = null;
+  // 행사 일정을 크게 바꾸라고 권하지 않는다 — 하루 2시간 안쪽만 본다
+  for (let hours = input.hoursPerDay + 1; hours <= Math.min(14, input.hoursPerDay + 2); hours++) {
+    const next = normalizePerfumeStaffing({ ...input, hoursPerDay: hours });
+    const nextPerfume = next.items.find((i) => i.key === 'acscent');
+    if (!nextPerfume || nextPerfume.key !== 'acscent') continue;
+    const teams = getPerfumeStaffing(nextPerfume.options, next).teams;
+    if (teams >= now.teams) continue;
+    const saving = current - calculateQuote(next).supply;
+    if (saving > 0 && (!best || saving > best.saving)) best = { hours, teams, saving };
+  }
+  return best;
+}
+
+/* ── 오래 운영하는 행사: 상시 운영(월 단위)으로 계산 ─────────────────
+   2026-11-27 사용자: 14일 · 하루 14시간 키오스크 견적이 1,033만원(일 단위 + 연장 운영)으로 나와 고객이 떠났다.
+   같은 기기를 한 달 두는 상시 운영이 더 싸면, 운영일을 넣는 순간 상시 운영 요금으로 바꾸고 화면에 말풍선으로 알린다. */
+
+type LongRunKey = 'rental' | 'photoBooth';
+
+/** 운영일을 달로 (30일마다 1개월) */
+export const longRunMonths = (days: number) => Math.max(1, Math.ceil(days / LONG_RUN.daysPerMonth));
+
+/** 하루 단위로 빌릴 때의 기기 비용 (1일차 + 추가 운영일 + 기기 연장 운영) — 상시 운영과 견줄 몫만, 부가세 별도 */
+export function eventDeviceCost(key: LongRunKey, units: number, schedule: Pick<QuoteInput, 'days' | 'hoursPerDay'>): number {
+  const extraDays = Math.max(0, schedule.days - 1);
+  const overtime = COMMON.extraHourPerDay * units * Math.max(0, schedule.hoursPerDay - COMMON.baseHours) * schedule.days;
+  return key === 'rental'
+    ? KIOSK.firstKiosk + KIOSK.extraKiosk * (units - 1) + KIOSK.extraDayPerKiosk * units * extraDays + overtime
+    : PHOTO_BOOTH.firstBooth + PHOTO_BOOTH.extraBooth * (units - 1) + PHOTO_BOOTH.extraDayPerBooth * units * extraDays + overtime;
+}
+
+/** 상시 운영 요금 (대당 월 × 대수 × 개월), 부가세 별도 */
+export const monthlyDeviceCost = (key: LongRunKey, units: number, months: number) =>
+  (key === 'rental' ? KIOSK.monthlyPerKiosk : PHOTO_BOOTH.monthlyPerBooth) * units * months;
+
+/** 상시 운영으로 바꿔야 하면 그 금액을, 아니면 null */
+export function longRunPlan(key: LongRunKey, units: number, schedule: Pick<QuoteInput, 'days' | 'hoursPerDay'>) {
+  if (schedule.days < LONG_RUN.minDays) return null;
+  const months = longRunMonths(schedule.days);
+  const eventCost = eventDeviceCost(key, units, schedule);
+  const monthlyCost = monthlyDeviceCost(key, units, months);
+  return monthlyCost < eventCost ? { months, eventCost, monthlyCost, saving: eventCost - monthlyCost } : null;
+}
+
+/** 운영일·시간에 맞춰 키오스크·포토부스의 요금 방식을 정한다.
+ *  고객이 직접 고른 상시 운영(예전 견적 화면의 '매달 계속 이용')은 건드리지 않고, 자동으로 바꾼 것만 되돌린다. */
+export function applyLongRunPricing(input: QuoteInput): QuoteInput {
+  let changed = false;
+  const items = input.items.map((item): QuoteItem => {
+    if (item.key === 'rental') {
+      const o = item.options;
+      if (o.mode === 'monthly' && !o.autoMonthly) return item;
+      const plan = longRunPlan('rental', o.kiosks, input);
+      if (plan) {
+        if (o.mode === 'monthly' && o.months === plan.months && o.autoMonthly) return item;
+        changed = true;
+        return { key: 'rental', options: { ...o, mode: 'monthly', months: plan.months, autoMonthly: true } };
+      }
+      if (!o.autoMonthly) return item;
+      changed = true;
+      const options: KioskOptions = { ...o, mode: 'event', months: 1 };
+      delete options.autoMonthly;
+      return { key: 'rental', options };
+    }
+    if (item.key === 'photoBooth') {
+      const o = item.options;
+      const plan = longRunPlan('photoBooth', o.booths, input);
+      if (plan) {
+        if (o.mode === 'monthly' && o.months === plan.months) return item;
+        changed = true;
+        return { key: 'photoBooth', options: { ...o, mode: 'monthly', months: plan.months, autoMonthly: true } };
+      }
+      if (o.mode !== 'monthly' && o.months === undefined && o.autoMonthly === undefined) return item;
+      changed = true;
+      const options: PhotoBoothOptions = { ...o };
+      delete options.mode; delete options.months; delete options.autoMonthly;
+      return { key: 'photoBooth', options };
+    }
+    return item;
+  });
+  return changed ? { ...input, items } : input;
 }
 
 /** perfumeGuests: 향수 인원을 이미 알 때만 넘긴다 (미리 짜 둔 구성 · 테스트). 견적 화면에서 담을 때는 넘기지 않는다 */
@@ -174,6 +268,7 @@ export function sanitizeInput(raw: unknown): QuoteInput {
           customStyles: clampInt(o.customStyles, 0, 10, 0),
           custom: o.custom === 'flow' || o.custom === 'dedicated' ? o.custom : 'none',
           ...(templateSlugs === undefined ? {} : { templateSlugs }),
+          ...(o.mode === 'monthly' && o.autoMonthly === true ? { mode: 'monthly' as const, months: clampInt(o.months, 1, 24, 1), autoMonthly: true as const } : {}),
         } });
         break;
       }
@@ -190,6 +285,7 @@ export function sanitizeInput(raw: unknown): QuoteInput {
           custom: o.custom === 'brand' || o.custom === 'content' || o.custom === 'dedicated' ? o.custom : o.branding === true ? 'brand' : 'none',
           experienceSlug: experienceSlugs === undefined ? (typeof o.experienceSlug === 'string' ? o.experienceSlug.slice(0, 60) : undefined) : experienceSlugs[0] || undefined,
           ...(experienceSlugs === undefined ? {} : { experienceSlugs }),
+          ...(o.mode === 'monthly' && o.autoMonthly === true ? { autoMonthly: true as const } : {}),
         } });
         break;
       }
@@ -252,14 +348,14 @@ export function perfumeGuestCost(guests: number, volume: '10ml' | '50ml') {
 }
 
 /** 연장 운영비를 받는 단위 — 행사 현장의 기기 대수와 인력 수.
- * 기기: 포토부스 + 행사용 AI 키오스크 + 향수 분석용 키오스크 (상시 운영 키오스크는 빼고)
+ * 기기: 포토부스 + 행사용 AI 키오스크 + 향수 분석용 키오스크 (상시 운영 키오스크·포토부스는 빼고 — 월 요금에 운영 시간이 들어 있다)
  * 인력: 조향 팀(팀당 조향사 1 + 조수 1 = 2명) + 추가 현장 운영 인력
  * 상담 후 견적인 상품(미디어 아트·공간 디자인·커스텀)은 금액이 없으므로 세지 않는다. */
 export function getOvertimeUnits(input: QuoteInput): { devices: number; staff: number } {
   let devices = 0;
   let staff = input.extraStaff;
   for (const item of input.items) {
-    if (item.key === 'photoBooth') devices += item.options.booths;
+    if (item.key === 'photoBooth' && item.options.mode !== 'monthly') devices += item.options.booths;
     else if (item.key === 'rental' && item.options.mode !== 'monthly') devices += item.options.kiosks;
     else if (item.key === 'acscent') {
       devices += item.options.analysisKiosks ?? 0;
@@ -277,6 +373,13 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
   const extraDays = Math.max(0, days - 1);
   const name = (key: ServiceKey) => SERVICE_TEXT[key].name[lang];
   const notes: string[] = [];
+  const longRunNote = (key: LongRunKey, units: number, months: number) => {
+    const eventCost = eventDeviceCost(key, units, input);
+    const what = key === 'rental' ? L('AI 키오스크', 'AI Kiosk') : L('AI 포토부스', 'AI Photo Booth');
+    return L(
+      `${what}: ${days}일 운영이라 하루 단위 요금(${won(eventCost, lang)})보다 낮은 상시 운영 요금(월 단위, ${won(monthlyDeviceCost(key, units, months), lang)})으로 계산했습니다. 상시 운영 요금에는 운영 시간 연장이 포함됩니다.`,
+      `${what}: for ${days} days, the long-term monthly rate (${won(monthlyDeviceCost(key, units, months), lang)}) is lower than the daily rate (${won(eventCost, lang)}), so it is applied. Extended hours are included.`);
+  };
   // 포토부스·키오스크 커스텀 개발비 합계와 필요한 준비 기간(일)
   let devAmount = 0;
   let lead = 0;
@@ -342,13 +445,23 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
         const templates = getPhotoBoothTemplates(o.templateSlugs);
         const extraStyles = o.templateSlugs === undefined ? o.extraStyles : Math.max(0, templates.length - PHOTO_BOOTH.includedStyles);
         const templateDetail = templates.length ? L(` · 선택한 기존 템플릿: ${templates.map((template) => template.name.ko).join(', ')}`, ` · Selected existing templates: ${templates.map((template) => template.name.en).join(', ')}`) : '';
-        const first = PHOTO_BOOTH.firstBooth + PHOTO_BOOTH.extraBooth * (o.booths - 1);
-        lines.push({ service: 'photoBooth', label: name('photoBooth'), detail: L(
-          `${o.booths}대 · 1일차 (AI 스타일 ${PHOTO_BOOTH.includedStyles}종·인화 ${PHOTO_BOOTH.printsPerRoll}장·프레임 1종·운송·설치 포함, 운영 인력 별도)`,
-          `${o.booths} booth(s) · day 1 (2 AI styles, ${PHOTO_BOOTH.printsPerRoll} prints, 1 frame, delivery & setup; staff not included)`) + templateDetail, amount: first });
-        if (extraDays) lines.push({ service: 'photoBooth', label: L('포토부스 추가 운영일', 'Photo booth extra days'), detail: L(
-          `${o.booths}대 × ${extraDays}일 × ${won(PHOTO_BOOTH.extraDayPerBooth, lang)}`,
-          `${o.booths} booth(s) × ${extraDays} day(s) × ${won(PHOTO_BOOTH.extraDayPerBooth, lang)}`), amount: PHOTO_BOOTH.extraDayPerBooth * o.booths * extraDays });
+        const months = o.mode === 'monthly' ? (o.months ?? 1) : 0;
+        if (months) {
+          // 오래 운영하는 행사 — 하루 단위보다 싼 상시 운영(월 단위) 요금 (applyLongRunPricing, 2026-11-27)
+          lines.push({ service: 'photoBooth', label: L('AI 포토부스 상시 운영', 'AI Photo Booth long-term'), detail: L(
+            `${o.booths}대 × ${months}개월 × ${won(PHOTO_BOOTH.monthlyPerBooth, lang)} (${days}일 운영 · AI 스타일 ${PHOTO_BOOTH.includedStyles}종·인화 월 ${PHOTO_BOOTH.printsPerRoll}장·프레임 1종·운송·설치 포함, 운영 인력 별도)`,
+            `${o.booths} booth(s) × ${months} month(s) × ${won(PHOTO_BOOTH.monthlyPerBooth, lang)} (${days} days · 2 AI styles, ${PHOTO_BOOTH.printsPerRoll} prints a month, 1 frame, delivery & setup; staff not included)`) + templateDetail,
+            amount: PHOTO_BOOTH.monthlyPerBooth * o.booths * months });
+          notes.push(longRunNote('photoBooth', o.booths, months));
+        } else {
+          const first = PHOTO_BOOTH.firstBooth + PHOTO_BOOTH.extraBooth * (o.booths - 1);
+          lines.push({ service: 'photoBooth', label: name('photoBooth'), detail: L(
+            `${o.booths}대 · 1일차 (AI 스타일 ${PHOTO_BOOTH.includedStyles}종·인화 ${PHOTO_BOOTH.printsPerRoll}장·프레임 1종·운송·설치 포함, 운영 인력 별도)`,
+            `${o.booths} booth(s) · day 1 (2 AI styles, ${PHOTO_BOOTH.printsPerRoll} prints, 1 frame, delivery & setup; staff not included)`) + templateDetail, amount: first });
+          if (extraDays) lines.push({ service: 'photoBooth', label: L('포토부스 추가 운영일', 'Photo booth extra days'), detail: L(
+            `${o.booths}대 × ${extraDays}일 × ${won(PHOTO_BOOTH.extraDayPerBooth, lang)}`,
+            `${o.booths} booth(s) × ${extraDays} day(s) × ${won(PHOTO_BOOTH.extraDayPerBooth, lang)}`), amount: PHOTO_BOOTH.extraDayPerBooth * o.booths * extraDays });
+        }
         if (extraStyles) lines.push({ service: 'photoBooth',
           label: o.templateSlugs === undefined ? L('AI 스타일 추가', 'Extra AI styles') : L('기존 AI 템플릿 추가', 'Additional existing AI templates'),
           detail: o.templateSlugs === undefined ? L(`${extraStyles}종`, `${extraStyles}`) : L(`${extraStyles}종 × ${won(PHOTO_BOOTH.extraStyle, lang)} · 기본 ${PHOTO_BOOTH.includedStyles}종 초과분`, `${extraStyles} × ${won(PHOTO_BOOTH.extraStyle, lang)} beyond the ${PHOTO_BOOTH.includedStyles} included styles`),
@@ -368,7 +481,7 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
           lead = Math.max(lead, CUSTOM_DEV.leadDays[o.custom]);
         }
         const expectedPrints = input.attendees;
-        const includedPrints = PHOTO_BOOTH.printsPerRoll * (o.booths + o.extraPrintRolls);
+        const includedPrints = PHOTO_BOOTH.printsPerRoll * (o.booths * Math.max(1, months) + o.extraPrintRolls);
         if (expectedPrints > includedPrints) warnings.push(L(
           `AI 포토부스: 예상 인원(${input.attendees}명)이 포함 인화 매수(${includedPrints}장)보다 많습니다. 인화 추가를 고려하세요.`,
           `AI Photo Booth: expected guests (${input.attendees}) exceed included prints (${includedPrints}). Consider extra prints.`));
@@ -384,8 +497,9 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
         }).join(' / ') : '';
         if (o.mode === 'monthly') {
           lines.push({ service: 'rental', label: L('AI 키오스크 상시 운영', 'AI Kiosk ongoing operation'), detail: L(
-            `${o.kiosks}대 × ${o.months}개월 × ${won(KIOSK.monthlyPerKiosk, lang)} (콘텐츠 월 1회 교체 포함)`,
-            `${o.kiosks} kiosk(s) × ${o.months} month(s) × ${won(KIOSK.monthlyPerKiosk, lang)} (monthly content refresh)`) + assignmentDetail, amount: KIOSK.monthlyPerKiosk * o.kiosks * o.months });
+            `${o.kiosks}대 × ${o.months}개월 × ${won(KIOSK.monthlyPerKiosk, lang)} (${o.autoMonthly ? `${days}일 운영 · ` : ''}콘텐츠 월 1회 교체 포함)`,
+            `${o.kiosks} kiosk(s) × ${o.months} month(s) × ${won(KIOSK.monthlyPerKiosk, lang)} (${o.autoMonthly ? `${days} days · ` : ''}monthly content refresh)`) + assignmentDetail, amount: KIOSK.monthlyPerKiosk * o.kiosks * o.months });
+          if (o.autoMonthly) notes.push(longRunNote('rental', o.kiosks, o.months));
         } else {
           lines.push({ service: 'rental', label: name('rental'), detail: L(
             `${o.kiosks}대 · 1일차 (${assigned ? '대당 ' : ''}기존 체험 1종 그대로 운영·카메라·영수증형 프린터 내장·운반·설치 포함, 운영 인력 별도)`,
@@ -413,7 +527,8 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
     }
   }
 
-  const hasOnsite = input.items.some((i) => !isConsultationService(i.key) && !(i.key === 'rental' && i.options.mode === 'monthly'));
+  // 고객이 고른 매장 상시 운영(키오스크)만 현장 행사에서 뺀다 — 운영일이 길어 자동으로 바뀐 상시 운영은 여전히 행사라서 설치·인력을 받는다
+  const hasOnsite = input.items.some((i) => !isConsultationService(i.key) && !(i.key === 'rental' && i.options.mode === 'monthly' && !i.options.autoMonthly));
   // 키오스크 합계는 normalizePerfumeStaffing 이 보유 대수 안으로 맞추므로 따로 경고하지 않는다 (2026-11-22)
   if (hasOnsite && input.setupDayBefore) {
     lines.push({ service: 'common', label: L('전날 사전 설치', 'Setup the day before'), detail: L('2인 · 행사 전날 설치', '2 people · day before the event'), amount: COMMON.setupDayBefore });

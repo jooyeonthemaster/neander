@@ -83,6 +83,7 @@ export function productPageCopy(kind: ProductPageKind, lang: Lang): ProductPageC
             { label: '결과물', value: '4×6 인화 사진(디자인 2종 중 선택) · QR로 휴대폰 저장' },
             { label: '결과 보관', value: 'QR 받기 페이지 7일' },
             { label: '대수', value: `최대 ${PHOTO_BOOTH.maxBooths}대 동시 운영` },
+            { label: '상시 운영', value: `대당 월 ${p(PHOTO_BOOTH.monthlyPerBooth)} · 인화 월 ${PHOTO_BOOTH.printsPerRoll}장 포함` },
             { label: '운영 인력', value: `별도 · 1명 1일 ${p(COMMON.staffPerDay)}` },
             { label: '운영 시간', value: `1일 기본 ${COMMON.baseHours}시간` },
           ]
@@ -92,6 +93,7 @@ export function productPageCopy(kind: ProductPageKind, lang: Lang): ProductPageC
             { label: 'Take-home', value: '4×6 print (choice of two designs) · QR download to phone' },
             { label: 'Result retention', value: 'QR download page for 7 days' },
             { label: 'Units', value: `Up to ${PHOTO_BOOTH.maxBooths} booths at once` },
+            { label: 'Long-term', value: `${p(PHOTO_BOOTH.monthlyPerBooth)} per booth per month · ${PHOTO_BOOTH.printsPerRoll} prints a month` },
             { label: 'Staff', value: `Extra · ${p(COMMON.staffPerDay)} per person per day` },
             { label: 'Hours', value: `${COMMON.baseHours} hours per day as standard` },
           ],
