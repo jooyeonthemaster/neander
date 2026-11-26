@@ -30,8 +30,6 @@ interface SmoothScrollProviderProps {
 export default function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
   const lenisRef = useRef<Lenis | null>(null);
   const pathname = usePathname();
-  // The home page uses native CSS scroll snapping, which Lenis would fight
-  const isHome = pathname === '/';
   // 뒤로·앞으로 가기는 브라우저가 이전 위치로 돌려놓으므로 맨 위로 올리지 않는다
   const isHistoryNav = useRef(false);
 
@@ -54,11 +52,13 @@ export default function SmoothScrollProvider({ children }: SmoothScrollProviderP
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [pathname]);
 
+  // 2026-11 개편: 홈의 구역 스냅을 없애 모든 페이지에서 같은 부드러운 스크롤을 쓴다.
+  // 터치 화면은 브라우저 기본 스크롤 그대로 둔다 (Lenis 는 휠 입력만 부드럽게 만든다).
   useEffect(() => {
-    if (isHome) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1.1,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       touchMultiplier: 2,
       infinite: false,
@@ -80,7 +80,7 @@ export default function SmoothScrollProvider({ children }: SmoothScrollProviderP
       lenisRef.current = null;
       setLenis(null);
     };
-  }, [isHome]);
+  }, []);
 
   return (
     <SmoothScrollContext.Provider value={{ lenis: lenisRef.current }}>

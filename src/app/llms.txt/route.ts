@@ -39,7 +39,7 @@ export async function GET() {
 
 ## 서비스와 시작가 (VAT 별도, 서울 기준)
 
-- AI 향수 체험 (AC'SCENT): AI가 취향·이미지를 분석해 향을 추천하고 조향사가 현장에서 향수를 만들어 건넵니다. ${man(startingPrice('acscent'))}부터 (1인 10ml ${man(PERFUME.tiers[2].unit['10ml'])}~${man(PERFUME.tiers[0].unit['10ml'])}, 조향 1팀(조향사 1 + 보조 1)이 시간당 최대 ${PERFUME.guestsPerTeamHour}명).
+- AI 조향사 (AC'SCENT): AI가 취향·이미지를 분석해 향을 추천하고 조향사가 현장에서 향수를 만들어 건넵니다. ${man(startingPrice('acscent'))}부터 (1인 10ml ${man(PERFUME.tiers[2].unit['10ml'])}~${man(PERFUME.tiers[0].unit['10ml'])}, 조향 1팀(조향사 1 + 보조 1)이 시간당 최대 ${PERFUME.guestsPerTeamHour}명).
 ${byService('acscent').join('\n')}
 - AI 포토부스: 1대 1일 ${man(PHOTO_BOOTH.firstBooth)}부터 (AI 스타일 ${PHOTO_BOOTH.includedStyles}종·즉석 인화 ${PHOTO_BOOTH.printsPerRoll}장·운송·설치 포함, 최대 ${PHOTO_BOOTH.maxBooths}대).
 ${byService('photoBooth').join('\n')}
@@ -71,7 +71,7 @@ ${cases.join('\n')}
 - [포트폴리오](${SITE_URL}/portfolio)
 - [회사 소개](${SITE_URL}/about)
 - [자주 묻는 질문](${SITE_URL}/faq)
-- [프로그램 개발(웹·AI 외주 개발)](${SITE_URL}/development)
+- [개발·AX(웹·플랫폼·AI 외주 개발, AI 전환)](${SITE_URL}/development)
 - [English site](${SITE_URL}/en)
 `;
 

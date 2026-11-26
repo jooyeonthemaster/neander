@@ -53,15 +53,15 @@ export interface Insight {
 
 export const CREDENTIALS_KO = [
   '화장품책임판매업 등록 제42812호 (2024-01-24, 서울지방식품의약품안전청)',
-  '방향제 안전기준 적합확인 신고 HB24-12-2355 (일반용·섬유용, 분무기형, 2024-12)',
-  '방향제 안전기준 적합확인 신고 HB23-12-1949 (실내공간용·자동차용, 함침물형, 2023-12)',
+  '생활화학제품 안전기준 적합확인 신고 HB24-12-2355 (일반용·섬유용, 분무기형, 2024-12)',
+  '생활화학제품 안전기준 적합확인 신고 HB23-12-1949 (실내공간용·자동차용, 함침물형, 2023-12)',
   '향료 30종 운영',
 ];
 
 const CREDENTIALS_EN = [
   'Cosmetics Distributor (책임판매업) registration No. 42812 (2024-01-24, Seoul Regional Office of Food and Drug Safety)',
-  'Air freshener safety-standard conformity report HB24-12-2355 (general & fabric use, spray type, 2024-12)',
-  'Air freshener safety-standard conformity report HB23-12-1949 (indoor & car use, impregnated type, 2023-12)',
+  'Household chemical product safety-standard conformity report HB24-12-2355 (general & fabric use, spray type, 2024-12)',
+  'Household chemical product safety-standard conformity report HB23-12-1949 (indoor & car use, impregnated type, 2023-12)',
   '30 fragrance ingredients in operation',
 ];
 
@@ -95,7 +95,7 @@ export const INSIGHTS: Insight[] = [
           type: 'table',
           head: ['서비스', '시작가'],
           rows: [
-            ["AI 향수 체험 (AC'SCENT)", '99만원부터 (최소 금액 · 10ml 32명까지 · 조향 1팀 출장비 포함)'],
+            ["AI 조향사 (AC'SCENT)", '99만원부터 (최소 금액 · 10ml 32명까지 · 조향 1팀 출장비 포함)'],
             ['AI 포토부스', '120만원부터 (1일·AI 스타일 2종·인화 700장·운송·설치 포함, 운영 인력 별도)'],
             ['AI 키오스크', '89만원부터 (1일·기존 체험 1종 그대로·카메라·영수증형 프린터 내장·운반·설치 포함, 운영 인력 별도)'],
             ['공간 디자인', '300만원부터 (조립식 부스 3×3m · 나무 가벽 550만원부터)'],
@@ -107,8 +107,8 @@ export const INSIGHTS: Insight[] = [
         {
           type: 'ul',
           items: [
-            'AI 향수 체험 1인 단가: 10ml 2만 / 1.8만 / 1.5만원, 50ml 4.5만 / 4만 / 3.5만원 (20~49명 / 50~99명 / 100명 이상)',
-            'AI 향수 체험 조향 1팀(2인) 출장비: 서울 35만 · 경기·인천 40만 · 충청·강원 영서 45만 · 전라·강원 영동 55만 · 경상 60만원, 팀 추가 시 1팀당 동일. 최소 금액 99만원(서울)',
+            'AI 조향사 1인 단가: 10ml 2만 / 1.8만 / 1.5만원, 50ml 4.5만 / 4만 / 3.5만원 (20~49명 / 50~99명 / 100명 이상)',
+            'AI 조향사 조향 1팀(2인) 출장비: 서울 35만 · 경기·인천 40만 · 충청·강원 영서 45만 · 전라·강원 영동 55만 · 경상 60만원, 팀 추가 시 1팀당 동일. 최소 금액 99만원(서울)',
             'AI 포토부스: 부스 추가 1대당 +110만원(최대 3대), 추가 운영일 대당 +60만원, AI 스타일 추가 1종당 +20만원, 인화 1롤(700장) 추가 +20만원',
             'AI 키오스크: 키오스크 추가 1대당 +30만원(최대 4대), 추가 운영일 대당 +20만원, 영수증형 즉석 프린터 기본 내장, 상시 운영 대당 월 200만원',
             '포토부스·키오스크 커스텀 개발(1회): 키오스크 브랜드 적용 20만 · 콘텐츠 커스텀 150만 · 전용 체험 500만원부터, 포토부스 전용 AI 스타일 1종 50만 · 촬영 흐름·화면 150만 · 전용 AI 기능 500만원부터. 준비 기간보다 촉박하면 긴급 제작 +30%',
@@ -239,16 +239,16 @@ export const INSIGHTS: Insight[] = [
     slug: 'event-perfume-experience-regulation',
     kind: 'article',
     date: '2026-09-26',
-    keywords: ['행사 향수 배포', '향수 체험 인허가', '화장품책임판매업', '방향제 안전기준 적합확인', '조향 체험 행사 업체'],
+    keywords: ['행사 향수 배포', '향수 체험 인허가', '화장품책임판매업', '생활화학제품 안전기준 적합확인', '조향 체험 행사 업체'],
     ko: {
-      title: '행사에서 향수·방향제를 나눠 주려면: 인허가 체크리스트',
-      description: '행사에서 맞춤 향수나 방향제를 판매·증정할 때 일반적으로 확인할 화장품책임판매업, 방향제 안전기준 적합확인, 표시 사항을 정리했습니다.',
+      title: '행사에서 향수를 나눠 주려면: 인허가 체크리스트',
+      description: '행사에서 맞춤 향수와 향 제품을 판매·증정할 때 일반적으로 확인할 화장품책임판매업, 생활화학제품 안전기준 적합확인, 표시 사항을 정리했습니다.',
       blocks: [
-        { type: 'p', text: '행사 기념품으로 맞춤 향수나 방향제를 나눠 주는 사례가 늘고 있습니다. 다만 향 제품은 유형에 따라 관련 제도가 다르므로, 기획 단계에서 운영 업체의 자격을 확인하는 것이 좋습니다. 아래 내용은 일반적인 안내이며 법률 자문이 아닙니다.' },
+        { type: 'p', text: '행사 기념품으로 맞춤 향수와 향 제품을 나눠 주는 사례가 늘고 있습니다. 다만 향 제품은 유형에 따라 관련 제도가 다르므로, 기획 단계에서 운영 업체의 자격을 확인하는 것이 좋습니다. 아래 내용은 일반적인 안내이며 법률 자문이 아닙니다.' },
         { type: 'h2', text: '향수: 화장품책임판매업' },
         { type: 'p', text: '향수는 일반적으로 화장품으로 분류됩니다. 화장품을 유통·판매하려면 화장품책임판매업 등록이 필요한 경우가 많습니다. 무료 증정이라도 제품 형태나 유통 방식에 따라 적용 여부가 달라질 수 있습니다.' },
-        { type: 'h2', text: '방향제: 생활화학제품 안전기준 적합확인' },
-        { type: 'p', text: '실내·섬유·자동차용 방향제는 일반적으로 생활화학제품으로 관리되며, 제품 유형별로 안전기준 적합확인 신고가 필요할 수 있습니다. 분무형, 함침형 등 형태와 용도에 따라 신고 범위가 다릅니다.' },
+        { type: 'h2', text: '디퓨저·사쉐 등: 생활화학제품 안전기준 적합확인' },
+        { type: 'p', text: '디퓨저·사쉐·룸 스프레이처럼 실내·섬유·자동차에 쓰는 향 제품은 일반적으로 생활화학제품으로 관리되며, 제품 유형별로 안전기준 적합확인 신고가 필요할 수 있습니다. 분무형, 함침형 등 형태와 용도에 따라 신고 범위가 다릅니다.' },
         { type: 'h2', text: '표시 사항' },
         {
           type: 'ul',
@@ -262,7 +262,7 @@ export const INSIGHTS: Insight[] = [
         {
           type: 'ul',
           items: [
-            '나눠 줄 제품이 향수(화장품)인지 방향제(생활화학제품)인지 구분',
+            '나눠 줄 제품이 향수(화장품)인지 디퓨저·사쉐 같은 생활화학제품인지 구분',
             '판매인지 증정인지, 현장 조향인지 사전 제작인지 구분',
             '운영 업체의 등록·신고 번호와 신고된 제품 유형이 행사 제품과 맞는지 확인',
             '세부 기준은 식약처·환경부 안내 또는 전문가를 통해 확인',
@@ -275,14 +275,14 @@ export const INSIGHTS: Insight[] = [
       ],
     },
     en: {
-      title: 'Giving Away Perfume or Fresheners at Events: A Permit Checklist',
-      description: 'Registrations, safety reports and labeling to check before giving away perfume or fresheners at Korean events.',
+      title: 'Giving Away Perfume at Events: A Permit Checklist',
+      description: 'Registrations, safety reports and labeling to check before giving away perfume and scent products at Korean events.',
       blocks: [
-        { type: 'p', text: 'Custom perfume and fresheners are increasingly used as event giveaways. Because the applicable rules differ by product type, it is worth checking the operator’s credentials at the planning stage. This is general information, not legal advice.' },
+        { type: 'p', text: 'Custom perfume and scent products are increasingly used as event giveaways. Because the applicable rules differ by product type, it is worth checking the operator’s credentials at the planning stage. This is general information, not legal advice.' },
         { type: 'h2', text: 'Perfume: Cosmetics Distributor registration' },
         { type: 'p', text: 'Perfume is generally classified as a cosmetic in Korea. Distributing or selling cosmetics often requires Cosmetics Distributor (화장품책임판매업) registration. Whether it applies to free giveaways can depend on the product and distribution method.' },
-        { type: 'h2', text: 'Air fresheners: safety-standard conformity report' },
-        { type: 'p', text: 'Room, fabric and car fresheners are generally managed as household chemical products, and a safety-standard conformity report may be required per product type. The scope differs by form (spray, impregnated, etc.) and use.' },
+        { type: 'h2', text: 'Diffusers, sachets and similar: safety-standard conformity report' },
+        { type: 'p', text: 'Scent products for rooms, fabric and cars — diffusers, sachets, room sprays — are generally managed as household chemical products, and a safety-standard conformity report may be required per product type. The scope differs by form (spray, impregnated, etc.) and use.' },
         { type: 'h2', text: 'Labeling' },
         {
           type: 'ul',
@@ -296,7 +296,7 @@ export const INSIGHTS: Insight[] = [
         {
           type: 'ul',
           items: [
-            'Is the item a perfume (cosmetic) or a freshener (household chemical product)?',
+            'Is the item a perfume (cosmetic) or a household chemical product such as a diffuser or sachet?',
             'Is it sold or given away; blended on site or made in advance?',
             'Do the operator’s registration/report numbers and product types match your item?',
             'Confirm details with MFDS / Ministry of Environment guidance or a specialist.',
@@ -329,7 +329,7 @@ export const INSIGHTS: Insight[] = [
             ['AI 포토 체험', 'AI 이미지 생성·합성 기술로 방문자를 특별한 모습으로 변신시키는 포토 체험'],
             ['AI 진단 체험', '컴퓨터 비전과 AI 분석으로 개인 맞춤 진단 결과를 제공하는 체험'],
             ['AI 포춘 체험', 'AI가 사주, 관상, 손금 등을 분석하여 재미있는 운세를 제공하는 엔터테인먼트 체험'],
-            ['AI 크리에이티브 체험', 'AI 향수, 캐리커처, 뮤직비디오 등 방문자를 위한 맞춤 결과물을 만드는 체험'],
+            ['AI 크리에이티브 체험', 'AI 향수, 캐리커처, 타임캡슐 사진 등 방문자를 위한 맞춤 결과물을 만드는 체험'],
             ['AI 이머시브 체험', 'AI 스탬프 투어 등 공간을 이동하며 참여하는 체험'],
           ],
         },
@@ -370,7 +370,7 @@ export const INSIGHTS: Insight[] = [
             ['AI Photo Experience', 'Photo experiences that transform visitors using AI image generation and compositing'],
             ['AI Diagnosis Experience', 'Personalized diagnosis results using computer vision and AI analysis'],
             ['AI Fortune Experience', 'Entertainment where AI reads fortune, face and palm'],
-            ['AI Creative Experience', 'Personalized creations such as AI perfume, caricatures and music videos'],
+            ['AI Creative Experience', 'Personalized creations such as AI perfume, caricatures and time-capsule photos'],
             ['AI Immersive Experience', 'Experiences such as AI stamp tours that invite visitors to explore a space'],
           ],
         },

@@ -107,19 +107,18 @@ export function QuoteOptionPages({ pages, lang, active = true }: { pages: QuoteO
 
   return <div data-testid="option-pages" data-current-page={selected.id} data-current-step={selectedIndex + 1} data-total-steps={total} data-all-visited={allVisited}
     className="flex h-full min-h-0 flex-col">
-    <div data-testid="option-page-progress" className="relative flex shrink-0 flex-col gap-1.5 border-b border-slate-100 py-2">
-      <div aria-live="polite" aria-atomic="true" className="flex min-h-4 items-center justify-between gap-2 text-[11px] leading-4">
-        <p className="min-w-0 truncate font-semibold text-slate-700"><span className="mr-2 tabular-nums text-teal-700">{selectedIndex + 1}/{total}</span>{selected.label}</p>
-        <span className="shrink-0 tabular-nums text-slate-500">{ko ? `${visitedCount}개 확인` : `${visitedCount} reviewed`}</span>
-      </div>
-      <div role="tablist" aria-label={ko ? '옵션 선택 순서' : 'Option topics'} aria-orientation="horizontal" className="grid gap-1" style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}>
+    {/* 주제 탭에 번호 대신 이름을 바로 쓴다 — 위의 「1/3 기본 구성 · N개 확인」 줄을 따로 두지 않아도 어디에 있는지 보인다 */}
+    <div data-testid="option-page-progress" className="relative flex shrink-0 flex-col border-b border-slate-100 py-2.5">
+      <p aria-live="polite" aria-atomic="true" className="sr-only">{ko ? `${total}개 중 ${selectedIndex + 1}번째, ${selected.label} · ${visitedCount}개 확인` : `${selectedIndex + 1} of ${total}, ${selected.label} · ${visitedCount} reviewed`}</p>
+      <div role="tablist" aria-label={ko ? '옵션 선택 순서' : 'Option topics'} aria-orientation="horizontal" className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}>
         {pages.map((page, index) => <button key={page.id} id={`${uid}-tab-${page.id}`} type="button" role="tab"
           data-testid={`option-tab-${page.id}`} data-visited={visited[index]} aria-label={page.ariaLabel ?? page.label} aria-selected={index === selectedIndex}
           aria-describedby={`${uid}-status-${page.id}`} aria-controls={`${uid}-panel-${page.id}`} tabIndex={index === selectedIndex ? 0 : -1}
           onClick={() => select(index)} onKeyDown={(event) => onTabKeyDown(event, index)}
-          className={cn('relative flex h-8 min-w-0 items-center justify-center rounded-lg text-xs font-semibold tabular-nums touch:h-11 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 motion-reduce:transition-none', index === selectedIndex ? 'bg-teal-700 text-white' : visited[index] ? 'bg-teal-50 text-teal-800 hover:bg-teal-100' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')}>
-          <span aria-hidden="true">{index + 1}</span>
-          {visited[index] && index !== selectedIndex && <Check size={8} aria-hidden="true" className="absolute top-1 right-1 text-teal-600" />}
+          className={cn('relative flex min-h-10 min-w-0 items-center justify-center rounded-lg px-1.5 py-1 text-sm font-semibold touch:min-h-11 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 motion-reduce:transition-none', index === selectedIndex ? 'bg-teal-700 text-white' : visited[index] ? 'bg-teal-50 text-teal-800 hover:bg-teal-100' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')}>
+          {/* 좁은 화면에서도 이름이 잘리지 않게 두 줄까지 */}
+          <span aria-hidden="true" className="line-clamp-2 text-center leading-tight [word-break:keep-all]">{page.label}</span>
+          {visited[index] && index !== selectedIndex && <Check size={10} aria-hidden="true" className="absolute top-1 right-1 text-teal-600" />}
           <span id={`${uid}-status-${page.id}`} className="sr-only">{ko ? `${index + 1}단계, ${visited[index] ? '확인한 단계' : '아직 확인하지 않은 단계'}` : `Step ${index + 1}, ${visited[index] ? 'reviewed' : 'not reviewed yet'}`}</span>
         </button>)}
       </div>
@@ -129,7 +128,7 @@ export function QuoteOptionPages({ pages, lang, active = true }: { pages: QuoteO
     <div ref={scrollArea} data-testid="option-page-scroll" data-more-below={moreBelow} onScroll={updateMoreBelow} className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-3 pr-1">
       {pages.map((page, index) => <section key={page.id} id={`${uid}-panel-${page.id}`} role="tabpanel"
         data-testid={`option-page-${page.id}`} aria-labelledby={`${uid}-tab-${page.id}`} hidden={index !== selectedIndex} inert={index !== selectedIndex}>
-        {page.hint && <p className="mb-3 text-xs leading-relaxed text-slate-500">{page.hint}</p>}
+        {/* 쪽 위 작은 설명은 뺐다 (2026-11-21 사용자) */}
         {page.content}
       </section>)}
       {/* 높이 0인 붙박이 — 스크롤 높이를 늘리지 않고 보이는 영역의 아래 가장자리에 붙는다 */}

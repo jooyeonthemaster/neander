@@ -1,14 +1,13 @@
 import { expect, test, type Page } from '@playwright/test';
 import { calculateQuote, type QuoteInput } from '../../src/lib/quote/engine';
-import { PHOTO_BOOTH_TEMPLATES } from '../../src/lib/quote/photo-booth-templates';
-import { getExperienceBySlug } from '../../src/data/experiences';
+import { QUOTE_BOOTH_TEMPLATES } from '../../src/data/product-lines';
 import { enterExperienceStep, showOptionPage, showPhotoGalleryPage } from './helpers/quote-preview-options';
 
-const publicTemplates = PHOTO_BOOTH_TEMPLATES.filter((template) => getExperienceBySlug(template.slug));
+const publicTemplates = QUOTE_BOOTH_TEMPLATES;
 const galleryPages = Math.max(1, Math.ceil(publicTemplates.length / 4));
 const extraStyleCost = Math.max(0, publicTemplates.length - 2) * 220_000;
 
-const storageKey = 'neander-quote-preview-flow-v1';
+const storageKey = 'neander-quote-v2';
 const visible = (page: Page, id: string) => page.locator(`[data-testid="${id}"]:visible`);
 async function saved(page: Page): Promise<QuoteInput> {
   return page.evaluate(key => JSON.parse(localStorage.getItem(key)!), storageKey);
@@ -35,7 +34,7 @@ for (const lang of ['ko', 'en'] as const) {
     page.on('pageerror', error => errors.push(error.message));
     await page.route('**/api/demo-ai/**', route => { generationRequests.push(route.request().url()); return route.abort(); });
     await page.addInitScript(key => localStorage.setItem(key, JSON.stringify({ items: [{ key: 'photoBooth', options: { booths: 1, templateSlugs: [], customStyles: 0 } }] })), storageKey);
-    await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${lang === 'en' ? '/en' : ''}/quote`, { waitUntil: 'domcontentloaded' });
     await enterExperienceStep(page);
     const picker = await showPhotoGalleryPage(page, 1);
     const options = page.getByTestId('quote-options-photoBooth');

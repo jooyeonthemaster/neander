@@ -140,7 +140,7 @@ test('development consultation carries an editable subject and resets when chang
   const subjectValue = page.locator('input[name="subject"]');
   const subject = page.getByRole('combobox', { name: '문의 유형', exact: true });
   await expect(subjectValue).toHaveValue('development');
-  await expect(subject).toContainText('프로그램 개발 / AX 상담');
+  await expect(subject).toContainText('개발·AX 상담');
   await subject.click();
   await page.getByRole('option', { name: '일반 문의', exact: true }).click();
   await expect(subjectValue).toHaveValue('general');
@@ -159,7 +159,8 @@ test('development consultation carries an editable subject and resets when chang
 
 test('English copy and responsive navigation keep development reachable without overlap', async ({ page, isMobile }) => {
   await openDevelopment(page, true);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ideas into products.AI into business.');
+  // 2026-11 개편: 큰 제목은 영어 표어(FROM IDEA TO SERVICE.), 그 아래에 기존 문구가 한 줄로 붙는다
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Ideas into products. AI into business.');
   await expect(page.locator('article[data-development-project]')).toHaveCount(21);
 
   if (isMobile) {
@@ -168,7 +169,7 @@ test('English copy and responsive navigation keep development reachable without 
       await expectNoHorizontalOverflow(page);
       await page.getByRole('button', { name: 'Menu', exact: true }).click();
       const menu = page.getByRole('dialog', { name: 'Menu', exact: true });
-      const development = menu.getByRole('link', { name: 'Development', exact: true });
+      const development = menu.getByRole('link', { name: 'AX', exact: true });
       await expect(development).toBeVisible();
       await expect(development).toHaveAttribute('aria-current', 'page');
       const contact = menu.getByRole('link', { name: 'Contact', exact: true });
@@ -183,7 +184,7 @@ test('English copy and responsive navigation keep development reachable without 
       const header = page.locator('header');
       const navigation = header.getByRole('navigation', { name: 'Main navigation', exact: true });
       await expect(navigation).toBeVisible();
-      await expect(navigation.getByRole('link', { name: 'Development', exact: true })).toHaveAttribute('aria-current', 'page');
+      await expect(navigation.getByRole('link', { name: 'AX', exact: true })).toHaveAttribute('aria-current', 'page');
       const logo = await header.getByRole('link', { name: /NEANDER/ }).boundingBox();
       const nav = await navigation.boundingBox();
       const languages = await header.getByRole('radiogroup', { name: 'Language selection', exact: true }).boundingBox();

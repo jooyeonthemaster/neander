@@ -6,8 +6,10 @@ import { fetchPublishedPortfolio } from '@/lib/firebase/rest';
 import { PortfolioGallery } from '@/components/portfolio/PortfolioGallery';
 import type { PortfolioImageMetadata, PortfolioItem } from '@/types/admin';
 import caseStudyCopy from '@/data/portfolio-case-studies.json';
-import { ScrollReveal } from '@/components/animations';
-import { Badge } from '@/components/ui';
+import Image from 'next/image';
+import { Reveal } from '@/components/fx';
+import { Title } from '@/components/site/Title';
+import { Btn } from '@/components/site/ui';
 import { Link } from '@/i18n/navigation';
 import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
 import { SERVICE_TEXT, type ServiceKey } from '@/lib/quote/catalog';
@@ -151,325 +153,168 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
     })
     .filter(Boolean);
 
+  const nextImage = nextProject?.heroImage;
+  const meta = [
+    // 대행사를 거친 행사는 클라이언트 칸이 비어 온다 (src/lib/portfolio-catalog.ts) — 그때는 칸을 뺀다
+    ...(project.client ? [{ label: t('detail.client'), value: project.client }] : []),
+    ...(project.date ? [{ label: t('detail.date'), value: project.date }] : []),
+    ...(project.location ? [{ label: t('detail.location'), value: project.location }] : []),
+    ...(usedServices.length ? [{ label: t('detail.services'), value: usedServices.map((svc) => svc?.name).filter(Boolean).join(' · ') }] : []),
+  ];
+
   return (
-    <main>
-      {/* Full-width hero image */}
-      <section
-        className="relative overflow-hidden bg-slate-950 pb-16 pt-28 sm:pb-20 sm:pt-36"
-        aria-labelledby="case-study-title"
-      >
-        {/* Background hero image */}
-        {project.heroImage ? (
-          <img
-            src={project.heroImage}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-            aria-hidden="true"
-          />
-        ) : (
-          <div
-            className="absolute inset-0 bg-gradient-to-br from-teal-900 via-slate-900 to-slate-950"
-            aria-hidden="true"
-          />
-        )}
-
-        {/* Gradient overlay */}
-        <div
-          className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"
-          aria-hidden="true"
-        />
-
-        {/* Content */}
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Breadcrumb nav */}
-          <ScrollReveal>
-            <nav aria-label="Breadcrumb" className="mb-8">
-              <ol className="flex items-center gap-2 text-sm">
-                <li>
-                  <Link
-                    href="/portfolio"
-                    className="text-slate-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 rounded-sm"
-                  >
-                    {t('title')}
-                  </Link>
-                </li>
-                <li aria-hidden="true">
-                  <svg className="h-4 w-4 text-slate-600" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
-                  </svg>
-                </li>
-                <li>
-                  <span className="text-white" aria-current="page">
-                    {project.title}
-                  </span>
-                </li>
-              </ol>
-            </nav>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.1}>
-            <div className="max-w-3xl">
-              {/* Category + year */}
-              <div className="mb-4 flex flex-wrap items-center gap-3">
-                <Badge variant="teal" className="bg-teal-500/20 text-teal-300">
-                  {t(`filterCategories.${project.category}`)}
-                </Badge>
-                {project.date && <span className="text-sm text-slate-400">
-                  {project.date}
-                </span>}
-              </div>
-
-              {/* Title */}
-              <h1
-                id="case-study-title"
-                className="mb-6 text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl"
-              >
-                {project.title}
-              </h1>
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2">
-                {project.tags.map((tag) => (
-                  <Badge key={tag} className="border border-white/10 bg-white/5 text-slate-300">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </ScrollReveal>
+    <>
+      {/* ── 첫 화면: 대표 사진 + 제목 + 프로젝트 정보 ── */}
+      <section className="under-header relative isolate flex min-h-[min(54rem,100svh)] flex-col justify-end overflow-hidden bg-ink" aria-labelledby="case-study-title">
+        <div className="absolute inset-0 -z-10" aria-hidden="true">
+          {project.heroImage && <Image src={project.heroImage} alt="" fill priority sizes="100vw" className="zoom-settle object-cover" />}
+          <div className="absolute inset-0 bg-gradient-to-b from-ink/75 via-ink/35 to-ink" />
         </div>
+
+        <div className="wrap pb-10 pt-36 lg:pt-44">
+          <nav aria-label="Breadcrumb" className="t-label fade-in mb-8 flex flex-wrap items-center gap-x-3 gap-y-1 text-paper/55">
+            <Link href="/portfolio" className="transition-colors hover:text-paper">PORTFOLIO</Link>
+            <span aria-hidden="true">/</span>
+            <span className="text-accent">{t(`filterCategories.${project.category}`)}</span>
+          </nav>
+          <h1 id="case-study-title" className="rise t-kr-title max-w-5xl text-[clamp(2rem,4.8vw,4.4rem)] !leading-[1.2] text-paper">
+            {project.title}
+          </h1>
+          {project.tags.length > 0 && (
+            <ul className="rise mt-7 flex flex-wrap gap-2" style={{ '--i': 2 } as React.CSSProperties}>
+              {project.tags.map((tag) => (
+                <li key={tag} className="rounded-full border border-paper/30 px-3.5 py-1.5 text-[13px] text-paper/85">{tag}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <dl className="fade-in grid border-t border-paper/20 sm:grid-cols-2 lg:grid-cols-4" style={{ '--i': 5 } as React.CSSProperties}>
+          {meta.map((m) => (
+            <div key={m.label} className="border-b border-paper/15 px-[clamp(1.25rem,3vw,3.25rem)] py-5 last:border-b-0 sm:border-r sm:[&:nth-child(2n)]:border-r-0 lg:border-b-0 lg:[&:nth-child(2n)]:border-r lg:last:border-r-0">
+              <dt className="t-label !text-[0.64rem] text-paper/50">{m.label}</dt>
+              <dd className="mt-2 text-[1.02rem] font-semibold leading-snug tracking-[-0.02em] text-paper">{m.value}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
-      {/* Project details */}
-      <section className="py-16 sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 lg:gap-16">
-            {/* Main content */}
-            <div className="lg:col-span-2">
-              {/* Description */}
-              <ScrollReveal>
-                <div className="prose prose-slate max-w-none">
-                  <p className="whitespace-pre-line text-lg leading-relaxed text-slate-600">
-                    {project.description}
-                  </p>
-                </div>
-              </ScrollReveal>
+      {/* ── 소개 · 목적 → 실행 → 결과 ───────────────────── */}
+      <section className="bg-ink">
+        <div className="wrap section-y">
+          <Reveal>
+            <p className="max-w-5xl whitespace-pre-line text-[clamp(1.25rem,2.3vw,2.1rem)] font-semibold leading-[1.55] tracking-[-0.03em] text-paper">
+              {project.description}
+            </p>
+          </Reveal>
 
-              {/* 목적 → 실행 → 결과 */}
-              {story ? (
-                <ScrollReveal delay={0.15}>
-                  <ol className="mt-10 grid gap-4 sm:grid-cols-3">
-                    {(['objective', 'execution', 'outcome'] as const).map((step, i) => (
-                      <li
-                        key={step}
-                        className={
-                          step === 'outcome'
-                            ? 'rounded-2xl border border-teal-100 bg-teal-50 p-6'
-                            : 'rounded-2xl border border-slate-200 bg-white p-6'
-                        }
-                      >
-                        <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-teal-700">
-                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-teal-600 text-xs text-white">
-                            {i + 1}
-                          </span>
-                          {t(`detail.${step}`)}
-                        </h2>
-                        <p className="text-base leading-relaxed text-slate-700">
-                          {story[step]}
-                        </p>
-                      </li>
-                    ))}
-                  </ol>
-                </ScrollReveal>
-              ) : project.result && (
-                <ScrollReveal delay={0.15}>
-                  <div className="mt-10 rounded-2xl border border-teal-100 bg-teal-50 p-6 sm:p-8">
-                    <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-teal-700">
-                      {t('detail.result')}
-                    </h2>
-                    <p className="text-lg font-medium text-teal-900">
-                      {project.result}
-                    </p>
-                  </div>
-                </ScrollReveal>
-              )}
-
-              {/* Image gallery */}
-              <PortfolioGallery
-                images={project.images}
-                metadata={project.imageMetadata}
-                title={project.title}
-                locale={locale}
-                heading={t('detail.gallery')}
-              />
-
-              {/* 이 프로젝트에 쓴 서비스 → 안내·견적 */}
-              {usedForQuote.length > 0 && (
-                <section aria-labelledby="used-services-title" className="mt-14 border-t border-slate-200 pt-10">
-                  <h2 id="used-services-title" className="text-xl font-bold text-slate-900">
-                    {lang === 'ko' ? '이 프로젝트에 쓴 서비스' : 'Services used in this project'}
+          {story ? (
+            <ol className="mt-14 grid gap-px border border-paper/15 bg-paper/15 md:grid-cols-3 lg:mt-20">
+              {(['objective', 'execution', 'outcome'] as const).map((step, i) => (
+                <Reveal as="li" key={step} delay={i * 90} className={step === 'outcome' ? 'bg-paper p-7 text-ink lg:p-9' : 'bg-ink p-7 lg:p-9'}>
+                  <h2 className={step === 'outcome' ? 't-label flex items-center gap-3 text-ink/60' : 't-label flex items-center gap-3 text-paper/55'}>
+                    <span className={step === 'outcome' ? 'text-ink' : 'text-accent'}>{String(i + 1).padStart(2, '0')}</span>
+                    {t(`detail.${step}`)}
                   </h2>
-                  <p className="mt-2 text-sm text-slate-500">
-                    {lang === 'ko'
-                      ? '비슷한 행사를 준비 중이라면 같은 구성으로 금액을 바로 확인해 보세요.'
-                      : 'Planning something similar? Check the price for the same setup right away.'}
-                  </p>
-                  <ul className="mt-6 grid gap-4 sm:grid-cols-2">
-                    {usedForQuote.map((key) => {
-                      const guide = SERVICE_GUIDE[key];
-                      return (
-                        <li key={key} className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5">
-                          <h3 className="text-base font-semibold text-slate-900">{SERVICE_TEXT[key].name[lang]}</h3>
-                          <p className="mt-1.5 flex-1 text-sm leading-relaxed text-slate-600">{SERVICE_TEXT[key].summary[lang]}</p>
-                          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium">
-                            <Link
-                              href={{ pathname: '/quote', query: { item: key } }}
-                              className="text-teal-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 rounded-sm"
-                            >
-                              {lang === 'ko' ? '이 구성으로 견적 내기 →' : 'Get a quote for this →'}
-                            </Link>
-                            {guide && (
-                              <Link
-                                href={guide.href}
-                                className="text-slate-600 underline-offset-4 hover:text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 rounded-sm"
-                              >
-                                {guide[lang]}
-                              </Link>
-                            )}
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                  {isFestival && (
-                    <p className="mt-5 text-sm text-slate-600">
-                      {lang === 'ko' ? '축제에 체험 부스를 준비 중이라면 ' : 'Planning booths for a festival? '}
-                      <Link
-                        href="/insights/festival-experience-booth"
-                        className="font-medium text-teal-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 rounded-sm"
-                      >
-                        {lang === 'ko' ? '축제 체험 부스 — 구성·비용 안내 →' : 'Festival experience booths — setup and costs →'}
+                  <p className={step === 'outcome' ? 'mt-5 text-[1.05rem] font-semibold leading-[1.75] tracking-[-0.01em]' : 'mt-5 text-[1.02rem] leading-[1.75] text-paper/75'}>{story[step]}</p>
+                </Reveal>
+              ))}
+            </ol>
+          ) : project.result && (
+            <Reveal delay={120} className="mt-14 bg-paper p-7 text-ink lg:mt-20 lg:p-10">
+              <h2 className="t-label text-ink/55">{t('detail.result')}</h2>
+              <p className="mt-4 text-[clamp(1.25rem,2.2vw,2rem)] font-bold leading-snug tracking-[-0.03em]">{project.result}</p>
+            </Reveal>
+          )}
+
+          {/* 사진 */}
+          <div className="rd-gallery">
+            <PortfolioGallery
+              images={project.images}
+              metadata={project.imageMetadata}
+              title={project.title}
+              locale={locale}
+              heading={t('detail.gallery')}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── 이 프로젝트에 쓴 서비스 → 안내 · 견적 ─────────
+          포트폴리오 상세는 끝까지 읽는 비율이 가장 높은데(스크롤 중앙값 87%) 절반이 그대로 나간다.
+          그래서 읽고 난 자리에 같은 구성의 견적으로 가는 길을 크게 둔다. */}
+      {usedForQuote.length > 0 && (
+        <section aria-labelledby="used-services-title" className="border-t border-paper/10 bg-ink">
+          <div className="wrap section-y">
+            <div className="flex flex-wrap items-end justify-between gap-x-12 gap-y-6">
+              <div>
+                <Reveal><p className="t-label text-paper/55"><span className="mr-4 text-accent">→</span>SERVICES USED</p></Reveal>
+                <Title id="used-services-title" en={['SAME SETUP,', 'YOUR EVENT.']} ko={lang === 'ko' ? '이 프로젝트에 쓴 서비스' : undefined} className="mt-6" />
+              </div>
+              <Reveal delay={120} className="max-w-md text-[1.05rem] leading-relaxed text-paper/60 lg:text-right">
+                {lang === 'ko' ? '비슷한 행사를 준비 중이라면 같은 구성으로 금액을 바로 확인해 보세요.' : 'Planning something similar? Check the price for the same setup right away.'}
+              </Reveal>
+            </div>
+            <ul className="mt-12 border-t border-paper/15">
+              {usedForQuote.map((key, i) => {
+                const guide = SERVICE_GUIDE[key];
+                return (
+                  <Reveal as="li" key={key} delay={i * 70} className="grid items-center gap-x-10 gap-y-4 border-b border-paper/15 py-7 lg:grid-cols-[minmax(0,18rem)_1fr_auto]">
+                    <h3 className="text-[1.4rem] font-bold tracking-[-0.03em] text-paper">{SERVICE_TEXT[key].name[lang]}</h3>
+                    <p className="text-[0.95rem] leading-relaxed text-paper/60">{SERVICE_TEXT[key].summary[lang]}</p>
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                      <Link href={{ pathname: '/quote', query: { item: key } }} className="inline-flex min-h-11 items-center gap-2.5 bg-paper px-5 text-sm font-semibold text-ink transition-colors duration-300 hover:bg-accent">
+                        {lang === 'ko' ? '이 구성으로 견적 내기' : 'Get a quote for this'} <span aria-hidden="true" className="font-display">→</span>
                       </Link>
-                    </p>
-                  )}
-                </section>
-              )}
-            </div>
-
-            {/* Sidebar metadata */}
-            <div className="lg:col-span-1">
-              <ScrollReveal direction="right">
-                <div className="sticky top-28 space-y-8">
-                  {/* Project info card */}
-                  <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <h2 className="mb-5 text-base font-bold text-slate-900">
-                      {t('detail.projectDetails')}
-                    </h2>
-
-                    <dl className="space-y-4">
-                      <div>
-                        <dt className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                          {t('detail.client')}
-                        </dt>
-                        <dd className="mt-1 text-sm font-medium text-slate-900">
-                          {project.client}
-                        </dd>
-                      </div>
-
-                      {project.date && <div>
-                        <dt className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                          {t('detail.date')}
-                        </dt>
-                        <dd className="mt-1 text-sm font-medium text-slate-900">
-                          {project.date}
-                        </dd>
-                      </div>}
-
-                      {project.location && <div>
-                        <dt className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                          {t('detail.location')}
-                        </dt>
-                        <dd className="mt-1 text-sm font-medium text-slate-900">
-                          {project.location}
-                        </dd>
-                      </div>}
-
-                      <div>
-                        <dt className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-400">
-                          {t('detail.services')}
-                        </dt>
-                        <dd>
-                          <div className="flex flex-wrap gap-2">
-                            {usedServices.map((svc) =>
-                              svc ? (
-                                <Badge key={svc.key} variant="teal">
-                                  <span className="mr-1" aria-hidden="true">
-                                    {svc.icon}
-                                  </span>
-                                  {svc.name}
-                                </Badge>
-                              ) : null
-                            )}
-                          </div>
-                        </dd>
-                      </div>
-                    </dl>
-                  </div>
-
-                  {/* CTA */}
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-                    <p className="mb-4 text-sm text-slate-600">
-                      {t('detail.ctaTitle')}
-                    </p>
-                    <Link
-                      href="/contact"
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2"
-                    >
-                      {t('detail.ctaButton')}
-                    </Link>
-                    <Link
-                      href={firstQuoteKey ? { pathname: '/quote', query: { item: firstQuoteKey } } : '/quote'}
-                      className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-teal-600 bg-white px-5 py-2.5 text-sm font-medium text-teal-700 transition-colors hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2"
-                    >
-                      {lang === 'ko' ? '온라인 견적으로 금액 보기' : 'See the price online'}
-                    </Link>
-                  </div>
-                </div>
-              </ScrollReveal>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Navigation: Back + Next project */}
-      <section className="border-t border-slate-200 bg-slate-50 py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <Link
-              href="/portfolio"
-              className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 rounded-sm"
-            >
-              {t('detail.backToList')}
-            </Link>
-
-            {nextProject && (
-              <Link
-                href={`/portfolio/${nextProject.slug}`}
-                className="group inline-flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 shadow-sm transition-all duration-200 hover:border-teal-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
-              >
-                <div className="text-right">
-                  <span className="block text-xs text-slate-400">
-                    {tCommon('next')}
-                  </span>
-                  <span className="block text-sm font-medium text-slate-900 transition-colors group-hover:text-teal-600">
-                    {nextProject.title}
-                  </span>
-                </div>
-              </Link>
+                      {guide && (
+                        <Link href={guide.href} className="text-sm font-medium text-paper/70 underline decoration-paper/30 underline-offset-4 transition-colors hover:text-paper hover:decoration-paper">{guide[lang]}</Link>
+                      )}
+                    </div>
+                  </Reveal>
+                );
+              })}
+            </ul>
+            {isFestival && (
+              <p className="mt-7 text-[0.95rem] text-paper/60">
+                {lang === 'ko' ? '축제에 체험 부스를 준비 중이라면 ' : 'Planning booths for a festival? '}
+                <Link href="/insights/festival-experience-booth" className="font-semibold text-paper underline decoration-paper/40 underline-offset-4 hover:decoration-accent">
+                  {lang === 'ko' ? '축제 체험 부스 — 구성·비용 안내 →' : 'Festival experience booths — setup and costs →'}
+                </Link>
+              </p>
             )}
+            <div className="mt-10 flex flex-wrap gap-3" data-cta-area="portfolio_detail">
+              <Btn href={firstQuoteKey ? { pathname: '/quote', query: { item: firstQuoteKey } } : '/quote'} variant="fill" arrow>{lang === 'ko' ? '온라인 견적으로 금액 보기' : 'See the price online'}</Btn>
+              <Btn href="/contact">{t('detail.ctaTitle')}</Btn>
+            </div>
           </div>
+        </section>
+      )}
+
+      {/* ── 다음 프로젝트 ──────────────────────────────── */}
+      <section className="border-t border-paper/10 bg-ink">
+        {nextProject && (
+          <Link href={`/portfolio/${nextProject.slug}`} data-cursor="NEXT" className="group relative isolate block overflow-hidden">
+            {nextImage && (
+              <div className="absolute inset-0 -z-10" aria-hidden="true">
+                <Image src={nextImage} alt="" fill sizes="100vw" loading="lazy" className="object-cover opacity-25 transition-[opacity,transform] duration-[1400ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 group-hover:opacity-55" />
+                <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/70 to-ink/30" />
+              </div>
+            )}
+            <div className="wrap flex flex-wrap items-end justify-between gap-8 py-[clamp(3.5rem,8vw,7rem)]">
+              <div>
+                <p className="t-label text-paper/55">NEXT PROJECT{lang === 'ko' && <span className="ml-3 font-body text-[11px] font-medium normal-case tracking-normal text-paper/40">{tCommon('next')}</span>}</p>
+                <p className="t-kr-title mt-5 max-w-4xl text-[clamp(1.6rem,3.6vw,3.2rem)] text-paper transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-3">{nextProject.title}</p>
+              </div>
+              <span aria-hidden="true" className="flex h-20 w-20 items-center justify-center rounded-full border border-paper/40 font-display text-2xl text-paper transition-colors duration-500 group-hover:border-accent group-hover:bg-accent group-hover:text-accent-ink lg:h-28 lg:w-28">→</span>
+            </div>
+          </Link>
+        )}
+        <div className="wrap border-t border-paper/10 py-6">
+          <Link href="/portfolio" className="t-label inline-flex items-center gap-3 text-paper/60 transition-colors hover:text-paper">
+            <span aria-hidden="true">←</span> {t('detail.backToList')}
+          </Link>
         </div>
       </section>
-    </main>
+    </>
   );
 }

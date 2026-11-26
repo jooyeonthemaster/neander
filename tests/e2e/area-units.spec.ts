@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { calculateQuote, type QuoteInput } from '../../src/lib/quote/engine';
 import { closePreviewOptions, enterExperienceStep, openPreviewOptions } from './helpers/quote-preview-options';
 
-const key = 'neander-quote-preview-flow-v1';
+const key = 'neander-quote-v2';
 const saved = (page: Page): Promise<QuoteInput> => page.evaluate(key => JSON.parse(localStorage.getItem(key)!), key);
 
 for (const lang of ['ko', 'en'] as const) {
@@ -13,7 +13,7 @@ for (const lang of ['ko', 'en'] as const) {
         { key: 'spatialDesign', options: { size: 'large', pyeong: 30.25, areaUnit, photoZone: true, lighting: true, build: 'wood' } },
       ] };
       await page.addInitScript(({ key, seed }) => { if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify(seed)); }, { key, seed });
-      await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
+      await page.goto(`${lang === 'en' ? '/en' : ''}/quote`, { waitUntil: 'domcontentloaded' });
       await enterExperienceStep(page);
       const original = await saved(page);
       expect(original.items.map(item => item.key)).toEqual(['acscent']);

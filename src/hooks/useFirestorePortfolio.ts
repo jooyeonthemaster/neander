@@ -30,6 +30,12 @@ export interface DisplayPortfolio {
   location_ko?: string | null
   location_en?: string | null
   is_featured: boolean
+  /** 목록 카드에 쓰는 기간 · 성과 문구 (포트폴리오 목록 2026-11 목업) */
+  period?: string
+  period_ko?: string
+  period_en?: string
+  result_ko?: string
+  result_en?: string
 }
 
 export function useFirestorePortfolio() {
@@ -75,6 +81,11 @@ export function useFirestorePortfolio() {
                 location_ko: data.location_ko,
                 location_en: data.location_en,
                 is_featured: data.is_featured,
+                period: data.period,
+                period_ko: data.period_ko,
+                period_en: data.period_en,
+                result_ko: data.result_ko,
+                result_en: data.result_en,
               }
             })
           setProjects(items)

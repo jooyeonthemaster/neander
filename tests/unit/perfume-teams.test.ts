@@ -121,7 +121,7 @@ test('40 guests per team per hour determines automatic staffing, fees and both p
         const quote = calculateQuote(raw);
         assert.deepEqual(quote, calculateQuote(normalized));
         assert.equal(quote.lines.find(line => line.label === '조향 팀 출장비')!.amount, 350_000 * teams * days);
-        assert.equal(quote.warnings.some(warning => warning.startsWith('AI 향수 체험:')), exceeds);
+        assert.equal(quote.warnings.some(warning => warning.startsWith('AI 조향사:')), exceeds);
         assert.deepEqual(sanitizeInput(JSON.parse(JSON.stringify(normalized))), normalized);
         assert.deepEqual(raw, before);
       }

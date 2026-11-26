@@ -43,7 +43,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               onBlur?.(e);
             }}
             className={cn(
-              'peer w-full rounded-lg border bg-white px-4 pt-5 pb-2 text-sm',
+              // 휴대폰은 16px — 아이폰 사파리는 16px 보다 작은 입력 칸을 누르면 화면을 확대한다
+              'peer w-full rounded-lg border bg-white px-4 pt-5 pb-2 text-base sm:text-sm',
               'outline-none transition-all duration-200',
               'placeholder:text-transparent',
               isFocused

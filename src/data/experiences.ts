@@ -248,8 +248,17 @@ const listRank = (slug: string) => {
   return i < 0 ? LIST_FIRST.length : i;
 };
 
+/** 2026-11-26 사용자가 프로그램에서 뺀 것 — 운영 사진이 있어도(뮤직비디오 메이커 · 평택 AI 페스타) 공개하지 않는다.
+ *  예전 상세 주소(/services/<slug>)로 들어오면 값의 상품 화면으로 넘긴다 */
+export const RETIRED_PROGRAMS: Record<string, '/services/ai-photo-booth' | '/services/ai-kiosk'> = {
+  'ai-musicvideo-maker': '/services/ai-photo-booth',
+  'ai-fan-photocard': '/services/ai-photo-booth',
+  'ai-memory-movie': '/services/ai-kiosk',
+};
+const RETIRED = new Set(Object.keys(RETIRED_PROGRAMS));
+
 export const experiences: Experience[] = experienceCatalog
-  .filter((experience) => publishedSlugs.has(experience.slug))
+  .filter((experience) => publishedSlugs.has(experience.slug) && !RETIRED.has(experience.slug))
   .sort((a, b) => listRank(a.slug) - listRank(b.slug));
 
 export const industries: Industry[] = industryCatalog

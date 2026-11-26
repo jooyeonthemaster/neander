@@ -1,196 +1,108 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { Link, usePathname } from '@/i18n/navigation';
-import { NAV_ITEMS } from '@/lib/constants';
-import { cn } from '@/lib/utils';
-import { AnimatePresence, motion, type Variants } from 'motion/react';
-import { useUIStore } from '@/stores/uiStore';
-import LanguageToggle from './LanguageToggle';
 import { useEffect } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { AnimatePresence, motion } from 'motion/react';
+import { Link, usePathname } from '@/i18n/navigation';
 import { CONTACT } from '@/lib/constants';
+import { PhoneLinks } from '@/components/site/PhoneLinks';
+import { cn } from '@/lib/utils';
+import { useUIStore } from '@/stores/uiStore';
+import { SITE_NAV } from '@/components/site/nav';
+import LanguageToggle from './LanguageToggle';
 
-/* ─────────────────────────────────────────────────────────
-   Mobile Menu
-   Full-screen overlay with staggered link animations
-   ───────────────────────────────────────────────────────── */
+/* 휴대폰 · 좁은 화면 메뉴 — 화면 전체를 덮고 큰 영어 메뉴가 차례로 올라온다 */
 
-const overlayVariants: Variants = {
-  closed: { opacity: 0 },
-  open: { opacity: 1 },
-};
-
-const panelVariants: Variants = {
-  closed: { x: '100%' },
-  open: {
-    x: 0,
-    transition: {
-      type: 'spring' as const,
-      stiffness: 300,
-      damping: 30,
-      staggerChildren: 0.06,
-      delayChildren: 0.15,
-    },
-  },
-  exit: {
-    x: '100%',
-    transition: {
-      type: 'spring' as const,
-      stiffness: 400,
-      damping: 40,
-    },
-  },
-};
-
-const linkVariants: Variants = {
-  closed: { opacity: 0, x: 40 },
-  open: {
-    opacity: 1,
-    x: 0,
-    transition: { type: 'spring' as const, stiffness: 300, damping: 24 },
-  },
-};
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 export default function MobileMenu() {
   const t = useTranslations('nav');
+  const locale = useLocale();
+  const ko = locale !== 'en';
   const pathname = usePathname();
-  const isMobileMenuOpen = useUIStore((s) => s.isMobileMenuOpen);
-  const setMobileMenuOpen = useUIStore((s) => s.setMobileMenuOpen);
+  const open = useUIStore((s) => s.isMobileMenuOpen);
+  const setOpen = useUIStore((s) => s.setMobileMenuOpen);
 
-  // Lock body scroll when menu is open
   useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isMobileMenuOpen]);
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
 
-  // Close with Escape
+  // 페이지를 옮기면 닫는다
   useEffect(() => {
-    if (!isMobileMenuOpen) return;
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') setMobileMenuOpen(false);
-    }
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isMobileMenuOpen, setMobileMenuOpen]);
+    setOpen(false);
+  }, [pathname, setOpen]);
 
-  // Close on route change
   useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname, setMobileMenuOpen]);
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, setOpen]);
 
-  function handleClose() {
-    setMobileMenuOpen(false);
-  }
+  const items = [...SITE_NAV, { path: '/quote' as const, en: 'Quote', key: 'quote' as const }];
 
   return (
-    <AnimatePresence mode="wait">
-      {isMobileMenuOpen && (
-        <>
-          {/* Backdrop overlay */}
-          <motion.div
-            key="mobile-menu-backdrop"
-            variants={overlayVariants}
-            initial="closed"
-            animate="open"
-            exit="closed"
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-neutral-950/40 backdrop-blur-sm"
-            style={{ zIndex: 'var(--z-overlay)' }}
-            onClick={handleClose}
-            // Lenis가 휠을 가로채 body overflow 잠금을 무시하고 뒤 페이지를 스크롤하지 않도록
-            data-lenis-prevent
-            aria-hidden="true"
-          />
-
-          {/* Menu panel */}
-          <motion.div
-            key="mobile-menu-panel"
-            variants={panelVariants}
-            initial="closed"
-            animate="open"
-            exit="exit"
-            className="fixed top-0 right-0 bottom-0 flex w-full max-w-sm flex-col overflow-hidden bg-white"
-            style={{ zIndex: 'var(--z-modal)' }}
-            data-lenis-prevent
-            role="dialog"
-            aria-modal="true"
-            aria-label={t('menu')}
-          >
-            {/* Close button */}
-            <div className="flex shrink-0 items-center justify-end p-6">
-              <button
-                onClick={handleClose}
-                aria-label={t('close')}
-                className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                >
-                  <line x1="4" y1="4" x2="16" y2="16" />
-                  <line x1="16" y1="4" x2="4" y2="16" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Navigation links */}
-            <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4" aria-label="Mobile navigation">
-              <ul className="flex flex-col gap-2">
-                {NAV_ITEMS.map((item) => {
-                  const isActive =
-                    item.path === '/'
-                      ? pathname === '/'
-                      : pathname.startsWith(item.path);
-
-                  return (
-                    <motion.li key={item.path} variants={linkVariants}>
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('menu')}
+          initial={{ clipPath: 'inset(0 0 100% 0)' }}
+          animate={{ clipPath: 'inset(0 0 0% 0)' }}
+          exit={{ clipPath: 'inset(0 0 100% 0)' }}
+          transition={{ duration: 0.6, ease: EASE }}
+          className="fixed inset-0 flex flex-col overflow-y-auto bg-ink xl:hidden"
+          style={{ zIndex: 'calc(var(--z-header) - 1)' }}
+          data-lenis-prevent
+        >
+          <nav className="wrap flex flex-1 flex-col justify-center pb-6 pt-20" aria-label={ko ? '주 메뉴' : 'Main navigation'}>
+            <ul className="border-t border-paper/15">
+              {items.map((item, i) => {
+                const active = pathname === item.path || pathname.startsWith(`${item.path}/`);
+                return (
+                  <li key={item.path} className="overflow-hidden border-b border-paper/15">
+                    <motion.div
+                      initial={{ y: '110%' }}
+                      animate={{ y: 0 }}
+                      transition={{ duration: 0.7, ease: EASE, delay: 0.12 + i * 0.05 }}
+                    >
                       <Link
                         href={item.path}
-                        aria-current={isActive ? 'page' : undefined}
-                        onClick={handleClose}
-                        className={cn(
-                          'block rounded-xl px-4 py-3.5 font-display text-2xl font-semibold tracking-tight transition-colors',
-                          isActive
-                            ? 'bg-teal-50 text-teal-600'
-                            : 'text-neutral-800 hover:bg-neutral-50 hover:text-neutral-950',
-                        )}
+                        aria-current={active ? 'page' : undefined}
+                        // 지금 보고 있는 페이지의 메뉴를 눌러도 닫힌다 (주소가 안 바뀌어 아래 effect 가 돌지 않는다)
+                        onClick={() => setOpen(false)}
+                        // 가장 긴 EXPERIENCES 가 한 줄에 들어가는 크기. 한글 이름이 옆에 안 들어가면 다음 줄 오른쪽으로 내려간다
+                        className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-[clamp(0.55rem,1.6vh,1.1rem)]"
                       >
-                        {t(item.labelKey.replace('nav.', ''))}
+                        <span aria-hidden={ko ? true : undefined} className={cn('font-display text-[clamp(1.25rem,7vw,3rem)] font-extrabold uppercase leading-none tracking-[-0.01em]', active ? 'text-accent' : 'text-paper')}>
+                          {item.en}
+                        </span>
+                        {ko && <span className="ml-auto shrink-0 text-sm font-medium text-paper/55">{t(item.key)}</span>}
                       </Link>
-                    </motion.li>
-                  );
-                })}
-              </ul>
-            </nav>
+                    </motion.div>
+                  </li>
+                );
+              })}
+            </ul>
 
-            {/* Bottom section: Language + contact */}
             <motion.div
-              variants={linkVariants}
-              className="shrink-0 border-t border-neutral-100 px-6 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="mt-4 flex flex-wrap items-end justify-between gap-6"
             >
-              <div className="flex items-center justify-between">
-                <LanguageToggle />
-                <a
-                  href={`mailto:${CONTACT.email}`}
-                  className="text-sm font-medium text-neutral-500 transition-colors hover:text-teal-600"
-                >
-                  {CONTACT.email}
-                </a>
+              {/* 전화 · 메일은 누르기 쉽게 40px 높이 — 대신 위 메뉴 줄 간격을 조금 줄여 아이폰 13 높이(약 660px)에 메뉴가 다 들어가게 했다 */}
+              <div>
+                <PhoneLinks lang={ko ? 'ko' : 'en'} separator={false} className="flex flex-col" labelClassName="inline-block w-16 text-sm text-paper/50" linkClassName="inline-flex min-h-10 items-center font-display text-xl font-bold tracking-[0.02em] text-paper" />
+                <a href={`mailto:${CONTACT.email}`} className="flex min-h-10 items-center text-sm text-paper/60">{CONTACT.email}</a>
               </div>
+              <LanguageToggle />
             </motion.div>
-          </motion.div>
-        </>
+          </nav>
+        </motion.div>
       )}
     </AnimatePresence>
   );

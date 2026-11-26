@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { SectionHeader } from '@/components/ui';
-import { ScrollReveal } from '@/components/animations';
 import { PressGrid } from '@/components/press/PressGrid';
 import { PRESS_ARTICLES } from '@/lib/press-data';
 import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
+import { PageHero } from '@/components/site/PageHero';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -34,43 +33,17 @@ export default async function PressPage({ params }: Props) {
   return (
     <main>
       {/* Hero banner */}
-      <section
-        className="relative overflow-hidden bg-slate-950 pb-20 pt-32 sm:pb-28 sm:pt-40"
-        aria-labelledby="press-hero-title"
-      >
-        {/* Background pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
-            backgroundSize: '40px 40px',
-          }}
-          aria-hidden="true"
-        />
-
-        {/* Teal glow */}
-        <div
-          className="absolute right-0 top-0 h-[600px] w-[600px] -translate-y-1/4 translate-x-1/4 rounded-full bg-teal-500/8 blur-[100px] transform-gpu"
-          aria-hidden="true"
-        />
-
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollReveal>
-            <SectionHeader
-              category={t('title')}
-              title={t('subtitle')}
-              align="center"
-              as="h1"
-              className="max-w-3xl [&_h1]:text-white [&_span]:text-teal-400"
-            />
-          </ScrollReveal>
-        </div>
-      </section>
+      <PageHero
+        id="press-hero-title"
+        label="PRESS · NEWSROOM"
+        en={['IN THE', 'NEWS.']}
+        ko={`${t('title')} — ${t('subtitle')}`}
+        size="h1"
+      />
 
       {/* Press articles grid */}
-      <section className="py-20 sm:py-28" aria-labelledby="press-articles-title">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="bg-ink pb-[clamp(4rem,9vw,8rem)] pt-4" aria-labelledby="press-articles-title">
+        <div className="wrap">
           <h2 id="press-articles-title" className="sr-only">
             {t('title')}
           </h2>

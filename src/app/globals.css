@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./theme-redesign.css";
 
 /* ─────────────────────────────────────────────────────────
    Font Face Declarations
@@ -83,7 +84,7 @@
   --color-spatial-dark: #047857;
 
   /* ── Typography ─────────────────────────────────────── */
-  --font-display: "Syne", system-ui, sans-serif;
+  --font-display: "Syne", "Pretendard", system-ui, sans-serif;
   --font-body: "Pretendard", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 

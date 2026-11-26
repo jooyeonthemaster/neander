@@ -33,14 +33,14 @@ export const QUOTE_PRESETS: QuotePreset[] = [
       eventType: 'campus', eventDate: '', days: 1, hoursPerDay: 6, attendees: 300, region: 'seoul', extraStaff: 0,
       items: [
         { key: 'photoBooth', options: { booths: 1, extraStyles: 0, extraPrintRolls: 0, photocard: false, wrapping: false } },
-        { key: 'rental', options: { mode: 'event', kiosks: 1, months: 1, printer: false, extraContents: 0, custom: 'none', experienceSlug: 'ai-face-reading' } },
+        { key: 'rental', options: { mode: 'event', kiosks: 1, months: 1, printer: false, extraContents: 0, custom: 'none', experienceSlug: 'ai-personal-color' } },
       ],
     },
   },
   {
     id: 'brand-popup',
     title: { ko: '브랜드 팝업 3일', en: '3-day brand pop-up' },
-    caption: { ko: '3일 · 하루 약 100명 · AI 향수 체험 + 포토부스', en: '3 days · ~100 guests/day · perfume + photo booth' },
+    caption: { ko: '3일 · 하루 약 100명 · AI 조향사 + 포토부스', en: '3 days · ~100 guests/day · perfume + photo booth' },
     input: {
       eventType: 'popup', eventDate: '', days: 3, hoursPerDay: 6, attendees: 300, region: 'seoul', extraStaff: 0,
       items: [
@@ -52,7 +52,7 @@ export const QUOTE_PRESETS: QuotePreset[] = [
   {
     id: 'corporate-workshop',
     title: { ko: '기업 행사·워크숍', en: 'Corporate event / workshop' },
-    caption: { ko: '1일 · 50명 · AI 향수 체험 50ml', en: '1 day · 50 guests · perfume 50ml' },
+    caption: { ko: '1일 · 50명 · AI 조향사 50ml', en: '1 day · 50 guests · perfume 50ml' },
     input: {
       eventType: 'corporate', eventDate: '', days: 1, hoursPerDay: 4, attendees: 50, region: 'seoul', extraStaff: 0,
       items: [

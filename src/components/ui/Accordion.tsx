@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useCallback, useId } from 'react';
+import { useState, useCallback, useId, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 interface AccordionItem {
   title: string;
   content: string;
+  /** 답 아래에 붙는 이미지 등 (선택) */
+  media?: ReactNode;
 }
 
 interface AccordionProps {
@@ -102,6 +104,7 @@ export function Accordion({
                   <div className="pb-4 text-sm text-slate-600 leading-relaxed">
                     {item.content}
                   </div>
+                  {item.media && <div className="pb-6">{item.media}</div>}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -109,6 +112,7 @@ export function Accordion({
             {!isOpen && (
               <div id={panelId} role="region" aria-labelledby={triggerId} hidden>
                 <div className="pb-4 text-sm text-slate-600 leading-relaxed">{item.content}</div>
+                {item.media && <div className="pb-6">{item.media}</div>}
               </div>
             )}
           </div>

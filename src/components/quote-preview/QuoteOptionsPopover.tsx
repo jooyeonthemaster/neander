@@ -113,7 +113,8 @@ function frame(service: ServiceKey | null) {
   const viewport = window.visualViewport;
   const vLeft = viewport?.offsetLeft ?? 0;
   const vWidth = viewport?.width ?? window.innerWidth;
-  const width = Math.min(480, vWidth >= 1024 ? grid?.width ?? 480 : 480, vWidth - 24);
+  // 글씨를 키운 뒤(2026-11-21) 카드 목록 폭만으로는 탭 이름 · 체험 카드가 잘려, 데스크톱은 최소 520px 로 넓힌다
+  const width = Math.min(vWidth >= 1024 ? Math.max(grid?.width ?? 520, 520) : 480, vWidth - 24);
   const left = Math.max(vLeft + 12, Math.min(grid?.left ?? anchor.left, vLeft + vWidth - width - 12));
   // 꼬리는 말풍선 테두리(1px) 안쪽 기준으로 놓이므로 그만큼 빼야 카드 이름 한가운데를 가리킨다
   const arrow = Math.max(22, Math.min(width - 22, anchor.left + anchor.width / 2 - left - 1));
@@ -419,17 +420,19 @@ function QuoteOptionsBubble({ open, service, lang, total, supply, children, onCl
       className={`absolute size-3.5 -translate-x-1/2 rotate-45 bg-white ${position.side === 'bottom' ? 'border-t border-l' : 'border-r border-b'} border-teal-200`} />
     <div className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-[22px] bg-white">
       <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-4 py-2">
-        <h2 className="flex min-w-0 items-center gap-2 text-sm font-bold text-slate-900"><span className="size-1.5 shrink-0 rounded-full bg-teal-500" aria-hidden="true" />{title}</h2>
+        <h2 className="flex min-w-0 items-center gap-2 text-base font-bold text-slate-900"><span className="size-1.5 shrink-0 rounded-full bg-teal-500" aria-hidden="true" />{title}</h2>
         <button ref={closeButton} type="button" data-testid="quote-options-close" onClick={dismiss} aria-label={ko ? '옵션 닫기' : 'Close options'} className="flex size-8 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-slate-50 touch:size-11 focus-visible:outline-2 focus-visible:outline-teal-600"><X size={17} /></button>
       </div>
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 sm:px-4">{children}</div>
       <div className="relative shrink-0 border-t border-slate-100 px-4 py-2.5">
         {/* 증감 표시는 윗선에 걸쳐 띄운다 — 줄이 꺾여 아래 버튼이 밀리지 않게 */}
         <TotalDelta value={total} lang={lang} className="absolute -top-2.5 right-4 shadow-sm ring-2 ring-white" />
-        <div className="mb-2 flex items-center justify-between gap-2 text-[10px] text-slate-500">
-          <span className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5">
-            <span>{ko ? '전체 합계 · 부가세 포함' : 'Event total · incl. VAT'} <strong className="ml-1 text-xs tabular-nums text-teal-700" data-testid="options-total" data-amount={total}>{money(total)}</strong></span>
-            <span data-testid="options-total-supply" data-amount={supply} className="tabular-nums">{ko ? `(별도 ${money(supply)})` : `(${money(supply)} before VAT)`}</span>
+        {/* 합계는 한 줄로 크게 — 부가세 별도 금액은 오른쪽 견적 요약에 이미 있어 화면에는 빼고 읽어 주기만 한다 */}
+        <div className="mb-2 flex items-center justify-between gap-2 text-xs text-slate-500">
+          <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            <span>{ko ? '합계 (VAT 포함)' : 'Total (incl. VAT)'}</span>
+            <strong className="text-base font-bold tabular-nums text-teal-700" data-testid="options-total" data-amount={total}>{money(total)}</strong>
+            <span data-testid="options-total-supply" data-amount={supply} className="sr-only">{ko ? `(별도 ${money(supply)})` : `(${money(supply)} before VAT)`}</span>
           </span>
           <button type="button" data-testid="quote-options-remove" onClick={() => { dismiss(); onRemove(); }} aria-label={ko ? '이 체험 빼기' : 'Remove this experience'} className="flex size-6 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-rose-50 touch:size-11 hover:text-rose-600 focus-visible:outline-2 focus-visible:outline-teal-600"><Trash2 size={13} /></button>
         </div>

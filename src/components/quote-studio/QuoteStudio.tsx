@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { AnimatePresence, MotionConfig, animate, motion, useMotionValue, useReducedMotion, useTransform } from 'motion/react';
-import { ArrowDown, ArrowLeft, ArrowRight, Check as CheckIcon, ChevronDown, ChevronRight, FileDown, FileText, Plus, Sparkles, Trash2, X } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, Check as CheckIcon, ChevronDown, ChevronRight, FileDown, Plus, Trash2, X } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { isValidEmail } from '@/lib/email';
@@ -16,19 +16,20 @@ import { trackEvent } from '@/lib/analytics/tracker';
 import { recordQuote, recordQuoteScreen, recordQuoteTotal, startQuoteJourney } from '@/lib/analytics/quote-journey';
 import { createInquiry } from '@/lib/firebase/inquiries';
 import { REFERRAL_OPTIONS } from '@/lib/inquiry-referral';
-import { experiences, getExperienceBySlug } from '@/data/experiences';
+import { getExperienceBySlug } from '@/data/experiences';
 import { PRODUCTS } from '@/data/products';
-import { QUOTE_PRESET_IMAGES } from '@/data/quote-preset-images';
 import {
-  COMMON, ESTIMATE_DISCLAIMER, PERFUME, REGION_NOTE, REGIONS, SERVICE_ORDER, SERVICE_TEXT, isConsultationService,
+  COMMON, ESTIMATE_DISCLAIMER, REGION_NOTE, REGIONS, SERVICE_ORDER, SERVICE_TEXT, isConsultationService,
   type Lang, type RegionKey, type ServiceKey,
 } from '@/lib/quote/catalog';
 import {
   calculateQuote, defaultOptions, normalizePerfumeStaffing, sanitizeInput, serviceForExperience, startingPrice,
   type QuoteInput, type QuoteItem, type QuoteResult, type SpaceOptions,
 } from '@/lib/quote/engine';
-import { loadPreviewFlow, normalizePreviewInput, QUOTE_PREVIEW_FLOW_STORAGE_KEY } from '@/lib/quote-preview/flow-storage';
+import { normalizePreviewInput } from '@/lib/quote-preview/flow-storage';
 import { getKioskAssignments } from '@/lib/quote/kiosk-experiences';
+import { getPhotoBoothTemplates } from '@/lib/quote/photo-booth-templates';
+import { QUOTE_KIOSK_EXPERIENCES } from '@/data/product-lines';
 import { QUOTE_PRESETS } from '@/lib/quote/presets';
 import { QUOTE_COPY } from './copy';
 import { Check, Field, NumberInput, Segmented, Stepper, inputClass } from './QuoteControls';
@@ -38,6 +39,12 @@ import { TotalDelta } from './TotalDelta';
 import { QuoteOptions, type QuoteOptionsSetter } from './QuoteOptions';
 import { optionSummary } from './option-summary';
 import { QUOTE_STORAGE_KEY, addEstimateHistory, estimateHref, loadEstimateHistory, type EstimateHistoryItem } from './history';
+import { QuoteFinalTiles, type FinalForm } from '@/components/report-kit/QuoteFinalTiles';
+import { RequestModal } from './RequestModal';
+import { downloadHwpx, openPrintWindow, printDoc } from '@/components/report-kit/report-actions';
+
+// 마지막 단계 — 버튼 네 개(가견적서 · 보고서 한글 · 보고서 PDF · 상담 요청)만 두고 입력 칸은 누를 때 연다
+// (2026-11-21 사용자 결정으로 실험 페이지에서 공개 견적으로 옮김)
 
 /* ─────────────────────────────────────────────────────────
    온라인 견적 (/quote)
@@ -61,9 +68,8 @@ function hasDraft(input: QuoteInput): boolean {
     || input.setupDayBefore === true;
 }
 
-function loadSaved(previewMode: boolean): QuoteInput | null {
+function loadSaved(): QuoteInput | null {
   try {
-    if (previewMode) return loadPreviewFlow(window.localStorage);
     const raw = window.localStorage.getItem(STORAGE_KEY);
     return raw ? sanitizeInput(JSON.parse(raw)) : null;
   } catch {
@@ -157,16 +163,12 @@ export interface QuoteExperienceEditorProps {
   onOptionsOpenChange?: (open: boolean) => void;
 }
 
-export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwork }: {
-  mode?: 'live' | 'preview';
+export function QuoteStudio({ renderExperienceEditor, renderArtwork }: {
   renderExperienceEditor?: (props: QuoteExperienceEditorProps) => ReactNode;
   renderArtwork?: (key: ServiceKey, presetId?: string) => ReactNode;
 } = {}) {
-  // previewMode: 실험 페이지 — 기록·발급·접수를 하지 않고 따로 저장한다
   // visual: 체험 편집 화면(미리보기) — 키오스크를 기기별 체험으로 다루는 구성 규칙을 따른다
-  const previewMode = mode === 'preview';
   const visual = !!renderExperienceEditor;
-  const storageKey = previewMode ? QUOTE_PREVIEW_FLOW_STORAGE_KEY : STORAGE_KEY;
   const locale = useLocale();
   const lang: Lang = locale === 'en' ? 'en' : 'ko';
   const c = QUOTE_COPY[lang];
@@ -174,10 +176,21 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
   const searchParams = useSearchParams();
 
   const [input, setInput] = useState<QuoteInput>(BLANK);
-  const [presetId, setPresetId] = useState<string | null>(null);
+  const [, setPresetId] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const tracked = useRef(new Set<string>());
   const topRef = useRef<HTMLDivElement>(null);
+  /**
+   * 단계를 넘길 때 화면을 굴리는 건 새 단계의 맨 위가 화면 위(헤더 뒤)로 가려졌을 때만 —
+   * 맨 위가 이미 보이면 그대로 둔다 (2026-11-21 사용자: 「다음으로 넘어갈 때 자동으로 스크롤되는 게 마음에 들지 않아」).
+   * 휴대폰처럼 긴 쪽 맨 아래 '다음'을 누르면 새 단계 중간에 떨어지므로 그때만 올린다.
+   */
+  const revealTop = () => requestAnimationFrame(() => {
+    const el = topRef.current;
+    if (!el) return;
+    const headerBottom = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0;
+    if (el.getBoundingClientRect().top < Math.max(0, headerBottom)) smoothScrollIntoView(el, { block: 'start' });
+  });
   const [step, setStep] = useState(1);
   // 행사 정보 단계의 두 쪽: 0 = 행사명·인원·기간·지역, 1 = 날짜·운영 시간·인력·전날 설치
   const [conditionsPage, setConditionsPage] = useState<0 | 1>(0);
@@ -216,12 +229,11 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
   const reducedMotion = useReducedMotion();
 
   const track = useCallback((name: string, label?: string) => {
-    if (previewMode) return;
     const key = `${name}:${label ?? ''}`;
     if (tracked.current.has(key)) return;
     tracked.current.add(key);
     trackEvent(name, label);
-  }, [previewMode]);
+  }, []);
 
   // 처음: ?preset= → ?service= → 저장된 견적 순으로 불러온다
   useEffect(() => {
@@ -234,19 +246,21 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
     const serviceParam = searchParams.get('service');
     const itemParam = searchParams.get('item') as ServiceKey | null;
     const preset = QUOTE_PRESETS.find((p) => p.id === presetParam);
-    let next: QuoteInput = loadSaved(previewMode) ?? BLANK;
+    let next: QuoteInput = loadSaved() ?? BLANK;
     if (preset) {
       next = structuredClone(preset.input);
       setPresetId(preset.id);
     } else if (itemParam && itemParam in SERVICE_TEXT) {
       // 홈·서비스 소개의 상품 카드에서 '견적에 담기'로 들어온 경우
-      if (!next.items.some((i) => i.key === itemParam)) next = { ...next, items: [...next.items, defaultOptions(itemParam, next.attendees)] };
+      if (!next.items.some((i) => i.key === itemParam)) next = { ...next, items: [...next.items, defaultOptions(itemParam)] };
     } else if (serviceParam) {
       const exp = getExperienceBySlug(serviceParam);
       const key = serviceForExperience(serviceParam, exp?.pillar);
       if (key && !next.items.some((i) => i.key === key)) {
-        const item = defaultOptions(key, next.attendees);
+        const item = defaultOptions(key);
         if (item.key === 'rental') item.options.experienceSlug = serviceParam;
+        // 포토부스 프로그램 상세에서 들어오면 그 테마를 고른 채로 (예: 사주 · 관상 — 2026-11-26)
+        if (item.key === 'photoBooth' && getPhotoBoothTemplates([serviceParam]).length) item.options.templateSlugs = [serviceParam];
         next = { ...next, items: [...next.items, item] };
       } else if (key === 'rental') {
         // 이미 AI 키오스크가 담겨 있으면 들어온 체험으로 바꿔 준다
@@ -263,16 +277,16 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
     setActiveOptions(next.items[0]?.key ?? null);
     setReady(true);
     track('quote_view', preset ? `preset:${preset.id}` : itemParam ? `item:${itemParam}` : serviceParam ? `service:${serviceParam}` : undefined);
-  }, [searchParams, track, previewMode, visual]);
+  }, [searchParams, track, visual]);
 
   useEffect(() => {
     if (!ready) return;
     try {
-      window.localStorage.setItem(storageKey, JSON.stringify(input));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(input));
     } catch {
       // 저장할 수 없는 환경이면 무시한다
     }
-  }, [input, ready, storageKey]);
+  }, [input, ready]);
 
   const quote = useMemo(() => calculateQuote(input, lang), [input, lang]);
 
@@ -284,30 +298,27 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
     if (target === 1) setConditionsPage(step > 1 ? 1 : 0);
     focusStep.current = target;
     setStep(target);
+    // 단계를 옮기면 마지막 단계에서 연 팝업은 닫아 둔다 — 돌아왔을 때 저절로 다시 열리지 않게
+    setOpenForm(null);
     setFurthestStep((previous) => Math.max(previous, target));
     if (target > 0) track('quote_step', STEP_KEYS[target]);
-    // 새 단계의 맨 위가 보이게 한다
-    requestAnimationFrame(() => {
-      const el = topRef.current;
-      smoothScrollIntoView(el, { block: 'start' });
-    });
+    // 새 단계의 맨 위가 화면 위로 가려졌을 때만 올려 준다 (revealTop)
+    revealTop();
   };
   const update = (patch: Partial<QuoteInput>) => {
     for (const [field, value] of Object.entries(patch)) recordQuote('e', field, String(value));
     setInput((prev) => {
-      const next = { ...prev, ...patch };
-      if (patch.attendees !== undefined) {
-        next.items = prev.items.map((item) => item.key === 'acscent'
-          ? { ...item, options: { ...item.options, guests: Math.max(item.options.customBox ? PERFUME.customBox.minGuests : PERFUME.minGuests, Math.min(5000, patch.attendees!)) } }
-          : item);
-      }
-      return normalizePerfumeStaffing(next);
+      // 행사 인원은 향수 인원에 옮기지 않는다 — 향수 인원은 AI 조향사 옵션에서 직접 적는다 (2026-11-23)
+      return normalizePerfumeStaffing({ ...prev, ...patch });
     });
     setStatus('idle');
   };
+  // AI 조향사를 담고 향수 인원을 아직 적지 않았으면 견적서 단계로 넘어가지 않는다 (2026-11-23)
+  const perfumeGuestsPending = input.items.some((i) => i.key === 'acscent' && i.options.guestsPending === true);
+  const canReachFinal = input.items.length > 0 && !perfumeGuestsPending;
   const toEstimate = () => {
     if (visual && step === 1) { moveForward(); return; }
-    goTo(input.items.length > 0 ? 3 : 2);
+    goTo(canReachFinal ? 3 : 2);
   };
   const hasItem = (key: ServiceKey) => input.items.some((i) => i.key === key);
   const toggleItem = (key: ServiceKey) => {
@@ -316,7 +327,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
     setInput((prev) => {
       const next = prev.items.some((item) => item.key === key)
         ? { ...prev, items: prev.items.filter((i) => i.key !== key) }
-        : { ...prev, items: [...prev.items, defaultOptions(key, prev.attendees)] };
+        : { ...prev, items: [...prev.items, defaultOptions(key)] };
       return visual && key === 'rental' ? normalizePreviewInput(next) : normalizePerfumeStaffing(next);
     });
     setActiveOptions(removing ? null : key);
@@ -329,7 +340,9 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
     setInput((prev) => {
       // A direct team edit changes the customer's preference. Other edits keep
       // that preference so automatically added teams can fall back when possible.
-      const optionsPatch = key === 'acscent' && 'extraTeams' in patch ? { ...patch, requestedExtraTeams: patch.extraTeams } : patch;
+      const teamPatch = key === 'acscent' && 'extraTeams' in patch ? { ...patch, requestedExtraTeams: patch.extraTeams } : patch;
+      // 향수 인원을 직접 고르면 '미입력' 표시를 지운다
+      const optionsPatch = key === 'acscent' && 'guests' in patch ? { ...teamPatch, guestsPending: false } : teamPatch;
       const next = { ...prev, items: prev.items.map((i) => (i.key === key ? ({ ...i, options: { ...i.options, ...optionsPatch } } as QuoteItem) : i)) };
       return visual && key === 'rental' ? normalizePreviewInput(next) : normalizePerfumeStaffing(next);
     });
@@ -349,25 +362,28 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
     setStatus('idle');
   };
 
-  const kioskExperiences = useMemo(
-    () => experiences
-      .filter((e) => serviceForExperience(e.slug, e.pillar) === 'rental')
-      .map((e) => ({ value: e.slug, label: tServices(e.nameKey) })),
-    [tServices],
-  );
+  // 키오스크에 넣을 수 있는 체험 전부 — 서비스 소개의 키오스크 목록 순서(영상판 먼저 · 관심 순), 나머지는 뒤에
+  const kioskExperiences = useMemo(() => {
+    return QUOTE_KIOSK_EXPERIENCES.map((k) => {
+      const page = getExperienceBySlug(k.slug);
+      return { value: k.slug, label: page ? tServices(page.nameKey) : k.name[lang] };
+    });
+  }, [tServices, lang]);
 
   /* ── 폼 ── */
-  const [status, setStatus] = useState<'idle' | 'pdf' | 'request' | 'done' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'pdf' | 'report' | 'request' | 'done' | 'error'>('idle');
+  // 마지막 단계에서 연 팝업 — 가견적서 · 보고서 · 상담 요청 (RequestModal)
+  const [openForm, setOpenForm] = useState<FinalForm | null>(null);
   const [message, setMessage] = useState('');
   // 이 브라우저에서 발급한 가견적서 (다시 보기 링크)
   const [history, setHistory] = useState<EstimateHistoryItem[]>([]);
   const [doneLink, setDoneLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  useEffect(() => { if (!previewMode) setHistory(loadEstimateHistory()); }, [previewMode]);
+  useEffect(() => { setHistory(loadEstimateHistory()); }, []);
   const canClearQuote = hasDraft(input);
 
   const clearQuote = () => {
-    if (!canClearQuote || status === 'pdf' || status === 'request') return;
+    if (!canClearQuote || status === 'pdf' || status === 'report' || status === 'request') return;
     const empty = { ...BLANK, items: [] };
     setInput(empty);
     setPresetId(null);
@@ -381,7 +397,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
 
     // 주소 변경보다 먼저 비운 내용을 저장해 새로고침해도 다시 담기지 않게 한다.
     try {
-      window.localStorage.setItem(storageKey, JSON.stringify(empty));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(empty));
     } catch {
       // 저장이 막혀 있어도 현재 화면은 비울 수 있다.
     }
@@ -398,7 +414,6 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
   };
 
   async function saveInquiry(form: { name: string; email: string; company: string; phone: string; note: string; referral: string }, subject: string, estimate?: { no: string; token: string | null }) {
-    if (previewMode) return;
     // 담당자가 보는 수신함은 한국어로 남긴다 (영문 화면에서 보낸 견적도)
     const ko = calculateQuote(input, 'ko');
     const expName = (slug: string) => kioskExperiences.find((e) => e.value === slug)?.label;
@@ -452,7 +467,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
 
   // 발급한 가견적서를 이 브라우저 목록에 남기고, 완료 화면에 다시 보기 링크를 띄운다
   const rememberEstimate = (no: string, token: string | null) => {
-    if (previewMode || !token) return;
+    if (!token) return;
     const names = input.items.map((i) => SERVICE_TEXT[i.key].name[lang]).join(' · ');
     addEstimateHistory({ no, issuedAt: new Date().toISOString(), total: quote.total, token, summary: names });
     setHistory(loadEstimateHistory());
@@ -462,7 +477,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
-    const action = submitter?.value === 'request' ? 'request' : 'pdf';
+    const action = submitter?.value === 'request' ? 'request' : submitter?.value === 'report' ? 'report' : 'pdf';
     const fd = new FormData(e.currentTarget);
     const form = {
       name: String(fd.get('name') ?? '').trim(),
@@ -486,16 +501,34 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
       return;
     }
     setMissing({});
-    if (previewMode) {
-      setStatus('done');
-      setMessage(lang === 'ko'
-        ? '3단계까지 구성을 확인했어요. 실험용 확인이 완료되었으며, 입력한 정보는 전송하거나 저장하지 않았어요.'
-        : 'You have reviewed all three steps. This test is complete; your contact details were not sent or saved.');
-      return;
-    }
     setStatus(action);
+    // 보고서 PDF는 인쇄 창으로 만든다 — 창은 누른 순간 열어야 팝업 차단에 걸리지 않는다
+    const reportFormat = String(fd.get('format') ?? 'hwpx') === 'pdf' ? 'pdf' : 'hwpx';
+    const printWindow = action === 'report' && reportFormat === 'pdf' ? openPrintWindow() : null;
     try {
-      if (action === 'pdf') {
+      if (action === 'report') {
+        // 견적번호를 먼저 받아 보고서에 넣고, 담당자 수신함에도 같은 번호 · 다시 보기 링크를 남긴다
+        const issued = await fetch('/api/quote-pdf?mode=token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ input, lang, recipient: { name: form.name, email: form.email, company: form.company, phone: form.phone } }),
+        }).then((r) => (r.ok ? (r.json() as Promise<{ no: string; token: string | null }>) : null)).catch(() => null);
+        const no = issued?.no ?? '';
+        const { buildQuoteReport } = await import('@/components/report-kit/report-quote');
+        const doc = buildQuoteReport(input, calculateQuote(input, 'ko'), no || undefined);
+        const ok = reportFormat === 'pdf' ? printDoc(doc, printWindow) : await downloadHwpx(doc);
+        if (!ok) throw new Error('report');
+        trackEvent('quote_report', no ? `${reportFormat}:${no}` : reportFormat);
+        recordQuote('x', `report_${reportFormat}`);
+        saveInquiry(form, no ? `보고서 발급 ${no} (${reportFormat === 'pdf' ? 'PDF' : '한글 파일'})` : '보고서 발급', issued ?? undefined)
+          .then(() => trackEvent('inquiry_submit', 'quote')).catch(() => {});
+        if (issued?.no) rememberEstimate(issued.no, issued.token);
+        setOpenForm(null);
+        setStatus('done');
+        setMessage(reportFormat === 'pdf'
+          ? `인쇄 창에서 「PDF로 저장」을 골라 주세요${no ? ` (견적번호 ${no})` : ''}. 담당자에게도 전달되며, 필요하면 연락드릴게요.`
+          : `보고서 한글 파일을 내려받았어요${no ? ` (견적번호 ${no})` : ''}. 담당자에게도 전달되며, 필요하면 연락드릴게요.`);
+      } else if (action === 'pdf') {
         const res = await fetch('/api/quote-pdf', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -518,6 +551,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
         // 수신함 기록은 PDF 발급을 막지 않는다
         saveInquiry(form, `가견적서 발급 ${no}`, { no, token }).then(() => trackEvent('inquiry_submit', 'quote')).catch(() => {});
         rememberEstimate(no, token);
+        setOpenForm(null);
         setStatus('done'); setMessage(c.pdfDone(no));
       } else {
         // 담당자가 수신함에서 같은 견적서를 볼 수 있게 견적번호·링크를 함께 남긴다 (실패해도 요청은 보낸다)
@@ -531,28 +565,28 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
         trackEvent('quote_request');
         recordQuote('x', 'request');
         trackEvent('inquiry_submit', 'quote');
+        setOpenForm(null);
         setStatus('done'); setMessage(c.requestDone);
       }
     } catch {
+      printWindow?.close();
       recordQuote('x', 'error');
       setStatus('error'); setMessage(c.error);
     }
   }
 
-  // 견적 행동 기록 (실험 페이지 제외) — 화면이 그려진 뒤 시작해 떠날 때 끝낸다
+  // 견적 행동 기록 — 화면이 그려진 뒤 시작해 떠날 때 끝낸다
   const [studioEl, setStudioEl] = useState<HTMLDivElement | null>(null);
-  useEffect(() => (studioEl && !previewMode ? startQuoteJourney(studioEl) : undefined), [studioEl, previewMode]);
+  useEffect(() => (studioEl ? startQuoteJourney(studioEl) : undefined), [studioEl]);
   const screen = step === 1 ? (conditionsPage === 1 ? 'cond2' : 'cond1')
     : step === 2 ? 'experiences' : status === 'done' ? 'done' : 'form';
   useEffect(() => { if (studioEl) recordQuoteScreen(screen); }, [studioEl, screen]);
   useEffect(() => { if (studioEl) recordQuoteTotal(quote.total); }, [studioEl, quote.total]);
 
-  const selectedPreset = QUOTE_PRESETS.find((preset) => preset.id === presetId);
-  const selectedPresetImage = selectedPreset ? QUOTE_PRESET_IMAGES[selectedPreset.id] : undefined;
-  const selectedImage = selectedPresetImage?.src || PRODUCT_BY_KEY[input.items[0]?.key ?? 'acscent'].image;
   const stepHeadings = ['', conditionsPage === 1 ? c.step2b : c.step2, c.step3, c.step4];
-  const stepHints = ['', conditionsPage === 1 ? c.step2bHint : (lang === 'ko' ? '아직 정해지지 않았다면 대략 선택해도 괜찮아요.' : 'An approximate answer is fine. You can change it later.'), renderExperienceEditor ? (lang === 'ko' ? '체험을 담고 옵션을 바꾸며 우리 행사의 모습을 미리 살펴보세요.' : 'Choose experiences and explore how your event could look as you adjust the options.') : c.step3Hint, previewMode ? (lang === 'ko' ? '고른 구성으로 견적서 받기 화면을 확인해 보세요. 이 페이지에서는 실제 발급이나 상담 접수가 이루어지지 않아요.' : 'Try the final estimate step with your choices. This experiment does not issue documents or submit inquiries.') : c.step4Hint];
-  const scrollToTop = () => requestAnimationFrame(() => smoothScrollIntoView(topRef.current, { block: 'start' }));
+  // 1단계의 「정해지지 않았다면 괜찮아요」 같은 안내는 뺀다 (2026-11-21 사용자)
+  const stepHints = ['', '', renderExperienceEditor ? (lang === 'ko' ? '체험을 담고 옵션을 바꾸며 우리 행사의 모습을 미리 살펴보세요.' : 'Choose experiences and explore how your event could look as you adjust the options.') : c.step3Hint, lang === 'ko' ? '필요한 것을 골라 주세요.' : 'Choose what you need.'];
+  const scrollToTop = () => revealTop();
   const moveForward = () => {
     if (step === 1 && conditionsPage === 0) {
       focusStep.current = 1;
@@ -561,8 +595,14 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
       scrollToTop();
       return;
     }
+    // 향수 인원을 아직 적지 않았으면 견적서 단계로 넘기지 않고, 무엇을 해야 하는지 적힌 안내로 데려간다.
+    // (모바일 아래 바의 「다음」이 이 함수를 바로 불러, 본문 버튼의 disabled 를 우회하고 20명 기준 견적서가 나갔다)
+    if (step === 2 && !canReachFinal) {
+      smoothScrollIntoView(document.querySelector<HTMLElement>('[data-testid="quote-next-blocked"]'), { block: 'nearest', offset: 24 });
+      return;
+    }
     if (step < 3) goTo(step + 1);
-    else smoothScrollIntoView(topRef.current, { block: 'start' });
+    else revealTop();
   };
   const nextLabel = step === 1
     ? (conditionsPage === 0 ? c.next : (lang === 'ko' ? '체험 고르기' : 'Choose experiences'))
@@ -575,15 +615,71 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
       <button type="button" data-testid="quote-next" disabled={!canNext} onClick={moveForward} className={primaryButton}>
         {nextLabel}<ArrowRight className="size-4" aria-hidden="true" />
       </button>
-      {!canNext && <p className="w-full text-right text-xs text-slate-500">{c.needItemsNext}</p>}
+      {!canNext && <p data-testid="quote-next-blocked" className={cn('w-full text-right text-xs', perfumeGuestsPending && input.items.length > 0 ? 'font-semibold text-amber-700' : 'text-slate-500')}>
+        {perfumeGuestsPending && input.items.length > 0
+          ? (lang === 'ko' ? 'AI 조향사 옵션에서 향수를 만들어 갈 인원을 적어 주세요.' : 'Enter the number of perfume guests in the AI Perfumer options.')
+          : c.needItemsNext}
+      </p>}
     </div>
   );
 
   if (!ready) return <div className="h-96 animate-pulse rounded-3xl bg-white motion-reduce:animate-none" aria-busy="true" />;
 
+  // 연락처 입력 칸 — 가견적서 · 보고서 · 상담 요청 모두 팝업(RequestModal) 안에 연다.
+  // 받는 칸: 이름·이메일(필수) · 회사·전화(선택). 보고서는 형식(한글 파일 · PDF), 상담 요청은 요청사항 · 알게 된 경로를 더 받는다
+  const contactForm = (
+      <form onSubmit={onSubmit} noValidate className="space-y-5">
+        {openForm === 'report' && (
+          <fieldset>
+            <legend className="mb-2 text-sm font-semibold text-slate-700">{lang === 'ko' ? '파일 형식' : 'Format'}</legend>
+            <div className="grid grid-cols-2 gap-2" data-testid="quote-report-format">
+              {([['hwpx', '한글 파일', 'Hangul (HWPX)'], ['pdf', 'PDF', 'PDF']] as const).map(([value, koLabel, enLabel]) => (
+                <label key={value} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl px-4 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 transition-colors has-[:checked]:bg-teal-50 has-[:checked]:text-teal-800 has-[:checked]:ring-2 has-[:checked]:ring-teal-500">
+                  <input type="radio" name="format" value={value} defaultChecked={value === 'hwpx'} className="size-4 accent-teal-600" />
+                  {lang === 'ko' ? koLabel : enLabel}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field label={`${c.name} *`}><input id="q-name" name="name" autoComplete="name" required maxLength={60} value={contact.name} aria-invalid={missing.name || undefined} aria-describedby={missing.name ? 'q-name-error' : undefined}
+            onChange={(e) => { setContact({ ...contact, name: e.target.value }); if (missing.name && e.target.value.trim()) setMissing({ ...missing, name: false }); }}
+            className={cn(inputClass, missing.name && 'border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-red-500/10')} />
+            {missing.name && <p id="q-name-error" data-testid="quote-name-error" className="text-xs font-medium text-red-600">{c.nameRequired}</p>}</Field>
+          <Field label={`${c.email} *`}><input ref={emailRef} id="q-email" name="email" type="email" autoComplete="email" required maxLength={200} value={contact.email} aria-invalid={emailError || missing.email || undefined} aria-describedby={missing.email ? 'q-email-required' : undefined}
+            onChange={(e) => { setContact({ ...contact, email: e.target.value }); if (emailError && isValidEmail(e.target.value)) setEmailError(false); if (missing.email && e.target.value.trim()) setMissing({ ...missing, email: false }); }}
+            onBlur={(e) => setEmailError(e.target.value.trim() !== '' && !isValidEmail(e.target.value))}
+            className={cn(inputClass, (emailError || missing.email) && 'border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-red-500/10')} />
+            {emailError && <p role="alert" data-testid="quote-email-error" className="text-xs font-medium text-red-600">{c.invalidEmail}</p>}
+            {missing.email && !emailError && <p id="q-email-required" data-testid="quote-email-required" className="text-xs font-medium text-red-600">{c.emailRequired}</p>}</Field>
+          <Field label={c.company}><input id="q-company" name="company" autoComplete="organization" maxLength={80} value={contact.company} onChange={(e) => setContact({ ...contact, company: e.target.value })} className={inputClass} /></Field>
+          <Field label={c.phone}><input id="q-phone" name="phone" type="tel" autoComplete="tel" maxLength={40} value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} className={inputClass} /></Field>
+        </div>
+        {openForm === 'request' && <Field label={c.message}><textarea id="q-note" name="note" rows={3} maxLength={1000} value={contact.note} onChange={(e) => setContact({ ...contact, note: e.target.value })} className={cn(inputClass, 'h-auto py-3')} /></Field>}
+        {/* 어디서 보고 왔는지 (선택) — 유입 경로가 남지 않는 방문도 출처를 알 수 있게 */}
+        {openForm === 'request' && <Field label={lang === 'ko' ? '어떻게 알게 되셨나요? (선택)' : 'How did you hear about us? (optional)'}>
+          <select id="q-referral" name="referral" defaultValue="" className={inputClass}>
+            <option value="">{lang === 'ko' ? '선택해 주세요' : 'Choose one'}</option>
+            {REFERRAL_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o[lang]}</option>)}
+          </select>
+        </Field>}
+        <div>
+          <label data-track="consent" className={cn('flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-xs leading-relaxed text-slate-500', missing.consent && 'bg-red-50/60 ring-1 ring-red-300')}><Checkbox name="consent" required checked={contact.consent} aria-invalid={missing.consent || undefined} aria-describedby={missing.consent ? 'q-consent-error' : undefined} onChange={(e) => { setContact({ ...contact, consent: e.target.checked }); if (missing.consent && e.target.checked) setMissing({ ...missing, consent: false }); }} className="mt-0.5 size-4" /><span>{c.consent} <Link href="/privacy" className="font-medium text-teal-700 underline underline-offset-2">{c.privacy}</Link></span></label>
+          {missing.consent && <p id="q-consent-error" data-testid="quote-consent-error" className="mt-1.5 text-xs font-medium text-red-600">{c.consentRequired}</p>}
+        </div>
+        {status === 'error' && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-600" role="alert">{message}</p>}
+        <button type="submit" value={openForm ?? 'pdf'} disabled={status === 'pdf' || status === 'report' || status === 'request'} className={cn(primaryButton, 'w-full')}>
+          {openForm === 'request' ? (status === 'request' ? c.requestBusy : c.request)
+            : openForm === 'report' ? (status === 'report' ? (lang === 'ko' ? '보고서 만드는 중…' : 'Preparing report…') : (lang === 'ko' ? '보고서 받기' : 'Download report'))
+            : (status === 'pdf' ? c.pdfBusy : c.pdf)}
+        </button>
+      </form>
+  );
+
   return (
     <MotionConfig reducedMotion="user">
-      <div ref={setStudioEl} data-testid="quote-studio" data-mode={mode} className={cn('grid min-w-0 grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-5 lg:pb-0', step > 0 && 'pb-28')}>
+      <div ref={setStudioEl} data-testid="quote-studio" className={cn('grid min-w-0 grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-5 lg:pb-0', step > 0 && 'pb-28')}>
         <div ref={topRef} className={cn('min-w-0 scroll-mt-28 rounded-[28px] bg-white p-4 shadow-[0_4px_32px_-16px_rgba(15,23,42,0.12)] sm:p-6 xl:p-7',
           // 1~3단계는 데스크톱에서 같은 높이(2단계 기준)로 — 단계를 오가도 카드 크기가 출렁이지 않는다.
           step < 3 && 'lg:flex lg:min-h-[var(--quote-intro-h)] lg:flex-col [--quote-intro-h:766px]')}>
@@ -593,7 +689,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                 const targetStep = index + 1;
                 const done = targetStep < step;
                 const current = targetStep === step;
-                const reachable = targetStep <= furthestStep && (targetStep !== 3 || input.items.length > 0);
+                const reachable = targetStep <= furthestStep && (targetStep !== 3 || canReachFinal);
                 return (
                   <li key={index}>
                     <button type="button" disabled={!reachable} onClick={() => goTo(targetStep)} aria-current={current ? 'step' : undefined}
@@ -626,7 +722,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
               <div className="mb-7">
                 <p className="mb-2 text-xs font-semibold text-teal-600">{c.stepCount(step, 3)}</p>
                 <h2 id={`q-step${step + 1}`} tabIndex={-1} style={{ outline: 'none' }} className="text-2xl font-bold leading-snug tracking-tight text-slate-900 sm:text-[28px]">{stepHeadings[step]}</h2>
-                <p className="mt-2 text-sm leading-relaxed text-slate-500 [word-break:keep-all]">{stepHints[step]}</p>
+                {stepHints[step] && <p className="mt-2 text-sm leading-relaxed text-slate-500 [word-break:keep-all]">{stepHints[step]}</p>}
               </div>
 
               {step === 1 && (
@@ -647,15 +743,9 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                       </ul>
                     </div>
                   )}
-                  {/* 페이지 번호와 '시작 구성'을 한 줄에 — 구성이 있어도 2단계 높이가 늘지 않는다. */}
+                  {/* 페이지 번호 — 「이 구성으로 시작해요」 칩은 뺐다 (2026-11-21 사용자) */}
                   <div className="mb-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
                     <p className="text-xs font-semibold text-teal-700">{lang === 'ko' ? `행사 정보 ${conditionsPage + 1}/2` : `Event details ${conditionsPage + 1}/2`}</p>
-                    {input.items.length > 0 && (
-                      <div className="-my-3 flex min-w-0 items-center gap-2.5 rounded-full bg-slate-50 py-1 pl-1 pr-3.5">
-                        <div className="relative size-8 shrink-0 overflow-hidden rounded-full bg-slate-100">{renderArtwork ? renderArtwork(input.items[0]?.key ?? 'acscent', selectedPreset?.id) : <Image src={selectedImage} alt="" fill sizes="32px" style={{ objectPosition: selectedPresetImage?.objectPosition }} className="object-cover" />}</div>
-                        <p className="min-w-0 truncate text-xs text-slate-500">{lang === 'ko' ? '이 구성으로 시작해요' : 'Starting point'} · <b className="font-semibold text-slate-800">{selectedPreset?.title[lang] ?? input.items.map((item) => SERVICE_TEXT[item.key].name[lang]).join(' · ')}</b></p>
-                      </div>
-                    )}
                   </div>
                   {conditionsPage === 0 ? (
                   <div className="@container">
@@ -667,7 +757,7 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                     <div className="flex min-w-0 flex-col gap-y-7">
                       <Field label={c.eventName}><input id="q-event-name" type="text" maxLength={200} autoComplete="off" value={input.eventName ?? ''} onChange={(event) => update({ eventName: event.target.value })} placeholder={lang === 'ko' ? '예: 네안데르 브랜드 팝업' : 'e.g. NEANDER brand pop-up'} className={inputClass} /></Field>
                       <Field label={c.days}><NumberInput id="q-days" value={input.days} min={1} max={60} suffix={lang === 'ko' ? '일' : 'days'} onChange={(value) => update({ days: value })} /></Field>
-                      <Field label={c.attendees} hint={lang === 'ko' ? '행사 전체 기간에 체험할 인원이에요. 향수 체험 인원에도 반영돼요.' : 'Total participants across all event days. Also updates the perfume participant count.'}><NumberInput id="q-attendees" value={input.attendees} min={1} max={100000} suffix={lang === 'ko' ? '명' : 'guests'} onChange={(value) => update({ attendees: value })} /></Field>
+                      <Field label={c.attendees} hint={lang === 'ko' ? '행사 전체 기간에 체험할 인원이에요.' : 'Total participants across all event days.'}><NumberInput id="q-attendees" value={input.attendees} min={1} max={100000} suffix={lang === 'ko' ? '명' : 'guests'} onChange={(value) => update({ attendees: value })} /></Field>
                     </div>
                     <Field label={c.region} hint={REGION_NOTE[lang]}>
                       <RegionMap value={input.region} lang={lang} onChange={(value) => update({ region: value })}>
@@ -756,19 +846,18 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                   <p className="mt-3 text-xs text-slate-500">{lang === 'ko' ? '시작가는 부가세 별도예요. 담은 체험을 다시 누르면 빠지고, 옵션은 \'옵션 정하기\'에서 바꿀 수 있어요.' : 'Starting prices exclude VAT. Tap a selected experience again to remove it; use “Set options” to adjust it.'}</p>
                   </>}
                   <div aria-hidden="true" className="hidden lg:block lg:flex-1" />
-                  {nav(input.items.length > 0)}
+                  {nav(canReachFinal)}
                 </>
               )}
 
               {step === 3 && (
                 <>
-                  <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-900">{ESTIMATE_DISCLAIMER[lang]}</p>
-                  <div className="mb-7 flex items-center gap-4 rounded-2xl bg-teal-50/80 p-4">
-                    <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white text-teal-600"><FileText className="size-6" aria-hidden="true" /></span>
-                    <div><p className="text-sm font-semibold text-teal-900">{previewMode ? (lang === 'ko' ? '마지막 단계도 미리 경험해 보세요' : 'Try the final step') : (lang === 'ko' ? '내부 검토용 견적서가 필요하신가요?' : 'Need an estimate to share with your team?')}</p><p className="mt-1 text-xs leading-relaxed text-teal-700">{previewMode ? (lang === 'ko' ? '입력과 완료 화면을 확인하는 실험이에요. 연락처는 이 화면에서만 사용해요.' : 'Test the form and confirmation. Contact details stay on this screen.') : (lang === 'ko' ? '이름과 이메일을 적으면 PDF를 바로 받을 수 있어요.' : 'Enter your name and email to download a PDF.')}</p></div>
-                  </div>
+                  {status !== 'done' && (
+                    <QuoteFinalTiles input={input} lang={lang} open={openForm} recipient={contact}
+                      onOpen={(form) => { setOpenForm(form); if (status === 'error') setStatus('idle'); }} />
+                  )}
                   {status === 'done' ? (
-                    <div data-testid={previewMode ? 'quote-preview-complete' : undefined} className="rounded-2xl bg-teal-50 p-6 text-sm leading-relaxed text-teal-900" role="status">
+                    <div className="rounded-2xl bg-teal-50 p-6 text-sm leading-relaxed text-teal-900" role="status">
                       <CheckIcon className="mb-3 size-7 text-teal-600" aria-hidden="true" />{message}
                       {doneLink && (
                         <div className="mt-4 space-y-2">
@@ -780,42 +869,14 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                           </div>
                         </div>
                       )}
+                      {/* 가견적서를 받은 뒤 보고서도, 보고서를 받은 뒤 상담 요청도 할 수 있게 — 적은 연락처는 그대로 남아 있다 */}
+                      <button type="button" data-testid="quote-again" onClick={() => { setStatus('idle'); setOpenForm(null); setMessage(''); setDoneLink(null); setCopied(false); }}
+                        className="mt-4 inline-flex h-10 items-center rounded-xl px-1 text-sm font-semibold text-teal-800 underline underline-offset-4 hover:text-teal-950">
+                        {lang === 'ko' ? '다른 파일 받기 · 상담 요청하기' : 'Get another file or request a quote'}
+                      </button>
                     </div>
-                  ) : (
-                    <form onSubmit={onSubmit} noValidate className="space-y-5">
-                      <div className="grid gap-5 sm:grid-cols-2">
-                        <Field label={`${c.name} *`}><input id="q-name" name="name" autoComplete="name" required maxLength={60} value={contact.name} aria-invalid={missing.name || undefined} aria-describedby={missing.name ? 'q-name-error' : undefined}
-                          onChange={(e) => { setContact({ ...contact, name: e.target.value }); if (missing.name && e.target.value.trim()) setMissing({ ...missing, name: false }); }}
-                          className={cn(inputClass, missing.name && 'border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-red-500/10')} />
-                          {missing.name && <p id="q-name-error" data-testid="quote-name-error" className="text-xs font-medium text-red-600">{c.nameRequired}</p>}</Field>
-                        <Field label={`${c.email} *`}><input ref={emailRef} id="q-email" name="email" type="email" autoComplete="email" required maxLength={200} value={contact.email} aria-invalid={emailError || missing.email || undefined} aria-describedby={missing.email ? 'q-email-required' : undefined}
-                          onChange={(e) => { setContact({ ...contact, email: e.target.value }); if (emailError && isValidEmail(e.target.value)) setEmailError(false); if (missing.email && e.target.value.trim()) setMissing({ ...missing, email: false }); }}
-                          onBlur={(e) => setEmailError(e.target.value.trim() !== '' && !isValidEmail(e.target.value))}
-                          className={cn(inputClass, (emailError || missing.email) && 'border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-red-500/10')} />
-                          {emailError && <p role="alert" data-testid="quote-email-error" className="text-xs font-medium text-red-600">{c.invalidEmail}</p>}
-                          {missing.email && !emailError && <p id="q-email-required" data-testid="quote-email-required" className="text-xs font-medium text-red-600">{c.emailRequired}</p>}</Field>
-                        <Field label={c.company}><input id="q-company" name="company" autoComplete="organization" maxLength={80} value={contact.company} onChange={(e) => setContact({ ...contact, company: e.target.value })} className={inputClass} /></Field>
-                        <Field label={c.phone}><input id="q-phone" name="phone" type="tel" autoComplete="tel" maxLength={40} value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} className={inputClass} /></Field>
-                      </div>
-                      <Field label={c.message}><textarea id="q-note" name="note" rows={3} maxLength={1000} value={contact.note} onChange={(e) => setContact({ ...contact, note: e.target.value })} className={cn(inputClass, 'h-auto py-3')} /></Field>
-                      {/* 어디서 보고 왔는지 (선택) — 유입 경로가 남지 않는 방문도 출처를 알 수 있게 */}
-                      <Field label={lang === 'ko' ? '어떻게 알게 되셨나요? (선택)' : 'How did you hear about us? (optional)'}>
-                        <select id="q-referral" name="referral" defaultValue="" className={inputClass}>
-                          <option value="">{lang === 'ko' ? '선택해 주세요' : 'Choose one'}</option>
-                          {REFERRAL_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o[lang]}</option>)}
-                        </select>
-                      </Field>
-                      <div>
-                        <label data-track="consent" className={cn('flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-xs leading-relaxed text-slate-500', missing.consent && 'bg-red-50/60 ring-1 ring-red-300')}><Checkbox name="consent" required checked={contact.consent} aria-invalid={missing.consent || undefined} aria-describedby={missing.consent ? 'q-consent-error' : undefined} onChange={(e) => { setContact({ ...contact, consent: e.target.checked }); if (missing.consent && e.target.checked) setMissing({ ...missing, consent: false }); }} className="mt-0.5 size-4" /><span>{c.consent} <Link href="/privacy" className="font-medium text-teal-700 underline underline-offset-2">{c.privacy}</Link></span></label>
-                        {missing.consent && <p id="q-consent-error" data-testid="quote-consent-error" className="mt-1.5 text-xs font-medium text-red-600">{c.consentRequired}</p>}
-                      </div>
-                      {status === 'error' && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-600" role="alert">{message}</p>}
-                      <div className="flex flex-col gap-3">
-                        <button type="submit" value="pdf" disabled={status === 'pdf' || status === 'request'} className={primaryButton}><FileDown className="size-4" aria-hidden="true" />{previewMode ? (lang === 'ko' ? '견적서 받기 흐름 확인 (실험)' : 'Try the estimate flow (test)') : status === 'pdf' ? c.pdfBusy : c.pdf}</button>
-                        <button type="submit" value="request" disabled={status === 'pdf' || status === 'request'} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-slate-100 px-5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-200 disabled:opacity-60">{previewMode ? (lang === 'ko' ? '상담 요청 흐름 확인 (실험)' : 'Try the inquiry flow (test)') : status === 'request' ? c.requestBusy : c.request}<ArrowRight className="size-4" aria-hidden="true" /></button>
-                      </div>
-                    </form>
-                  )}
+                  ) : null}
+                  <RequestModal mode={status !== 'done' ? openForm : null} onClose={() => setOpenForm(null)} lang={lang}>{contactForm}</RequestModal>
                   <button type="button" data-testid="quote-prev" onClick={() => goTo(2)} className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl px-2 text-sm font-medium text-slate-500 hover:bg-slate-50"><ArrowLeft className="size-4" aria-hidden="true" />{lang === 'ko' ? '체험 구성 다시 보기' : 'Review experiences'}</button>
                 </>
               )}
@@ -851,7 +912,10 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
                   const lines = quote.lines.filter((line) => line.service === item.key);
                   const amount = lines.reduce((sum, line) => sum + (line.tbd ? 0 : line.amount), 0);
                   const tbd = lines.some((line) => line.tbd);
-                  return <li key={item.key} className="flex items-start gap-3"><span className="relative size-11 shrink-0 overflow-hidden rounded-xl">{renderArtwork ? renderArtwork(item.key) : <Image src={PRODUCT_BY_KEY[item.key].image} alt="" fill sizes="44px" className="object-cover" />}</span><div className="min-w-0 flex-1"><p className="text-xs font-medium text-slate-600">{SERVICE_TEXT[item.key].name[lang]}</p><p className="mt-1 text-sm font-bold tabular-nums text-slate-800">{amount > 0 ? won(amount, lang) : c.tbd}</p><p className="mt-1 text-[11px] leading-relaxed text-slate-500">{optionSummary(item, lang, (slug) => kioskExperiences.find((e) => e.value === slug)?.label).join(' · ')}</p>{tbd && amount > 0 && <p className="mt-1 text-[10px] text-amber-700">+ {c.tbd}</p>}</div><button type="button" aria-label={`${SERVICE_TEXT[item.key].name[lang]} ${lang === 'ko' ? '옵션 수정' : 'edit options'}`} onClick={() => { setActiveOptions(item.key); goTo(2); }} className="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-slate-50 hover:text-teal-700"><ChevronRight className="size-4" aria-hidden="true" /></button></li>;
+                  // 옵션은 앞의 두 개만 보이고 나머지는 「외 N개」로 줄인다 — 전체는 마우스를 올리면 (2026-11-22 사용자 요청: 읽기 부담)
+                  const parts = optionSummary(item, lang, (slug) => kioskExperiences.find((e) => e.value === slug)?.label);
+                  const more = parts.length - 2;
+                  return <li key={item.key} className="flex items-start gap-3"><span className="relative size-11 shrink-0 overflow-hidden rounded-xl">{renderArtwork ? renderArtwork(item.key) : <Image src={PRODUCT_BY_KEY[item.key].image} alt="" fill sizes="44px" className="object-cover" />}</span><div className="min-w-0 flex-1"><p className="text-xs font-medium text-slate-600">{SERVICE_TEXT[item.key].name[lang]}</p><p className="mt-1 text-sm font-bold tabular-nums text-slate-800">{amount > 0 ? won(amount, lang) : c.tbd}</p><p className="mt-1 text-[11px] leading-relaxed text-slate-500 [word-break:keep-all]" title={more > 0 ? parts.join(' · ') : undefined}>{parts.slice(0, 2).join(' · ')}{more > 0 && (lang === 'ko' ? ` 외 ${more}개` : ` +${more} more`)}</p>{tbd && amount > 0 && <p className="mt-1 text-[10px] text-amber-700">+ {c.tbd}</p>}</div><button type="button" aria-label={`${SERVICE_TEXT[item.key].name[lang]} ${lang === 'ko' ? '옵션 수정' : 'edit options'}`} onClick={() => { setActiveOptions(item.key); goTo(2); }} className="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-slate-50 hover:text-teal-700"><ChevronRight className="size-4" aria-hidden="true" /></button></li>;
                 })}
               </ul>
               </>
@@ -860,16 +924,16 @@ export function QuoteStudio({ mode = 'live', renderExperienceEditor, renderArtwo
               <dl className="space-y-2 text-xs text-slate-500"><div className="flex flex-wrap justify-between gap-2"><dt>{c.supply}</dt><dd className="tabular-nums">{won(quote.supply, lang)}</dd></div><div className="flex flex-wrap justify-between gap-2"><dt>{c.vat}</dt><dd className="tabular-nums">{won(quote.vat, lang)}</dd></div></dl>
               <div className="mt-4 border-t border-slate-200/60 pt-4"><p className="flex min-h-5 flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold text-slate-600">{c.mobileTotal}<TotalDelta value={quote.total} lang={lang} /></p><p className="mt-1.5 break-words text-[26px] font-bold leading-tight text-teal-700"><AnimatedAmount value={quote.total} lang={lang} testId="quote-total" /></p><p className="mt-2 text-[10px] text-slate-500">{lang === 'ko' ? '부가세 포함 · 선택한 옵션 기준' : 'Including VAT · based on your selections'}</p><p data-testid="quote-disclaimer" className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">{ESTIMATE_DISCLAIMER[lang]}</p></div>
             </div>
-            {quote.lines.length > 0 && <details className="group mt-4"><summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 text-xs font-medium text-slate-500 [&::-webkit-details-marker]:hidden">{lang === 'ko' ? '상세 금액 보기' : 'Price breakdown'}<ChevronDown className="size-3.5 transition-transform group-open:rotate-180" aria-hidden="true" /></summary><ul className="max-h-72 space-y-4 overflow-y-auto border-t border-slate-100 py-4" data-lenis-prevent>{quote.lines.map((line, index) => <li key={index} className="text-xs"><div className="flex flex-wrap justify-between gap-1.5"><p className="text-slate-600">{line.label}</p><span className="font-semibold tabular-nums text-slate-800">{line.tbd ? c.tbd : won(line.amount, lang)}</span></div>{line.detail && <p className="mt-1 text-[11px] leading-relaxed text-slate-500">{line.detail}</p>}</li>)}</ul></details>}
+            {quote.lines.length > 0 && <details className="group mt-4"><summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 text-xs font-medium text-slate-500 [&::-webkit-details-marker]:hidden">{lang === 'ko' ? '상세 금액 보기' : 'Price breakdown'}<ChevronDown className="size-3.5 transition-transform group-open:rotate-180" aria-hidden="true" /></summary>{/* 항목 이름과 금액만 — 산출 설명(line.detail)은 가견적서에 들어가므로 여기서는 뺀다 (2026-11-22 사용자 요청: 읽기 부담) */}<ul className="space-y-2.5 border-t border-slate-100 py-4">{quote.lines.map((line, index) => <li key={index} className="flex items-baseline justify-between gap-3 text-xs"><p className="min-w-0 text-slate-600 [word-break:keep-all]">{line.label}</p><span className="shrink-0 font-semibold tabular-nums text-slate-800">{line.tbd ? c.tbd : won(line.amount, lang)}</span></li>)}</ul></details>}
             {quote.warnings.length > 0 && <ul className="mt-4 space-y-2 rounded-xl bg-amber-50 p-3 text-[11px] leading-relaxed text-amber-800" role="status">{quote.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul>}
             {quote.notes.length > 0 && <details className="group mt-2"><summary className="flex min-h-10 cursor-pointer list-none items-center justify-between text-xs text-slate-500 [&::-webkit-details-marker]:hidden">{lang === 'ko' ? '이 구성의 안내사항' : 'Notes for this estimate'}<ChevronDown className="size-3.5 group-open:rotate-180" aria-hidden="true" /></summary><div className="space-y-2 pb-3 text-[11px] leading-relaxed text-slate-500">{quote.notes.map((note) => <p key={note}>{note}</p>)}</div></details>}
             {/* 1~2단계에서는 '다음'(화살표), 3단계부터 '견적서 받기'(내려받기). 견적서를 받은 뒤에는 다시 누를 일이 없어 감춘다 */}
-            {!(step === 3 && status === 'done') && <button type="button" data-testid="quote-summary-action" onClick={toEstimate} disabled={step >= 2 && input.items.length === 0} className={cn(primaryButton, 'mt-5 w-full')}>
+            {step !== 3 && <button type="button" data-testid="quote-summary-action" onClick={toEstimate} disabled={step >= 2 && input.items.length === 0} className={cn(primaryButton, 'mt-5 w-full')}>
               {visual && step < 2 ? <>{c.next}<ArrowRight className="size-4" aria-hidden="true" /></> : <><FileDown className="size-4" aria-hidden="true" />{c.toForm}</>}
             </button>}
             <p className="mt-3 text-center text-[10px] leading-relaxed text-slate-500">{lang === 'ko' ? '선택 내용은 이 브라우저에 자동으로 저장돼요.' : 'Your selections are saved in this browser.'}</p>
           </div>
-          <div className="mt-4 flex items-start gap-2.5 px-3 text-xs leading-relaxed text-slate-500"><Sparkles className="mt-0.5 size-4 shrink-0 text-teal-500" aria-hidden="true" /><p>{lang === 'ko' ? '아직 고민 중이어도 괜찮아요. 체험과 옵션은 언제든 바꿀 수 있어요.' : 'Still deciding? You can change any experience or option as you go.'}</p></div>
+
         </aside>
 
         {step > 0 && <div data-quote-bottom-bar hidden={step === 2 && optionsOpen} className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-100 bg-white/95 px-5 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] pt-3 backdrop-blur-xl lg:hidden">

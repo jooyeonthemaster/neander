@@ -10,6 +10,9 @@ import { INSIGHTS } from '@/data/insights';
 const STATIC_PATHS: { path: string; priority: number }[] = [
   { path: '/', priority: 1 },
   { path: '/services', priority: 0.9 },
+  // 2026-11 개편에서 추가한 상품 상세 (AI 향수 상세는 /services/ai-scent-soulmate 로 아래 목록에 있다)
+  { path: '/services/ai-photo-booth', priority: 0.8 },
+  { path: '/services/ai-kiosk', priority: 0.8 },
   { path: '/development', priority: 0.9 },
   { path: '/quote', priority: 0.9 },
   { path: '/portfolio', priority: 0.9 },
@@ -18,7 +21,6 @@ const STATIC_PATHS: { path: string; priority: number }[] = [
   { path: '/experience', priority: 0.6 },
   { path: '/faq', priority: 0.5 },
   { path: '/insights', priority: 0.7 },
-  { path: '/brochure', priority: 0.6 },
   { path: '/privacy', priority: 0.2 },
 ];
 

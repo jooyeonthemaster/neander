@@ -441,7 +441,8 @@ function addQuoteSession(stats: QuoteStats, session: SessionRecord) {
       else if (a.label.startsWith('add_')) { items.add(a.label.slice(4)); reached = Math.max(reached, 2) }
     }
     if (a.name === 'quote_preset' && a.label) { presets.add(a.label); reached = Math.max(reached, 1) }
-    if (a.name === 'quote_pdf') reached = Math.max(reached, 4)
+    // 견적 보고서(2026-11 개편) 발급도 문서를 받아 간 것이라 가견적서 단계로 센다
+    if (a.name === 'quote_pdf' || a.name === 'quote_report') reached = Math.max(reached, 4)
     if (a.name === 'quote_request') reached = Math.max(reached, 5)
     if (a.name === 'quote_view' && a.label) {
       const [kind, value] = a.label.split(':')
@@ -458,7 +459,7 @@ function addQuoteSession(stats: QuoteStats, session: SessionRecord) {
   if (reached >= 1) f.conditions += 1
   if (reached >= 2) f.experiences += 1
   if (reached >= 3) f.form += 1
-  if (acts.some((a) => a.name === 'quote_pdf')) f.pdf += 1
+  if (acts.some((a) => a.name === 'quote_pdf' || a.name === 'quote_report')) f.pdf += 1
   if (acts.some((a) => a.name === 'quote_request')) f.request += 1
 
   presets.forEach((p) => bump(stats.presets, p))

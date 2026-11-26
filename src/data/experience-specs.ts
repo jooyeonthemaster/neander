@@ -24,6 +24,8 @@ export interface ExperienceSpec {
   footprint?: string;
   /** 현장 운영 인력 (명) */
   staff?: number;
+  /** 숫자 · 기본 문구로 적기 어려운 칸은 문구를 그대로 적는다 (사용자가 확인한 문구만) */
+  text?: Partial<Record<'output' | 'minutes' | 'staff', { ko: string; en: string }>>;
 }
 
 export const EXPERIENCE_SPECS: Record<string, ExperienceSpec> = {
@@ -31,7 +33,15 @@ export const EXPERIENCE_SPECS: Record<string, ExperienceSpec> = {
   'ai-skincare-analysis': { input: ['camera', 'touch'], output: ['print'] }, // AI 스킨케어 분석관
   'ai-virtual-makeup': { input: ['camera', 'touch'], output: ['print', 'qr'] }, // AI 버추얼 메이크업 스튜디오
   // 시간당 인원은 조향 1팀(조향사 1 + 보조 1) 기준, 온라인 견적 카탈로그 값 (2026-11-11 확인)
-  'ai-scent-soulmate': { input: ['touch'], output: ['print'], guestsPerHour: PERFUME.guestsPerTeamHour, staff: 2 }, // AI 향수 소울메이트
+  // 결과 전달 · 소요 시간 · 운영 인력 문구는 2026-11-21 사용자 확인
+  'ai-scent-soulmate': {
+    input: ['touch'], output: ['print'], guestsPerHour: PERFUME.guestsPerTeamHour, staff: 2,
+    text: {
+      output: { ko: '현장 조향 · 출력', en: 'Blended on site · printed' },
+      minutes: { ko: '약 2~5분 (현장 운영에 따라 조절)', en: 'About 2–5 min (adjusted on site)' },
+      staff: { ko: '조향사 1명 · 조수 1명부터', en: 'From 1 perfumer + 1 assistant' },
+    },
+  }, // AI 향수 소울메이트
   'ai-nail-designer': { input: ['camera', 'touch'], output: ['print', 'qr'] }, // AI 네일 디자이너
   'ai-sommelier': { input: ['touch'], output: ['print', 'qr'] }, // AI 소믈리에
   'ai-cocktail-creator': { input: ['touch'], output: ['print'] }, // AI 칵테일 크리에이터

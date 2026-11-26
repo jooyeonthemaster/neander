@@ -31,15 +31,6 @@ export interface PhotoBoothTemplate {
 
 export const PHOTO_BOOTH_TEMPLATES = [
   {
-    slug: 'ai-caricature-artist',
-    name: { ko: 'AI 캐리커처 아티스트', en: 'AI Caricature Artist' },
-    description: {
-      ko: '웹툰·팝아트·픽셀·스케치·수채화, 준비된 5가지 화풍으로 내 사진을 그려요.',
-      en: 'Turn your photo into one of five existing styles: webtoon, pop art, pixel art, sketch, or watercolor.',
-    },
-    appearance: 'caricature',
-  },
-  {
     slug: 'ai-hanbok-booth',
     name: { ko: 'AI 한복 포토부스', en: 'AI Hanbok Photo Booth' },
     description: {
@@ -75,14 +66,45 @@ export const PHOTO_BOOTH_TEMPLATES = [
     },
     appearance: 'idol',
   },
+  // 2026-11-27 배포 전 검수: 포토부스 라인업(B-01 · B-05)에 있는데 견적 테마 목록에 없어,
+  // 상세의 「견적 요청하기」로 들어오면 테마가 고르지 않은 채로 열렸다. 캐리커처는 키오스크 라인업(K-04)이라 여기서 뺐다.
   {
-    slug: 'ai-fan-photocard',
-    name: { ko: 'AI 팬 포토카드 메이커', en: 'AI Fan Photocard Maker' },
+    slug: 'ai-timecapsule-photo',
+    name: { ko: 'AI 타임캡슐 포토', en: 'AI Time Capsule Photo' },
     description: {
-      ko: '시즌 그리팅·월드투어·데뷔·홀로그램, 준비된 4가지 콘셉트로 나만의 포토카드 이미지를 만들어요.',
-      en: 'Create your own photocard image in four existing concepts: season greetings, world tour, debut, or hologram.',
+      ko: '지금 모습을 찍으면 AI가 10년 후·20년 후의 모습을 그려 4×6 사진으로 인화해요.',
+      en: 'Take a photo now and AI imagines you 10 and 20 years later, printed as a 4×6 photo.',
     },
-    appearance: 'photocard',
+    appearance: 'retro',
+  },
+  {
+    slug: 'ai-future-family',
+    name: { ko: 'AI 미래 가족 상상', en: 'AI Future Family' },
+    description: {
+      ko: '두 사람이 함께 찍으면 AI가 우리의 미래 가족 사진을 그려 4×6 사진으로 인화해요.',
+      en: 'Two people take a photo together and AI imagines their future family, printed as a 4×6 photo.',
+    },
+    appearance: 'wedding',
+  },
+  // 2026-11-26 사용자: AI 팬 포토카드 메이커는 프로그램에서 뺐다 (포트폴리오 · 사이트 전부)
+  // 사주 · 관상은 키오스크에서 포토부스로 옮겼다 (포트폴리오 B-02 · B-03, 영상판) — 그림이 없을 때 쓰는 모양은 전통(traditional)
+  {
+    slug: 'ai-fortune-robot',
+    name: { ko: 'AI 사주', en: 'AI Saju Reading' },
+    description: {
+      ko: '생년월일을 넣고 사진을 찍으면 관상감 관원이 사주를 풀어 주고, 사주 카드로 인화해요.',
+      en: 'Enter a birth date and take a photo; a royal astrologer reads your saju and it prints as a card.',
+    },
+    appearance: 'traditional',
+  },
+  {
+    slug: 'ai-face-reading',
+    name: { ko: 'AI 관상 분석', en: 'AI Face Reading' },
+    description: {
+      ko: '사진 한 장으로 도화서 화원이 얼굴을 읽어 관상을 풀어 주고, 4×6 사진으로 인화해요.',
+      en: 'From one photo, a court painter reads your face and the reading prints as a 4×6 photo.',
+    },
+    appearance: 'traditional',
   },
   {
     slug: 'ai-graduation-booth',

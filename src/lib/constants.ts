@@ -83,6 +83,22 @@ export const CONTACT = {
   },
 } as const;
 
+/**
+ * 전화번호 두 개 — 연락처를 적는 곳에는 둘 다, 이 이름 · 순서로 함께 적는다 (2026-11-26 사용자).
+ * 고객센터 = 유선 02-336-3368, 직통 = 휴대폰 010-8507-5121. 회사소개서 · 포트폴리오 PDF(output/experience-portfolio-2026-11-site)도 같다.
+ * 전화 걸기 버튼이 하나뿐인 곳(휴대폰 하단 바 등)은 직통으로 건다.
+ * 검색엔진용 회사 정보(JSON-LD)의 전화번호는 네이버 플레이스 등 다른 곳의 표기와 어긋나지 않게 그대로 둔다.
+ */
+export const PHONE_LINES = [
+  { key: 'center', ko: '고객센터', en: 'Customer center', number: CONTACT.phone, intl: CONTACT.phoneInternational },
+  { key: 'direct', ko: '직통', en: 'Direct', number: CONTACT.mobile, intl: CONTACT.mobileInternational },
+] as const;
+
+/** 「고객센터 02-336-3368 · 직통 010-8507-5121」 — 글 속에 번호를 적을 때 */
+export function phonesText(lang: 'ko' | 'en'): string {
+  return PHONE_LINES.map((p) => `${p[lang]} ${lang === 'ko' ? p.number : p.intl}`).join(' · ');
+}
+
 /* ─────────────────────────────────────────────────────────
    검색엔진 소유 확인 · 카카오톡 채널
    ───────────────────────────────────────────────────────── */

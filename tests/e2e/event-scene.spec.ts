@@ -2,16 +2,15 @@ import { expect, test, type Page } from '@playwright/test';
 import { enterExperienceStep, closePreviewOptions, toggleKioskExperience, nextPreviewStep, openPreviewOptions, removePreviewService, showOptionPage } from './helpers/quote-preview-options';
 import { SERVICE_ORDER, type Lang, type ServiceKey } from '../../src/lib/quote/catalog';
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
-import { calculateQuote, defaultOptions, sanitizeInput, type QuoteInput } from '../../src/lib/quote/engine';
+import { calculateQuote, sanitizeInput, type QuoteInput } from '../../src/lib/quote/engine';
+import { QUOTE_STORAGE_KEY } from '../../src/components/quote-studio/history';
 
-const FLOW_KEY = 'neander-quote-preview-flow-v1';
-const LIVE_KEY = 'neander-quote-v2';
 const physicalServices = SERVICE_ORDER.filter(key => ['acscent', 'photoBooth', 'rental'].includes(key));
-const saved = (page: Page): Promise<QuoteInput> => page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), FLOW_KEY);
+const saved = (page: Page): Promise<QuoteInput> => page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), QUOTE_STORAGE_KEY);
 const objects = (page: Page, service?: ServiceKey, kind?: string) => page.locator(`[data-testid="event-object"]${service ? `[data-service="${service}"]` : ''}${kind ? `[data-kind="${kind}"]` : ''}`);
 
 async function beginBlank(page: Page, lang: Lang) {
-  await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`${lang === 'en' ? '/en' : ''}/quote`, { waitUntil: 'domcontentloaded' });
   await nextPreviewStep(page);
   await nextPreviewStep(page);
   await expect(page.locator('[data-quote-step="2"]')).toBeVisible();
@@ -31,7 +30,7 @@ async function expectOverview(page: Page, active: ServiceKey, selected: readonly
   }
   await expect(page.getByTestId('event-service-custom')).toHaveCount(0);
   await expect(objects(page, 'custom')).toHaveCount(0);
-  await expect(page.getByTestId('quote-preview-lab').locator('img, canvas, svg image')).toHaveCount(0);
+  await expect(page.getByTestId('quote-studio').locator('img, canvas, svg image')).toHaveCount(0);
 }
 
 async function transforms(page: Page) {
@@ -147,14 +146,7 @@ for (const lang of ['ko', 'en'] as const) {
     expect(errors).toEqual([]);
   });
 
-  test(`${lang}: inquiry cards do not add equipment and the lab leaves the live draft unchanged`, async ({ page }) => {
-    const liveDraft = JSON.stringify(sanitizeInput({ days: 5, items: [defaultOptions('photoBooth')] }));
-    await page.addInitScript(({ key, value }) => {
-      if (!sessionStorage.getItem('event-scene-live-seeded')) {
-        localStorage.setItem(key, value);
-        sessionStorage.setItem('event-scene-live-seeded', '1');
-      }
-    }, { key: LIVE_KEY, value: liveDraft });
+  test(`${lang}: inquiry cards do not add equipment`, async ({ page }) => {
     await beginBlank(page, lang);
     for (const service of ['spatialDesign', 'mediaArt', 'custom']) {
       await page.getByTestId(`quote-add-${service}`).click();
@@ -169,36 +161,37 @@ for (const lang of ['ko', 'en'] as const) {
     await expect(page.getByTestId('event-scene')).toHaveAttribute('data-space', 'existing');
     await removePreviewService(page, 'acscent');
     await expect(page.getByTestId('event-scene')).toHaveAttribute('data-empty', 'true');
-    expect(await page.evaluate((key) => localStorage.getItem(key), LIVE_KEY)).toBe(liveDraft);
+    expect((await saved(page)).items).toEqual([]);
   });
 
 }
 
 test('maximum equipment quantities remain inside one shared illustration with every assigned experience intact', async ({ page }, testInfo) => {
   const input = sanitizeInput({ items: [
-    { key: 'acscent', options: { extraTeams: 2, analysisKiosks: 4 } },
+    // 보유 키오스크는 향수 분석용과 AI 키오스크를 합쳐 4대까지 (넘치면 분석용이 줄어든다)
+    { key: 'acscent', options: { extraTeams: 2, analysisKiosks: 1 } },
     { key: 'photoBooth', options: { booths: 3, wrapping: true } },
-    { key: 'rental', options: { kiosks: 4, printer: true, experienceSlugs: ['ai-personal-color', 'ai-sommelier', 'ai-face-reading', 'ai-travel-style'] } },
+    { key: 'rental', options: { kiosks: 3, printer: true, experienceSlugs: ['ai-personal-color', 'ai-sommelier', 'ai-palm-reading'] } },
   ] });
   await page.addInitScript(({ key, value }) => {
     if (!sessionStorage.getItem('max-event-scene-seeded')) {
       localStorage.setItem(key, value);
       sessionStorage.setItem('max-event-scene-seeded', '1');
     }
-  }, { key: FLOW_KEY, value: JSON.stringify(input) });
-  await page.goto('/quote-preview', { waitUntil: 'domcontentloaded' });
+  }, { key: QUOTE_STORAGE_KEY, value: JSON.stringify(input) });
+  await page.goto('/quote', { waitUntil: 'domcontentloaded' });
   await enterExperienceStep(page);
   await expect(page.getByTestId('event-scene-svg')).toHaveCount(1);
   for (const [service, kind, count] of [
-    ['acscent', 'team', 3], ['acscent', 'counter', 1], ['acscent', 'analysis-kiosk', 4],
-    ['photoBooth', 'photo-booth', 3], ['rental', 'kiosk', 4], ['rental', 'printer', 0],
+    ['acscent', 'team', 3], ['acscent', 'counter', 1], ['acscent', 'analysis-kiosk', 1],
+    ['photoBooth', 'photo-booth', 3], ['rental', 'kiosk', 3], ['rental', 'printer', 0],
   ] as const) await expect(objects(page, service, kind)).toHaveCount(count);
   await expect(page.getByTestId('event-scene-floor')).toHaveCount(1);
   await expect(page.getByTestId('event-scene')).toHaveAttribute('data-needs-placement', 'false');
   await expect(page.getByTestId('event-scene')).toHaveAttribute('data-space', 'existing');
   await expectSceneGeometry(page);
   const selectedExperiences = await objects(page, 'rental', 'kiosk').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-experience-slug')));
-  expect(selectedExperiences).toEqual(['ai-personal-color', 'ai-sommelier', 'ai-face-reading', 'ai-travel-style']);
+  expect(selectedExperiences).toEqual(['ai-personal-color', 'ai-sommelier', 'ai-palm-reading']);
   await priceParity(page, 'ko');
   await page.getByTestId('event-preview').screenshot({ path: testInfo.outputPath('maximum-combined-event.png'), style: 'nextjs-portal { display: none !important; }' });
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);

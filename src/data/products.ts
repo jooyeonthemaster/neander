@@ -22,13 +22,13 @@ export const PRODUCTS: ProductEntry[] = [
   },
   {
     key: 'photoBooth',
-    href: '/services?pillar=ai-photo',
+    href: '/services/ai-photo-booth',
     image: '/images/services/experiences/ai-celeb-lookalike.webp',
     caption: { ko: '운영 사례 · 평택 AI 페스타 2026', en: 'Pyeongtaek AI Festa 2026' },
   },
   {
     key: 'rental',
-    href: '/services?pillar=ai-diagnosis',
+    href: '/services/ai-kiosk',
     image: '/images/ai-experiences/ai-diagnosis.webp',
     caption: { ko: '연출 예시', en: 'Concept image' },
   },

@@ -1,367 +1,94 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
-import { QUOTE_HREF } from '@/lib/constants';
 import Image from 'next/image';
-import { motion } from 'motion/react';
-import { ScrollReveal, StaggerChildren, StaggerItem } from '@/components/animations';
+import { useLocale, useTranslations } from 'next-intl';
+import { CONTACT, PHONE_LINES, QUOTE_HREF } from '@/lib/constants';
+import { STORE_MAP_URL } from '@/data/site';
+import { Parallax, Reveal, Spotlight } from '@/components/fx';
+import { SectionHead } from '@/components/services/detail/SectionHead';
+import { Title } from '@/components/site/Title';
+import { ArrowLink, Btn } from '@/components/site/ui';
 import { cn } from '@/lib/utils';
 
 /* ─────────────────────────────────────────────────────────
-   Constants
+   B2B 무료 체험 안내 본문 (2026-11 개편)
+   매장 사진 → 매장 소개 → 예약 · 문의. 문구는 messages 의 experience.* 그대로.
+   전화는 고객센터 · 직통 두 번호를 함께 적는다 (constants.ts 의 PHONE_LINES, 2026-11-26).
    ───────────────────────────────────────────────────────── */
-const ACCENT_ID_MAP =
-  'https://map.naver.com/p/entry/place/1274492663?placePath=%252Fhome%253Fentry%253Dplt&searchType=place&lng=126.9267345&lat=37.5549328';
 
-
-const STORE_IMAGES = [
-  '/images/acscentid/1.png',
-  '/images/acscentid/2.png',
-  '/images/acscentid/3.png',
-];
-
-const KEY_COLOR = '#24ADB5';
-
-/* ── SVG Icons ────────────────────────────────────────── */
-function FlaskIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2" />
-      <path d="M8.5 2h7" />
-      <path d="M7 16.5h10" />
-    </svg>
-  );
-}
-
-function PhoneIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z" />
-    </svg>
-  );
-}
-
-function MailIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="4" width="20" height="16" rx="2" />
-      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-    </svg>
-  );
-}
-
-function MapPinIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  );
-}
-
-function ArrowRightIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 8h10M9 4l4 4-4 4" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 6 9 17l-5-5" />
-    </svg>
-  );
-}
+const STORE_IMAGES = ['/images/acscentid/1.png', '/images/acscentid/2.png', '/images/acscentid/3.png'];
 
 export function ExperienceContent() {
   const t = useTranslations('experience');
-  const tNav = useTranslations('nav');
+  const locale = useLocale();
+  const ko = locale !== 'en';
+  const features = [0, 1, 2, 3].map((i) => t(`accentId.features.${i}`));
 
   return (
     <>
-      {/* ── Store Gallery ──────────────────────────────── */}
-      <section className="relative bg-white">
-        <div className="container-wide py-16 lg:py-24">
-          <ScrollReveal className="mb-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-600 mb-2">
-              {t('galleryTitle')}
-            </p>
-          </ScrollReveal>
+      {/* ── 매장 사진 ─────────────────────────────────── */}
+      <section className="bg-ink">
+        <div className="wrap section-y">
+          <SectionHead no="01" label="STORE GALLERY" en={['INSIDE', 'THE STORE.']} ko={t('galleryTitle')} />
+          <div className="mt-14 grid gap-4 md:grid-cols-3 md:grid-rows-2 lg:gap-5">
+            {STORE_IMAGES.map((src, idx) => (
+              <Reveal key={src} variant="clip" delay={idx * 100} className={cn(idx === 0 ? 'md:col-span-2 md:row-span-2' : '')}>
+                <Parallax className={cn(idx === 0 ? 'aspect-[3/2] md:aspect-auto md:h-full md:min-h-[30rem]' : 'aspect-[3/2]')} strength={idx === 0 ? 5 : 3}>
+                  <Image src={src} alt={`${t('accentId.name')} — ${t('galleryTitle')} ${idx + 1}`} fill sizes={idx === 0 ? '(min-width: 768px) 60vw, 92vw' : '(min-width: 768px) 30vw, 92vw'} className="object-cover" />
+                </Parallax>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          <ScrollReveal>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
-              {STORE_IMAGES.map((src, idx) => (
-                <motion.div
-                  key={src}
-                  whileHover={{ y: -4, scale: 1.01 }}
-                  transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
-                  className={cn(
-                    'relative overflow-hidden rounded-2xl',
-                    // 큰 사진이 왼쪽 두 줄을 차지하고, 나머지 두 장은 오른쪽에 쌓인다
-                    idx === 0
-                      ? 'sm:col-span-2 sm:row-span-2 aspect-[16/10] sm:aspect-auto'
-                      : 'aspect-[4/3]',
-                  )}
-                >
-                  <Image
-                    src={src}
-                    alt={`AC'SCENT ID Store ${idx + 1}`}
-                    fill
-                    className="object-cover transition-transform duration-700 hover:scale-105"
-                    sizes={idx === 0 ? '(max-width: 640px) 100vw, 66vw' : '(max-width: 640px) 100vw, 33vw'}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/30 via-transparent to-transparent" />
-                </motion.div>
+      {/* ── 매장 소개 ─────────────────────────────────── */}
+      <section className="border-t border-paper/10 bg-ink">
+        <div className="wrap section-y">
+          <SectionHead no="02" label={ko ? 'FLAGSHIP STORE' : t('storesTitle').toUpperCase()} en={["AC'SCENT ID"]} ko={`${t('accentId.nameKo')} · ${t('accentId.tagline')}`} aside={t('storesSubtitle')} />
+          <div className="mt-14 grid gap-x-20 gap-y-12 lg:grid-cols-[1.1fr_1fr]">
+            <Reveal>
+              <p className="text-[clamp(1.15rem,1.9vw,1.6rem)] font-semibold leading-[1.6] tracking-[-0.03em] text-paper">{t('accentId.description')}</p>
+              <p className="mt-8"><ArrowLink href={STORE_MAP_URL} external>{t('viewMap')}</ArrowLink></p>
+            </Reveal>
+            <ul className="self-start border-t border-paper/15">
+              {features.map((feature, i) => (
+                <Reveal as="li" key={feature} delay={i * 70} className="flex items-baseline gap-6 border-b border-paper/15 py-5">
+                  <span className="t-label text-accent">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="text-[1.08rem] font-medium tracking-[-0.02em] text-paper/90">{feature}</span>
+                </Reveal>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 예약 · 문의 ───────────────────────────────── */}
+      <Spotlight as="section" className="overflow-hidden border-t border-paper/10 bg-ink">
+        <div className="wrap section-y relative text-center">
+          <Reveal><p className="t-label text-paper/55">BOOK A VISIT</p></Reveal>
+          <Title en={['COME AND', 'TRY IT.']} ko={t('ctaTitle')} size="h1" className="mt-7" />
+          <Reveal delay={120}><p className="mx-auto mt-8 max-w-xl text-[1.05rem] leading-relaxed text-paper/65">{t('ctaDescription')}</p></Reveal>
+          <Reveal delay={180} className="mt-10 flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-x-12 gap-y-5 sm:flex-row">
+              {PHONE_LINES.map((p) => (
+                <a key={p.key} href={`tel:${p.intl}`} className="group flex flex-col items-center gap-2" aria-label={`${t('ctaPhoneLabel')} — ${ko ? p.ko : p.en} ${p.number}`}>
+                  <span className="t-label !text-[0.7rem] text-paper/50">{ko ? p.ko : p.en.toUpperCase()}</span>
+                  <span className="font-display text-[clamp(1.6rem,3vw,2.5rem)] font-extrabold leading-none tracking-[0.01em] text-paper transition-colors group-hover:text-accent">{ko ? p.number : p.intl}</span>
+                </a>
               ))}
             </div>
-          </ScrollReveal>
+            <a href={`mailto:${CONTACT.email}`} className="font-display text-[clamp(1rem,1.8vw,1.35rem)] font-bold tracking-[0.04em] text-paper/60 transition-colors hover:text-paper" aria-label={`${t('ctaEmailLabel')} ${CONTACT.email}`}>
+              {CONTACT.email}
+            </a>
+          </Reveal>
+          <Reveal delay={240} className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            <Btn href="/contact" variant="fill" arrow>{ko ? '체험 문의하기' : 'Ask about a visit'}</Btn>
+            <Btn href={QUOTE_HREF}>{ko ? '온라인 견적' : 'Online estimate'}</Btn>
+          </Reveal>
+          <Reveal delay={300}><p className="mt-9 text-sm text-paper/45">{t('address')}</p></Reveal>
         </div>
-      </section>
-
-      {/* ── Store Details ─────────────────────────────── */}
-      <section className="relative overflow-hidden bg-neutral-50">
-        {/* Subtle grid */}
-        <div
-          className="absolute inset-0 opacity-[0.3]"
-          style={{
-            backgroundImage:
-              'linear-gradient(to right, #e4e4e7 1px, transparent 1px), linear-gradient(to bottom, #e4e4e7 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-          }}
-          aria-hidden="true"
-        />
-
-        <div className="relative container-wide py-16 lg:py-24">
-          <ScrollReveal className="text-center mb-12 lg:mb-16">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-neutral-900 leading-[1.1]">
-              {t('storesTitle')}
-            </h2>
-            <p className="mt-4 text-base sm:text-lg text-neutral-500 leading-relaxed max-w-2xl mx-auto">
-              {t('storesSubtitle')}
-            </p>
-          </ScrollReveal>
-
-          <StaggerChildren staggerDelay={0.15} className="mx-auto grid w-full max-w-3xl grid-cols-1 gap-6 lg:gap-8">
-            {/* AC'SCENT ID */}
-            <StaggerItem>
-              <StoreDetailCard
-                icon={<FlaskIcon />}
-                name={t('accentId.name')}
-                nameKo={t('accentId.nameKo')}
-                tagline={t('accentId.tagline')}
-                description={t('accentId.description')}
-                features={[
-                  t('accentId.features.0'),
-                  t('accentId.features.1'),
-                  t('accentId.features.2'),
-                  t('accentId.features.3'),
-                ]}
-                mapUrl={ACCENT_ID_MAP}
-                mapLabel={t('viewMap')}
-              />
-            </StaggerItem>
-          </StaggerChildren>
-        </div>
-      </section>
-
-      {/* ── CTA / Contact ─────────────────────────────── */}
-      <section className="relative overflow-hidden bg-neutral-950">
-        {/* Teal glow */}
-        <div
-          className="absolute left-1/2 top-0 -translate-x-1/2 h-[400px] w-[700px] rounded-full blur-[140px] transform-gpu"
-          style={{ background: 'radial-gradient(ellipse, rgba(36, 173, 181, 0.12) 0%, transparent 70%)' }}
-          aria-hidden="true"
-        />
-
-        {/* Noise */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-            backgroundRepeat: 'repeat',
-            backgroundSize: '128px 128px',
-          }}
-          aria-hidden="true"
-        />
-
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-teal-500/30 to-transparent" />
-
-        <div className="relative container-wide py-20 lg:py-28">
-          <ScrollReveal className="text-center mb-12">
-            <h2 className="font-[family-name:var(--font-display)] text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight">
-              {t('ctaTitle')}
-            </h2>
-            <p className="mt-4 max-w-lg mx-auto text-base sm:text-lg text-neutral-400 leading-relaxed">
-              {t('ctaDescription')}
-            </p>
-          </ScrollReveal>
-
-          <ScrollReveal>
-            <div className="max-w-2xl mx-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Phone */}
-                <a
-                  href="tel:+8223363368"
-                  className="group flex items-center gap-4 p-5 rounded-2xl border border-neutral-800 bg-neutral-900/60 backdrop-blur-sm transition-all duration-300 hover:border-teal-500/30 hover:shadow-lg hover:shadow-teal-500/5"
-                >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-teal-500/[0.08] text-teal-400 ring-1 ring-teal-500/20 transition-all duration-300 group-hover:bg-teal-500/[0.12]">
-                    <PhoneIcon />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-0.5">
-                      {t('ctaPhoneLabel')}
-                    </p>
-                    <p className="text-lg font-bold text-teal-400 group-hover:text-teal-300 transition-colors">
-                      {t('ctaPhone')}
-                    </p>
-                  </div>
-                </a>
-
-                {/* Email */}
-                <a
-                  href="mailto:ok@neander.co.kr"
-                  className="group flex items-center gap-4 p-5 rounded-2xl border border-neutral-800 bg-neutral-900/60 backdrop-blur-sm transition-all duration-300 hover:border-teal-500/30 hover:shadow-lg hover:shadow-teal-500/5"
-                >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-teal-500/[0.08] text-teal-400 ring-1 ring-teal-500/20 transition-all duration-300 group-hover:bg-teal-500/[0.12]">
-                    <MailIcon />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-0.5">
-                      {t('ctaEmailLabel')}
-                    </p>
-                    <p className="text-lg font-bold text-teal-400 group-hover:text-teal-300 transition-colors">
-                      {t('ctaEmail')}
-                    </p>
-                  </div>
-                </a>
-              </div>
-
-              {/* 문의 폼으로 가는 길 (전화·메일은 PC에서 눌러도 동작하지 않는 경우가 많다) */}
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                <Link
-                  href="/contact"
-                  className="inline-flex h-12 items-center justify-center rounded-xl bg-teal-500 px-7 text-sm font-semibold text-neutral-950 transition-colors hover:bg-teal-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
-                >
-                  {tNav('contact')}
-                </Link>
-                <Link
-                  href={QUOTE_HREF}
-                  className="inline-flex h-12 items-center justify-center rounded-xl border border-neutral-700 px-7 text-sm font-semibold text-neutral-200 transition-colors hover:border-neutral-500 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
-                >
-                  {tNav('quote')}
-                </Link>
-              </div>
-
-              {/* Address bar */}
-              <div className="mt-6 flex items-center justify-center gap-2 text-sm text-neutral-500">
-                <MapPinIcon className="shrink-0" />
-                <span>{t('address')}</span>
-              </div>
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
+      </Spotlight>
     </>
-  );
-}
-
-/* ── Store Detail Card ─────────────────────────────────── */
-function StoreDetailCard({
-  icon,
-  name,
-  nameKo,
-  tagline,
-  description,
-  features,
-  mapUrl,
-  mapLabel,
-}: {
-  icon: React.ReactNode;
-  name: string;
-  nameKo: string;
-  tagline: string;
-  description: string;
-  features: string[];
-  mapUrl: string;
-  mapLabel: string;
-}) {
-  return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
-      className={cn(
-        'group relative flex flex-col h-full rounded-2xl overflow-hidden',
-        'border border-neutral-200/80',
-        'bg-white',
-        'shadow-sm',
-        'transition-all duration-500',
-        'hover:shadow-xl hover:border-teal-200',
-      )}
-    >
-      {/* Top accent bar */}
-      <div className="h-1 w-full bg-teal-500 transition-all duration-500 group-hover:h-1.5" aria-hidden="true" />
-
-      {/* Hover glow */}
-      <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-        style={{
-          background: `radial-gradient(ellipse at 30% 20%, ${KEY_COLOR}0C 0%, transparent 50%)`,
-        }}
-        aria-hidden="true"
-      />
-
-      <div className="relative flex flex-col h-full p-7 sm:p-8 lg:p-9">
-        {/* Icon + Name */}
-        <div className="flex items-start gap-4 mb-5">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-500/[0.08] text-teal-600 ring-1 ring-teal-500/20 transition-all duration-500 group-hover:scale-110 group-hover:bg-teal-500/[0.12]">
-            {icon}
-          </div>
-          <div>
-            <h3 className="font-[family-name:var(--font-display)] text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight">
-              {name}
-            </h3>
-            <p className="text-sm text-neutral-400 mt-0.5">{nameKo}</p>
-          </div>
-        </div>
-
-        {/* Tagline */}
-        <p className="text-base sm:text-lg font-medium text-teal-600 mb-3">
-          {tagline}
-        </p>
-
-        {/* Description */}
-        <p className="text-sm sm:text-base text-neutral-600 leading-relaxed mb-6 flex-1">
-          {description}
-        </p>
-
-        {/* Features */}
-        <div className="space-y-2.5 mb-6">
-          {features.map((feature) => (
-            <div key={feature} className="flex items-center gap-2.5">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-500/[0.08] text-teal-600">
-                <CheckIcon />
-              </span>
-              <span className="text-sm text-neutral-700">{feature}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Map link */}
-        <div className="pt-4 border-t border-neutral-100">
-          <a
-            href={mapUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-teal-600 transition-all duration-300 hover:text-teal-700 hover:gap-3"
-          >
-            <span>{mapLabel}</span>
-            <ArrowRightIcon className="transition-transform duration-300 group-hover:translate-x-1.5" />
-          </a>
-        </div>
-      </div>
-    </motion.div>
   );
 }

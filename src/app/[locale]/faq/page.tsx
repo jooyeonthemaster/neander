@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { Accordion } from '@/components/ui';
-import { ScrollReveal } from '@/components/animations';
-import { Link } from '@/i18n/navigation';
-import { QUOTE_HREF } from '@/lib/constants';
 import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { Faq } from '@/components/site/Faq';
+import { PageHero } from '@/components/site/PageHero';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -33,12 +32,27 @@ export default async function FaqPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'faq' });
-  const tContact = await getTranslations({ locale, namespace: 'contact' });
-  const tNav = await getTranslations({ locale, namespace: 'nav' });
 
   const items = QUESTION_KEYS.map((key) => ({
-    title: t(`items.${key}.question`),
-    content: t(`items.${key}.answer`),
+    q: t(`items.${key}.question`),
+    a: t(`items.${key}.answer`),
+    // 결과보고서 질문에는 가상 행사로 만든 샘플 보고서 첫 장을 붙인다
+    media:
+      key === 'q6' ? (
+        <figure className="max-w-sm">
+          <Image
+            src="/images/faq/result-report-sample-p1.webp"
+            alt={t('items.q6.imageAlt')}
+            width={1000}
+            height={1414}
+            sizes="(max-width: 640px) 100vw, 384px"
+            className="w-full border border-paper/15"
+          />
+          <figcaption className="mt-2.5 text-xs leading-relaxed text-paper/50">
+            {t('items.q6.imageCaption')}
+          </figcaption>
+        </figure>
+      ) : undefined,
   }));
 
   return (
@@ -50,57 +64,25 @@ export default async function FaqPage({ params }: Props) {
           '@type': 'FAQPage',
           mainEntity: items.map((item) => ({
             '@type': 'Question',
-            name: item.title,
-            acceptedAnswer: { '@type': 'Answer', text: item.content },
+            name: item.q,
+            acceptedAnswer: { '@type': 'Answer', text: item.a },
           })),
         }}
       />
       {/* Hero */}
-      <section className="bg-slate-950 pb-20 pt-32 sm:pb-28 sm:pt-40">
-        <div className="container-wide">
-          <h1 className="font-display text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-            {t('title')}
-          </h1>
-          <p className="mt-4 max-w-2xl text-lg text-neutral-400">
-            {t('subtitle')}
-          </p>
-        </div>
-      </section>
+      <PageHero
+        id="faq-title"
+        label="FAQ"
+        en={['QUESTIONS.']}
+        ko={t('title')}
+        lead={t('subtitle')}
+        size="h1"
+      />
 
-      {/* Questions */}
-      <section className="py-20 sm:py-28">
-        <div className="container-wide">
-          <div className="mx-auto max-w-3xl">
-            <ScrollReveal>
-              <Accordion items={items} />
-            </ScrollReveal>
-
-            {/* 답이 없을 때 나갈 길 */}
-            <ScrollReveal>
-              <div className="mt-12 rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center">
-                <p className="text-base font-semibold text-slate-900">
-                  {tContact('title')}
-                </p>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                  {tContact('subtitle')}
-                </p>
-                <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                  <Link
-                    href="/contact"
-                    className="inline-flex h-11 items-center justify-center rounded-lg bg-teal-600 px-6 text-sm font-medium text-white transition-colors hover:bg-teal-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2"
-                  >
-                    {tNav('contact')}
-                  </Link>
-                  <Link
-                    href={QUOTE_HREF}
-                    className="inline-flex h-11 items-center justify-center rounded-lg border-2 border-slate-300 px-6 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
-                  >
-                    {tNav('quote')}
-                  </Link>
-                </div>
-              </div>
-            </ScrollReveal>
-          </div>
+      {/* Questions — 답이 없을 때 나갈 길(문의 · 견적)은 바닥글의 문의 구역이 맡는다 */}
+      <section className="bg-ink pb-[clamp(4rem,9vw,8rem)] pt-4">
+        <div className="wrap">
+          <Faq items={items} defaultOpen={null} className="max-w-5xl" />
         </div>
       </section>
     </div>

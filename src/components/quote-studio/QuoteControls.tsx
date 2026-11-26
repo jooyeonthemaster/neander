@@ -108,7 +108,9 @@ const FieldContext = createContext<{ label: string; labelId: string; hintId?: st
 export function Field({ label, hint, info, price, children }: { label: string; hint?: ReactNode; info?: string; price?: Price; children: ReactNode }) {
   const id = useId();
   const labelId = `${id}-label`;
-  const hintId = hint ? `${id}-hint` : undefined;
+  // 칸 아래 작은 설명은 보여 주지 않는다 (2026-11-21 사용자) — hint 는 받아도 그리지 않는다
+  void hint;
+  const hintId = undefined;
   const controls = Children.toArray(children);
   const firstControl = controls.find((child) => isValidElement<{ id?: string }>(child) && child.props.id);
   const controlId = isValidElement<{ id?: string }>(firstControl) ? firstControl.props.id : undefined;
@@ -129,7 +131,6 @@ export function Field({ label, hint, info, price, children }: { label: string; h
           }
           return child;
         })}
-        {hint && <p id={hintId} className="text-xs leading-relaxed text-slate-500">{hint}</p>}
       </HoverInfo>
     </FieldContext.Provider>
   );

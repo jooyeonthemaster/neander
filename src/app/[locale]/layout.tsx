@@ -78,7 +78,7 @@ function organizationJsonLd(locale: string) {
     logo: `${SITE_URL}/icon.png`,
     email: CONTACT.email,
     telephone: CONTACT.phoneInternational,
-    foundingDate: '2022',
+    foundingDate: '2023',
     address: {
       '@type': 'PostalAddress',
       streetAddress: locale === 'en' ? '1F, 10-6, Dongmak-ro 36-gil' : '독막로36길 10-6 1층',
@@ -114,7 +114,7 @@ export default async function LocaleLayout({
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
-      <body className="min-h-screen overflow-x-hidden bg-white font-body text-neutral-900 antialiased">
+      <body className="theme-dark min-h-screen overflow-x-hidden bg-ink font-body text-paper antialiased">
         <script
           type="application/ld+json"
           // JSON.stringify 결과의 '<'를 이스케이프해 스크립트 태그가 닫히지 않게 한다
@@ -122,6 +122,10 @@ export default async function LocaleLayout({
             __html: JSON.stringify(organizationJsonLd(locale)).replace(/</g, '\\u003c'),
           }}
         />
+        {/* 스크롤 등장 효과는 스크립트가 켜 준다 — 스크립트가 꺼진 브라우저에서는 처음부터 다 보이게 */}
+        <noscript>
+          <style>{'[data-reveal],[data-reveal]>.rd-clip,[data-lines] [data-line]{opacity:1!important;transform:none!important;clip-path:none!important}'}</style>
+        </noscript>
         <NextIntlClientProvider messages={messages}>
           <SmoothScrollProvider>
             <CustomCursor />

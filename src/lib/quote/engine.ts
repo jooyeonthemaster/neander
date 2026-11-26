@@ -10,7 +10,7 @@ import { normalizePyeong, type AreaUnit } from './space-area';
    견적 계산 엔진 — 화면과 PDF가 같은 결과를 내도록 순수 함수로 둔다.
    ───────────────────────────────────────────────────────── */
 
-export interface PerfumeOptions { guests: number; volume: '10ml' | '50ml'; extraTeams: number; /** 자동 증원 전 고객이 선택한 추가 팀 수. 자동 증원이 필요할 때만 저장한다. */ requestedExtraTeams?: number; customScent: boolean; premiumPackaging: boolean; /** 전용 디자인 단박스 (300명 이상) — premiumPackaging 대신 */ customBox?: boolean; /** 분석용 AI 키오스크 대수 (0 = QR 웹 분석) */ analysisKiosks?: number }
+export interface PerfumeOptions { guests: number; /** 담은 직후 — 향수 인원을 아직 직접 적지 않았다 (2026-11-23: 행사 인원을 그대로 쓰지 않고 고객이 적게 한다) */ guestsPending?: boolean; volume: '10ml' | '50ml'; extraTeams: number; /** 자동 증원 전 고객이 선택한 추가 팀 수. 자동 증원이 필요할 때만 저장한다. */ requestedExtraTeams?: number; customScent: boolean; premiumPackaging: boolean; /** 전용 디자인 단박스 (300명 이상) — premiumPackaging 대신 */ customBox?: boolean; /** 분석용 AI 키오스크 대수 (0 = QR 웹 분석) */ analysisKiosks?: number }
 export interface PhotoBoothOptions { booths: number; extraStyles: number; extraPrintRolls: number; photocard: boolean; wrapping: boolean; customStyles?: number; custom?: BoothCustom; /** Chosen existing demo templates; omitted for legacy quantity-only estimates. */ templateSlugs?: string[] }
 export interface KioskOptions { mode: 'event' | 'monthly'; kiosks: number; months: number; /** 쓰지 않음 — 영수증형 프린터는 키오스크에 내장돼 선택·비용이 없다. 예전 저장값 호환용으로 늘 false */ printer: boolean; extraContents: number; custom?: KioskCustom; experienceSlug?: string; /** One experience per kiosk, in kiosk-number order. Empty slots are undecided. */ experienceSlugs?: string[] }
 export interface MediaArtOptions { grade: 'standard' | 'premium' | 'fullCustom'; extraSensors: number; sensorType?: 'image' | 'depth' }
@@ -93,23 +93,37 @@ export function getPerfumeStaffing(options: Pick<PerfumeOptions, 'guests' | 'ext
   };
 }
 
+/** 키오스크는 보유 대수(KIOSK.maxKiosks)를 AI 키오스크와 AI 향수 분석용 키오스크가 나눠 쓴다.
+ *  `key` 항목이 쓸 수 있는 대수 = 보유 대수 − 다른 항목이 쓰는 대수 (2026-11-22: 4대를 넘겨 고를 수 없게) */
+export function kioskRoom(input: Pick<QuoteInput, 'items'>, key: 'rental' | 'acscent'): number {
+  const used = input.items.reduce((n, i) => n + (key !== 'rental' && i.key === 'rental' ? i.options.kiosks : key !== 'acscent' && i.key === 'acscent' ? (i.options.analysisKiosks ?? 0) : 0), 0);
+  return Math.max(0, KIOSK.maxKiosks - used);
+}
+
 /** Resolve teams in the stored/UI model as well as pricing, keeping SVG headcount
- * and summaries in sync. Legacy extraTeams remain the customer's preference. */
+ * and summaries in sync. Legacy extraTeams remain the customer's preference.
+ * 키오스크 합계도 보유 대수 안으로 맞춘다 — 넘치면 향수 분석용 키오스크를 줄인다(AI 키오스크는 최소 1대라서). */
 export function normalizePerfumeStaffing(input: QuoteInput): QuoteInput {
+  const analysisRoom = kioskRoom(input, 'acscent');
   return { ...input, items: input.items.map((item) => {
     if (item.key !== 'acscent') return item;
     const staffing = getPerfumeStaffing(item.options, input);
     const options = { ...item.options, extraTeams: staffing.teams - PERFUME.includedTeams };
+    if ((options.analysisKiosks ?? 0) > analysisRoom) options.analysisKiosks = analysisRoom;
     if (staffing.automaticTeams > 0) options.requestedExtraTeams = staffing.requestedExtraTeams;
     else delete options.requestedExtraTeams;
     return { ...item, options };
   }) };
 }
 
-export function defaultOptions(key: ServiceKey, attendees = 100): QuoteItem {
+/** perfumeGuests: 향수 인원을 이미 알 때만 넘긴다 (미리 짜 둔 구성 · 테스트). 견적 화면에서 담을 때는 넘기지 않는다 */
+export function defaultOptions(key: ServiceKey, perfumeGuests?: number): QuoteItem {
   switch (key) {
     case 'acscent':
-      return { key, options: { guests: Math.max(PERFUME.minGuests, Math.min(attendees, 5000)), volume: '10ml', extraTeams: 0, customScent: false, premiumPackaging: false } };
+      // 향수 인원은 행사 인원과 따로, 고객이 직접 적는다 (2026-11-23) — 적기 전에는 최소 인원(최소 금액)으로 두고 '미입력'으로 표시한다
+      return { key, options: perfumeGuests === undefined
+        ? { guests: PERFUME.minGuests, guestsPending: true, volume: '10ml', extraTeams: 0, customScent: false, premiumPackaging: false }
+        : { guests: Math.max(PERFUME.minGuests, Math.min(perfumeGuests, 5000)), volume: '10ml', extraTeams: 0, customScent: false, premiumPackaging: false } };
     case 'photoBooth':
       return { key, options: { booths: 1, extraStyles: 0, extraPrintRolls: 0, photocard: false, wrapping: false } };
     case 'rental':
@@ -139,6 +153,7 @@ export function sanitizeInput(raw: unknown): QuoteInput {
       case 'acscent':
         items.push({ key, options: {
           guests: clampInt(o.guests, PERFUME.minGuests, 5000, 100),
+          ...(o.guestsPending === true ? { guestsPending: true } : {}),
           volume: o.volume === '50ml' ? '50ml' : '10ml',
           extraTeams: clampInt(o.extraTeams, 0, Number.MAX_SAFE_INTEGER - PERFUME.includedTeams, 0),
           ...(o.requestedExtraTeams === undefined ? {} : { requestedExtraTeams: clampInt(o.requestedExtraTeams, 0, Number.MAX_SAFE_INTEGER - PERFUME.includedTeams, 0) }),
@@ -288,7 +303,7 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
         const perfumeSubtotal = cost.amount + travel * teams * days;
         if (perfumeSubtotal < minimum) {
           lines.push({ service: 'acscent', label: L('최소 금액 보정', 'Minimum charge adjustment'), detail: L(
-            `AI 향수 체험 최소 금액 ${won(minimum, lang)}에 맞춤`,
+            `AI 조향사 최소 금액 ${won(minimum, lang)}에 맞춤`,
             `Brought up to the AI Perfume minimum of ${won(minimum, lang)}`), amount: minimum - perfumeSubtotal });
         }
         if (o.customScent) lines.push({ service: 'acscent', label: L('커스텀 향 디자인', 'Custom scent design'), detail: L('브랜드 전용 향 개발', 'Signature scent for the brand'), amount: PERFUME.customScent });
@@ -317,7 +332,7 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
         }
         if (staffing.requiresConsultation) {
           warnings.push(L(
-            `AI 향수 체험: 조향 ${teams}팀을 선택했습니다. 기본 운영 규모(${PERFUME.standardTeams}팀)를 초과해 상담이 필요합니다. 선택한 팀 수의 출장비를 가견적에 반영했으며, 인력 배치·운영 계획과 최종 금액은 상담 후 확정합니다.`,
+            `AI 조향사: 조향 ${teams}팀을 선택했습니다. 기본 운영 규모(${PERFUME.standardTeams}팀)를 초과해 상담이 필요합니다. 선택한 팀 수의 출장비를 가견적에 반영했으며, 인력 배치·운영 계획과 최종 금액은 상담 후 확정합니다.`,
             `AI Perfume: ${teams} perfumer teams selected. This exceeds our standard ${PERFUME.standardTeams}-team setup and requires consultation. Travel fees for all selected teams are included in this estimate; staffing, the operating plan and final price will be confirmed after consultation.`));
         }
         break;
@@ -399,11 +414,7 @@ export function calculateQuote(input: QuoteInput, lang: Lang = 'ko'): QuoteResul
   }
 
   const hasOnsite = input.items.some((i) => !isConsultationService(i.key) && !(i.key === 'rental' && i.options.mode === 'monthly'));
-  // 키오스크는 보유 대수 안에서만 쓸 수 있다 (AI 키오스크 + 분석용 키오스크)
-  const kioskTotal = input.items.reduce((n, i) => n + (i.key === 'rental' ? i.options.kiosks : i.key === 'acscent' ? (i.options.analysisKiosks ?? 0) : 0), 0);
-  if (kioskTotal > KIOSK.maxKiosks) warnings.push(L(
-    `키오스크가 모두 ${kioskTotal}대입니다. 보유 대수(${KIOSK.maxKiosks}대)를 넘는 부분은 상담이 필요합니다.`,
-    `${kioskTotal} kiosks requested in total; we have ${KIOSK.maxKiosks}. The rest needs a consultation.`));
+  // 키오스크 합계는 normalizePerfumeStaffing 이 보유 대수 안으로 맞추므로 따로 경고하지 않는다 (2026-11-22)
   if (hasOnsite && input.setupDayBefore) {
     lines.push({ service: 'common', label: L('전날 사전 설치', 'Setup the day before'), detail: L('2인 · 행사 전날 설치', '2 people · day before the event'), amount: COMMON.setupDayBefore });
   }
@@ -468,8 +479,12 @@ export function startingPrice(key: ServiceKey): number {
 }
 
 /** 체험(slug)에서 견적으로 넘어올 때 미리 담을 서비스 */
+/** 체험서비스 포트폴리오에서 포토부스 프로그램인 것 — 분류(pillar)가 운세 · 크리에이티브여도 포토부스 가격 · 견적 (2026-11-26 사용자) */
+const BOOTH_PROGRAM_SLUGS = new Set(['ai-fortune-robot', 'ai-face-reading', 'ai-traditional-painter']);
+
 export function serviceForExperience(slug: string, pillar: string | undefined): ServiceKey | null {
   if (slug === 'ai-scent-soulmate') return 'acscent';
+  if (BOOTH_PROGRAM_SLUGS.has(slug)) return 'photoBooth';
   if (!pillar) return null;
   if (pillar === 'ai-photo') return 'photoBooth';
   if (pillar === 'ai-immersive') return 'mediaArt';

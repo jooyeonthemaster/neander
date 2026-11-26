@@ -171,7 +171,7 @@ export default function QuoteAnalyticsPage() {
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         <Kpi label="견적 여정" value={formatNumber(stats.journeys)} hint={`방문자 ${formatNumber(stats.visitors)}명${visitors === 'external' && internalCount ? ` · 내부 ${internalCount}건 제외` : ''}`} />
-        <Kpi label="발급·요청 전환율" value={formatPercent(share(stats.submitted, stats.journeys))} hint={`가견적서 ${stats.pdf} · 상담 요청 ${stats.request}`} />
+        <Kpi label="발급·요청 전환율" value={formatPercent(share(stats.submitted, stats.journeys))} hint={`가견적서 ${stats.pdf} · 보고서 ${stats.report} · 상담 요청 ${stats.request}`} />
         <Kpi label="중간 이용 시간" value={formatDuration(stats.medianActiveMs)} hint="탭을 숨긴 시간 제외" />
         <Kpi label="평균 최종 견적" value={stats.meanFinalTotal ? `${formatNumber(Math.round(stats.meanFinalTotal / 10_000))}만원` : '-'} hint="체험을 담은 여정, 부가세 포함" />
         <Kpi label="옵션 창을 연 여정" value={formatPercent(share(stats.funnel[4]?.value ?? 0, base))} hint="3단계에서 옵션을 살펴본 비율" />

@@ -1,8 +1,7 @@
 import { expect, type Page } from '@playwright/test';
-import { KIOSK_EXPERIENCES } from '../../../src/lib/quote/kiosk-experiences';
-import { getExperienceBySlug } from '../../../src/data/experiences';
+import { QUOTE_KIOSK_EXPERIENCES } from '../../../src/data/product-lines';
 
-const publicKioskExperiences = KIOSK_EXPERIENCES.filter((experience) => getExperienceBySlug(experience.slug));
+const publicKioskExperiences = QUOTE_KIOSK_EXPERIENCES;
 
 /** A restored draft opens on event details, just like a new quote. */
 export async function enterExperienceStep(page: Page) {
@@ -26,7 +25,10 @@ export async function closePreviewOptions(page: Page) {
 
 export async function openPreviewOptions(page: Page, service: string) {
   const panel = page.getByTestId(`quote-options-${service}`);
-  if (await page.getByTestId('quote-options-popover').isVisible() && await panel.isVisible()) return panel;
+  if (await page.getByTestId('quote-options-popover').isVisible() && await panel.isVisible()) {
+    if (service === 'acscent') await fillPerfumeGuests(page, 100);
+    return panel;
+  }
   await closePreviewOptions(page);
   const add = page.getByTestId(`quote-add-${service}`);
   const edit = page.getByTestId(`quote-edit-${service}`);
@@ -35,7 +37,22 @@ export async function openPreviewOptions(page: Page, service: string) {
   await (await add.isVisible() ? add : edit).click();
   await expect(page.getByTestId('quote-options-popover')).toBeVisible();
   await expect(panel).toBeVisible();
+  // 2026-11-23: AI 조향사를 담으면 향수 인원을 직접 적어야 한다 — 테스트는 예전 기본값(100명)을 고른다
+  if (service === 'acscent') await fillPerfumeGuests(page, 100);
   return panel;
+}
+
+/** AI 조향사 인원 입력 칸이 떠 있으면 인원을 고른다 (이미 적었으면 아무것도 하지 않는다) */
+export async function fillPerfumeGuests(page: Page, guests: number) {
+  const prompt = page.getByTestId('perfume-guests-prompt');
+  if (!(await prompt.isVisible())) return;
+  const chip = prompt.getByTestId(`perfume-guests-${guests}`);
+  if (await chip.count()) await chip.click();
+  else {
+    await prompt.locator('#p-guests').fill(String(guests));
+    await prompt.locator('#p-guests').press('Enter');
+  }
+  await expect(prompt).toHaveCount(0);
 }
 
 export async function showOptionPage(page: Page, service: string, id: string) {
@@ -130,4 +147,82 @@ export async function toggleKioskExperience(page: Page, slug: string, lang: 'ko'
 export async function shiftKioskExperience(page: Page, slug: string, delta: 1 | -1) {
   await showOptionPage(page, 'rental', 'kiosk-1');
   await page.getByTestId(`kiosk-distribution-${delta > 0 ? 'more' : 'less'}-${slug}`).click();
+}
+
+/* ── 마지막 단계(가견적서 · 보고서 · 상담 요청) ── */
+
+/** The fake estimate the mocked /api/quote-pdf returns. */
+export const FAKE_ESTIMATE = { no: 'E2E-TEST-0001', token: 'e2e-test-only-token' } as const;
+
+/**
+ * Never let a test issue a real estimate or write an inquiry to production Firestore:
+ * /api/quote-pdf answers with a fake PDF (or {no, token} for ?mode=token), Firestore
+ * writes and the inquiry e-mail notification are aborted. Returns what was attempted.
+ */
+export async function mockQuoteSubmission(page: Page) {
+  const estimates: { mode: 'pdf' | 'token'; body: { input?: unknown; lang?: string; recipient?: Record<string, string> } }[] = [];
+  const blockedWrites: string[] = [];
+  await page.route(url => url.hostname === 'firestore.googleapis.com' && /\/Write\/|:commit$|:batchWrite$/.test(url.pathname), route => {
+    blockedWrites.push(route.request().url());
+    return route.abort();
+  });
+  await page.route('**/api/inquiry-notify**', route => {
+    blockedWrites.push(route.request().url());
+    return route.abort();
+  });
+  await page.route('**/api/quote-pdf**', route => {
+    const request = route.request();
+    const mode = new URL(request.url()).searchParams.get('mode') === 'token' ? 'token' : 'pdf';
+    estimates.push({ mode, body: request.postDataJSON() });
+    if (mode === 'token') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(FAKE_ESTIMATE) });
+    return route.fulfill({
+      status: 200, contentType: 'application/pdf', body: '%PDF-1.4\n% e2e fake estimate\n%%EOF\n',
+      headers: { 'X-Estimate-No': FAKE_ESTIMATE.no, 'X-Estimate-Token': FAKE_ESTIMATE.token },
+    });
+  });
+  return { estimates, blockedWrites };
+}
+
+/** 「가견적서 (PDF)」 tile → the popup form (name · e-mail · company · phone · consent). */
+export async function openEstimateForm(page: Page) {
+  // 2026-11-23: 가견적서도 팝업에서 연락처를 받는다
+  await page.getByTestId('quote-final-estimate').click();
+  const form = page.getByTestId('quote-request-modal').locator('form');
+  await expect(form).toBeVisible();
+  await expect(form.locator('button[type="submit"][value="pdf"]')).toBeVisible();
+  return form;
+}
+
+/** 「보고서」 tile → modal with the format choice (한글 파일 · PDF) and the contact fields. */
+export async function openReportForm(page: Page) {
+  await page.getByTestId('quote-final-report').click();
+  const form = page.getByTestId('quote-request-modal').locator('form');
+  await expect(form).toBeVisible();
+  await expect(form.locator('button[type="submit"][value="report"]')).toBeVisible();
+  return form;
+}
+
+/** 「상담 요청」 tile → modal with the full request form. */
+export async function openRequestForm(page: Page, lang: 'ko' | 'en') {
+  await page.getByTestId('quote-final-request').click();
+  const modal = page.getByTestId('quote-request-modal');
+  await expect(modal).toBeVisible();
+  // 2026-11-23: 고르는 단계 없이 입력 칸이 바로 열린다 (전화는 같은 화면 위쪽 한 줄)
+  void lang;
+  const form = modal.locator('form');
+  await expect(form).toBeVisible();
+  await expect(form.locator('button[type="submit"][value="request"]')).toBeVisible();
+  return { modal, form };
+}
+
+/**
+ * Full option summaries of the 「지금까지 고른 견적」 sidebar, one string per item.
+ * The sidebar shows only the first two parts plus 「외 N개」 / "+N more"; the full list
+ * is in the paragraph's title attribute (2026-11-22).
+ */
+export async function sidebarOptionSummaries(page: Page): Promise<string[]> {
+  return page.locator('aside ul > li').evaluateAll(items => items.flatMap(item => {
+    const summary = item.querySelectorAll(':scope > div > p')[2];
+    return summary ? [summary.getAttribute('title') ?? summary.textContent ?? ''] : [];
+  }));
 }

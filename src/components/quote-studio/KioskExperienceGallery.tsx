@@ -5,7 +5,15 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Lang } from '@/lib/quote/catalog';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import { getProgramScreen } from '@/data/program-previews';
 import { KioskExperienceArt } from './KioskExperienceArt';
+
+/** 서비스 소개 카드와 같은 실제 프로그램 화면 — 캡처가 없으면 예전 그림 */
+function ExperienceThumb({ slug }: { slug: string }) {
+  const src = getProgramScreen(slug, 'kiosk');
+  return src ? <Image src={src} alt="" fill sizes="52px" className="object-cover object-top" /> : <KioskExperienceArt slug={slug} className="h-full w-full" />;
+}
 
 const PAGE_SIZE = 4;
 
@@ -52,11 +60,11 @@ export function KioskExperienceGallery({ number, value, experiences, lang, onCha
   };
 
   const selectionSummary = multiple ? <>
-      <p aria-live="polite" aria-atomic="true" className={cn("min-w-0 flex-1 text-[10px] leading-relaxed text-teal-800", dense && "truncate")}>{chosenLabels.length ? L(`${chosenLabels.length}종 선택${full && limit > 1 ? ' · 최대' : ''}`, `${chosenLabels.length} chosen${full && limit > 1 ? ' · max' : ''}`) : L('여러 개 고를 수 있어요. 미정이면 상담 때 정해요.', 'Pick one or more, or decide later.')}</p>
+      <p aria-live="polite" aria-atomic="true" className={cn("min-w-0 flex-1 text-[10px] leading-relaxed text-teal-800", dense && "truncate")}>{chosenLabels.length ? L(`${chosenLabels.length}종 선택${full && limit > 1 ? ' · 최대' : ''}`, `${chosenLabels.length} chosen${full && limit > 1 ? ' · max' : ''}`) : ''}</p>
       {chosenLabels.length > 0 && <button type="button" data-testid={`kiosk-experience-reset-${number}`} onClick={onClear}
         className={cn('shrink-0 rounded px-1 text-[10px] font-medium text-teal-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-teal-600 touch:min-h-11', dense ? 'min-h-6' : 'min-h-7')}>{L('모두 상담 후 결정', 'Decide later')}</button>}
   </> : <>
-      <p aria-live="polite" aria-atomic="true" className={cn("min-w-0 flex-1 text-[10px] leading-relaxed text-teal-800", dense && "truncate")}>{selected ? L(`선택: ${selected.label}`, `Selected: ${selected.label}`) : L('미정으로 넘어가도 괜찮아요. 상담할 때 함께 정해요.', 'You can decide later with our help.')}</p>
+      <p aria-live="polite" aria-atomic="true" className={cn("min-w-0 flex-1 text-[10px] leading-relaxed text-teal-800", dense && "truncate")}>{selected ? L(`선택: ${selected.label}`, `Selected: ${selected.label}`) : ''}</p>
       {selected && <button type="button" data-testid={`kiosk-experience-reset-${number}`} onClick={() => onChange('')}
         className={cn('shrink-0 rounded px-1 text-[10px] font-medium text-teal-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-teal-600 touch:min-h-11', dense ? 'min-h-6' : 'min-h-7')}>{L('상담 후 결정', 'Decide later')}</button>}
   </>;
@@ -121,8 +129,8 @@ export function KioskExperienceGallery({ number, value, experiences, lang, onCha
                   else regionRef.current?.querySelectorAll<HTMLButtonElement>('[role="radio"]')[nextIndex % PAGE_SIZE]?.focus({ preventScroll: true });
                 }}
                 className="flex h-full w-full items-center gap-2 pr-2 text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-teal-600">
-                <span aria-hidden="true" className="relative flex h-full w-[52px] shrink-0 items-center overflow-hidden bg-[#f7f5f0]">
-                  <KioskExperienceArt slug={experience.value} className="h-full w-full" />
+                <span aria-hidden="true" className="relative flex h-full w-[52px] shrink-0 items-center overflow-hidden bg-slate-900">
+                  <ExperienceThumb slug={experience.value} />
                   {chosen && <span className="absolute left-1 top-1 rounded-full bg-teal-600 p-0.5 text-white"><Check size={11} /></span>}
                 </span>
                 <span className="flex h-full min-w-0 flex-1 items-center py-2">

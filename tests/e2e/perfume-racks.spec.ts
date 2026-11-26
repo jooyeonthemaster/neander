@@ -5,13 +5,13 @@ import { enterExperienceStep, closePreviewOptions, showOptionPage } from './help
 test('participant count adds scent racks and widens tables in overview and detail', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  const key = 'neander-quote-preview-flow-v1';
+  const key = 'neander-quote-v2';
   await page.addInitScript(key => localStorage.setItem(key, JSON.stringify({ items: [
     { key: 'acscent', options: { guests: 50, extraTeams: 1 } },
     { key: 'spatialDesign', options: { size: 'booth6x3' } },
     { key: 'photoBooth', options: {} }, { key: 'rental', options: {} },
   ] })), key);
-  await page.goto('/quote-preview');
+  await page.goto('/quote');
   await enterExperienceStep(page);
   const viewport = page.getByTestId('preview-canvas');
   const height = (await viewport.boundingBox())!.height;

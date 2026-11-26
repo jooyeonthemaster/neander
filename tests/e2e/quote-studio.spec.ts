@@ -2,7 +2,7 @@ import { test, expect, type Locator, type Page } from '@playwright/test';
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
 import { type Lang } from '../../src/lib/quote/catalog';
 import { calculateQuote, sanitizeInput, type QuoteInput } from '../../src/lib/quote/engine';
-import { closePreviewOptions, enterExperienceStep, nextPreviewStep, openPreviewOptions, showOptionPage, toggleKioskExperience } from './helpers/quote-preview-options';
+import { closePreviewOptions, enterExperienceStep, nextPreviewStep, openEstimateForm, openPreviewOptions, openRequestForm, showOptionPage, toggleKioskExperience } from './helpers/quote-preview-options';
 
 const STORAGE_KEY = 'neander-quote-v2';
 const stage = (page: Page, step: number) => page.locator(`[data-quote-step="${step}"]`);
@@ -110,6 +110,8 @@ test('the calendar supports typed dates, keyboard selection and clearing', async
   expect(bounds.x + bounds.width).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
   expect(bounds.y + bounds.height).toBeLessThanOrEqual(page.viewportSize()!.height + 1);
   await page.keyboard.press('ArrowRight');
+  // 달력은 다음 화면 갱신 때 새 날짜로 포커스를 옮긴다 — 옮겨진 뒤에 Enter 를 누른다
+  await expect(calendar.getByRole('button', { name: '2027년 6월 19일 토요일', exact: true })).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(date).toHaveValue('2027-06-19');
   await expect(calendar).toHaveCount(0);
@@ -158,7 +160,7 @@ test('all automatically priced services retain options, totals and private form 
   await rental.locator('#k-count').fill('2');
   await rental.locator('#k-count').press('Enter');
   await expect(rental.locator('#k-months, #k-printer')).toHaveCount(0);
-  await toggleKioskExperience(page, 'ai-face-reading', 'ko');
+  await toggleKioskExperience(page, 'ai-palm-reading', 'ko');
   await expectNamedControls(rental);
   await closePreviewOptions(page);
   const configured = await savedQuote(page);
@@ -166,25 +168,40 @@ test('all automatically priced services retain options, totals and private form 
   expect(configured.items.map(item => item.key)).toEqual(['acscent', 'photoBooth', 'rental']);
   expect(configured.items[0].options).toMatchObject({ guests: 140, volume: '50ml', extraTeams: 1, premiumPackaging: true, analysisKiosks: 2 });
   expect(configured.items[1].options).toMatchObject({ booths: 2, extraPrintRolls: 2, wrapping: true, custom: 'flow' });
-  expect(configured.items[2].options).toMatchObject({ kiosks: 2, mode: 'event', printer: false, experienceSlugs: ['ai-face-reading', 'ai-face-reading'] });
+  expect(configured.items[2].options).toMatchObject({ kiosks: 2, mode: 'event', printer: false, experienceSlugs: ['ai-palm-reading', 'ai-palm-reading'] });
   await expectTotal(page, configured);
   await nextPreviewStep(page);
   await expectNamedControls(stage(page, 3));
+  // 마지막 단계: 가견적서 · 보고서 · 상담 요청 모두 팝업 안 입력 칸 — 같은 연락처를 쓴다
+  const estimate = await openEstimateForm(page);
+  await expectNamedControls(estimate);
   await page.locator('#q-name').fill('Quote draft test');
   await page.locator('#q-email').fill('qa@example.test');
+  await page.keyboard.press('Escape');
+  const request = await openRequestForm(page, 'ko');
+  await expectNamedControls(request.form);
+  await expect(page.locator('#q-name')).toHaveValue('Quote draft test');
   await page.locator('#q-note').fill('Keep this private draft while I review the experiences.');
+  await page.keyboard.press('Escape');
+  await expect(request.modal).toHaveCount(0);
   await page.getByTestId('quote-prev').click();
   await openPreviewOptions(page, 'rental');
   await expect(page.locator('#k-count')).toHaveValue('2');
   await nextPreviewStep(page);
+  await openEstimateForm(page);
   await expect(page.locator('#q-name')).toHaveValue('Quote draft test');
   await expect(page.locator('#q-email')).toHaveValue('qa@example.test');
+  await page.keyboard.press('Escape');
+  await openRequestForm(page, 'ko');
+  await expect(page.locator('#q-note')).toHaveValue('Keep this private draft while I review the experiences.');
+  await page.keyboard.press('Escape');
   expect(JSON.stringify(await savedQuote(page))).not.toMatch(/qa@example\.test|Quote draft test|Keep this private/);
   await page.reload({ waitUntil: 'domcontentloaded' });
   await expect.poll(() => savedQuote(page)).toEqual(configured);
   await expectTotal(page, configured);
   await enterExperienceStep(page);
   await nextPreviewStep(page);
+  await openEstimateForm(page);
   await expect(page.locator('#q-name')).toHaveValue('');
   await expect(page.locator('#q-email')).toHaveValue('');
   await expectFitsViewport(page);
@@ -207,8 +224,13 @@ test('the English journey supports keyboard entry and keeps each stage within na
   await expectNamedControls(stage(page, 3));
   await expect(page.getByTestId('event-info-summary')).toContainText('Community launch');
   await expect(page.getByTestId('quote-total')).toContainText('KRW');
+  // English has no report tiles (the report form is Korean only)
+  await expect(page.getByTestId('quote-final-report')).toHaveCount(0);
+  await expect(page.getByTestId('quote-final-estimate')).toHaveAccessibleName('Estimate (PDF)');
+  await expectNamedControls(await openEstimateForm(page));
   await page.locator('#q-name').fill('English review');
   await page.locator('#q-email').fill('review@example.test');
+  await page.keyboard.press('Escape');
   for (const width of (isMobile ? [390, 320] : [1440, 1280])) {
     await page.setViewportSize({ width, height: isMobile ? 844 : 800 });
     await expectFitsViewport(page);
@@ -216,22 +238,24 @@ test('the English journey supports keyboard entry and keeps each stage within na
     await expect(stage(page, 2)).toBeVisible();
     await expectFitsViewport(page);
     await nextPreviewStep(page);
+    await openEstimateForm(page);
     await expect(page.locator('#q-name')).toHaveValue('English review');
     await expect(page.locator('#q-email')).toHaveValue('review@example.test');
+    await page.keyboard.press('Escape');
   }
 });
 
 for (const entry of [
   { name: 'preset', query: 'preset=campus-festival', expected: ['photoBooth', 'rental'] },
   { name: 'product', query: 'item=photoBooth', expected: ['photoBooth'] },
-  { name: 'experience', query: 'service=ai-face-reading', expected: ['rental'] },
+  { name: 'experience', query: 'service=ai-palm-reading', expected: ['rental'] },
 ]) {
   test(`incoming ${entry.name} context remains editable and clear stays empty after reload`, async ({ page }) => {
     await page.goto(`/quote?${entry.query}`, { waitUntil: 'domcontentloaded' });
     await expect(stage(page, 1)).toBeVisible();
     await expect.poll(async () => (await savedQuote(page)).items.map(item => item.key)).toEqual(entry.expected);
     await expectTotal(page, await savedQuote(page));
-    if (entry.name === 'experience') expect((await savedQuote(page)).items[0].options).toMatchObject({ experienceSlug: 'ai-face-reading' });
+    if (entry.name === 'experience') expect((await savedQuote(page)).items[0].options).toMatchObject({ experienceSlug: 'ai-palm-reading' });
     await page.locator('#q-event-name').fill('취소할 행사');
     await enterExperienceStep(page);
     await nextPreviewStep(page);

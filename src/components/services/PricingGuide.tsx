@@ -139,7 +139,7 @@ export async function PricingGuide({ locale, variant = 'full' }: { locale: strin
                 {t('cta')}
               </Link>
               <Link
-                href="/brochure"
+                href="/portfolio?doc=profile#download"
                 className="inline-flex h-12 items-center justify-center rounded-lg border-2 border-slate-300 px-6 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50"
               >
                 {t('ctaSecondary')}
@@ -157,13 +157,13 @@ export async function PricingGuide({ locale, variant = 'full' }: { locale: strin
               {(locale === 'en'
                 ? [
                     ['/insights/ai-photo-booth-rental', 'AI photo booth rental'],
-                    ['/insights/ai-fortune-kiosk-rental', 'AI fortune kiosk rental'],
+                    ['/insights/ai-fortune-kiosk-rental', 'AI fortune-telling rental'],
                     ['/insights/event-ai-perfume-experience', 'AI perfume experience'],
                     ['/insights/corporate-year-end-event-ai-booth', 'Corporate & year-end events'],
                   ]
                 : [
                     ['/insights/ai-photo-booth-rental', 'AI 포토부스 대여'],
-                    ['/insights/ai-fortune-kiosk-rental', 'AI 사주·관상 키오스크 대여'],
+                    ['/insights/ai-fortune-kiosk-rental', 'AI 사주·관상·손금 체험 대여'],
                     ['/insights/event-ai-perfume-experience', 'AI 향수 만들기 체험'],
                     ['/insights/corporate-year-end-event-ai-booth', '송년회·기업 행사 체험 부스'],
                   ]

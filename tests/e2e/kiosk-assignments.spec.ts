@@ -1,21 +1,20 @@
 import { expect, test, type Page } from '@playwright/test';
-import { enterExperienceStep, closePreviewOptions, shiftKioskExperience, toggleKioskExperience, nextPreviewStep, openPreviewDetails, openPreviewOptions, showKioskGalleryPage, showOptionPage } from './helpers/quote-preview-options';
+import { enterExperienceStep, closePreviewOptions, shiftKioskExperience, toggleKioskExperience, nextPreviewStep, openPreviewDetails, openPreviewOptions, showKioskGalleryPage, showOptionPage, sidebarOptionSummaries } from './helpers/quote-preview-options';
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
 import { calculateQuote, sanitizeInput, type QuoteInput } from '../../src/lib/quote/engine';
-import { getKioskExperience, KIOSK_EXPERIENCES } from '../../src/lib/quote/kiosk-experiences';
+import { getKioskExperience } from '../../src/lib/quote/kiosk-experiences';
 import { normalizePreviewInput } from '../../src/lib/quote-preview/flow-storage';
 import { QUOTE_PRESETS } from '../../src/lib/quote/presets';
-import { getExperienceBySlug } from '../../src/data/experiences';
+import { QUOTE_KIOSK_EXPERIENCES } from '../../src/data/product-lines';
+import { QUOTE_STORAGE_KEY } from '../../src/components/quote-studio/history';
 
-const FLOW_KEY = 'neander-quote-preview-flow-v1';
-const LIVE_KEY = 'neander-quote-v2';
-const a = 'ai-personal-color', b = 'ai-face-reading', c = 'ai-future-career', d = 'ai-sommelier';
-const publicKioskExperiences = KIOSK_EXPERIENCES.filter((experience) => getExperienceBySlug(experience.slug));
+const a = 'ai-personal-color', b = 'ai-palm-reading', c = 'ai-future-career', d = 'ai-sommelier';
+const publicKioskExperiences = QUOTE_KIOSK_EXPERIENCES;
 const galleryPages = Math.ceil(publicKioskExperiences.length / 4);
 const step = (page: Page, index: number) => page.locator(`[data-quote-step="${index}"]`);
 const name = (slug: string, lang: 'ko' | 'en') => getKioskExperience(slug)!.name[lang];
 
-async function saved(page: Page, key = FLOW_KEY): Promise<QuoteInput> {
+async function saved(page: Page, key = QUOTE_STORAGE_KEY): Promise<QuoteInput> {
   return page.evaluate((storageKey) => JSON.parse(localStorage.getItem(storageKey)!), key);
 }
 async function passConditions(page: Page) {
@@ -73,7 +72,7 @@ for (const lang of ['ko', 'en'] as const) {
     const generationRequests: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.route('**/api/demo-ai/**', route => { generationRequests.push(route.request().url()); return route.abort(); });
-    await page.goto(lang === 'ko' ? '/quote-preview' : '/en/quote-preview', { waitUntil: 'domcontentloaded' });
+    await page.goto(lang === 'ko' ? '/quote' : '/en/quote', { waitUntil: 'domcontentloaded' });
     await expect(step(page, 1)).toBeVisible();
     await passConditions(page);
     await openPreviewOptions(page, 'rental');
@@ -134,7 +133,8 @@ for (const lang of ['ko', 'en'] as const) {
           const card = page.getByTestId(`kiosk-experience-1-${experience.slug}`);
           await expect(card).toHaveRole('checkbox');
           await expect(card).toHaveAccessibleName(experience.name[lang]);
-          await expect(card.locator('svg').first()).toBeVisible();
+          // 실제 프로그램 화면 (캡처가 없는 체험은 그림)
+          await expect(card.locator('img, svg').first()).toBeVisible();
           const titleFits = await card.getByText(experience.name[lang], { exact: true }).evaluate(element => {
             const title = element.getBoundingClientRect();
             const card = element.closest('[role="checkbox"]')!.getBoundingClientRect();
@@ -183,7 +183,7 @@ for (const lang of ['ko', 'en'] as const) {
     await page.keyboard.press('Space');
     await expect(first).toHaveAttribute('aria-checked', 'true');
     await page.keyboard.press('ArrowRight');
-    await expect(page.getByTestId('kiosk-experience-1-ai-skincare-analysis')).toHaveAttribute('aria-checked', 'false');
+    await expect(page.getByTestId(`kiosk-experience-1-${publicKioskExperiences[1].slug}`)).toHaveAttribute('aria-checked', 'false');
     await expectAssignments(page, [a, a, a, a], lang);
     await toggleKioskExperience(page, b, lang);
     await expectAssignments(page, [a, a, b, b], lang);
@@ -196,7 +196,7 @@ for (const lang of ['ko', 'en'] as const) {
     await expectAssignments(page, [a, b, c, d], lang);
     // 4대에 4종을 고르면 더는 고를 수 없다 (하나를 빼면 다시 고를 수 있다)
     await showKioskGalleryPage(page, 1, 1, lang);
-    await expect(page.getByTestId('kiosk-experience-1-ai-skincare-analysis')).toHaveAttribute('aria-disabled', 'true');
+    await expect(page.getByTestId(`kiosk-experience-1-${publicKioskExperiences[1].slug}`)).toHaveAttribute('aria-disabled', 'true');
     await toggleKioskExperience(page, d, lang);
     await expectAssignments(page, [a, a, b, c], lang);
     await toggleKioskExperience(page, b, lang);
@@ -241,8 +241,11 @@ for (const lang of ['ko', 'en'] as const) {
     await expect(step(page, 3)).toBeVisible();
     const summary = page.getByRole('complementary', { name: QUOTE_COPY[lang].sheetTitle });
     // 요약은 체험별 대수로 묶는다
-    await expect(summary).toContainText(lang === 'ko' ? `${name(a, lang)} 3대` : `${name(a, lang)} ×3`);
-    await expect(summary).toContainText(lang === 'ko' ? '상담 후 결정 1대' : 'Decide later ×1');
+    // 요약 칸은 옵션 앞 두 개만 보이고 나머지는 title 에 — 전체 요약에서 찾는다
+    await expect(summary).toBeVisible();
+    const rentalSummary = async () => (await sidebarOptionSummaries(page)).join('\n');
+    await expect.poll(rentalSummary).toContain(lang === 'ko' ? `${name(a, lang)} 3대` : `${name(a, lang)} ×3`);
+    await expect.poll(rentalSummary).toContain(lang === 'ko' ? '상담 후 결정 1대' : 'Decide later ×1');
     await page.getByTestId('quote-prev').click();
     await expectAssignments(page, [a, a, a, ''], lang);
     await page.reload({ waitUntil: 'domcontentloaded' });
@@ -252,7 +255,6 @@ for (const lang of ['ko', 'en'] as const) {
     await expectAssignments(page, [a, a, a, ''], lang);
     await expect.poll(() => saved(page)).toEqual(selected);
     await expectTotal(page);
-    await expect(page.getByTestId('quote-preview-lab').locator('img, canvas, svg image')).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     expect(generationRequests).toEqual([]);
     expect(errors).toEqual([]);
@@ -262,19 +264,18 @@ for (const lang of ['ko', 'en'] as const) {
 
 
 for (const lang of ['ko', 'en'] as const) {
-  test(`${lang}: a saved monthly preview becomes event rental while assignments and live subscriptions survive`, async ({ page }, testInfo) => {
+  test(`${lang}: a saved monthly rental becomes event rental while its kiosk assignments survive`, async ({ page }, testInfo) => {
     const legacy = sanitizeInput({ days: 1, items: [{ key: 'rental', options: {
       mode: 'monthly', months: 2, kiosks: 2, experienceSlugs: [a, b], printer: true, custom: 'brand',
     } }] });
     const serialized = JSON.stringify(legacy);
-    await page.addInitScript(({ flowKey, liveKey, value }) => {
+    await page.addInitScript(({ key, value }) => {
       if (!sessionStorage.getItem('kiosk-event-migration-seeded')) {
-        localStorage.setItem(flowKey, value);
-        localStorage.setItem(liveKey, value);
+        localStorage.setItem(key, value);
         sessionStorage.setItem('kiosk-event-migration-seeded', 'yes');
       }
-    }, { flowKey: FLOW_KEY, liveKey: LIVE_KEY, value: serialized });
-    await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
+    }, { key: QUOTE_STORAGE_KEY, value: serialized });
+    await page.goto(`${lang === 'en' ? '/en' : ''}/quote`, { waitUntil: 'domcontentloaded' });
     await enterExperienceStep(page);
     await expectAssignments(page, [a, b], lang);
     const normalized = normalizePreviewInput(legacy);
@@ -316,60 +317,42 @@ for (const lang of ['ko', 'en'] as const) {
     await expectAssignments(page, [a, b], lang);
     await expect.poll(() => saved(page)).toEqual(threeDays);
     await expectTotal(page, oneDay + 880_000);
-    expect(await page.evaluate(key => localStorage.getItem(key), LIVE_KEY)).toBe(serialized);
-
-    // /quote 도 같은 체험 편집 화면을 쓴다 — 저장된 월 이용은 행사 기간 대여로 바뀌고 배정은 그대로
-    await page.goto(`${lang === 'en' ? '/en' : ''}/quote`, { waitUntil: 'domcontentloaded' });
-    await enterExperienceStep(page);
-    await openPreviewOptions(page, 'rental');
-    await showOptionPage(page, 'rental', 'kiosk-1');
-    await expect(page.getByTestId('kiosk-experience-assignments')).toHaveAttribute('data-assignments', `${a},${b}`);
-    await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(calculateQuote(normalized, lang).total));
   });
 }
 
-test('preview drafts, presets and incoming experiences assign device slots while the live legacy quote keeps its old controls and fee', async ({ page }) => {
+test('saved legacy drafts, presets and incoming experiences assign device slots', async ({ page }) => {
   const legacy = sanitizeInput({ items: [{ key: 'rental', options: { kiosks: 3, experienceSlug: a, extraContents: 2, printer: true } }] });
-  await page.addInitScript(({ flowKey, liveKey, value }) => {
+  await page.addInitScript(({ key, value }) => {
     if (!sessionStorage.getItem('kiosk-assignment-seeded')) {
-      localStorage.setItem(flowKey, value);
-      localStorage.setItem(liveKey, value);
+      localStorage.setItem(key, value);
       sessionStorage.setItem('kiosk-assignment-seeded', 'yes');
     }
-  }, { flowKey: FLOW_KEY, liveKey: LIVE_KEY, value: JSON.stringify(legacy) });
-  await page.goto('/quote-preview', { waitUntil: 'domcontentloaded' });
+  }, { key: QUOTE_STORAGE_KEY, value: JSON.stringify(legacy) });
+  // 예전 저장(체험 1종 + 추가 콘텐츠 + 프린터)은 기기별 배정 · 행사 기간 대여로 옮겨진다
+  await page.goto('/quote', { waitUntil: 'domcontentloaded' });
   await enterExperienceStep(page);
+  await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(calculateQuote(normalizePreviewInput(legacy), 'ko').total));
   await openPreviewOptions(page, 'rental');
   await expectAssignments(page, [a, '', ''], 'ko');
   await toggleKioskExperience(page, b, 'ko');
   await toggleKioskExperience(page, c, 'ko');
   await expectAssignments(page, [a, b, c], 'ko');
-  await page.goto(`/quote-preview?service=${d}`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`/quote?service=${d}`, { waitUntil: 'domcontentloaded' });
   await passConditions(page);
   await expectAssignments(page, [d, b, c], 'ko');
   await expectTotal(page);
 
-  await page.goto('/quote-preview?preset=public-tourism', { waitUntil: 'domcontentloaded' });
+  await page.goto('/quote?preset=public-tourism', { waitUntil: 'domcontentloaded' });
   await passConditions(page);
   await expectAssignments(page, [c, ''], 'ko');
   const preset = QUOTE_PRESETS.find((entry) => entry.id === 'public-tourism')!;
   await expectTotal(page, calculateQuote(normalizePreviewInput(preset.input), 'ko').total);
-  await page.evaluate((key) => localStorage.removeItem(key), FLOW_KEY);
-  await page.goto('/quote-preview?item=rental', { waitUntil: 'domcontentloaded' });
+  await page.evaluate((key) => localStorage.removeItem(key), QUOTE_STORAGE_KEY);
+  await page.goto('/quote?item=rental', { waitUntil: 'domcontentloaded' });
   await passConditions(page);
   await expectAssignments(page, [''], 'ko');
-  await page.evaluate((key) => localStorage.removeItem(key), FLOW_KEY);
-  await page.goto(`/quote-preview?service=${b}`, { waitUntil: 'domcontentloaded' });
+  await page.evaluate((key) => localStorage.removeItem(key), QUOTE_STORAGE_KEY);
+  await page.goto(`/quote?service=${b}`, { waitUntil: 'domcontentloaded' });
   await passConditions(page);
   await expectAssignments(page, [b], 'ko');
-  expect(await page.evaluate((key) => localStorage.getItem(key), LIVE_KEY)).toBe(JSON.stringify(legacy));
-
-  // /quote 도 같은 체험 편집 화면 — 예전 저장(체험 1종 + 추가 콘텐츠)은 기기별 배정으로 옮겨진다
-  await page.goto('/quote', { waitUntil: 'domcontentloaded' });
-  await expect(page.getByTestId('quote-studio')).toHaveAttribute('data-mode', 'live');
-  await enterExperienceStep(page);
-  await openPreviewOptions(page, 'rental');
-  await showOptionPage(page, 'rental', 'kiosk-1');
-  await expect(page.getByTestId('kiosk-experience-assignments')).toHaveAttribute('data-assignments', `${a},,`);
-  await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(calculateQuote(normalizePreviewInput(legacy), 'ko').total));
 });

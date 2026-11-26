@@ -4,7 +4,7 @@ import { SERVICE_ORDER } from '../../src/lib/quote/catalog';
 import { calculateQuote, sanitizeInput, type QuoteInput } from '../../src/lib/quote/engine';
 import { enterExperienceStep, closePreviewOptions, nextPreviewStep, openPreviewOptions, showOptionPage } from './helpers/quote-preview-options';
 
-const storageKey = 'neander-quote-preview-flow-v1';
+const storageKey = 'neander-quote-v2';
 const canvas = (page: Page) => page.getByTestId('preview-canvas');
 const viewport = (page: Page) => page.getByTestId('preview-canvas-viewport');
 const saved = (page: Page): Promise<QuoteInput> => page.evaluate(key => JSON.parse(localStorage.getItem(key)!), storageKey);
@@ -90,7 +90,7 @@ test('wheel over the preview zooms around the cursor without scrolling the page'
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   const input = sanitizeInput({ items: [{ key: 'acscent', options: {} }] });
   await page.addInitScript(({ key, value }) => localStorage.setItem(key, value), { key: storageKey, value: JSON.stringify(input) });
-  await page.goto('/quote-preview', { waitUntil: 'domcontentloaded' });
+  await page.goto('/quote', { waitUntil: 'domcontentloaded' });
   await enterExperienceStep(page);
   await viewport(page).evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
   const baseline = await dimensions(canvas(page));
@@ -147,7 +147,7 @@ for (const lang of ['ko', 'en'] as const) {
     const mobile = testInfo.project.name === 'mobile';
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
-    await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${lang === 'en' ? '/en' : ''}/quote`, { waitUntil: 'domcontentloaded' });
     await nextPreviewStep(page);
     await nextPreviewStep(page);
     await expect(canvas(page)).toHaveCount(1);
@@ -166,13 +166,14 @@ for (const lang of ['ko', 'en'] as const) {
     await expect(canvas(page)).toHaveAttribute('data-zoom', '1.25');
     await showOptionPage(page, 'acscent', 'analysis');
     await page.getByTestId('quote-options-acscent').getByRole('radiogroup', { name: QUOTE_COPY[lang].analysis, exact: true }).getByRole('radio').last().check();
-    await setNumber(page, 'p-akiosk', 4);
+    // 보유 키오스크는 향수 분석용과 AI 키오스크를 합쳐 4대까지 — 2대씩 나눠 쓴다
+    await setNumber(page, 'p-akiosk', 2);
     await showOptionPage(page, 'acscent', 'basic');
     await setNumber(page, 'p-teams', 3);
     await showOptionPage(page, 'photoBooth', 'basic');
     await setNumber(page, 'b-booths', 3);
     await showOptionPage(page, 'rental', 'basic');
-    await setNumber(page, 'k-count', 4);
+    await setNumber(page, 'k-count', 2);
     await closePreviewOptions(page);
     await stableSize(page, baseline);
     await expect(canvas(page)).toHaveAttribute('data-zoom', '1.25');
@@ -189,7 +190,7 @@ for (const lang of ['ko', 'en'] as const) {
       await expect(page.getByTestId('quote-options-popover')).toBeVisible();
       await closePreviewOptions(page);
     }
-    for (const [kind, count] of [['team', 3], ['analysis-kiosk', 4], ['photo-booth', 3], ['kiosk', 4], ['printer', 0], ['sensor', 0]] as const) {
+    for (const [kind, count] of [['team', 3], ['analysis-kiosk', 2], ['photo-booth', 3], ['kiosk', 2], ['printer', 0], ['sensor', 0]] as const) {
       await expect(page.locator(`[data-testid="event-object"][data-kind="${kind}"]`)).toHaveCount(count);
     }
     await resetCamera(page);
@@ -247,11 +248,11 @@ for (const lang of ['ko', 'en'] as const) {
 test('every service detail and alternate view uses the same fixed canvas controls', async ({ page }, testInfo) => {
   const input = sanitizeInput({ items: [
     { key: 'acscent', options: { analysisKiosks: 2, extraTeams: 1 } },
-    { key: 'photoBooth', options: { booths: 2, templateSlugs: ['ai-caricature-artist', 'ai-hanbok-booth'] } },
-    { key: 'rental', options: { kiosks: 2, experienceSlugs: ['ai-personal-color', 'ai-face-reading'] } },
+    { key: 'photoBooth', options: { booths: 2, templateSlugs: ['ai-timecapsule-photo', 'ai-hanbok-booth'] } },
+    { key: 'rental', options: { kiosks: 2, experienceSlugs: ['ai-personal-color', 'ai-palm-reading'] } },
   ] });
   await page.addInitScript(({ key, value }) => localStorage.setItem(key, value), { key: storageKey, value: JSON.stringify(input) });
-  await page.goto('/quote-preview', { waitUntil: 'domcontentloaded' });
+  await page.goto('/quote', { waitUntil: 'domcontentloaded' });
   await enterExperienceStep(page);
   const baseline = await dimensions(canvas(page));
   const original = await saved(page);

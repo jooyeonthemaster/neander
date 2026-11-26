@@ -75,7 +75,8 @@ export interface JourneyRecord {
   actions: QuoteAction[]
   /** 도달한 가장 깊은 퍼널 단계 (FUNNEL 의 순서) */
   depth: number
-  submitted: 'pdf' | 'request' | null
+  /** report = 견적 보고서(HWPX·PDF) 발급 — 2026-11 개편부터 */
+  submitted: 'pdf' | 'report' | 'request' | null
   /** 실제로 보고 있던 시간 (탭 숨김 제외, 자리 비움은 IDLE_CAP_MS 까지) */
   activeMs: number
   lastScreen: QuoteScreen | null
@@ -156,6 +157,11 @@ export const fieldLabel = (key: string) => FIELD_LABELS[key] ?? key
 
 // ── 여정 만들기 ──────────────────────────────────────────
 
+/** 'x' 행동 값 → 제출 종류. 보고서는 report_hwpx · report_pdf 로 남는다 */
+const submissionOf = (a: unknown): Exclude<JourneyRecord['submitted'], null> | null =>
+  a === 'pdf' || a === 'request' ? a : a === 'report_hwpx' || a === 'report_pdf' ? 'report' : null
+const SUBMISSION_RANK = { pdf: 1, report: 2, request: 3 } as const
+
 const stageOf = (kind: QuoteActionKind, a: unknown): number => {
   if (kind === 'p') return 1
   if (kind === 'v') {
@@ -167,7 +173,7 @@ const stageOf = (kind: QuoteActionKind, a: unknown): number => {
   }
   if (kind === 'o') return 4
   if (kind === 'f') return 6
-  if (kind === 'x' && (a === 'pdf' || a === 'request')) return 7
+  if (kind === 'x' && submissionOf(a)) return 7
   return 0
 }
 
@@ -186,7 +192,7 @@ function describe(action: QuoteAction): string {
     case 'h': return `머묾: ${targetLabel(String(a))} (${Math.round(Number(b) / 100) / 10}초)`
     case 'i': return `안내 열람: ${a}`
     case 'f': return `연락처 칸: ${fieldLabel(String(a))}`
-    case 'x': return a === 'pdf' ? '가견적서 발급' : a === 'request' ? '상담 요청' : a === 'invalid' ? '제출 실패 (입력 누락)' : '제출 오류'
+    case 'x': return a === 'pdf' ? '가견적서 발급' : a === 'request' ? '상담 요청' : a === 'report_hwpx' ? '보고서 발급 (HWPX)' : a === 'report_pdf' ? '보고서 발급 (PDF)' : a === 'invalid' ? '제출 실패 (입력 누락)' : '제출 오류'
     case '$': return `견적 금액: ${Number(a).toLocaleString('ko-KR')}원`
     case 'hide': return '탭 숨김'
     case 'show': return '탭 다시 봄'
@@ -223,7 +229,9 @@ export function buildJourneys(batches: QuoteActionBatch[]): JourneyRecord[] {
     for (const action of actions) {
       const [, kind, a, b] = action
       depth = Math.max(depth, stageOf(kind, a))
-      if (kind === 'x' && (a === 'pdf' || a === 'request')) submitted = a
+      // 한 여정에 여럿이면 상담 요청 > 보고서 > 가견적서 순으로 대표를 고른다
+      const sub = kind === 'x' ? submissionOf(a) : null
+      if (sub && SUBMISSION_RANK[sub] > (submitted ? SUBMISSION_RANK[submitted] : 0)) submitted = sub
       if (kind === 'v') { lastScreen = a as QuoteScreen; optionPage = null }
       if (kind === 'o') optionPage = `${serviceName(String(a))} · ${b ?? ''}`
       if (kind === 'oc') optionPage = null
@@ -335,6 +343,7 @@ export interface QuoteBehaviorStats {
   visitors: number
   submitted: number
   pdf: number
+  report: number
   request: number
   medianActiveMs: number
   meanFinalTotal: number
@@ -448,6 +457,7 @@ export function summarizeJourneys(journeys: JourneyRecord[]): QuoteBehaviorStats
     visitors: new Set(journeys.map((j) => j.vid)).size,
     submitted: submittedJourneys.length,
     pdf: journeys.filter((j) => j.submitted === 'pdf').length,
+    report: journeys.filter((j) => j.submitted === 'report').length,
     request: journeys.filter((j) => j.submitted === 'request').length,
     medianActiveMs: median(journeys.map((j) => j.activeMs)),
     meanFinalTotal: mean(withTotal.map((j) => j.finalTotal)),

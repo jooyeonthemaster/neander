@@ -62,7 +62,8 @@ export function ContactTabs({ initialTab, initialService, developmentInquiry = f
     <div>
       {!developmentInquiry && (
         <>
-          <div className="mx-auto mb-6 max-w-3xl" data-service-context>
+          {/* 고르는 칸과 탭은 아래 문의 칸 · 연락처와 좌우 끝을 맞춘다 */}
+          <div className="mb-6" data-service-context>
             <Select id="contact-service" label={locale === 'ko' ? '관심 있는 체험' : 'Experience of interest'} value={serviceSlug}
               options={[{ value: '', label: locale === 'ko' ? '아직 정하지 않았어요' : 'Not decided yet' }, ...experiences.map((experience) => ({ value: experience.slug, label: tService(experience.nameKey) }))]}
               onValueChange={(slug) => {
@@ -74,7 +75,7 @@ export function ContactTabs({ initialTab, initialService, developmentInquiry = f
           <div
             role="tablist"
             aria-label={t('tabs.label')}
-            className="mx-auto mb-10 grid max-w-3xl grid-cols-2 gap-3 sm:gap-4"
+            className="mb-10 grid grid-cols-2 gap-3 sm:gap-4"
           >
             {TABS.map((id) => {
               const active = tab === id;

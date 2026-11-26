@@ -107,13 +107,12 @@ export function KioskExperienceAssignments({ options, lang, experiences, onChang
             <div className="min-w-0">
               <p className="text-[11px] font-semibold leading-relaxed text-slate-700">{selected.label}</p>
             </div>
-          </div> : <p className="mt-2 text-[11px] leading-relaxed text-slate-500">{L('아직 정하지 않았다면 비워두어도 괜찮아요.', 'You can leave this undecided for now.')}</p>}
+          </div> : null}
         </div>;
       })}
     </div>
     <p data-testid="kiosk-assignment-progress" aria-live="polite" aria-atomic="true" className="rounded-xl bg-teal-50/70 px-3.5 py-3 text-xs leading-relaxed text-teal-800">
       {L(`${assignments.length}대 중 ${selectedCount}대의 체험을 골랐어요.`, `Experiences selected for ${selectedCount} of ${assignments.length} kiosks.`)}
-      {selectedCount < assignments.length && <span className="mt-1 block text-[11px] text-teal-700">{L('나머지 체험은 상담할 때 함께 정해요.', 'We can help you choose the rest during consultation.')}</span>}
     </p>
   </section>;
 }

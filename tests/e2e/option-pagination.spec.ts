@@ -4,13 +4,14 @@ import { PHOTO_BOOTH_TEMPLATES } from '../../src/lib/quote/photo-booth-templates
 import { enterExperienceStep, closePreviewOptions, toggleKioskExperience, openPreviewOptions, showOptionPage, showPhotoGalleryPage } from './helpers/quote-preview-options';
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
 
-const storageKey = 'neander-quote-preview-flow-v1';
+const storageKey = 'neander-quote-v2';
 const services = ['acscent', 'photoBooth', 'rental'] as const;
-const assigned = ['ai-personal-color', 'ai-sommelier', 'ai-face-reading', 'ai-travel-style'];
+const assigned = ['ai-personal-color', 'ai-sommelier', 'ai-palm-reading', 'ai-travel-style'];
 const seed = { items: [
   { key: 'acscent', options: { guests: 100, volume: '10ml', extraTeams: 0, analysisKiosks: 0 } },
   { key: 'photoBooth', options: { booths: 1, templateSlugs: [], customStyles: 0 } },
-  { key: 'rental', options: { mode: 'event', kiosks: 1, experienceSlugs: [''] } },
+  // 보유 키오스크(4대)를 AI 키오스크가 모두 쓴다 — 향수 분석용 키오스크는 고를 수 없다 (2026-11-22 합계 상한)
+  { key: 'rental', options: { mode: 'event', kiosks: 4, experienceSlugs: ['', '', '', ''] } },
 ] };
 const visible = (page: Page, id: string) => page.locator(`[data-testid="${id}"]:visible`);
 async function setNumber(page: Page, id: string, value: number) {
@@ -23,7 +24,10 @@ async function maximizePage(page: Page, service: string, id: string, lang: 'ko' 
     if (service === 'acscent') { await setNumber(page, 'p-guests', 100); await setNumber(page, 'p-teams', 3); await panel.getByRole('radio').last().check(); }
     if (service === 'photoBooth') await setNumber(page, 'b-booths', 3);
     if (service === 'rental') await setNumber(page, 'k-count', 4);
-  } else if (id === 'analysis') { await panel.getByRole('radio').last().check(); await setNumber(page, 'p-akiosk', 4); }
+  } else if (id === 'analysis') {
+    await expect(panel.getByRole('radio', { name: QUOTE_COPY[lang].analysisKiosk })).toHaveCount(0);
+    await panel.getByRole('radio').last().check();
+  }
   else if (id === 'packaging') { await panel.getByRole('radiogroup', { name: lang === 'ko' ? '향 구성' : 'Scent selection', exact: true }).getByRole('radio').last().check(); await panel.getByRole('radio').last().check(); }
   else if (id === 'photo-styles') {
     for (let galleryPage = 1; galleryPage <= 3; galleryPage++) {
@@ -53,7 +57,7 @@ for (const lang of ['ko', 'en'] as const) {
         { key: 'acscent', options: { guests: 100, analysisKiosks: 0 } },
       ] }));
     }, storageKey);
-    const route = `${lang === 'en' ? '/en' : ''}/quote-preview`;
+    const route = `${lang === 'en' ? '/en' : ''}/quote`;
     const resume = () => enterExperienceStep(page);
     await page.goto(route);
     await resume();
@@ -107,7 +111,7 @@ for (const lang of ['ko', 'en'] as const) {
     await page.addInitScript(({ key, value }) => localStorage.setItem(key, JSON.stringify(value)), { key: storageKey, value: seed });
     for (const viewport of viewports) {
       await page.setViewportSize(viewport);
-      await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
+      await page.goto(`${lang === 'en' ? '/en' : ''}/quote`, { waitUntil: 'domcontentloaded' });
       await enterExperienceStep(page);
       for (const service of services) {
         const options = await openPreviewOptions(page, service);
@@ -185,7 +189,7 @@ for (const lang of ['ko', 'en'] as const) {
       const saved: QuoteInput = await page.evaluate(key => JSON.parse(localStorage.getItem(key)!), storageKey);
       await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(calculateQuote(saved, lang).total));
       const perfume = saved.items.find(item => item.key === 'acscent')!;
-      expect(perfume.options).toMatchObject({ guests: 300, volume: '50ml', extraTeams: 2, analysisKiosks: 4, customScent: true, customBox: true });
+      expect(perfume.options).toMatchObject({ guests: 300, volume: '50ml', extraTeams: 2, analysisKiosks: 0, customScent: true, customBox: true });
       expect(saved.items.find(item => item.key === 'photoBooth')!.options).toMatchObject({ booths: 3, templateSlugs: PHOTO_BOOTH_TEMPLATES.map(template => template.slug), customStyles: 10, extraPrintRolls: 50, wrapping: true, custom: 'dedicated' });
       expect(saved.items.find(item => item.key === 'rental')!.options).toMatchObject({ kiosks: 4, mode: 'event', months: 1, printer: false, custom: 'dedicated', experienceSlugs: assigned });
       expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);

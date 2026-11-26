@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { calculateQuote, type QuoteInput } from '../../src/lib/quote/engine';
 import { enterExperienceStep } from './helpers/quote-preview-options';
 
-const key = 'neander-quote-preview-flow-v1';
+const key = 'neander-quote-v2';
 const seed = { days: 3, hoursPerDay: 10, region: 'gyeongsang', extraStaff: 0, setupDayBefore: false, items: [
   { key: 'mediaArt', options: { grade: 'fullCustom', extraSensors: 10, sensorType: 'depth' } },
   { key: 'custom', options: { scope: 'large', consulting: true, pgIntegration: true, maintenanceMonths: 36 } },
@@ -14,7 +14,7 @@ for (const lang of ['ko', 'en'] as const) {
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.addInitScript(({ key, seed }) => { if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify(seed)); }, { key, seed });
-    await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${lang === 'en' ? '/en' : ''}/quote`, { waitUntil: 'domcontentloaded' });
     await enterExperienceStep(page);
     const original = await saved(page);
     expect(original.items).toEqual([]);

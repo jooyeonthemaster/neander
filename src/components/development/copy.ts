@@ -4,9 +4,10 @@ const projectCount = DEVELOPMENT_PROJECTS.length;
 
 export const DEVELOPMENT_COPY = {
   ko: {
-    metaTitle: '프로그램 개발 · 웹사이트부터 AI·AX까지',
+    // 검색 제목에는 「외주 개발」을 남긴다 — 메뉴 이름은 개발·AX 지만 사람들은 이 말로 찾는다
+    metaTitle: '개발·AX · 웹사이트·플랫폼·AI 외주 개발',
     metaDescription: '아이디어를 서비스로, AI를 비즈니스로. 네안데르의 웹사이트, 자사몰, 플랫폼, AI 솔루션 개발 프로젝트 ' + projectCount + '개를 직접 만나보세요. 기획부터 디자인, 개발, 운영과 AX까지 함께합니다.',
-    eyebrow: 'NEANDER DEVELOPMENT STUDIO',
+    eyebrow: 'NEANDER AX STUDIO',
     title: ['아이디어를 서비스로,', 'AI를 비즈니스로.'],
     lead: '외주개발부터 AX까지.',
     description: '비즈니스의 다음 단계를 함께 만듭니다.\n기획과 디자인, 개발과 운영을 하나의 팀으로.',
@@ -64,9 +65,9 @@ export const DEVELOPMENT_COPY = {
     fallback: '프로젝트 살펴보기',
   },
   en: {
-    metaTitle: 'Development · Websites, AI & AX',
+    metaTitle: 'Development & AX · Websites, platforms & AI',
     metaDescription: 'Ideas into products. AI into business. Explore ' + projectCount + ' NEANDER website, commerce, platform and AI projects. From planning and design to development, operations and AI transformation.',
-    eyebrow: 'NEANDER DEVELOPMENT STUDIO',
+    eyebrow: 'NEANDER AX STUDIO',
     title: ['Ideas into products.', 'AI into business.'],
     lead: 'From custom development to AI transformation.',
     description: 'Build the next chapter of your business.\nOne team for strategy, design, development and beyond.',

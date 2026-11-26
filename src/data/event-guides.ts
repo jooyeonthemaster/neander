@@ -15,7 +15,7 @@ export interface GuideGroup {
 export const GUIDE_GROUPS: GuideGroup[] = [
   {
     id: 'perfume',
-    title: { ko: 'AI 향수', en: 'AI perfume' },
+    title: { ko: 'AI 조향사', en: 'AI perfume' },
     slugs: ['event-ai-perfume-experience', 'event-perfume-gift', 'brand-scent-kiosk'],
   },
   {

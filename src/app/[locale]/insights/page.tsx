@@ -3,6 +3,8 @@ import { setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { INSIGHTS } from '@/data/insights';
 import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
+import { PageHero } from '@/components/site/PageHero';
+import { HoverPreviewList, HoverPreviewRow, Reveal } from '@/components/fx';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -12,20 +14,14 @@ const COPY = {
   ko: {
     title: '인사이트',
     subtitle: '행사·팝업에 AI 체험을 들이기 전에 알아 두면 좋은 비용, 운영, 인허가 이야기를 정리합니다.',
-    article: '가이드',
-    landing: '서비스 안내',
-    read: '읽기',
     guides: '행사별 비용·진행 안내는 체험서비스 소개로 옮겼습니다',
-    guidesLink: '행사별 안내 보기 →',
+    guidesLink: '행사별 안내 보기',
   },
   en: {
     title: 'Insights',
     subtitle: 'Costs, operations and licensing to know before bringing AI experiences to your event or pop-up.',
-    article: 'Guide',
-    landing: 'Service',
-    read: 'Read',
     guides: 'Guides by use (prices and process) are now under Services',
-    guidesLink: 'See the guides →',
+    guidesLink: 'SEE THE GUIDES',
   },
 } as const;
 
@@ -50,38 +46,57 @@ export default async function InsightsPage({ params }: Props) {
 
   return (
     <div>
-      <section className="bg-slate-950 pb-16 pt-32 sm:pb-20 sm:pt-40">
-        <div className="container-wide">
-          <h1 className="font-display text-4xl font-extrabold tracking-tight text-white sm:text-5xl">{c.title}</h1>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-neutral-400">{c.subtitle}</p>
-        </div>
-      </section>
+      <PageHero
+        id="insights-title"
+        label="INSIGHTS"
+        en={['GOOD', 'TO KNOW.']}
+        ko={c.title}
+        lead={c.subtitle}
+        size="h1"
+      />
 
-      <section className="py-16 sm:py-24">
-        <div className="container-wide">
-          <ul className="mx-auto grid max-w-5xl grid-cols-1 gap-5 md:grid-cols-2">
-            {items.map((item) => (
-              <li key={item.slug}>
-                <Link
-                  href={`/insights/${item.slug}`}
-                  className="group flex h-full flex-col rounded-2xl border border-slate-200 p-6 transition-colors hover:border-teal-300 hover:bg-teal-50/40"
-                >
-                  <span className="text-xs font-semibold text-teal-700">
-                    {item.kind === 'article' ? c.article : c.landing}
-                  </span>
-                  <h2 className="mt-2 text-lg font-bold leading-snug text-slate-900">{item[lang].title}</h2>
-                  <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">{item[lang].description}</p>
-                  <span className="mt-4 text-sm font-semibold text-teal-700 group-hover:underline">{c.read} →</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+      <section className="bg-ink pb-[clamp(4rem,9vw,8rem)] pt-4">
+        <div className="wrap">
+          {/* 글 목록 — 줄에 마우스를 올리면 그 글의 사진이 커서를 따라 뜬다 */}
+          <HoverPreviewList>
+            <ul className="border-t border-paper/15">
+              {items.map((item, i) => {
+                const title = item[lang].title;
+                const cut = title.indexOf(' — ');
+                return (
+                  <li key={item.slug}>
+                    <HoverPreviewRow image={item.cover?.src}>
+                      <Reveal delay={(i % 4) * 70}>
+                        <Link
+                          href={`/insights/${item.slug}`}
+                          data-cursor="READ"
+                          className="group grid gap-x-10 gap-y-3 border-b border-paper/15 py-8 transition-colors duration-500 hover:border-paper/60 md:grid-cols-[4.5rem_minmax(0,1fr)_minmax(0,1fr)_2rem] md:items-baseline lg:py-10"
+                        >
+                          <span className="t-label text-accent">{String(i + 1).padStart(2, '0')}</span>
+                          <h2 className="t-kr-title text-[clamp(1.25rem,2.1vw,1.85rem)] text-paper transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-2">
+                            {cut < 0 ? title : title.slice(0, cut)}
+                            {cut >= 0 && <span className="mt-1.5 block text-[0.62em] font-medium text-paper/55">{title.slice(cut + 3)}</span>}
+                          </h2>
+                          <p className="text-[0.95rem] leading-relaxed text-paper/55">{item[lang].description}</p>
+                          <span aria-hidden="true" className="hidden justify-self-end font-display text-paper/40 transition-[color,transform] duration-500 group-hover:translate-x-1 group-hover:text-accent md:block">→</span>
+                        </Link>
+                      </Reveal>
+                    </HoverPreviewRow>
+                  </li>
+                );
+              })}
+            </ul>
+          </HoverPreviewList>
+
           <Link
             href="/services#guides"
-            className="mx-auto mt-8 flex max-w-5xl flex-col gap-1 rounded-2xl border border-teal-200 bg-teal-50/60 p-6 transition-colors hover:border-teal-400 sm:flex-row sm:items-center sm:justify-between"
+            className="group mt-12 flex flex-col gap-3 border border-paper/20 px-6 py-6 transition-colors duration-500 hover:border-paper/60 sm:flex-row sm:items-center sm:justify-between lg:px-8"
           >
-            <span className="text-sm text-slate-700">{c.guides}</span>
-            <span className="text-sm font-semibold text-teal-700">{c.guidesLink}</span>
+            <span className="text-[0.95rem] text-paper/65">{c.guides}</span>
+            <span className="t-label inline-flex items-center gap-2.5 text-paper">
+              {c.guidesLink}
+              <span aria-hidden="true" className="transition-transform duration-500 group-hover:translate-x-1.5">→</span>
+            </span>
           </Link>
         </div>
       </section>

@@ -1,0 +1,10 @@
+export { Reveal, Lines } from './Reveal';
+export { ScrollWords } from './ScrollWords';
+export { Parallax, Drift } from './Parallax';
+export { Tilt } from './Tilt';
+export { VelocityMarquee } from './VelocityMarquee';
+export { Spotlight } from './Spotlight';
+export { HoverPreviewList, HoverPreviewRow } from './HoverPreview';
+export { ScrollProgress } from './ScrollProgress';
+export { MagneticElement as Magnetic } from '@/components/animations/MagneticElement';
+export { CountUp } from '@/components/animations/CountUp';

@@ -6,5 +6,6 @@ export const metadata = {
 };
 
 export default function FormulaLabPage() {
-  return <FormulaLab />;
+  // 숨은 실험 페이지 — 2026-11 어두운 테마를 적용하지 않고 원래 색 그대로 둔다
+  return <div className="theme-original bg-white text-neutral-900"><FormulaLab /></div>;
 }

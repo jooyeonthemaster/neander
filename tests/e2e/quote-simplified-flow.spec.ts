@@ -67,18 +67,23 @@ for (const lang of ['ko', 'en'] as const) {
     await page.goto(`${prefix}/quote?item=acscent`, { waitUntil: 'domcontentloaded' });
     await expect(stage(page, 1)).toBeVisible();
     await expect(page.locator('#q-attendees')).toHaveValue('100');
-    await expect.poll(() => amount(page)).toBe(2_035_000);
+    // 2026-11-23: 향수 인원은 행사 인원을 따라가지 않는다 — 직접 적기 전에는 최소 금액(20명)으로 두고 '미입력'
+    await expect.poll(() => amount(page)).toBe(1_089_000);
     await page.locator('#q-attendees').fill('150');
     await page.locator('#q-attendees').press('Tab');
-    await expect.poll(async () => (await saved(page)).items.find(item => item.key === 'acscent')?.options.guests).toBe(150);
-    await expect.poll(() => amount(page)).toBe(2_860_000);
+    await expect.poll(async () => (await saved(page)).items.find(item => item.key === 'acscent')?.options.guestsPending).toBe(true);
+    await expect.poll(() => amount(page)).toBe(1_089_000);
     await toExperiences(page);
+    await expect(page.getByTestId('quote-next')).toBeDisabled();
+    await expect(page.getByTestId('quote-next-blocked')).toBeVisible();
 
     const options = await openPreviewOptions(page, 'acscent');
-    await expect(options.locator('#p-guests')).toHaveValue('150');
+    await expect(options.locator('#p-guests')).toHaveValue('100');
+    await expect.poll(() => amount(page)).toBe(2_035_000);
+    await expect(page.getByTestId('quote-next')).toBeEnabled();
     await expect(options.getByTestId('option-tab-space')).toHaveCount(0);
     await options.getByRole('radio', { name: /50ml/ }).check();
-    await expect.poll(() => amount(page)).toBe(6_160_000);
+    await expect.poll(() => amount(page)).toBe(4_235_000);
     await options.locator('#p-guests').fill('200');
     await options.locator('#p-guests').press('Enter');
     await expect.poll(() => amount(page)).toBe(8_085_000);
@@ -90,11 +95,12 @@ for (const lang of ['ko', 'en'] as const) {
     await expect(stage(page, 1)).toHaveAttribute('data-quote-page', '1');
     await page.locator('#q-attendees').fill('500');
     await page.locator('#q-attendees').press('Tab');
-    await expect.poll(async () => (await saved(page)).items.find(item => item.key === 'acscent')?.options.guests).toBe(500);
-    await expect.poll(() => amount(page)).toBe(20_405_000);
+    // 행사 인원을 바꿔도 직접 적은 향수 인원(200명)은 그대로다
+    await expect.poll(async () => (await saved(page)).items.find(item => item.key === 'acscent')?.options.guests).toBe(200);
+    await expect.poll(() => amount(page)).toBe(8_085_000);
     await page.reload({ waitUntil: 'domcontentloaded' });
     await expect(page.locator('#q-attendees')).toHaveValue('500');
-    await expect.poll(() => amount(page)).toBe(20_405_000);
+    await expect.poll(() => amount(page)).toBe(8_085_000);
     expect(errors).toEqual([]);
   });
 
@@ -136,7 +142,7 @@ for (const lang of ['ko', 'en'] as const) {
 }
 
 for (const lang of ['ko', 'en'] as const) {
-  test(`${lang}: old inquiry-only drafts cannot produce a zero-price estimate and new perfume selections use the full participant count`, async ({ page }) => {
+  test(`${lang}: old inquiry-only drafts cannot produce a zero-price estimate and new perfume selections ask for the guest count`, async ({ page }) => {
     await page.addInitScript(({ key }) => localStorage.setItem(key, JSON.stringify({
       eventName: 'Saved event', days: 1, hoursPerDay: 6, attendees: 750, region: 'seoul', extraStaff: 0,
       items: [
@@ -150,8 +156,13 @@ for (const lang of ['ko', 'en'] as const) {
     await expect.poll(() => amount(page)).toBe(0);
     await toExperiences(page);
     await expect(page.getByTestId('quote-next')).toBeDisabled();
+    // 행사 인원(750명)을 그대로 쓰지 않고, 향수 인원을 묻는다
+    await page.getByTestId('quote-add-acscent').click();
+    await expect(page.getByTestId('perfume-guests-prompt')).toBeVisible();
+    await expect(page.getByTestId('quote-next')).toBeDisabled();
     const options = await openPreviewOptions(page, 'acscent');
-    await expect(options.locator('#p-guests')).toHaveValue('750');
-    await expect.poll(() => amount(page)).toBe(13_915_000);
+    await expect(options.locator('#p-guests')).toHaveValue('100');
+    await expect.poll(() => amount(page)).toBe(2_035_000);
+    await expect(page.getByTestId('quote-next')).toBeEnabled();
   });
 }

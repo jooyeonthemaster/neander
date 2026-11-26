@@ -94,7 +94,7 @@ export function DemoModal({ slug, onClose, returnLabel }: DemoModalProps) {
   return createPortal(
     <motion.div
       style={{ zIndex: 'var(--z-modal)' }}
-      className="fixed inset-0 flex items-stretch justify-center bg-stone-900/30 backdrop-blur-md sm:p-5 lg:p-10"
+      className="theme-original fixed inset-0 flex items-stretch justify-center bg-stone-900/30 backdrop-blur-md sm:p-5 lg:p-10"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

@@ -3,7 +3,7 @@ import { calculateQuote, type QuoteInput } from '../../src/lib/quote/engine';
 import { CUSTOM_DEV } from '../../src/lib/quote/catalog';
 import { enterExperienceStep, toggleKioskExperience, closePreviewOptions, showOptionPage } from './helpers/quote-preview-options';
 
-const key = 'neander-quote-preview-flow-v1';
+const key = 'neander-quote-v2';
 const seed = { days: 1, hoursPerDay: 6, region: 'capital', items: [
   { key: 'rental', options: { kiosks: 1, printer: true, custom: 'none', experienceSlugs: ['ai-personal-color'] } },
   { key: 'spatialDesign', options: { size: 'booth6x3', pyeong: 10, photoZone: false, lighting: false } },
@@ -16,7 +16,7 @@ for (const lang of ['ko', 'en'] as const) {
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.addInitScript(({ key, seed }) => { if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify(seed)); }, { key, seed });
-    await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`);
+    await page.goto(`${lang === 'en' ? '/en' : ''}/quote`);
     const resume = () => enterExperienceStep(page);
     await resume();
     await page.getByTestId('quote-edit-rental').evaluate(element => element.scrollIntoView({ block: 'end' }));

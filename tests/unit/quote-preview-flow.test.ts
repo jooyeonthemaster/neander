@@ -86,7 +86,7 @@ test('restored flow drafts normalize invalid values and unknown or duplicate ser
 });
 
 test('preview inputs use event pricing while preserving kiosk assignments and other service choices', () => {
-  const assignments = ['ai-personal-color', '', 'ai-face-reading', 'ai-personal-color'];
+  const assignments = ['ai-personal-color', '', 'ai-palm-reading', 'ai-personal-color'];
   const source = sanitizeInput({
     days: 3, hoursPerDay: 8, region: 'central',
     items: [
@@ -121,7 +121,7 @@ test('preview inputs use event pricing while preserving kiosk assignments and ot
 test('current and legacy subscription drafts migrate to event rental without touching production storage', () => {
   const source = sanitizeInput({ days: 2, items: [{ key: 'rental', options: {
     mode: 'monthly', months: 24, kiosks: 3, printer: true, custom: 'brand',
-    experienceSlug: 'ai-face-reading', extraContents: 2,
+    experienceSlug: 'ai-palm-reading', extraContents: 2,
   } }] });
   for (const storageKey of [QUOTE_PREVIEW_FLOW_STORAGE_KEY, PREVIEW_STORAGE_KEY]) {
     const values = {
@@ -137,7 +137,7 @@ test('current and legacy subscription drafts migrate to event rental without tou
     assert.ok(kiosk);
     assert.deepEqual(kiosk.options, {
       mode: 'event', months: 1, kiosks: 3, printer: false, custom: 'brand',
-      experienceSlug: 'ai-face-reading', experienceSlugs: ['ai-face-reading', '', ''], extraContents: 0,
+      experienceSlug: 'ai-palm-reading', experienceSlugs: ['ai-palm-reading', '', ''], extraContents: 0,
     });
     assert.deepEqual(restored, normalizePreviewInput(source));
     assert.ok(!storage.reads.includes('neander-quote-v2') && !storage.reads.includes('neander-estimates'));

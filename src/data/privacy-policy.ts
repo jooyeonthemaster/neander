@@ -110,7 +110,7 @@ const ko: PolicyDoc = {
       title: '6. 이용자의 권리와 행사 방법',
       bullets: [
         '이용자는 언제든지 자신의 개인정보에 대해 열람, 정정, 삭제, 처리 정지를 요구할 수 있습니다.',
-        `요청은 이메일(${POLICY_META.email}) 또는 전화(${POLICY_META.phone}, 휴대폰 ${POLICY_META.mobile})로 하실 수 있으며, 회사는 지체 없이 조치합니다.`,
+        `요청은 이메일(${POLICY_META.email}) 또는 전화(고객센터 ${POLICY_META.phone}, 직통 ${POLICY_META.mobile})로 하실 수 있으며, 회사는 지체 없이 조치합니다.`,
         '행사 현장에서 촬영한 사진의 삭제를 원하시면 행사명과 촬영 일시를 알려 주세요. 고객사와 확인해 처리합니다.',
       ],
     },
@@ -139,7 +139,7 @@ const ko: PolicyDoc = {
         rows: [
           ['책임자', POLICY_META.officer.ko],
           ['이메일', POLICY_META.email],
-          ['전화', `${POLICY_META.phone} / 휴대폰 ${POLICY_META.mobile}`],
+          ['전화', `고객센터 ${POLICY_META.phone} / 직통 ${POLICY_META.mobile}`],
         ],
       },
       paragraphs: [
@@ -231,7 +231,7 @@ const en: PolicyDoc = {
       title: '6. Your rights',
       bullets: [
         'You may ask to access, correct, delete, or stop the processing of your personal information at any time.',
-        `Send requests to ${POLICY_META.email} or call +82-2-336-3368 (mobile +82-10-8507-5121); we will act without delay.`,
+        `Send requests to ${POLICY_META.email} or call our customer center (+82-2-336-3368) or direct line (+82-10-8507-5121); we will act without delay.`,
         'To delete a photo taken at an event, tell us the event name and the time it was taken. We will confirm with the client and process it.',
       ],
     },
@@ -260,7 +260,7 @@ const en: PolicyDoc = {
         rows: [
           ['Officer', POLICY_META.officer.en],
           ['Email', POLICY_META.email],
-          ['Phone', '+82-2-336-3368 / Mobile +82-10-8507-5121'],
+          ['Phone', 'Customer center +82-2-336-3368 / Direct +82-10-8507-5121'],
         ],
       },
       paragraphs: [

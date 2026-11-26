@@ -1,6 +1,6 @@
 /* ─────────────────────────────────────────────────────────
    서비스 상세(/services/[slug])의 검색 문구와 구조화 데이터.
-   체험 이름(예: 「AI 향수 소울메이트」)은 아무도 검색하지 않으므로,
+   체험 이름(예: 「AI 조향사」)은 아무도 검색하지 않으므로,
    제목·설명에 행사 담당자가 실제로 찾는 말(포토부스 대여, 체험 부스, 행사 운영)을 붙인다.
    가격은 온라인 견적 카탈로그(src/lib/quote/catalog.ts)의 시작가만 쓴다.
    ───────────────────────────────────────────────────────── */
@@ -27,7 +27,7 @@ function phraseKey(slug: string, pillar: string): string {
   return service;
 }
 
-/** 검색 결과 제목 — "AI 향수 소울메이트 — 행사·팝업 AI 향수 만들기 체험" */
+/** 검색 결과 제목 — "AI 조향사 — 행사·팝업 AI 향수 만들기 체험" */
 export function serviceSearchTitle(name: string, slug: string, pillar: string, locale: string): string {
   const lang: Lang = locale === 'en' ? 'en' : 'ko';
   return `${name} — ${PHRASES[phraseKey(slug, pillar)][lang]}`;
@@ -102,8 +102,8 @@ export function serviceLanding(slug: string, pillar: string, locale: string): { 
   const service = serviceForExperience(slug, pillar);
   const en = locale === 'en';
   if (service === 'photoBooth') return { href: '/insights/ai-photo-booth-rental', text: en ? 'AI photo booth rental: prices and terms →' : 'AI 포토부스 대여 가격·조건 보기 →' };
-  if (service === 'acscent') return { href: '/insights/event-ai-perfume-experience', text: en ? 'AI perfume experience: prices and terms →' : 'AI 향수 체험 가격·조건 보기 →' };
-  if (service === 'rental' && pillar === 'ai-fortune') return { href: '/insights/ai-fortune-kiosk-rental', text: en ? 'AI fortune kiosk rental: prices and terms →' : 'AI 사주·관상 키오스크 대여 가격·조건 보기 →' };
+  if (service === 'acscent') return { href: '/insights/event-ai-perfume-experience', text: en ? 'AI perfume experience: prices and terms →' : 'AI 조향사 가격·조건 보기 →' };
+  if (service === 'rental' && pillar === 'ai-fortune') return { href: '/insights/ai-fortune-kiosk-rental', text: en ? 'AI fortune-telling rental (photo booth · kiosk): prices and terms →' : 'AI 사주·관상·손금 체험 대여 가격·조건 보기 →' };
   if (service === 'rental') return { href: '/insights/event-ai-experience-cost-guide-2026', text: en ? 'AI kiosk prices and options →' : 'AI 키오스크 가격·옵션 보기 →' };
   return null;
 }

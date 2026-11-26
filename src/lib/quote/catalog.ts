@@ -21,7 +21,7 @@ export function isConsultationService(key: ServiceKey): boolean {
 
 export const SERVICE_TEXT: Record<ServiceKey, { name: Text; summary: Text }> = {
   acscent: {
-    name: { ko: 'AI 향수 체험', en: 'AI Perfume Experience' },
+    name: { ko: 'AI 조향사', en: 'AI Perfume Experience' },
     summary: {
       ko: "AI가 취향·이미지를 분석해 향을 추천하고 조향사가 현장에서 향수를 만들어 건넵니다 (AC'SCENT). 분석은 QR 웹 분석이 기본이며 분석용 키오스크를 더할 수 있습니다.",
       en: "AI recommends a scent from each guest's taste and image; a perfumer blends it on site (AC'SCENT). Analysis runs on guests' phones via QR by default; analysis kiosks are optional.",
@@ -37,8 +37,8 @@ export const SERVICE_TEXT: Record<ServiceKey, { name: Text; summary: Text }> = {
   rental: {
     name: { ko: 'AI 키오스크', en: 'AI Kiosk' },
     summary: {
-      ko: '관상·운세·퍼스널컬러 등 AI 체험 중 하나를 그대로 키오스크로 운영합니다. 결과는 키오스크에 내장된 영수증형 프린터로 바로 출력합니다. 현장 운영 인력은 별도입니다.',
-      en: 'Run an AI experience such as face reading, fortune or personal color as-is on a kiosk. Results print on the spot from the built-in receipt printer. On-site staff is extra.',
+      ko: '퍼스널컬러·운세·진로 등 AI 체험 중 하나를 그대로 키오스크로 운영합니다. 결과는 키오스크에 내장된 영수증형 프린터로 바로 출력합니다. 현장 운영 인력은 별도입니다.',
+      en: 'Run an AI experience such as personal color, fortune or career as-is on a kiosk. Results print on the spot from the built-in receipt printer. On-site staff is extra.',
     },
   },
   spatialDesign: {
@@ -87,8 +87,8 @@ export function normalizeRegion(value: unknown): RegionKey {
 /** 제주 등 도서 지역은 운영하지 않는다 (견적 화면·가견적서·가격 안내에 표시) */
 /** 가견적서 안내 — 견적 화면·가견적서 페이지·PDF에 모두 넣는다 */
 export const ESTIMATE_DISCLAIMER: Text = {
-  ko: '가견적서는 참고용으로만 사용해 주세요. 행사 일정·장소·현장 조건에 따라 금액이 달라질 수 있으며, 실제 견적은 상담 후 확정됩니다.',
-  en: 'This estimate is for reference only. Prices may change with your schedule, venue and site conditions; the final quote is confirmed after consultation.',
+  ko: '가견적서는 참고용으로만 사용해 주세요. 실제 견적은 상담 후 확정됩니다.',
+  en: 'This estimate is for reference only. The final quote is confirmed after consultation.',
 };
 
 export const REGION_NOTE: Text = {

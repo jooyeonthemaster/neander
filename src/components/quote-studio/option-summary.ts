@@ -17,7 +17,7 @@ export function optionSummary(item: QuoteItem, lang: Lang, experienceName?: (slu
     case 'acscent': {
       const o = item.options;
       const ak = o.analysisKiosks ?? 0;
-      out.push(ko ? `${o.guests}명` : `${o.guests} guests`, o.volume);
+      out.push(o.guestsPending ? (ko ? '인원 미입력' : 'Guests not set') : ko ? `${o.guests}명` : `${o.guests} guests`, o.volume);
       out.push(ak > 0 ? (ko ? `분석 키오스크 ${ak}대` : count(ak, 'analysis kiosk')) : (ko ? 'QR 분석' : 'QR analysis'));
       out.push(ko ? `조향 ${PERFUME.includedTeams + o.extraTeams}팀` : count(PERFUME.includedTeams + o.extraTeams, 'perfumer team'));
       add(o.customScent, '전용 향', 'Custom scent');

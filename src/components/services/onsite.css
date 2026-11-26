@@ -1,0 +1,61 @@
+/* 2026-11 개편: output/onsite-assets/reference-code/onsite.css 를 가져와 어두운 바탕에 맞게 그림자만 손봤다.
+   기기 정면 그림 — acscent 영업용 데모 랜딩(kiosk-demo.css .kd-kiosk · booth-demo.css .bd-booth)과 같은 비율.
+   매장 키오스크 · 포토부스를 정면에서 찍은 사진에서 쟀다. 그림 파일 없이 그리고, 화면 자리에 실제 프로그램 캡처를 넣는다.
+   치수는 기기 폭을 100cqw 로 둔 비율이라 어느 크기에서도 모양이 같다. */
+
+/* ── 세로형 키오스크: 검은 몸체 · 윗모서리 둥글게 · 위 가운데 웹캠(집게) · 화면 아래 패널의 영수증 구멍 ── */
+.os-kiosk { container-type: inline-size; position: relative; display: block; width: 100%; }
+.os-kiosk-cam { position: absolute; top: 0; left: 50%; z-index: 1; width: 27cqw; height: 8.2cqw; border-radius: 2.2cqw; background: linear-gradient(180deg, #45484f, #202227 62%, #17181c); box-shadow: inset 0 0.3cqw 0 rgba(255, 255, 255, 0.12), 0 0.8cqw 1.6cqw rgba(8, 10, 18, 0.26); transform: translateX(-50%); }
+.os-kiosk-cam::after { content: ''; position: absolute; top: 100%; left: 50%; z-index: -1; width: 14cqw; height: 5.4cqw; border-radius: 0 0 1cqw 1cqw; background: linear-gradient(180deg, #24262b, #16171a); transform: translateX(-50%); }
+.os-kiosk-cam i { position: absolute; top: 50%; left: 50%; width: 4.6cqw; height: 4.6cqw; border-radius: 50%; background: radial-gradient(circle at 38% 34%, #75829f 0 11%, #1c2335 25%, #07090e 60%); box-shadow: 0 0 0 0.6cqw #111215, 0 0 0 0.85cqw #2c2e34; transform: translate(-50%, -50%); }
+.os-kiosk-body { position: relative; display: flex; flex-direction: column; margin-top: 11.7cqw; padding: 9cqw 9.8cqw 0; border-radius: 6.2cqw 6.2cqw 0 0; background: linear-gradient(180deg, #1d1f23 0%, #121316 38%, #0f1012 100%); box-shadow: inset 0 0 0 0.35cqw rgba(255, 255, 255, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.06), 0 6cqw 14cqw rgba(0, 0, 0, 0.6); -webkit-mask-image: linear-gradient(180deg, #000 88%, transparent 100%); mask-image: linear-gradient(180deg, #000 88%, transparent 100%); }
+.os-kiosk-screen { position: relative; isolation: isolate; display: block; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; border-radius: 0.4cqw; background: #050608; box-shadow: 0 0 0 0.3cqw #070809; }
+.os-kiosk-panel { position: relative; display: block; height: 30cqw; margin: 11cqw -9.8cqw 0; border-top: 0.4cqw solid #08090a; background: linear-gradient(180deg, #212327, #18191c 60%); }
+.os-kiosk-panel i { position: absolute; top: 10.5cqw; left: 17cqw; width: 21cqw; height: 1.3cqw; border-radius: 0.7cqw; background: linear-gradient(180deg, #9a9fa8, #50545c 45%, #0a0b0d 55%, #2b2d33); }
+/* 영수증 — 출력구(.os-kiosk-panel i, 위에서 185.5cqw · 왼쪽 17cqw · 폭 21cqw)에서 프린터가 종이를 밀어내듯 끊어 끊어 나온다.
+   틀(.os-kiosk-receipt)의 윗변이 출력구 선이고, 틀 높이가 늘어나며 종이가 나온다 */
+/* 영수증 — 출력구 선(틀 윗변) 아래로 종이가 스르륵 미끄러져 내려온다. 틀이 잘라 내므로 출력구 위로는 보이지 않는다 */
+.os-receipt-feed { z-index: 1; display: block; height: 66cqw; pointer-events: none; -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 10cqw), transparent); mask-image: linear-gradient(180deg, #000 calc(100% - 10cqw), transparent); }
+.os-receipt-feed img { background: #fff; box-shadow: 0 1.4cqw 2.6cqw rgba(0, 0, 0, 0.45); animation: os-receipt-slide 2.6s cubic-bezier(0.33, 0.1, 0.25, 1) both; }
+@keyframes os-receipt-slide { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+
+/* ── 포토부스: 흰 세로 몸체 · 위 가운데 렌즈 · 가로 화면(폭 80%, 16:9) · 아래 인화물 출구 ── */
+.os-booth { container-type: inline-size; position: relative; display: block; width: 100%; }
+.os-booth-body { position: relative; display: block; height: 104cqw; border-radius: 1.2cqw 1.2cqw 0 0; background: linear-gradient(90deg, #eceef1 0%, #f8f8fa 18%, #ffffff 55%, #eff0f2 96%, #e0e2e6 100%); box-shadow: inset 0 0 0 0.3cqw rgba(17, 20, 27, 0.06), 0 6cqw 14cqw rgba(0, 0, 0, 0.55); -webkit-mask-image: linear-gradient(180deg, #000 86%, transparent 100%); mask-image: linear-gradient(180deg, #000 86%, transparent 100%); }
+.os-booth-cam { position: absolute; top: 5cqw; left: 50%; display: block; width: 11cqw; height: 11cqw; border-radius: 50%; background: radial-gradient(circle, #0b0c0e 62%, #2a2c31 70%, #9da1a8 74%, #e7e8eb 78%); box-shadow: inset 0 0.6cqw 1cqw rgba(0, 0, 0, 0.5); transform: translateX(-50%); }
+.os-booth-cam i { position: absolute; inset: 14%; border-radius: 50%; background: radial-gradient(circle at 40% 36%, #5c6273 0 6%, #1b1e26 18%, #0a0b0e 46%, #24262b 58%, #101114 66%, #2c2e33 72%, #0d0e10 80%); }
+.os-booth-screen { position: absolute; top: 21cqw; left: 6cqw; isolation: isolate; display: block; width: 88cqw; aspect-ratio: 16 / 9; overflow: hidden; border: 0.7cqw solid #0b0c0e; border-radius: 0.4cqw; background: #050608; }
+.os-booth-slot { position: absolute; top: 79cqw; left: 32cqw; z-index: 2; display: block; width: 36cqw; height: 4.6cqw; border-radius: 0.3cqw; background: linear-gradient(180deg, #040405, #1a1b1f); box-shadow: inset 0 0.6cqw 1cqw rgba(0, 0, 0, 0.55), 0 0.2cqw 0 rgba(255, 255, 255, 0.9); }
+.os-booth-slot i { position: absolute; top: 18%; right: 0; bottom: 0; width: 26%; background: linear-gradient(180deg, #8d9097, #c9cbd0 40%, #e9eaed); }
+.os-booth-print { position: absolute; top: 80.5cqw; left: 38cqw; z-index: 1; display: block; width: 22cqw; aspect-ratio: 2 / 3; overflow: hidden; border-radius: 0.5cqw; box-shadow: 0 1.6cqw 3cqw rgba(8, 10, 18, 0.35); transform: translateY(-100%) rotate(-2deg); clip-path: inset(100% 0 0 0); transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), clip-path 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
+/* 결과 단계가 되면 인화물이 출구에서 내려온다 */
+.os-booth-print[data-out] { transform: translateY(0) rotate(-2deg); clip-path: inset(0 0 0 0); }
+
+/* 화면 안 그림 — 단계가 바뀌면 겹쳐서 바꾼다(앞 그림은 새 그림이 다 나타난 뒤 빠진다) */
+.os-screen-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; opacity: 0; transition: opacity 0.55s ease; }
+.os-screen-img[data-on] { opacity: 1; z-index: 1; }
+.os-glass::after { content: ''; position: absolute; inset: 0; z-index: 3; background: linear-gradient(118deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.035) 26%, transparent 42%); pointer-events: none; }
+
+/* ── 휴대폰(받기 페이지) ── */
+/* 휴대폰 — 아이폰 정면 (티타늄 테두리 · 다이내믹 아일랜드 · 옆 버튼). 비율은 실물 몸체 71.5 × 147.5mm
+   여백을 padding % 로 주면 부모 폭을 따라 테두리가 두꺼워지므로(알약 모양이 됐다),
+   화면은 기기 상자 안에 inset % 로 놓는다 — inset 의 % 는 기기 자신의 폭 · 높이를 따른다.
+   예전 이름(os-phone)의 낡은 스타일이 남아 있어도 걸리지 않게 이름을 바꿨다 */
+.os-iphone { position: relative; display: block; width: 100%; aspect-ratio: 71.5 / 147.5; border-radius: 15.5% / 7.2%; background: linear-gradient(160deg, #4a4d55, #1b1c20 38%, #2c2e34 72%, #55585f); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.22), 0 28px 60px -12px rgba(0, 0, 0, 0.7); }
+.os-iphone::before, .os-iphone::after { content: ''; position: absolute; width: 1.4%; border-radius: 2px; background: linear-gradient(90deg, #2a2c31, #5b5e66); }
+.os-iphone::before { left: -1%; top: 18%; height: 6%; }
+.os-iphone::after { right: -1%; top: 24%; height: 10%; }
+.os-iphone-screen { container-type: inline-size; position: absolute; inset: 1.55% 3.4%; display: block; overflow: hidden; border-radius: 12.5% / 5.6%; background: #000; box-shadow: 0 0 0 3px #0d0e11; }
+.os-iphone-screen img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.os-iphone-screen::before { content: ''; position: absolute; top: 2.6cqw; left: 50%; z-index: 2; width: 30cqw; height: 8.6cqw; border-radius: 99px; background: #000; transform: translateX(-50%); }
+
+/* ── 영수증 · 인화물 ── */
+.os-paper { display: block; width: 100%; height: auto; box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.7); }
+.os-receipt { -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 10px), transparent 100%); mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 10px), transparent 100%); }
+
+@keyframes os-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .os-screen-img { transition: none; }
+  .os-receipt-feed img { animation: none; }
+}

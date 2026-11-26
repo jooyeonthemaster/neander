@@ -52,7 +52,9 @@ test('「어떻게 알게 되셨나요」 라벨', () => {
 
 test('서비스 검색 제목·설명에 검색어와 시작가가 들어간다', () => {
   assert.equal(serviceSearchTitle('AI 포토카드', 'ai-fan-photocard', 'ai-photo', 'ko'), 'AI 포토카드 — AI 포토부스 대여·행사 운영');
-  assert.equal(serviceSearchTitle('AI 관상', 'ai-face-reading', 'ai-fortune', 'ko'), 'AI 관상 — AI 운세 체험 키오스크 대여');
+  assert.equal(serviceSearchTitle('AI 손금', 'ai-palm-reading', 'ai-fortune', 'ko'), 'AI 손금 — AI 운세 체험 키오스크 대여');
+  // 관상 · 사주는 포토부스 프로그램 (2026-11-26)
+  assert.equal(serviceSearchTitle('AI 관상', 'ai-face-reading', 'ai-fortune', 'ko'), 'AI 관상 — AI 포토부스 대여·행사 운영');
   const desc = serviceSearchDescription('AI가 향을 찾아 드립니다.', 'ai-scent-soulmate', 'ai-creative', 'ko');
   assert.match(desc, /^AI가 향을 찾아 드립니다\. 팝업·기업 행사/);
   assert.match(desc, /99만원부터\(VAT 별도/);

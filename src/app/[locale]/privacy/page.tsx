@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
 import { getPrivacyPolicy } from '@/data/privacy-policy';
 import { localeAlternates } from '@/lib/seo';
+import { PageHero } from '@/components/site/PageHero';
+import { Toc } from '@/components/insights/Toc';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -25,27 +27,31 @@ export default async function PrivacyPage({ params }: Props) {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-slate-950 pb-16 pt-32 sm:pb-20 sm:pt-40">
-        <div className="container-wide">
-          <h1 className="font-display text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-            {doc.title}
-          </h1>
-          <p className="mt-4 max-w-3xl text-base leading-relaxed text-neutral-400">
-            {doc.subtitle}
-          </p>
-        </div>
-      </section>
+      <PageHero
+        id="privacy-title"
+        label="PRIVACY"
+        en={['PRIVACY', 'POLICY.']}
+        ko={doc.title}
+        lead={doc.subtitle}
+        size="h1"
+      />
 
-      <section className="py-16 sm:py-24">
-        <div className="container-wide">
-          <div className="mx-auto max-w-3xl">
+      <section className="border-t border-paper/10 bg-ink">
+        <div className="wrap grid gap-x-[clamp(2.5rem,6vw,7rem)] pb-[clamp(4.5rem,10vw,9rem)] pt-[clamp(3rem,6vw,5rem)] lg:grid-cols-[15rem_minmax(0,48rem)]">
+          <aside className="hidden lg:block">
+            <div className="sticky top-28">
+              <Toc items={doc.sections.map((section) => ({ id: section.id, text: section.title.replace(/^\d+\.\s*/, '') }))} label={locale === 'en' ? 'ON THIS PAGE' : '목차'} />
+            </div>
+          </aside>
+
+          <div className="min-w-0">
             {/* 얼굴·사진 데이터 원칙 — 가장 궁금해하는 내용이라 맨 위에 둔다 */}
-            <div className="rounded-2xl border border-teal-200 bg-teal-50/60 p-6 sm:p-8">
-              <h2 className="text-lg font-bold text-slate-900">{doc.highlightsTitle}</h2>
-              <ul className="mt-4 space-y-2.5">
+            <div className="border border-accent/45 bg-accent/[0.07] p-6 sm:p-9">
+              <h2 className="t-kr-title text-[1.3rem] text-paper">{doc.highlightsTitle}</h2>
+              <ul className="mt-5 space-y-3">
                 {doc.highlights.map((line) => (
-                  <li key={line} className="flex gap-2.5 text-sm leading-relaxed text-slate-700">
-                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-500" aria-hidden="true" />
+                  <li key={line} className="flex gap-3.5 text-[0.98rem] leading-relaxed text-paper/80">
+                    <span className="mt-[0.62em] h-1.5 w-1.5 shrink-0 bg-accent" aria-hidden="true" />
                     <span>{line}</span>
                   </li>
                 ))}
@@ -53,26 +59,26 @@ export default async function PrivacyPage({ params }: Props) {
             </div>
 
             {doc.sections.map((section) => (
-              <section key={section.id} id={section.id} className="mt-12 scroll-mt-28">
-                <h2 className="text-xl font-bold text-slate-900">{section.title}</h2>
+              <section key={section.id} id={section.id} className="mt-14 scroll-mt-28 border-t border-paper/15 pt-8">
+                <h2 className="t-kr-title text-[clamp(1.25rem,1.9vw,1.55rem)] text-paper">{section.title}</h2>
 
                 {section.table && (
-                  <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200">
-                    <table className="w-full min-w-[520px] text-left text-sm">
+                  <div className="mt-6 overflow-x-auto border border-paper/15" data-lenis-prevent-touch>
+                    <table className="w-full min-w-[520px] text-left text-[0.92rem]">
                       {section.table.head.some(Boolean) && (
-                        <thead className="bg-slate-50 text-slate-500">
+                        <thead className="border-b border-paper/15 bg-paper/[0.04] text-paper/50">
                           <tr>
                             {section.table.head.map((h) => (
-                              <th key={h} className="px-4 py-3 font-medium">{h}</th>
+                              <th key={h} className="px-4 py-3 text-[0.82rem] font-medium">{h}</th>
                             ))}
                           </tr>
                         </thead>
                       )}
-                      <tbody className="divide-y divide-slate-100 text-slate-700">
+                      <tbody className="divide-y divide-paper/10 text-paper/70">
                         {section.table.rows.map((row) => (
                           <tr key={row.join('|')}>
                             {row.map((cell, i) => (
-                              <td key={i} className={i === 0 ? 'px-4 py-3 font-medium text-slate-900' : 'px-4 py-3'}>
+                              <td key={i} className={i === 0 ? 'px-4 py-3.5 align-top font-semibold text-paper' : 'px-4 py-3.5 align-top leading-relaxed'}>
                                 {cell}
                               </td>
                             ))}
@@ -84,18 +90,23 @@ export default async function PrivacyPage({ params }: Props) {
                 )}
 
                 {section.paragraphs?.map((p) => (
-                  <p key={p} className="mt-4 text-sm leading-relaxed text-slate-600">{p}</p>
+                  <p key={p} className="mt-5 text-[0.98rem] leading-[1.85] text-paper/70">{p}</p>
                 ))}
 
                 {section.bullets && (
-                  <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-relaxed text-slate-600">
-                    {section.bullets.map((b) => <li key={b}>{b}</li>)}
+                  <ul className="mt-5 space-y-2.5">
+                    {section.bullets.map((b) => (
+                      <li key={b} className="flex gap-3.5 text-[0.98rem] leading-[1.8] text-paper/70">
+                        <span className="mt-[0.72em] h-1 w-1 shrink-0 bg-paper/40" aria-hidden="true" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
                   </ul>
                 )}
               </section>
             ))}
 
-            <p className="mt-16 border-t border-slate-200 pt-6 text-sm text-slate-500">{doc.effective}</p>
+            <p className="mt-16 border-t border-paper/15 pt-6 text-sm text-paper/45">{doc.effective}</p>
           </div>
         </div>
       </section>

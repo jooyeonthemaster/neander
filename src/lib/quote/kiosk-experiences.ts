@@ -12,6 +12,8 @@ export interface KioskExperience {
   readonly name: { readonly ko: string; readonly en: string };
 }
 
+// 2026-11-26 사용자: 뮤직비디오 메이커 · 추억 무비 메이커는 프로그램에서 뺐다 (포트폴리오 · 사이트 전부)
+// 사주 · 관상 · 전통 화가는 포토부스 프로그램이라 포토부스 템플릿(photo-booth-templates.ts)으로 옮겼다
 export const KIOSK_EXPERIENCES = [
   { slug: 'ai-personal-color', name: { ko: 'AI 퍼스널 컬러 진단', en: 'AI Personal Color Diagnosis' } },
   { slug: 'ai-skincare-analysis', name: { ko: 'AI 스킨케어 분석관', en: 'AI Skincare Analyzer' } },
@@ -22,21 +24,16 @@ export const KIOSK_EXPERIENCES = [
   { slug: 'ai-taste-dna', name: { ko: 'AI 미각 DNA 프로파일', en: 'AI Taste DNA Profile' } },
   { slug: 'ai-style-profiler', name: { ko: 'AI 스타일 프로파일러', en: 'AI Style Profiler' } },
   { slug: 'ai-coord-recommender', name: { ko: 'AI 코디 추천 키오스크', en: 'AI Coord Recommender Kiosk' } },
-  { slug: 'ai-musicvideo-maker', name: { ko: 'AI 뮤직비디오 메이커', en: 'AI Music Video Maker' } },
   { slug: 'ai-celeb-lookalike', name: { ko: 'AI 연예인 닮은꼴 진단', en: 'AI Celebrity Lookalike' } },
   { slug: 'ai-voice-lab', name: { ko: 'AI 보이스 체험관', en: 'AI Voice Lab' } },
   { slug: 'ai-future-career', name: { ko: 'AI 미래직업 진단', en: 'AI Future Career Diagnosis' } },
-  { slug: 'ai-fortune-robot', name: { ko: 'AI 사주', en: 'AI Saju Reading' } },
-  { slug: 'ai-face-reading', name: { ko: 'AI 관상 분석', en: 'AI Face Reading' } },
   { slug: 'ai-palm-reading', name: { ko: 'AI 손금 로봇', en: 'AI Palm Reading Robot' } },
   { slug: 'ai-caricature-artist', name: { ko: 'AI 캐리커처 아티스트', en: 'AI Caricature Artist' } },
   { slug: 'ai-aura-reading', name: { ko: 'AI 오라 리딩', en: 'AI Aura Reading' } },
   { slug: 'ai-team-chemistry', name: { ko: 'AI 팀 케미 분석', en: 'AI Team Chemistry Analysis' } },
   { slug: 'ai-business-card', name: { ko: 'AI 명함 디자이너', en: 'AI Business Card Designer' } },
-  { slug: 'ai-traditional-painter', name: { ko: 'AI 전통 화가', en: 'AI Traditional Painter' } },
   { slug: 'ai-travel-style', name: { ko: 'AI 여행 성향 진단', en: 'AI Travel Style Diagnosis' } },
   { slug: 'ai-couple-chemistry', name: { ko: 'AI 커플 케미 진단', en: 'AI Couple Chemistry' } },
-  { slug: 'ai-memory-movie', name: { ko: 'AI 추억 무비 메이커', en: 'AI Memory Movie Maker' } },
 ] as const satisfies readonly KioskExperience[];
 
 const experienceBySlug = new Map<string, KioskExperience>(

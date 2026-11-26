@@ -16,7 +16,7 @@ const STEP_LABELS: Record<(typeof QUOTE_STEPS)[number], { label: string; hint: s
   conditions: { label: '행사 조건', hint: '시나리오를 고르거나 조건 단계로 넘어감' },
   experiences: { label: '체험 담기', hint: '체험 단계로 넘어가거나 상품을 담음' },
   form: { label: '견적서 받기 단계', hint: '연락처 입력 단계까지 옴' },
-  pdf: { label: '가견적서 PDF 발급', hint: 'PDF를 내려받음' },
+  pdf: { label: '견적서 발급', hint: '가견적서 PDF나 견적 보고서(HWPX·PDF)를 내려받음' },
   request: { label: '확정 견적 요청', hint: '담당자에게 요청을 보냄' },
 }
 

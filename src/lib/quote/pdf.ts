@@ -82,7 +82,7 @@ export async function renderEstimatePdf(input: QuoteInput, meta: EstimateMeta): 
     L(`1일 기본 운영 ${COMMON.baseHours}시간 기준이며, 설치·철수 시간은 포함하지 않습니다.`, `Based on ${COMMON.baseHours} operating hours per day, excluding setup and teardown.`),
     L("'상담 후 산정' 항목은 합계에 포함되지 않았습니다.", "Items marked 'TBD' are not included in the total."),
     REGION_NOTE[lang],
-    L('문의: ok@neander.co.kr · 02-336-3368 · 010-8507-5121', 'Contact: ok@neander.co.kr · +82-2-336-3368 · +82-10-8507-5121'),
+    L('문의: ok@neander.co.kr · 고객센터 02-336-3368 · 직통 010-8507-5121', 'Contact: ok@neander.co.kr · Customer center +82-2-336-3368 · Direct +82-10-8507-5121'),
   ];
 
   const supplier = [

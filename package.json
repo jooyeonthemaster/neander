@@ -26,6 +26,7 @@
     "@tiptap/starter-kit": "^3.22.2",
     "clsx": "^2.1.1",
     "compressorjs": "^1.2.1",
+    "fflate": "^0.8.3",
     "firebase": "^12.11.0",
     "gsap": "^3.12.7",
     "lenis": "^1.2.3",
@@ -40,6 +41,7 @@
     "react-hook-form": "^7.54.2",
     "subset-font": "^2.9.0",
     "tailwind-merge": "^3.0.1",
+    "three": "0.170.0",
     "zod": "^3.24.2",
     "zustand": "^5.0.3"
   },
@@ -51,6 +53,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/subset-font": "^2.3.0",
+    "@types/three": "0.170.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "firebase-admin": "^14.4.0",

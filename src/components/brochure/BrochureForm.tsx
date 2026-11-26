@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { COMPANY_PROFILE, PORTFOLIO_FULL } from '@/data/portfolio-downloads';
 import { useLocale } from 'next-intl';
 import { Input, Textarea } from '@/components/ui';
 import { Checkbox } from '@/components/ui/Checkbox';
@@ -13,9 +14,11 @@ const COPY = {
     email: '이메일',
     company: '회사·기관 (선택)',
     purpose: '검토 중인 행사 (선택)',
-    consent: '회사소개서 발송과 상담 연락을 위해 이름·이메일·회사명을 수집하며, 요청일로부터 1년간 보관합니다. 동의하지 않으면 요청할 수 없습니다.',
+    consent: '자료 발송과 상담 연락을 위해 이름·이메일·회사명을 수집하며, 요청일로부터 1년간 보관합니다. 동의하지 않으면 요청할 수 없습니다.',
     privacy: '개인정보처리방침',
-    submit: '회사소개서 받기',
+    pick: '받을 자료',
+    docs: { portfolio: ['체험서비스 포트폴리오', `${PORTFOLIO_FULL.pages}쪽 · 프로그램 33가지 · 행사 사례 27곳`], profile: ['회사소개서', `${COMPANY_PROFILE.pages}쪽 · 회사 개요 · 서비스 · 대표 사례`] },
+    submit: { portfolio: '포트폴리오 받기', profile: '회사소개서 받기' },
     sending: '준비 중…',
     doneTitle: '다운로드가 시작됩니다',
     doneBody: '시작되지 않으면 아래 버튼을 눌러 주세요.',
@@ -28,9 +31,11 @@ const COPY = {
     email: 'Email',
     company: 'Company / organization (optional)',
     purpose: 'Event you are planning (optional)',
-    consent: 'We collect your name, email and company to send the profile and follow up, and keep them for 1 year. You cannot request it without consenting.',
+    consent: 'We collect your name, email and company to send the document and follow up, and keep them for 1 year. You cannot request it without consenting.',
     privacy: 'Privacy Policy',
-    submit: 'Get the company profile',
+    pick: 'Document',
+    docs: { portfolio: ['Experience portfolio', `${PORTFOLIO_FULL.pages} pages · 33 programs · 27 events`], profile: ['Company profile', `${COMPANY_PROFILE.pages} pages · overview · services · featured events`] },
+    submit: { portfolio: 'Get the portfolio', profile: 'Get the company profile' },
     sending: 'Preparing…',
     doneTitle: 'Your download is starting',
     doneBody: 'If it does not start, use the button below.',
@@ -46,6 +51,11 @@ export function BrochureForm() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [url, setUrl] = useState('');
+  // 기본은 포트폴리오 전체본. 주소에 ?doc=profile 이 있으면 회사소개서를 고른 채로 연다
+  const [doc, setDoc] = useState<'portfolio' | 'profile'>('portfolio');
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('doc') === 'profile') setDoc('profile');
+  }, []);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -57,6 +67,7 @@ export function BrochureForm() {
       purpose: String(form.get('purpose') ?? '').trim(),
       consent: form.get('consent') === 'on',
       locale,
+      doc,
     };
     if (!body.name || !body.email || !body.consent) {
       setStatus('error');
@@ -74,7 +85,7 @@ export function BrochureForm() {
       if (!res.ok || !data?.url) throw new Error(String(res.status));
       setUrl(data.url);
       setStatus('done');
-      trackEvent('brochure_request', body.company || undefined);
+      trackEvent('brochure_request', body.company ? `${doc}:${body.company}` : doc);
       // 새 탭으로 PDF를 연다 (팝업 차단 시 아래 버튼으로 연다)
       window.open(data.url, '_blank', 'noopener');
     } catch {
@@ -102,6 +113,23 @@ export function BrochureForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-5" noValidate>
+      <fieldset>
+        <legend className="mb-3 text-sm font-semibold text-slate-900">{c.pick}</legend>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {(['portfolio', 'profile'] as const).map((k) => (
+            <label
+              key={k}
+              className={`flex cursor-pointer gap-3 rounded-lg border p-4 transition-colors ${doc === k ? 'border-teal-600 bg-teal-50' : 'border-slate-200 hover:border-slate-400'}`}
+            >
+              <input type="radio" name="doc" value={k} checked={doc === k} onChange={() => setDoc(k)} className="mt-1 size-4 accent-teal-600" />
+              <span>
+                <span className="block text-sm font-bold text-slate-900">{c.docs[k][0]}</span>
+                <span className="mt-1 block text-xs leading-relaxed text-slate-500">{c.docs[k][1]}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Input id="brochure-name" name="name" label={c.name} required autoComplete="name" maxLength={100} />
         <Input id="brochure-email" name="email" type="email" label={c.email} required autoComplete="email" maxLength={200} />
@@ -125,7 +153,7 @@ export function BrochureForm() {
         disabled={status === 'sending'}
         className="inline-flex h-12 w-full items-center justify-center rounded-lg bg-teal-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-teal-500 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
       >
-        {status === 'sending' ? c.sending : c.submit}
+        {status === 'sending' ? c.sending : c.submit[doc]}
       </button>
     </form>
   );

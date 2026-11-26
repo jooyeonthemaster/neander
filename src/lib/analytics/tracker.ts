@@ -470,6 +470,14 @@ function handleClick(e: MouseEvent) {
     const url = new URL(anchor.href)
     if ((url.protocol === 'http:' || url.protocol === 'https:') && url.host !== window.location.host) {
       trackEvent('click_outbound', `${url.host}${url.pathname === '/' ? '' : url.pathname}`)
+      return
+    }
+    // 견적·문의로 가는 버튼 — 버튼이 놓인 구역(data-cta-area)을 붙여 「어느 버튼이 일했는지」 남긴다.
+    // 구역 표시가 없는 링크(메뉴·본문 링크 등)는 기록하지 않는다. 하단 연락 바는 자체 기록(mobile_bar:*)을 쓴다.
+    const area = (anchor.closest('[data-cta-area]') as HTMLElement | null)?.dataset.ctaArea
+    if (area && url.host === window.location.host) {
+      const kind = /^\/(?:en\/)?quote(?:\/|$)/.test(url.pathname) ? 'quote' : /^\/(?:en\/)?contact(?:\/|$)/.test(url.pathname) ? 'contact' : null
+      if (kind) trackEvent('click_cta', `${area}:${kind}`)
     }
   } catch {
     // 잘못된 링크는 무시

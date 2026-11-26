@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import { Suspense } from 'react';
 import { Check } from 'lucide-react';
 import { setRequestLocale } from 'next-intl/server';
 import { VisualQuoteStudio } from '@/components/quote-preview/QuotePreviewLab';
+import { Title } from '@/components/site/Title';
 import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
 
 interface Props {
@@ -54,41 +54,30 @@ export default async function QuotePage({ params }: Props) {
   const c = COPY[locale === 'en' ? 'en' : 'ko'];
 
   return (
-    <div className="bg-[#f6f8fa]">
-      <section className="pb-7 pt-8 sm:pb-8 sm:pt-10" aria-labelledby="quote-title">
-        <div className="mx-auto w-full max-w-[96rem] px-4 sm:px-6 flex items-center justify-between gap-8">
+    <div className="bg-ink">
+      {/* 첫 화면: 제목만 짧게 — 견적 화면이 바로 보이도록 */}
+      <section className="under-header relative isolate overflow-hidden" aria-labelledby="quote-title">
+        <div aria-hidden="true" className="absolute inset-0 -z-10" style={{ background: 'radial-gradient(55% 120% at 8% 0%, rgba(125,149,255,0.2), transparent 62%)' }} />
+        <div className="wrap flex flex-wrap items-end justify-between gap-x-12 gap-y-6 pb-8 pt-28 lg:pb-10 lg:pt-36">
           <div>
-            <p className="text-xs font-semibold tracking-wide text-teal-700">{c.eyebrow}</p>
-            <h1 id="quote-title" className="mt-2.5 font-display text-[2rem] font-extrabold leading-tight tracking-[-0.045em] text-slate-900 sm:text-[2.5rem]">{c.title}</h1>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base [word-break:keep-all]">{c.subtitle}</p>
-            <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+            <p className="t-label rise text-paper/60">ONLINE QUOTE</p>
+            <Title as="h1" id="quote-title" en={['GET YOUR QUOTE.']} ko={locale === 'en' ? undefined : c.title} size="h2" immediate delay={80} className="mt-5" koClassName="text-paper/85" />
+          </div>
+          <div className="rise max-w-md lg:text-right" style={{ '--i': 4 } as React.CSSProperties}>
+            <p className="text-[1.02rem] leading-relaxed text-paper/65 [word-break:keep-all]">{c.subtitle}</p>
+            <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 lg:justify-end">
               {c.points.map((point) => (
-                <li key={point} className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                  <Check size={14} className="text-teal-600" strokeWidth={2.5} aria-hidden="true" />
+                <li key={point} className="flex items-center gap-1.5 text-[13px] font-medium text-paper/55">
+                  <Check size={14} className="text-accent" strokeWidth={2.5} aria-hidden="true" />
                   {point}
                 </li>
               ))}
             </ul>
           </div>
-          <div className="relative hidden h-[168px] w-[328px] shrink-0 lg:block">
-            <figure className="absolute left-0 top-0 z-10 w-[174px] -rotate-6 overflow-hidden rounded-2xl border-4 border-white bg-white shadow-[0_8px_28px_rgba(15,23,42,0.08)]">
-              <div className="relative h-[108px]">
-                <Image src="/images/services/experiences/ai-scent-soulmate.webp" alt={locale === 'en' ? 'Visitors making perfume at Korea Grand Sale 2026' : '코리아그랜드세일 2026 현장에서 향수를 만드는 체험'} fill sizes="174px" className="object-cover" />
-              </div>
-              <figcaption className="py-2 text-center text-[11px] font-semibold text-slate-600">{c.scent}</figcaption>
-            </figure>
-            <figure className="absolute right-0 top-3 w-[174px] rotate-6 overflow-hidden rounded-2xl border-4 border-white bg-white shadow-[0_8px_28px_rgba(15,23,42,0.08)]">
-              <div className="relative h-[108px]">
-                <Image src="/images/services/experiences/ai-celeb-lookalike.webp" alt={locale === 'en' ? 'AI photo booths at Pyeongtaek AI Festa 2026' : '평택 AI 페스타 2026에 설치된 AI 포토부스'} fill sizes="174px" className="object-cover" />
-              </div>
-              <figcaption className="py-2 text-center text-[11px] font-semibold text-slate-600">{c.photo}</figcaption>
-            </figure>
-            <p className="absolute -bottom-3 right-1 text-[10px] text-slate-400">{c.imageNote}</p>
-          </div>
         </div>
       </section>
 
-      <section className="pb-8 text-pretty sm:pb-10 [&_button]:scroll-mb-28 [&_input]:scroll-mb-28 [&_textarea]:scroll-mb-28 [&_img]:scroll-mb-28" aria-label={locale === 'en' ? 'Build your estimate' : '견적 구성하기'}>
+      <section className="pb-12 text-pretty sm:pb-16 [&_button]:scroll-mb-28 [&_input]:scroll-mb-28 [&_textarea]:scroll-mb-28 [&_img]:scroll-mb-28" aria-label={locale === 'en' ? 'Build your estimate' : '견적 만들기'}>
         <div className="mx-auto w-full max-w-[96rem] px-4 sm:px-6">
           {/* 주소의 ?preset= · ?service= 를 읽으므로 Suspense로 감싼다 */}
           <Suspense fallback={<div role="status" className="flex min-h-80 items-center justify-center rounded-[28px] border border-slate-100 bg-white text-sm text-slate-500">{c.loading}</div>}>
@@ -96,8 +85,6 @@ export default async function QuotePage({ params }: Props) {
           </Suspense>
         </div>
       </section>
-
-
     </div>
   );
 }

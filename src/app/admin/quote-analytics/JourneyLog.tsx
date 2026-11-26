@@ -37,7 +37,7 @@ export default function JourneyLog({ journeys }: { journeys: JourneyRecord[] }) 
                 </span>
                 <span className="min-w-0 flex-1 truncate text-gray-800">
                   {j.submitted
-                    ? <span className="font-semibold text-emerald-700">{j.submitted === 'pdf' ? '가견적서 발급' : '상담 요청'}</span>
+                    ? <span className="font-semibold text-emerald-700">{j.submitted === 'pdf' ? '가견적서 발급' : j.submitted === 'report' ? '보고서 발급' : '상담 요청'}</span>
                     : <>{FUNNEL[j.depth]?.label}에서 떠남</>}
                   {j.preset && <span className="text-gray-400"> · {presetName(j.preset)}</span>}
                   {j.services.length > 0 && <span className="text-gray-400"> · {j.services.map(serviceName).join(', ')}</span>}

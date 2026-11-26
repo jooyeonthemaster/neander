@@ -11,7 +11,7 @@ import { PREVIEW_STORAGE_KEY } from '../../src/lib/quote-preview/model';
 import { optionSummary } from '../../src/components/quote-studio/option-summary';
 
 const a = 'ai-personal-color';
-const b = 'ai-face-reading';
+const b = 'ai-palm-reading';
 const c = 'ai-travel-style';
 const names = (slug: string, lang: 'ko' | 'en') => getKioskExperience(slug)!.name[lang];
 function inputWith(options: Partial<KioskOptions> = {}): QuoteInput {

@@ -2,7 +2,7 @@ import { enterExperienceStep } from './helpers/quote-preview-options';
 import { expect, test, type Page } from '@playwright/test';
 import { sanitizeInput } from '../../src/lib/quote/engine';
 
-const storageKey = 'neander-quote-preview-flow-v1';
+const storageKey = 'neander-quote-v2';
 
 /** Find painted floor points geometrically, rather than assuming the SVG's
  * layout rectangle describes the scene. The venue floor extends beyond the
@@ -78,7 +78,7 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
       page.on('pageerror', error => errors.push(error.message));
       const input = sanitizeInput({ items: [{ key: 'acscent', options: {} }] });
       await page.addInitScript(({ key, value }) => localStorage.setItem(key, value), { key: storageKey, value: JSON.stringify(input) });
-      await page.goto('/quote-preview', { waitUntil: 'domcontentloaded' });
+      await page.goto('/quote', { waitUntil: 'domcontentloaded' });
       await enterExperienceStep(page);
       await expect(page.getByTestId('event-scene')).toHaveAttribute('data-space', 'existing');
       const selection = await page.evaluate(key => localStorage.getItem(key), storageKey);

@@ -9,7 +9,7 @@ import { getExperienceImage } from '@/data/experience-images';
 import {
   CUSTOM_DEV, CUSTOM_DEV_TEXT, KIOSK, PERFUME, PHOTO_BOOTH, type Lang,
 } from '@/lib/quote/catalog';
-import { getPerfumeStaffing, perfumeGuestCost, type QuoteInput, type QuoteItem } from '@/lib/quote/engine';
+import { getPerfumeStaffing, kioskRoom, perfumeGuestCost, type QuoteInput, type QuoteItem } from '@/lib/quote/engine';
 import { cn } from '@/lib/utils';
 import { Check, Field, formatPriceAmount, inputClass, Segmented, Stepper, type Price } from './QuoteControls';
 import { QUOTE_COPY } from './copy';
@@ -27,7 +27,7 @@ interface MoreOptionsProps {
   pageId: string; pageLabel: string;
 }
 
-function MoreOptions({ title, hint, count = 0, lang, children }: MoreOptionsProps) {
+function MoreOptions({ title, count = 0, lang, children }: MoreOptionsProps) {
   const [open, setOpen] = useState(false);
   const id = useId();
   const reducedMotion = useReducedMotion();
@@ -42,7 +42,6 @@ function MoreOptions({ title, hint, count = 0, lang, children }: MoreOptionsProp
             {title}
             {count > 0 && <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-semibold text-teal-800">{lang === 'ko' ? `${count}개 선택` : `${count} selected`}</span>}
           </span>
-          <span className="mt-1 block text-xs leading-relaxed text-slate-500">{hint}</span>
         </span>
         <ChevronDown size={18} aria-hidden="true" className={cn('shrink-0 text-slate-400 transition-transform duration-300 motion-reduce:transition-none', open && 'rotate-180')} />
       </button>
@@ -135,7 +134,7 @@ function ExperienceSuggestions({ experiences, lang, onSelect, renderIllustration
   experiences: { value: string; label: string }[]; lang: Lang; onSelect: (slug: string) => void;
   renderIllustration?: ExperienceIllustration;
 }) {
-  const suggestions = ['ai-personal-color', 'ai-face-reading', 'ai-fortune-robot']
+  const suggestions = ['ai-personal-color', 'ai-future-career', 'ai-palm-reading']
     .flatMap((slug) => {
       const experience = experiences.find((candidate) => candidate.value === slug);
       const image = getExperienceImage(slug);
@@ -170,9 +169,36 @@ function ExperienceSuggestions({ experiences, lang, onSelect, renderIllustration
   );
 }
 
+/** AI 조향사를 담은 직후 — 향수 체험 인원을 직접 적게 한다 (2026-11-23 사용자 요청).
+ *  행사 인원을 그대로 쓰면 큰 행사에서 금액이 크게 뛰어 조향사를 빼고 나가는 경우가 많았다.
+ *  빈 인원 칸 아래에 짧은 말풍선 하나만 띄운다. 적기 전에는 견적서 단계로 넘어가지 않는다 (QuoteStudio). */
+function PerfumeGuestsPrompt({ ko, onPick }: { ko: boolean; onPick: (guests: number) => void }) {
+  const [draft, setDraft] = useState('');
+  const commit = () => {
+    const n = Math.round(Number(draft));
+    if (draft.trim() !== '' && Number.isFinite(n) && n > 0) onPick(Math.min(5000, Math.max(PERFUME.minGuests, n)));
+  };
+  return (
+    <div data-testid="perfume-guests-prompt" className="relative">
+      <div className="flex h-[52px] items-center rounded-2xl border border-teal-500 bg-white px-4 ring-4 ring-teal-500/15 focus-within:border-teal-500">
+        <input id="p-guests" type="number" inputMode="numeric" min={PERFUME.minGuests} max={5000} value={draft} placeholder={ko ? '인원' : 'Guests'}
+          aria-label={ko ? '향수 체험 인원' : 'Perfume guests'} aria-describedby="p-guests-tip"
+          onChange={(e) => setDraft(e.target.value)} onBlur={commit} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commit(); } }}
+          className="min-w-0 flex-1 bg-transparent text-base font-semibold tabular-nums text-slate-900 outline-none placeholder:font-normal placeholder:text-slate-400" />
+        <span className="text-sm text-slate-500">{ko ? '명' : 'guests'}</span>
+      </div>
+      {/* 말풍선 — 칸 바로 아래, 위쪽을 가리키는 꼬리 */}
+      <p id="p-guests-tip" role="status" className="absolute left-3 top-full z-10 mt-2.5 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-[13px] font-semibold text-white shadow-lg">
+        <span aria-hidden="true" className="absolute -top-1.5 left-5 size-3 rotate-45 bg-slate-900" />
+        <span className="relative">{ko ? '체험 인원을 선택해주세요.' : 'Please enter the number of guests.'}</span>
+      </p>
+    </div>
+  );
+}
+
 export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOptions, renderExperienceIllustration, enablePhotoBoothTemplates = false, enableKioskAssignments = false, allowKioskSubscription = true, paged = false, leadingPage, flowActive = true }: {
   item: QuoteItem;
-  schedule: Pick<QuoteInput, 'days' | 'hoursPerDay' | 'region'>;
+  schedule: Pick<QuoteInput, 'days' | 'hoursPerDay' | 'region' | 'items'>;
   lang: Lang;
   c: (typeof QUOTE_COPY)[Lang];
   kioskExperiences: { value: string; label: string }[];
@@ -208,14 +234,18 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
       const guestCost = perfumeGuestCost(o.guests, o.volume);
       const perGuest = (volume: '10ml' | '50ml') => base(perfumeGuestCost(o.guests, volume).unit, u('1인', 'per guest'));
       const guestsControl = <Field label={c.guests} price={perGuest(o.volume)} info={`${info('perfumeGuests')}${o.customBox ? ` ${c.customBoxGuestsLock}` : ''}`}
-        hint={paged ? (o.customBox ? (ko ? '단박스 선택 시 최소 300명' : 'Custom boxes: 300+ guests') : (ko ? `향수를 받아 갈 인원 · ${PERFUME.minGuests}명부터` : `Take-home perfumes · ${PERFUME.minGuests}+ guests`)) : (ko ? `향수를 받아 갈 인원이에요. ${PERFUME.minGuests}명부터, 최소 99만원(서울)으로 시작해요.` : `Guests taking home a perfume. From ${PERFUME.minGuests} guests; minimum KRW 990,000 in Seoul.`)}>
-        <Stepper id="p-guests" value={o.guests} min={o.customBox ? PERFUME.customBox.minGuests : PERFUME.minGuests} max={5000} step={10} suffix={ko ? '명' : paged ? undefined : 'guests'} onChange={(value) => setOptions('acscent', { guests: value })} />
+        hint={paged ? (o.customBox ? (ko ? '단박스는 300명부터' : 'Custom boxes: 300+ guests') : (ko ? `${PERFUME.minGuests}명부터` : `From ${PERFUME.minGuests} guests`)) : (ko ? `향수를 받아 갈 인원이에요. ${PERFUME.minGuests}명부터, 최소 99만원(서울)으로 시작해요.` : `Guests taking home a perfume. From ${PERFUME.minGuests} guests; minimum KRW 990,000 in Seoul.`)}>
+        {o.guestsPending
+          ? <PerfumeGuestsPrompt ko={ko} onPick={(value) => setOptions('acscent', { guests: value })} />
+          : <Stepper id="p-guests" value={o.guests} min={o.customBox ? PERFUME.customBox.minGuests : PERFUME.minGuests} max={5000} step={10} suffix={ko ? '명' : paged ? undefined : 'guests'} onChange={(value) => setOptions('acscent', { guests: value })} />}
         {guestCost.billedGuests > o.guests && <p data-testid="perfume-tier-discount" className="text-[11px] leading-relaxed text-teal-700">{ko ? `${guestCost.billedGuests}명 구간으로 계산하는 편이 더 저렴해 해당 할인을 적용했어요.` : `The ${guestCost.billedGuests}-guest tier costs less, so that discount is applied.`}</p>}
         {!paged && o.customBox && <p className="text-xs font-medium leading-relaxed text-amber-700">{c.customBoxGuestsLock}</p>}
       </Field>;
-      const teamsControl = <Field label={c.extraTeams} info={info('extraTeams')} price={base(PERFUME.teamTravel[schedule.region], u('팀당', 'each team'), u('/일 (기본 1팀부터 적용)', '/day'))}
+      // 2026-11-21 옵션 창 글씨 줄이기: 「기본 1팀부터 적용」 · 「1팀당 시간당 N명」은 아래 소계 식과 팀 안내에 이미 나와 빼고,
+      // 옵션 창(paged)에서는 금액 · 기준만 짧게 둔다
+      const teamsControl = <Field label={c.extraTeams} info={info('extraTeams')} price={base(PERFUME.teamTravel[schedule.region], u('팀당', 'each team'), paged ? u('/일', '/day') : u('/일 (기본 1팀부터 적용)', '/day'))}
         // 상담 기준(4팀)은 입력 상한이 아니라서 넘겨도 입력된다 — 기준을 눈에 띄게 두고, 넘으면 입력칸 테두리와 색으로도 알린다
-        hint={<>{ko ? `1팀당 시간당 ${PERFUME.guestsPerTeamHour}명` : `${PERFUME.guestsPerTeamHour} guests/hour/team`}{' · '}
+        hint={<>{!paged && <>{ko ? `1팀당 시간당 ${PERFUME.guestsPerTeamHour}명` : `${PERFUME.guestsPerTeamHour} guests/hour/team`}{' · '}</>}
           <span data-testid="perfume-consultation-threshold" className={cn('whitespace-nowrap font-semibold', staffing.requiresConsultation ? 'text-amber-800' : 'text-amber-700')}>
             {ko ? `${PERFUME.standardTeams + 1}팀부터 상담 필요` : `${PERFUME.standardTeams + 1}+ teams need consultation`}
           </span></>}>
@@ -229,49 +259,57 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
         className={cn('rounded-xl px-3 py-2 text-[11px] leading-relaxed', staffing.requiresConsultation ? 'border border-amber-300 bg-amber-50 text-amber-900' : 'bg-teal-50/80 text-teal-800')}>
         {staffing.requiresConsultation ? <>
           <p data-testid="perfume-consultation-title" className="flex items-start gap-1.5 text-[13px] font-bold leading-snug text-amber-900">
-            <TriangleAlert size={15} aria-hidden="true" className="mt-px shrink-0 text-amber-600" />{ko ? `${PERFUME.standardTeams + 1}팀부터 상담이 필요해요` : `${PERFUME.standardTeams + 1}+ teams need consultation`}
+            <TriangleAlert size={15} aria-hidden="true" className="mt-px shrink-0 text-amber-600" />{ko ? `${PERFUME.standardTeams + 1}팀부터 상담이 필요해요` : `${PERFUME.standardTeams + 1}+ teams: consult us`}
           </p>
-          <p className="mt-1">{ko
+          <p className="mt-1">{paged
+            ? ko ? `${staffing.automaticTeams > 0 ? `자동 ${staffing.teams}팀` : `${staffing.teams}팀 선택`} · 금액은 상담 후 확정` : `${staffing.teams} teams${staffing.automaticTeams > 0 ? ' (auto)' : ''} · price TBC`
+            : ko
             ? `${staffing.automaticTeams > 0 ? `1팀당 ${staffing.capacityPerTeam}명 기준 ${staffing.teams}팀으로 자동 조정했어요` : `${staffing.teams}팀을 선택했어요`}. 팀 출장비는 반영되며, 운영 계획과 최종 금액은 상담 후 정해요.`
             : `${staffing.automaticTeams > 0 ? `Adjusted to ${staffing.teams} teams at ${staffing.capacityPerTeam} guests per team` : `Selected ${staffing.teams} teams`}. Travel fees are included; the plan and final price are confirmed together.`}</p>
         </> : <>
-          <p className="font-semibold text-balance">{capacityBasis}</p>
-          <p className="mt-0.5">{staffing.automaticTeams > 0
-            ? ko ? `인원에 맞춰 ${staffing.teams}팀으로 자동 조정했어요. 팀 출장비도 반영돼요.` : `Automatically adjusted to ${staffing.teams} teams. Team travel fees are included.`
-            : ko ? '팀당 조향사 1명과 보조 1명이에요. 필요한 팀 수보다 더 고를 수도 있어요.' : 'A perfumer and an assistant per team. You can choose more than the minimum.'}</p>
+          <p className="font-semibold text-balance">{paged ? (ko ? `1팀이 ${staffing.capacityPerTeam}명까지` : `Up to ${staffing.capacityPerTeam} per team`) : capacityBasis}</p>
+          {/* 자동 조정됐을 때만 덧붙인다 — 평소 안내(팀 구성)는 옵션 창에서 뺀다 */}
+          {(staffing.automaticTeams > 0 || !paged) && <p className="mt-0.5">{staffing.automaticTeams > 0
+            ? paged
+              ? ko ? `${staffing.teams}팀으로 자동 조정 · 출장비 포함` : `Automatically adjusted to ${staffing.teams} teams, travel fees included`
+              : ko ? `인원에 맞춰 ${staffing.teams}팀으로 자동 조정했어요. 팀 출장비도 반영돼요.` : `Automatically adjusted to ${staffing.teams} teams. Team travel fees are included.`
+            : ko ? '팀당 조향사 1명과 보조 1명이에요. 필요한 팀 수보다 더 고를 수도 있어요.' : 'A perfumer and an assistant per team. You can choose more than the minimum.'}</p>}
         </>}
       </div>;
       // 기본 1팀의 출장비도 합계에 들어간다 — 인원 비용만 보고 합계가 다르다고 느끼지 않게 식으로 풀어 보여 준다
       const breakdown = perfumeBaseBreakdown(o, schedule);
       const figure = (value: number, total = false) => <b className={cn('font-semibold tabular-nums', total ? 'text-teal-700' : 'text-slate-800')}>{formatPriceAmount(value, lang)}</b>;
       const baseBreakdown = <p data-testid="perfume-base-breakdown" data-guests={breakdown.guests} data-travel={breakdown.travel} data-subtotal={breakdown.subtotal}
-        className="col-span-2 text-[11px] leading-[18px] text-slate-500">
-        {u('체험 인원', 'Guests')} {figure(breakdown.guests)} + {ko
-          ? `조향팀 출장비(${breakdown.teams}팀${breakdown.days > 1 ? ` × ${breakdown.days}일` : ''})`
+        className="text-[11px] leading-relaxed text-slate-500">
+        {u('인원', 'Guests')} {figure(breakdown.guests)} + {ko
+          ? `출장비(${breakdown.teams}팀${breakdown.days > 1 ? ` × ${breakdown.days}일` : ''})`
           : `${plural(breakdown.teams, 'team')}${breakdown.days > 1 ? ` × ${breakdown.days} days` : ''}`} {figure(breakdown.travel)}
         {breakdown.adjustment > 0 && <> + {u('최소 금액 보정', 'minimum charge')} {figure(breakdown.adjustment)}</>}
         {' = '}{ko && '소계 '}{figure(breakdown.subtotal, true)} {u('(부가세 별도)', 'excl. VAT')}
       </p>;
-      const volumeControl = <Field label={c.volume} info={info('volume')} hint={ko ? '가볍게 선물하는 10ml, 넉넉하게 즐기는 50ml' : '10ml for a small gift, 50ml for more to enjoy.'}>
+      const volumeControl = <Field label={c.volume} info={info('volume')} hint={paged ? undefined : ko ? '가볍게 선물하는 10ml, 넉넉하게 즐기는 50ml' : '10ml for a small gift, 50ml for more to enjoy.'}>
         <Segmented name={c.volume} compact={paged} value={o.volume} onChange={(value) => setOptions('acscent', { volume: value })} options={[{ value: '10ml', label: '10ml', price: perGuest('10ml') }, { value: '50ml', label: '50ml', price: perGuest('50ml') }]} />
       </Field>;
       const analysisCount = (o.analysisKiosks ?? 0) > 0 ? <div className="mt-4 max-w-64">
         <Field label={ko ? '분석용 키오스크는 몇 대 필요할까요?' : 'How many analysis kiosks?'}>
-          <Stepper id="p-akiosk" value={o.analysisKiosks ?? 1} min={1} max={KIOSK.maxKiosks} suffix={ko ? '대' : undefined} onChange={(value) => setOptions('acscent', { analysisKiosks: value })} />
+          <Stepper id="p-akiosk" value={o.analysisKiosks ?? 1} min={1} max={Math.max(1, kioskRoom(schedule, 'acscent'))} suffix={ko ? '대' : undefined} onChange={(value) => setOptions('acscent', { analysisKiosks: value })} />
+          {kioskRoom(schedule, 'acscent') < KIOSK.maxKiosks && <p data-testid="p-akiosk-shared" className="mt-2 text-xs text-slate-500 [word-break:keep-all]">{ko ? `최대 ${kioskRoom(schedule, 'acscent')}대 · ${KIOSK.maxKiosks - kioskRoom(schedule, 'acscent')}대는 AI 키오스크 체험용` : `Up to ${kioskRoom(schedule, 'acscent')} · ${KIOSK.maxKiosks - kioskRoom(schedule, 'acscent')} used for AI kiosk experiences`}</p>}
         </Field>
       </div> : null;
       return (
         <OptionsLayout key={item.key} {...layout}>
           {paged ? <div data-testid="perfume-basic-configuration" className="grid grid-cols-2 items-start gap-x-3 gap-y-2.5 sm:col-span-2 sm:gap-x-5">
             <div className="min-w-0 space-y-4">{guestsControl}{teamsControl}</div>
-            <div className="min-w-0 space-y-3">{volumeControl}{teamsNotice}</div>
-            {baseBreakdown}
+            {/* 소계 식은 오른쪽 칸 팀 안내 아래에 — 두 칸 밑에 한 줄을 더 두면 글씨를 키운 뒤 낮은 화면(1366×768)에서 안쪽 스크롤이 생겼다 */}
+            <div className="min-w-0 space-y-2.5">{volumeControl}{teamsNotice}{!o.guestsPending && baseBreakdown}</div>
           </div> : <>{guestsControl}{volumeControl}</>}
           <OptionTopic id="analysis" label={ko ? '분석 기기' : 'Analysis'}>
             <Field label={c.analysis} hint={(o.analysisKiosks ?? 0) > 0 ? c.analysisKioskHint : c.analysisQrHint}>
               <Segmented name={c.analysis} value={(o.analysisKiosks ?? 0) > 0 ? 'kiosk' : 'qr'}
                 onChange={(value) => setOptions('acscent', { analysisKiosks: value === 'kiosk' ? Math.max(1, o.analysisKiosks ?? 0) : 0 })}
-                options={[{ value: 'qr', label: c.analysisQr, info: info('analysisQr'), price: included }, { value: 'kiosk', label: c.analysisKiosk, info: info('analysisKiosk'), price: add(PERFUME.analysisKiosk, u('대당', 'each')) }]} />
+                options={[{ value: 'qr', label: c.analysisQr, info: info('analysisQr'), price: included },
+                  // 보유 키오스크 4대를 AI 키오스크가 모두 쓰면 분석용 키오스크는 고를 수 없다 (2026-11-22)
+                  ...(kioskRoom(schedule, 'acscent') > 0 || (o.analysisKiosks ?? 0) > 0 ? [{ value: 'kiosk' as const, label: c.analysisKiosk, info: info('analysisKiosk'), price: add(PERFUME.analysisKiosk, u('대당', 'each')) }] : [])]} />
             </Field>
             {analysisCount}
           </OptionTopic>
@@ -293,7 +331,7 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
                   ]} />
               </Field></div>}
               <Field label={c.premiumPackaging}
-              hint={paged && o.customBox && bumpedFrom !== null ? undefined : paged && o.customBox ? (ko ? '300명부터 · 디자인비 포함 100만원부터 · 수량·사양은 상담 후 확정해요.' : '300+ guests · from KRW 1M including design · quantity and specifications confirmed together.') : paged && o.premiumPackaging ? (ko ? `병당 ${PERFUME.premiumPackaging[o.volume].toLocaleString('ko-KR')}원 · 총 ${o.guests}병에 브랜드 포장을 해요.` : `KRW ${PERFUME.premiumPackaging[o.volume].toLocaleString('en-US')} per bottle · ${o.guests} branded packs.`) : o.customBox ? c.customBoxHint : o.premiumPackaging ? c.brandPackHint : c.plainPackHint}>
+              hint={paged && o.customBox && bumpedFrom !== null ? undefined : paged && o.customBox ? (ko ? '300명부터 · 디자인비 포함 100만원부터 · 수량·사양은 상담 후 확정해요.' : '300+ guests · from KRW 1M including design · quantity and specifications confirmed together.') : paged && o.premiumPackaging ? (ko ? `병당 ${PERFUME.premiumPackaging[o.volume].toLocaleString('ko-KR')}원 · 총 ${o.guests}병에 브랜드 포장을 해요.` : `KRW ${PERFUME.premiumPackaging[o.volume].toLocaleString('en-US')} per bottle · ${o.guests} branded packs.`) : paged ? undefined : o.customBox ? c.customBoxHint : o.premiumPackaging ? c.brandPackHint : c.plainPackHint}>
               <Segmented name={c.premiumPackaging} compact={paged} value={o.customBox ? 'custom' : o.premiumPackaging ? 'brand' : 'none'}
                 onChange={(value) => {
                   // 전용 디자인 단박스는 300명부터 — 인원이 적으면 300명으로 올리고 아래에 알린다
@@ -386,7 +424,8 @@ export function QuoteOptions({ item, schedule, lang, c, kioskExperiences, setOpt
               options={[{ value: 'event', label: c.modeEvent, info: info('modeEvent'), price: base(KIOSK.firstKiosk, u('1대', 'first kiosk'), u('/일', '/day')) }, { value: 'monthly', label: c.modeMonthly, info: info('modeMonthly'), price: base(KIOSK.monthlyPerKiosk, u('대당', 'each'), u('/월', '/month')) }]} />
           </Field>}
           <Field label={c.kiosks} info={info('kiosks')} price={o.mode === 'monthly' ? base(KIOSK.monthlyPerKiosk, u('대당', 'each'), u('/월', '/month')) : add(KIOSK.extraKiosk, u('추가 대당', 'per extra kiosk'))} hint={enableKioskAssignments ? (ko ? '대수를 줄이면 뒤 번호 기기의 선택이 빠져요.' : 'Reducing the count removes choices for the last kiosks.') : undefined}>
-            <Stepper id="k-count" value={o.kiosks} min={1} max={KIOSK.maxKiosks} suffix={ko ? '대' : undefined} onChange={(value) => setOptions('rental', { kiosks: value })} />
+            <Stepper id="k-count" value={o.kiosks} min={1} max={Math.max(1, kioskRoom(schedule, 'rental'))} suffix={ko ? '대' : undefined} onChange={(value) => setOptions('rental', { kiosks: value })} />
+          {kioskRoom(schedule, 'rental') < KIOSK.maxKiosks && <p data-testid="k-count-shared" className="mt-2 text-xs text-slate-500 [word-break:keep-all]">{ko ? `최대 ${kioskRoom(schedule, 'rental')}대 · ${KIOSK.maxKiosks - kioskRoom(schedule, 'rental')}대는 향수 분석용` : `Up to ${kioskRoom(schedule, 'rental')} · ${KIOSK.maxKiosks - kioskRoom(schedule, 'rental')} used for perfume analysis`}</p>}
           </Field>
           {!allowKioskSubscription && <div data-testid="kiosk-event-rental-note" className="flex flex-col justify-center rounded-2xl bg-teal-50/70 px-4 py-3.5">
             <p className="text-xs font-semibold text-teal-800">{ko ? '행사 기간 동안 대여해요' : 'Rent for your event'}</p>

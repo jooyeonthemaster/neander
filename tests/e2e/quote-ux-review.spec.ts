@@ -1,12 +1,12 @@
 import { expect, test, type Page } from '@playwright/test';
-import { closePreviewOptions, nextPreviewStep, openPreviewOptions, showOptionPage } from './helpers/quote-preview-options';
+import { FAKE_ESTIMATE, closePreviewOptions, mockQuoteSubmission, nextPreviewStep, openEstimateForm, openPreviewOptions, showOptionPage, sidebarOptionSummaries } from './helpers/quote-preview-options';
 import { calculateQuote, type QuoteInput } from '../../src/lib/quote/engine';
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
+import { QUOTE_STORAGE_KEY } from '../../src/components/quote-studio/history';
 
 // 2026-10-02 UI/UX 점검에서 고친 항목의 회귀 테스트 (docs/quote-preview.md 참고)
-const FLOW_KEY = 'neander-quote-preview-flow-v1';
-const saved = (page: Page): Promise<QuoteInput> => page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), FLOW_KEY);
-const route = (lang: 'ko' | 'en', path = '/quote-preview') => `${lang === 'en' ? '/en' : ''}${path}`;
+const saved = (page: Page): Promise<QuoteInput> => page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), QUOTE_STORAGE_KEY);
+const route = (lang: 'ko' | 'en', path = '/quote') => `${lang === 'en' ? '/en' : ''}${path}`;
 async function toExperiences(page: Page, lang: 'ko' | 'en') {
   await page.goto(route(lang), { waitUntil: 'domcontentloaded' });
   await nextPreviewStep(page);
@@ -134,8 +134,10 @@ for (const lang of ['ko', 'en'] as const) {
     await expect(page.locator('[data-testid="quote-total-delta"]')).toHaveCount(0, { timeout: 6_000 });
     // 체험을 아직 고르지 않았으면 대수를 되풀이하지 않는다
     const summary = page.getByRole('complementary');
-    await expect(summary).toContainText(lang === 'ko' ? '3대 · 체험 미정' : '3 kiosks · experience not chosen yet');
-    await expect(summary).not.toContainText(lang === 'ko' ? '상담 후 결정 3대' : 'Decide later ×3');
+    // 요약 칸은 옵션 앞 두 개만 보이고 나머지는 title 에 — 전체 요약으로 확인한다
+    const options = async () => (await sidebarOptionSummaries(page)).join('\n');
+    await expect.poll(options).toContain(lang === 'ko' ? '3대 · 체험 미정' : '3 kiosks · experience not chosen yet');
+    expect(await options()).not.toContain(lang === 'ko' ? '상담 후 결정 3대' : 'Decide later ×3');
     await expect(summary.getByTestId('quote-items-vat-note')).toBeVisible();
     // 여러 대면 한 갤러리에서 여러 체험을 골라 나눠 담는다 — 접근성 이름도 그렇게 읽힌다
     await showOptionPage(page, 'rental', 'kiosk-1');
@@ -178,7 +180,8 @@ for (const lang of ['ko', 'en'] as const) {
       };
       return {
         summaryOptions: ratio('aside ul li p:nth-of-type(3)'),
-        priceDetail: ratio('aside details ul li p.mt-1'),
+        // 상세 금액은 항목 이름과 금액만 남았다 (산출 설명 줄은 2026-11-22 뺐다)
+        priceLabel: ratio('aside details ul li p'),
         topicProgress: ratio('[data-testid="option-flow-progress"]'),
         unvisitedTab: ratio('[data-testid="quote-options-popover"] [role="tab"][data-visited="false"]'),
         currentTab: ratio('[data-testid="quote-options-popover"] [role="tab"][aria-selected="true"]'),
@@ -194,20 +197,35 @@ for (const lang of ['ko', 'en'] as const) {
     }
   });
 
-  test(`${lang}: the estimate form points at the first empty field and retires the summary button when done`, async ({ page }) => {
+  test(`${lang}: the estimate form points at the first empty field and the summary button stays retired on the final step`, async ({ page }) => {
     const c = QUOTE_COPY[lang];
-    await page.goto(route(lang, '/quote-preview?item=rental'), { waitUntil: 'domcontentloaded' });
-    for (let index = 0; index < 3; index++) await nextPreviewStep(page);
-    const form = page.locator('[data-quote-step="3"] form');
-    await expect(form).toBeVisible();
-    const submit = form.locator('button[type="submit"]').first();
+    const { estimates, blockedWrites } = await mockQuoteSubmission(page);
+    const downloads: string[] = [];
+    page.on('download', download => downloads.push(download.suggestedFilename()));
+    await page.goto(route(lang, '/quote?item=rental'), { waitUntil: 'domcontentloaded' });
+    for (let index = 0; index < 2; index++) await nextPreviewStep(page);
+    await expect(page.locator('[data-quote-step="2"]')).toBeVisible();
+    await expect(page.getByTestId('quote-summary-action')).toBeVisible();
+    await nextPreviewStep(page);
+    const final = page.locator('[data-quote-step="3"]');
+    await expect(final).toBeVisible();
+    // 마지막 단계에는 요약 칸의 「견적서 받기」를 두지 않는다 — 타일 세 개(영문은 두 개)가 대신한다
+    await expect(page.getByTestId('quote-summary-action')).toHaveCount(0);
+    await expect(final.locator('form')).toHaveCount(0);
+    await expect(final.getByTestId('quote-disclaimer')).toHaveCount(0);
+    await expect(final.locator('[data-testid^="quote-final-"]')).toHaveCount(lang === 'ko' ? 3 : 2);
+    const form = await openEstimateForm(page);
+    await expect(form.locator('#q-note, #q-referral')).toHaveCount(0);
+    await expect(form.locator('button[type="submit"]')).toHaveCount(1);
+    const submit = form.locator('button[type="submit"][value="pdf"]');
+    await expect(submit).toHaveText(c.pdf);
     await submit.click();
     await expect(page.locator('#q-name')).toBeFocused();
     await expect(page.locator('#q-name')).toHaveAttribute('aria-invalid', 'true');
     await expect(page.getByTestId('quote-name-error')).toHaveText(c.nameRequired);
     await expect(page.getByTestId('quote-email-required')).toHaveText(c.emailRequired);
     await expect(page.getByTestId('quote-consent-error')).toHaveText(c.consentRequired);
-    await expect(page.locator('[data-quote-step="3"]').getByRole('alert')).toHaveText(c.required);
+    await expect(form.getByRole('alert')).toHaveText(c.required);
     await page.locator('#q-name').fill('Tester');
     await expect(page.getByTestId('quote-name-error')).toHaveCount(0);
     await submit.click();
@@ -224,10 +242,16 @@ for (const lang of ['ko', 'en'] as const) {
     await expect(form.locator('input[name="consent"]')).toBeFocused();
     await form.locator('input[name="consent"]').check();
     await expect(page.getByTestId('quote-consent-error')).toHaveCount(0);
-    await expect(page.getByTestId('quote-summary-action')).toBeVisible();
+    expect(estimates).toEqual([]);
     await submit.click();
-    // 미리보기 실험 페이지는 실제로 발급·접수하지 않는다
-    await expect(page.getByTestId('quote-preview-complete')).toBeVisible();
+    // 발급은 가짜 응답(mockQuoteSubmission)으로 끝난다 — 실제 견적 발급 · 문의 저장은 하지 않는다
+    await expect(final.getByRole('status').filter({ hasText: c.pdfDone(FAKE_ESTIMATE.no) })).toBeVisible();
+    expect(estimates.map(estimate => estimate.mode)).toEqual(['pdf']);
+    expect(estimates[0].body).toMatchObject({ lang, recipient: { name: 'Tester', email: 'tester@example.com' } });
+    await expect.poll(() => downloads).toEqual([`neander-estimate-${FAKE_ESTIMATE.no}.pdf`]);
+    await expect.poll(() => blockedWrites.length).toBeGreaterThan(0);
+    await expect(final.locator('[data-testid^="quote-final-"]')).toHaveCount(0);
+    await expect(final.locator('form')).toHaveCount(0);
     await expect(page.getByTestId('quote-summary-action')).toHaveCount(0);
   });
 }

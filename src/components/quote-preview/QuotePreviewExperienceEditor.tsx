@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Check, MessageCircle, Plus, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { SERVICE_ORDER, SERVICE_TEXT, isConsultationService, type Lang, type ServiceKey } from '@/lib/quote/catalog';
 import { type QuoteInput, type QuoteResult, type SpaceOptions } from '@/lib/quote/engine';
@@ -10,7 +11,7 @@ import { QuoteOptions, type QuoteOptionsSetter } from '@/components/quote-studio
 import { ConsultationNotice } from '@/components/quote-studio/ConsultationNotice';
 import { EventPreview } from './EventPreview';
 import { QuoteOptionsPopover } from './QuoteOptionsPopover';
-import { ExperienceIllustration, ServiceThumbnail } from './illustrations/ServiceIllustration';
+import { ExperienceIllustration } from './illustrations/ServiceIllustration';
 
 export interface QuotePreviewExperienceEditorProps {
   input: QuoteInput;
@@ -61,8 +62,8 @@ export function QuotePreviewExperienceEditor({
     <div className="@container">
     <div className="grid min-w-0 items-start gap-7 @3xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] @3xl:items-stretch @3xl:gap-8" data-testid="quote-preview-experience-editor">
       <div tabIndex={-1} aria-label={ko ? '고른 체험 미리보기' : 'Selected experience preview'} data-preview-column
-        className="h-[270px] min-w-0 scroll-mt-28 space-y-4 overflow-y-auto overscroll-contain rounded-[28px] outline-none lg:h-auto lg:overflow-visible lg:[&_[data-testid=preview-canvas]]:h-[220px]" data-lenis-prevent>
-        <EventPreview input={automaticInput} lang={lang} activeKey={visibleKey} onActiveKeyChange={onActiveKeyChange} compact />
+        className="min-w-0 scroll-mt-28 space-y-4 rounded-[28px] outline-none">
+        <EventPreview input={automaticInput} lang={lang} activeKey={visibleKey} compact />
 
       </div>
 
@@ -72,21 +73,21 @@ export function QuotePreviewExperienceEditor({
         <section aria-labelledby="preview-service-choice-title" className="@container/cards flex h-full flex-col overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_12px_50px_-30px_rgba(15,23,42,0.18)]">
           <div className="flex min-h-14 flex-wrap items-center justify-between gap-2 px-4 py-2.5 sm:px-5">
             <h2 id="preview-service-choice-title" className="flex items-center gap-2.5 text-sm font-semibold text-slate-800"><span aria-hidden="true" className="size-2 rounded-full bg-teal-500 ring-4 ring-teal-50" />{ko ? '어떤 체험을 함께할까요?' : 'What would you like to include?'}</h2>
-            <span className="text-[11px] text-slate-500">{ko ? '체험 견적 · 맞춤 서비스 별도 문의' : 'Experience estimates · custom services by inquiry'}</span>
           </div>
           {/* 데스크톱은 3단계 높이를 1·2단계와 맞추려고 카드를 낮게 — 칸이 넓으면 3열 2줄로 둔다. */}
           <div data-options-card-grid className="grid flex-1 auto-rows-fr grid-cols-2 gap-2.5 px-4 pb-4 sm:px-5 @[22rem]/cards:grid-cols-3">
             {SERVICE_ORDER.map((key) => {
               const consultation = isConsultationService(key);
               const included = selected.includes(key);
-              return <div key={key} className={cn('group relative min-w-0 rounded-2xl transition-shadow motion-reduce:transition-none', included && 'ring-2 ring-teal-500 ring-offset-2')}>
+              // 카드 그림은 왼쪽 3D 배치와 같은 장면에서 서비스마다 찍은 것 (public/images/quote/service-3d) — 카드도 같은 어두운 슬레이트 면
+              return <div key={key} className={cn('group relative min-w-0 rounded-2xl transition-shadow motion-reduce:transition-none', included && 'ring-2 ring-accent ring-offset-2 ring-offset-ink')}>
                 <button type="button" id={`preview-trigger-${key}`} data-testid={`quote-${included ? 'edit' : 'add'}-${key}`}
                   aria-label={consultation ? (ko ? `${SERVICE_TEXT[key].name.ko} 별도 문의 안내` : `${SERVICE_TEXT[key].name.en} inquiry information`) : ko ? `${SERVICE_TEXT[key].name.ko} ${included ? '옵션 보기' : c.add}` : included ? `${SERVICE_TEXT[key].name.en} options` : `Add ${SERVICE_TEXT[key].name.en}`}
                   aria-pressed={consultation ? undefined : included} aria-haspopup={consultation ? undefined : 'dialog'} aria-expanded={consultation ? consultationKey === key : optionsOpen && optionsKey === key} aria-controls={consultation ? consultationKey === key ? 'quote-consultation-info' : undefined : optionsOpen && optionsKey === key ? 'preview-options-popover' : undefined}
                   onClick={() => { if (consultation) { closeOptions(); setConsultationKey(key); return; } if (optionsOpen && optionsKey === key) { closeOptions(); return; } if (!included) onToggleItem(key); openOptions(key); }}
-                  className={cn('relative flex h-full w-full flex-col justify-end overflow-hidden rounded-2xl border bg-[#f5f2e9] text-left text-slate-800 transition-colors motion-reduce:transition-none', included ? 'border-teal-300 bg-teal-50/40' : 'border-slate-200/70 hover:border-teal-300', focus)}>
-                  <ServiceThumbnail service={key} className="!h-[112px] w-full sm:!h-[128px] lg:!h-[76px] @[22rem]/cards:lg:!h-[88px] motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-[1.03]" />
-                  <span data-options-anchor className="relative flex w-full items-center justify-between gap-1 bg-white/80 px-3 py-2.5 text-[12px] font-semibold leading-snug text-balance [word-break:keep-all]">{SERVICE_TEXT[key].name[lang]}{consultation ? <span className="shrink-0 text-[10px] font-medium text-teal-700">{ko ? '별도 문의' : 'Inquire'}</span> : <SlidersHorizontal size={12} className="shrink-0 text-teal-600" aria-hidden="true" />}</span>
+                  className={cn('relative flex h-full w-full flex-col justify-end overflow-hidden rounded-2xl border bg-[#2c313b] text-left text-paper transition-colors motion-reduce:transition-none', included ? 'border-accent' : 'border-paper/10 hover:border-paper/40', focus)}>
+                  <span className="relative block min-h-[112px] w-full flex-1 overflow-hidden sm:min-h-[128px] lg:min-h-[76px] @[22rem]/cards:lg:min-h-[88px]"><Image src={`/images/quote/service-3d/${key}-v2.webp`} alt="" fill sizes="(min-width: 1024px) 260px, 45vw" className="object-cover motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-[1.04]" /></span>
+                  <span data-options-anchor className="relative flex w-full flex-wrap items-center justify-between gap-x-1 gap-y-0.5 border-t border-paper/10 bg-[#1f232b] px-3 py-2.5 text-[12px] font-semibold leading-snug text-balance [word-break:keep-all]">{SERVICE_TEXT[key].name[lang]}{consultation ? <span className="shrink-0 text-[10px] font-medium text-accent">{ko ? '별도 문의' : 'Inquire'}</span> : <SlidersHorizontal size={12} className="shrink-0 text-accent" aria-hidden="true" />}</span>
                   {/* 카드 위쪽 표식은 모두 같은 줄(top-2 · 높이 8)에 둔다 — 왼쪽 「담았어요」, 오른쪽 + / 휴지통 */}
                   {!included && <span className="absolute top-2 right-2 flex size-8 items-center justify-center rounded-full border border-white bg-white/85 text-teal-700" aria-hidden="true">{consultation ? <MessageCircle size={15} /> : <Plus size={15} />}</span>}
                   {included && <span className="absolute top-2 left-2 flex h-8 items-center" aria-hidden="true"><span className="inline-flex items-center gap-1 rounded-full bg-teal-700 px-2 py-1 text-[9px] font-bold text-white"><Check size={10} /><span className="@max-[26rem]/cards:lg:hidden">{ko ? '담았어요' : 'Added'}</span></span></span>}

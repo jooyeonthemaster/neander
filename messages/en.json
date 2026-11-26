@@ -10,8 +10,8 @@
 
   "nav": {
     "home": "Home",
-    "services": "Services",
-    "development": "Development",
+    "services": "Experiences",
+    "development": "Development & AX",
     "portfolio": "Portfolio",
     "about": "About",
     "contact": "Contact",
@@ -66,7 +66,7 @@
 
   "services": {
     "metaTitle": "AI Experience Booth & AI Photo Booth Rental for Events in Korea",
-    "metaDescription": "AI perfume making, AI photo booths, AI fortune-telling and personal-color kiosks — AI experiences delivered with equipment and on-site staff to pop-ups, corporate events, festivals and exhibitions in Korea. Published starting prices and an instant online estimate.",
+    "metaDescription": "AI perfume making, AI photo booths (including saju and face reading), AI palm-reading and personal-color kiosks — AI experiences delivered with equipment and on-site staff to pop-ups, corporate events, festivals and exhibitions in Korea. Published starting prices and an instant online estimate.",
     "consultationOnly": "On request",
     "inquire": "Contact us",
     "title": "Services",
@@ -246,10 +246,10 @@
         ]
       },
       "beauty04": {
-        "name": "AI Scent Soulmate",
-        "oneLiner": "AI finds your perfect fragrance soulmate",
-        "description": "An experience that matches you with your ideal fragrance through personality tests and AI analysis, with real scent sampling",
-        "features": ["Personality/preference quiz interaction", "AI fragrance matching algorithm", "Real scent diffuser experience", "Fragrance profile card printing", "Brand product sampling connection"],
+        "name": "AI Perfumer",
+        "oneLiner": "AI recommends a scent, and a perfumer blends it into your own perfume on site.",
+        "description": "Personality tests and AI analysis\nto create a fragrance made for you",
+        "features": ["Personality/preference quiz interaction", "AI fragrance matching algorithm", "Image-based fragrance matching algorithm", "Printed fragrance profile report", "Brand product sampling connection"],
         "processSteps": [
           { "title": "Preference Analysis", "description": "Personality and preference quiz builds your scent profile" },
           { "title": "AI Matching", "description": "AI matches the optimal fragrance from the database" },
@@ -258,7 +258,7 @@
         "highlights": [
           { "value": "200+", "label": "Fragrance Database" },
           { "value": "Custom", "label": "Scent Profile Report" },
-          { "value": "Real", "label": "Scent Sampling" }
+          { "value": "10ml", "label": "A perfume you make and take home" }
         ],
         "useCases": [
           { "title": "Fragrance Brand Pop-ups", "description": "AI-matched personalized fragrance recommendations at product launches" },
@@ -1270,10 +1270,10 @@
 
   "about": {
     "title": "About Us",
-    "subtitle": "The People Who Design Sensory Experiences",
+    "subtitle": "Experiential AI content agency",
     "metaDescription": "NEANDER plans and builds AI experiences with scent, photography and media art, and runs them on site at events.",
     "hero": {
-      "eyebrow": "ABOUT NEANDER · SINCE 2022",
+      "eyebrow": "ABOUT NEANDER · SINCE 2023",
       "title": "We build AI experiences\nand bring them to life on site.",
       "description": "We connect people and brands through scent, photography and media art.\nWe stay with you from planning and production to on-site operation.",
       "primaryCta": "Start a project",
@@ -1305,6 +1305,29 @@
         }
       }
     },
+    "devices": {
+      "label": "OUR DEVICES",
+      "title": "AI photo booths and kiosks,\nready to stand at your event",
+      "description": "Loaded with the AI program that fits your experience, delivered and set up by our own team.",
+      "items": {
+        "photoBooth": {
+          "eyebrow": "AI PHOTO BOOTH",
+          "name": "AI Photo Booth",
+          "description": "Guests' photos are redrawn by AI in the concept they choose and printed on the spot.",
+          "specs": ["Instant prints plus QR download", "2 AI styles included, custom event styles available", "Up to 3 booths at once"],
+          "link": "Photo booth rental guide",
+          "alt": "A tall white AI photo booth with a camera at the top, a landscape screen below it, and a photo coming out of the print slot"
+        },
+        "kiosk": {
+          "eyebrow": "AI KIOSK",
+          "name": "AI Kiosk",
+          "description": "Runs AI experiences such as personal color, palm reading or career tests, and prints the result right away.",
+          "specs": ["Built-in receipt printer", "Camera reads faces (personal color) and palms", "Up to 4 kiosks at once"],
+          "link": "Kiosk rental guide",
+          "alt": "A black portrait-screen AI kiosk with a camera on top and a receipt-style result slip coming out of its silver printer slot"
+        }
+      }
+    },
     "process": {
       "label": "HOW WE WORK",
       "title": "So a good idea\nbecomes a great event.",
@@ -1328,52 +1351,27 @@
       "label": "OUR STORY",
       "title": "From scent and space\nto more experiences.",
       "milestones": {
-        "2022": "NEANDER founded · CROSS THE LINE",
-        "2023": "AC'SCENT Sinchon opens",
-        "2024": "Ha Hyun-sang <Elegy> album perfume collection",
+        "2022": "CROSS THE LINE immersive exhibition",
+        "2023": "NEANDER founded · AC'SCENT Sinchon opens",
+        "2024": "Ha Hyun-sang 〈Elegy〉 album perfume collection",
         "2025": "AC'SCENT ID launches",
         "2026": "Expanding to festivals and brand events"
       },
       "showAll": "View full history",
       "hideAll": "Hide full history"
     },
-    "cta": {
-      "title": "What experience shall we create together?",
-      "description": "Start by telling us your event's goals and schedule.",
-      "button": "Start a project"
-    },
-    "mission": {
-      "title": "Mission",
-      "content": "By combining AI technology with creative sensibility, we deliver unforgettable offline experiences to people everywhere."
-    },
-    "vision": {
-      "title": "Vision",
-      "content": "As a global leader in experiential AI content, we are setting the standard for a new experience industry where technology and emotion coexist."
-    },
-    "ceo": {
-      "name": "Yoo Jae-young",
-      "title": "CEO & Founder",
-      "quote": "We don't build technology — we design experiences. AI is a tool; the real value lies in the emotions people feel. That single moment of experience creates an unforgettable connection between a brand and a person.",
-      "bio": "Founder and CEO of NEANDERco.ltd. Pioneering new experiential value in offline spaces by combining AI technology with creative direction."
-    },
-    "company": {
-      "name": "NEANDERco.ltd",
-      "nameEn": "NEANDERco.ltd",
-      "established": "Founded 2022",
-      "business": "AI Experiential Content Planning & Operations"
-    },
     "timeline": {
       "title": "Our Journey",
       "details": {
         "crossTheLine": "An interactive media art exhibition where visitors become part of the work, built with motion tracking and AI generative art.",
         "acscentSinchon": "The first AC'SCENT flagship store, offering the full AI fragrance experience from personal scent profiling to on-site blending.",
-        "hahyunsangElegy": "An album fragrance collection translating all six tracks of singer-songwriter Ha Hyun-sang's EP <Elegy> into scent, with a media-art pop-up at AC'SCENT Sinchon.",
+        "hahyunsangElegy": "An album fragrance collection translating all six tracks of singer-songwriter Ha Hyun-sang's EP 〈Elegy〉 into scent, with a media-art pop-up at AC'SCENT Sinchon.",
         "acscentId": "AC'SCENT ID in Hongdae, where deeper preference analysis and premium materials turn your identity into a fragrance.",
         "jecheonFestival": "The AI Perfumer booth at the 21st Jecheon International Music & Film Festival: AI analysed each visitor's image and blended a 10ml cinema perfume on the spot.",
         "seoulWriters": "The AI Book Perfume exhibition at the 2025 Seoul International Writers' Festival: a custom scent for each of the 29 featured books, matched to visitors by AI.",
         "ansanScience": "Interactive content that lets visitors experience how AI works, turning science into play.",
         "ktoPerfumeClass": "An AI perfume class for 30 participants at the Korea Tourism Organization Seoul Center (HiKR Ground) — a five-step, 30-minute experience ending in a 10ml perfume.",
-        "nflyingMd": "With FNC Entertainment, we turned the official merchandise for N.Flying's <into REM> concert into scent, designing a different fragrance for each city.",
+        "nflyingMd": "With FNC Entertainment, we turned the official merchandise for N.Flying's 〈into REM〉 concert into scent, designing a different fragrance for each city.",
         "jimffOstFair": "The audience experience programme for the OST Fair at the 22nd Jecheon International Music & Film Festival, with three touch kiosks recommending and blending 10ml perfumes."
       },
       "entries": {
@@ -1388,10 +1386,10 @@
         },
         "2023": {
           "year": "2023",
-          "title": "AC'SCENT 1st Store",
+          "title": "AC'SCENT Sinchon Store",
           "events": [
             "Pre-Startup Package — selected, graduated with top honors",
-            "AC'SCENT Sinchon — 1st store opening",
+            "AC'SCENT Sinchon store opening",
             "Award at the Youth Alley Startup Competition",
             "Excellent Venture Award, Seodaemun-gu Youth Venture Program"
           ]
@@ -1402,7 +1400,7 @@
           "events": [
             "Selected for Early-Stage Tourism Venture Program",
             "Resident company, Chung-Ang University Campus Town",
-            "Ha Hyun-sang <Elegy> album perfume collection & pop-up"
+            "Ha Hyun-sang 〈Elegy〉 album perfume collection & pop-up"
           ]
         },
         "2025": {
@@ -1410,7 +1408,7 @@
           "title": "AC'SCENT ID Launch",
           "events": [
             "Selected for Youth Startup Academy",
-            "AC'SCENT ID — 3rd store launch",
+            "AC'SCENT ID launch",
             "AI Perfumer booth at Jecheon International Music & Film Festival",
             "AI book perfume exhibition at Seoul International Writers' Festival",
             "Ansan International Science Film Festival AI zone"
@@ -1422,55 +1420,11 @@
           "events": [
             "Selected for Deep Tech Value-Up Program",
             "AI perfume class for Korea Tourism Organization",
-            "Official scent MD for N.Flying <into REM> concert",
+            "Official scent MD for N.Flying 〈into REM〉 concert",
             "Audience program at the 22nd JIMFF OST Fair"
           ]
         }
       }
-    },
-    "values": {
-      "title": "Core Values",
-      "items": {
-        "experience": {
-          "title": "Experience First",
-          "description": "Technology serves the experience, not the other way around. Every project starts with one question: what will people feel?"
-        },
-        "innovation": {
-          "title": "Relentless Innovation",
-          "description": "We explore new possibilities at the frontier of AI technology. Never settling, always imagining the next experience."
-        },
-        "collaboration": {
-          "title": "Co-Created Value",
-          "description": "Through close collaboration with our clients, we understand the essence of their brand and design the optimal experience to match."
-        },
-        "impact": {
-          "title": "Measurable Impact",
-          "description": "Emotion can be measured. Visitor count, dwell time, social sharing rate — we prove our results through data."
-        }
-      }
-    },
-    "divisions": {
-      "title": "Business Divisions",
-      "subtitle": "Designing experiences across three pillars",
-      "online": {
-        "name": "Online Solution",
-        "description": "Digital AI solutions for brands. We design interactive online experiences including web-based activations, AI diagnostic tools, and digital photo booths.",
-        "items": ["AI Photo Booth (Digital)", "AI Diagnostic Tools", "Web-Based Interactive Content"]
-      },
-      "offline": {
-        "name": "Offline Solution",
-        "description": "Physical AI experiences at festivals, exhibitions, and events. We create unforgettable on-site experiences through spatial design, media art, and installations.",
-        "items": ["Festival/Event AI Zones", "Media Art Exhibitions", "Spatial Design & Installation"]
-      },
-      "service": {
-        "name": "Neander Service",
-        "description": "Neander's own brands and services. Through flagship projects like AC'SCENT fragrance stores, we set new standards for AI-powered experiences.",
-        "items": ["AC'SCENT Fragrance Stores", "Proprietary Brand Operations", "AI Experience R&D"]
-      }
-    },
-    "team": {
-      "title": "Our Team",
-      "description": "AI engineers, creative directors, spatial designers, and project managers working as one team to craft sensory experiences."
     }
   },
 
@@ -1863,7 +1817,7 @@
       "referralPlaceholder": "Choose one",
       "subjectOptions": {
         "general": "General Inquiry",
-      "development": "Development / AX consultation",
+      "development": "Development & AX consultation",
         "partnership": "Partnership / Collaboration",
         "quote": "Quote Request",
         "media": "Media / Press",
@@ -1878,14 +1832,14 @@
     "info": {
       "title": "Contact Information",
       "emailLabel": "Email",
-      "phoneLabel": "Phone",
-      "mobileLabel": "Mobile",
+      "phoneLabel": "Customer center",
+      "mobileLabel": "Direct",
       "addressLabel": "Address",
       "email": "ok@neander.co.kr",
       "phone": "+82 2-336-3368",
       "mobile": "+82 10-8507-5121",
-      "phoneNote": "If we miss your call, please reach us on our mobile (+82 10-8507-5121).",
-      "address": "22, Wausan-ro 29ra-gil, Mapo-gu, Seoul",
+      "phoneNote": "If the customer center line is busy, please call our direct line (+82 10-8507-5121).",
+      "address": "1F, 10-6, Dongmak-ro 36-gil, Mapo-gu, Seoul",
       "addressDetail": "Accent ID"
     },
     "businessHours": {
@@ -1987,7 +1941,7 @@
         "quote": "Online Estimate",
         "faq": "FAQ",
         "demo": "Try Demo",
-        "brochure": "Company Profile",
+        "brochure": "PDF downloads",
         "terms": "Terms of Service",
         "privacy": "Privacy Policy"
       }
@@ -2254,7 +2208,7 @@
       },
       "q3": {
         "question": "How far in advance should I plan?",
-        "answer": "Existing experiences only need a free date and equipment, so 4–6 weeks before your event is usually enough. Custom content must be confirmed 6 weeks before the event, so please contact us earlier for custom work."
+        "answer": "For existing experiences, two weeks before your event is usually enough. If your date is close, we can often adjust — please call us first (customer center +82-2-336-3368 · direct +82-10-8507-5121). Custom content must be confirmed 6 weeks before the event, so please contact us earlier for custom work."
       },
       "q4": {
         "question": "Do you operate outside of Seoul or internationally?",
@@ -2265,8 +2219,10 @@
         "answer": "Of course! We currently run the AC'SCENT ID store in Hongdae. No reservation required — walk in anytime to experience AI fragrance profiling in person."
       },
       "q6": {
-        "question": "What does the data analytics report include?",
-        "answer": "Our reports cover visitor count, average dwell time, top-performing content, social share count, satisfaction survey results, and more. These insights help you plan even more impactful future events."
+        "question": "Can we get a results report after the event?",
+        "answer": "Yes, on request. After the event we prepare a results report in the standard Korean institutional reporting format: an overview, tables of operating figures, notable on-site cases, outcomes and improvements, and next steps, with installation photos, a layout plan and detailed logs attached. We also hand over the raw operating data (Excel), so you can use it directly in your internal reporting. Below is the first page of a sample report made for a fictional event.",
+        "imageAlt": "First page of a sample results report — summary, overview, and a table of daily participants, prints and perfumes",
+        "imageCaption": "Sample: first page of a results report for a fictional event (event, organizers and figures are illustrative)"
       }
     },
     "contactCta": "Still have questions?",

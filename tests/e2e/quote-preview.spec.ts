@@ -1,22 +1,20 @@
 import { expect, test, type Page } from '@playwright/test';
-import { closePreviewOptions, enterExperienceStep, nextPreviewStep, openPreviewDetails, openPreviewOptions, showOptionPage } from './helpers/quote-preview-options';
+import { FAKE_ESTIMATE, closePreviewOptions, enterExperienceStep, mockQuoteSubmission, nextPreviewStep, openEstimateForm, openPreviewDetails, openPreviewOptions, openReportForm, openRequestForm, showOptionPage } from './helpers/quote-preview-options';
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
 import { QUOTE_STORAGE_KEY } from '../../src/components/quote-studio/history';
 import { calculateQuote, sanitizeInput, type QuoteInput } from '../../src/lib/quote/engine';
-import { PREVIEW_STORAGE_KEY } from '../../src/lib/quote-preview/model';
 
-const FLOW_STORAGE_KEY = 'neander-quote-preview-flow-v1';
 const section = (page: Page, step: number) => page.locator(`[data-quote-step="${step}"]`);
 
 async function openPreview(page: Page, lang: 'ko' | 'en' = 'ko') {
-  await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
-  await expect(page.getByTestId('quote-studio')).toHaveAttribute('data-mode', 'preview');
+  await page.goto(`${lang === 'en' ? '/en' : ''}/quote`, { waitUntil: 'domcontentloaded' });
+  await expect(page.getByTestId('quote-studio')).toBeVisible();
   await expect(section(page, 1)).toBeVisible();
   await expect(section(page, 0)).toHaveCount(0);
 }
 
 async function savedPreview(page: Page): Promise<QuoteInput> {
-  return page.evaluate(key => JSON.parse(localStorage.getItem(key)!), FLOW_STORAGE_KEY);
+  return page.evaluate(key => JSON.parse(localStorage.getItem(key)!), QUOTE_STORAGE_KEY);
 }
 
 async function expectPriceParity(page: Page) {
@@ -24,7 +22,7 @@ async function expectPriceParity(page: Page) {
 }
 
 async function expectOnlyVectors(page: Page) {
-  const lab = page.getByTestId('quote-preview-lab');
+  const lab = page.getByTestId('quote-studio');
   await expect(lab.locator('img, canvas, svg image')).toHaveCount(0);
   expect(await lab.evaluate(root => [...root.querySelectorAll('*')].flatMap(element => {
     const style = getComputedStyle(element);
@@ -77,7 +75,7 @@ for (const lang of ['ko', 'en'] as const) {
       await teams.press('Enter');
       await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(oneTeam + (count - 1) * 385000));
       await expectPerfumeScene(page, 0, count);
-      if (count === 4) await expect(perfume.getByTestId('perfume-capacity-notice')).toContainText(lang === 'ko' ? '상담이 필요' : 'need consultation');
+      if (count === 4) await expect(perfume.getByTestId('perfume-capacity-notice')).toContainText(lang === 'ko' ? '상담이 필요' : 'consult us');
     }
     await perfume.getByRole('radiogroup', { name: c.volume, exact: true }).getByRole('radio', { name: /50ml/ }).check();
     await showOptionPage(page, 'acscent', 'packaging');
@@ -161,24 +159,24 @@ test('every selected perfume kiosk and team stays in the existing venue without 
   await expectPriceParity(page);
 });
 
-test('legacy migration, reload and clear preserve the isolated production draft and issued history', async ({ page }) => {
-  const production = sanitizeInput({ eventName: '실제 저장 행사', attendees: 77, items: [{ key: 'photoBooth', options: { booths: 2 } }, { key: 'rental', options: { kiosks: 2 } }] });
-  const productionDraft = JSON.stringify(production);
-  const productionHistory = JSON.stringify([{ no: 'TEST-EXISTING', issuedAt: '2026-09-28T00:00:00.000Z', token: 'test-only-existing-token', total: 123, summary: '기존 견적' }]);
-  const legacyInput = sanitizeInput({ items: [{ key: 'acscent', options: { guests: 100, volume: '50ml' } }, { key: 'photoBooth', options: { booths: 1 } }] });
-  const legacyDraft = JSON.stringify({ version: 1, input: legacyInput });
-  await page.addInitScript(({ draftKey, oldKey, draft, history, legacy }) => {
-    if (!sessionStorage.getItem('quote-preview-isolation-seeded')) {
-      localStorage.setItem(draftKey, draft);
+test('a saved draft restores, reloads and clears while issued estimate history stays', async ({ page }) => {
+  const draft = sanitizeInput({ eventName: '실제 저장 행사', attendees: 77, items: [{ key: 'photoBooth', options: { booths: 2 } }, { key: 'rental', options: { kiosks: 2 } }] });
+  const history = JSON.stringify([{ no: 'TEST-EXISTING', issuedAt: '2026-09-28T00:00:00.000Z', token: 'test-only-existing-token', total: 123, summary: '기존 견적' }]);
+  await page.addInitScript(({ draftKey, value, history }) => {
+    if (!sessionStorage.getItem('quote-draft-seeded')) {
+      localStorage.setItem(draftKey, value);
       localStorage.setItem('neander-estimates', history);
-      localStorage.setItem(oldKey, legacy);
-      sessionStorage.setItem('quote-preview-isolation-seeded', '1');
+      sessionStorage.setItem('quote-draft-seeded', '1');
     }
-  }, { draftKey: QUOTE_STORAGE_KEY, oldKey: PREVIEW_STORAGE_KEY, draft: productionDraft, history: productionHistory, legacy: legacyDraft });
+  }, { draftKey: QUOTE_STORAGE_KEY, value: JSON.stringify(draft), history });
   await openPreview(page);
-  await expect.poll(async () => (await savedPreview(page)).items[0].options).toMatchObject({ volume: '50ml' });
-  await expect(page.getByText('TEST-EXISTING')).toHaveCount(0);
+  await expect(page.getByText('TEST-EXISTING', { exact: true })).toBeVisible();
+  await expect.poll(() => savedPreview(page)).toMatchObject({
+    eventName: '실제 저장 행사', attendees: 77,
+    items: [{ key: 'photoBooth', options: { booths: 2 } }, { key: 'rental', options: { kiosks: 2, mode: 'event' } }],
+  });
   await enterExperienceStep(page);
+  await expect(page.getByTestId('quote-edit-photoBooth')).toBeVisible();
   await openPreviewOptions(page, 'rental');
   await expect(page.getByTestId('kiosk-event-rental-note')).toBeVisible();
   await expect(page.locator('#k-printer, #k-months')).toHaveCount(0);
@@ -186,7 +184,7 @@ test('legacy migration, reload and clear preserve the isolated production draft 
   await page.locator('#b-wrap').check();
   await expectPriceParity(page);
   const selected = await savedPreview(page);
-  expect(selected.items.map(item => item.key)).toEqual(['acscent', 'photoBooth', 'rental']);
+  expect(selected.items.map(item => item.key)).toEqual(['photoBooth', 'rental']);
   await page.reload({ waitUntil: 'domcontentloaded' });
   await expect(section(page, 1)).toBeVisible();
   await expect.poll(() => savedPreview(page)).toEqual(selected);
@@ -196,18 +194,9 @@ test('legacy migration, reload and clear preserve the isolated production draft 
   await page.reload({ waitUntil: 'domcontentloaded' });
   await expect(section(page, 1)).toBeVisible();
   await expect.poll(async () => (await savedPreview(page)).items).toEqual([]);
-  expect(await page.evaluate(({ draftKey, oldKey }) => ({ draft: localStorage.getItem(draftKey), history: localStorage.getItem('neander-estimates'), legacy: localStorage.getItem(oldKey) }), { draftKey: QUOTE_STORAGE_KEY, oldKey: PREVIEW_STORAGE_KEY })).toEqual({ draft: productionDraft, history: productionHistory, legacy: legacyDraft });
-  await page.goto('/quote', { waitUntil: 'domcontentloaded' });
-  await expect(page.getByTestId('quote-studio')).toHaveAttribute('data-mode', 'live');
+  // 견적을 비워도 이 브라우저에서 받은 가견적서 목록은 그대로 남는다
+  expect(await page.evaluate(() => localStorage.getItem('neander-estimates'))).toBe(history);
   await expect(page.getByText('TEST-EXISTING', { exact: true })).toBeVisible();
-  await expect.poll(() => page.evaluate(key => JSON.parse(localStorage.getItem(key)!), QUOTE_STORAGE_KEY)).toMatchObject({
-    eventName: '실제 저장 행사', attendees: 77,
-    items: [{ key: 'photoBooth', options: { booths: 2 } }, { key: 'rental', options: { kiosks: 2 } }],
-  });
-  await enterExperienceStep(page);
-  await expect(page.getByTestId('quote-edit-photoBooth')).toBeVisible();
-  await expect(page.getByTestId('quote-edit-rental')).toBeVisible();
-  expect(await page.evaluate(key => JSON.parse(localStorage.getItem(key)!).items, FLOW_STORAGE_KEY)).toEqual([]);
 });
 
 test('all three stages and automatically priced service details use vector illustrations', async ({ page }) => {
@@ -232,38 +221,126 @@ test('all three stages and automatically priced service details use vector illus
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
 });
 
-test('the final preview stage validates privately without issuing PDFs, creating inquiries or storing contact data', async ({ page }) => {
-  const blockedWrites: string[] = [];
+test('the final stage validates the estimate form and submits only to mocked estimate endpoints', async ({ page }) => {
+  const c = QUOTE_COPY.ko;
+  const { estimates, blockedWrites } = await mockQuoteSubmission(page);
   const downloads: string[] = [];
-  await page.route('**/*', async route => {
-    const request = route.request(), url = new URL(request.url());
-    const apiWrite = url.pathname.startsWith('/api/quote-pdf') || url.pathname.startsWith('/api/inquiry-notify');
-    const firebaseWrite = url.hostname === 'firestore.googleapis.com' && (/\/Write\//.test(url.pathname) || /:commit$/.test(url.pathname) || /:batchWrite$/.test(url.pathname));
-    if (apiWrite || firebaseWrite) { blockedWrites.push(request.method() + ' ' + url.href); await route.abort(); }
-    else await route.continue();
-  });
   page.on('download', download => downloads.push(download.suggestedFilename()));
   await begin(page);
   await openPreviewOptions(page, 'acscent');
   await nextPreviewStep(page);
-  await page.locator('button[type="submit"][value="pdf"]').click();
-  await expect(section(page, 3).getByRole('alert')).toHaveText(QUOTE_COPY.ko.required);
-  await page.locator('#q-name').fill('실험 담당자');
-  await page.locator('#q-email').fill('preview@example.com');
+  const final = section(page, 3);
+  await expect(final).toBeVisible();
+  for (const [id, name] of [
+    ['quote-final-estimate', '가견적서 (PDF)'], ['quote-final-report', '보고서 (PDF · 한글 파일)'], ['quote-final-request', '상담 요청'],
+  ]) await expect(page.getByTestId(id)).toHaveAccessibleName(name);
+  await expect(final.locator('form')).toHaveCount(0);
+  await expect(page.getByTestId('quote-summary-action')).toHaveCount(0);
+
+  // 가견적서: 팝업에서 이름 · 이메일(필수) · 회사 · 전화(선택) · 동의만 묻고, 버튼은 하나
+  const estimate = await openEstimateForm(page);
+  await expect(estimate.locator('#q-name, #q-email, #q-company, #q-phone, input[name="consent"]')).toHaveCount(5);
+  await expect(estimate.locator('#q-note, #q-referral, input[name="format"]')).toHaveCount(0);
+  await expect(estimate.locator('button[type="submit"]')).toHaveCount(1);
+  await estimate.locator('button[type="submit"][value="pdf"]').click();
+  await expect(estimate.getByRole('alert')).toHaveText(c.required);
+  await expect(page.locator('#q-name')).toBeFocused();
+  await page.locator('#q-name').fill('견적 담당자');
+  await page.locator('#q-email').fill('quote-e2e@example.com');
   await page.locator('input[name="consent"]').check();
-  await page.locator('button[type="submit"][value="pdf"]').click();
-  await expect(page.getByTestId('quote-preview-complete')).toBeVisible();
+  await estimate.locator('button[type="submit"][value="pdf"]').click();
+  await expect(final.getByRole('status').filter({ hasText: c.pdfDone(FAKE_ESTIMATE.no) })).toBeVisible();
+  expect(estimates.map(entry => entry.mode)).toEqual(['pdf']);
+  expect(estimates[0].body).toMatchObject({ lang: 'ko', input: await savedPreview(page), recipient: { name: '견적 담당자', email: 'quote-e2e@example.com' } });
+  await expect.poll(() => downloads).toEqual([`neander-estimate-${FAKE_ESTIMATE.no}.pdf`]);
+  // 받은 가견적서는 이 브라우저 목록에 남는다 (연락처는 견적 초안에 남기지 않는다)
+  expect(JSON.parse((await page.evaluate(() => localStorage.getItem('neander-estimates')))!)).toEqual([expect.objectContaining({ no: FAKE_ESTIMATE.no, token: FAKE_ESTIMATE.token })]);
+  await expect(page.getByTestId('quote-final-estimate')).toHaveCount(0);
+
+  // 구성을 바꾸면 다시 고를 수 있고, 연 입력 칸과 적은 연락처는 그대로다
   await page.getByTestId('quote-prev').click();
   const perfume = await showOptionPage(page, 'acscent', 'basic');
-  await perfume.getByRole('radiogroup', { name: QUOTE_COPY.ko.volume, exact: true }).getByRole('radio', { name: /50ml/ }).check();
+  await perfume.getByRole('radiogroup', { name: c.volume, exact: true }).getByRole('radio', { name: /50ml/ }).check();
   await nextPreviewStep(page);
-  await page.locator('button[type="submit"][value="request"]').click();
-  await expect(page.getByTestId('quote-preview-complete')).toBeVisible();
-  expect(blockedWrites).toEqual([]);
-  expect(downloads).toEqual([]);
-  expect(await page.evaluate(() => localStorage.getItem('neander-estimates'))).toBeNull();
-  expect(await page.evaluate(key => localStorage.getItem(key), QUOTE_STORAGE_KEY)).toBeNull();
+  await expect(page.getByTestId('quote-final-estimate')).toBeVisible();
+  await openEstimateForm(page);
+  await expect(page.locator('#q-name')).toHaveValue('견적 담당자');
+  await page.keyboard.press('Escape');
+  await expect.poll(() => blockedWrites.length).toBeGreaterThan(0);
   const draft = JSON.stringify(await savedPreview(page));
-  expect(draft).not.toContain('preview@example.com');
-  expect(draft).not.toContain('실험 담당자');
+  for (const secret of ['quote-e2e@example.com', '견적 담당자']) expect(draft).not.toContain(secret);
+});
+
+test('the report tile asks for contact details and a format before downloading', async ({ page }) => {
+  const c = QUOTE_COPY.ko;
+  const { estimates } = await mockQuoteSubmission(page);
+  const downloads: string[] = [];
+  page.on('download', download => downloads.push(download.suggestedFilename()));
+  await begin(page);
+  await openPreviewOptions(page, 'acscent');
+  await nextPreviewStep(page);
+  await expect(section(page, 3)).toBeVisible();
+
+  // 보고서: 팝업에서 형식(한글 파일 · PDF)을 고르고 연락처를 적어야 받는다 — 바로 받아지지 않는다
+  const report = await openReportForm(page);
+  await expect(report.locator('input[name="format"]')).toHaveCount(2);
+  await expect(report.locator('input[name="format"][value="hwpx"]')).toBeChecked();
+  await expect(report.locator('#q-name, #q-email, #q-company, #q-phone, input[name="consent"]')).toHaveCount(5);
+  await report.locator('button[type="submit"][value="report"]').click();
+  await expect(report.getByRole('alert')).toHaveText(c.required);
+  expect(downloads).toEqual([]);
+  await page.locator('#q-name').fill('보고서 담당자');
+  await page.locator('#q-email').fill('report-e2e@example.com');
+  await report.locator('input[name="consent"]').check();
+  await report.locator('button[type="submit"][value="report"]').click();
+  await expect.poll(() => downloads.length).toBe(1);
+  expect(downloads[0]).toMatch(/\.hwpx$/);
+  expect(estimates.map(entry => entry.mode)).toEqual(['token']);
+  await expect(section(page, 3).getByRole('status')).toContainText(FAKE_ESTIMATE.no);
+  await expect(page.getByTestId('quote-request-modal')).toHaveCount(0);
+});
+
+test('the request modal offers a call or the full form and never reports an unsaved inquiry as received', async ({ page, isMobile }) => {
+  const c = QUOTE_COPY.ko;
+  const { estimates, blockedWrites } = await mockQuoteSubmission(page);
+  await begin(page);
+  await openPreviewOptions(page, 'acscent');
+  await nextPreviewStep(page);
+  await expect(section(page, 3)).toBeVisible();
+
+  // 상담 요청: 한 화면에 전화 한 줄 + 입력 칸 (2026-11-23 — 고르는 단계 없음)
+  await page.getByTestId('quote-final-request').click();
+  const modal = page.getByTestId('quote-request-modal');
+  await expect(page.getByTestId('quote-request-tel')).toHaveAttribute('href', /^tel:\+?\d+$/);
+  await expect(modal.locator('form')).toBeVisible();
+  void isMobile;
+  await page.keyboard.press('Escape');
+  await expect(modal).toHaveCount(0);
+  const { form } = await openRequestForm(page, 'ko');
+  await expect(form.locator('#q-name, #q-email, #q-company, #q-phone, #q-note, #q-referral, input[name="consent"]')).toHaveCount(7);
+  await expect(form.locator('button[type="submit"]')).toHaveCount(1);
+  await form.locator('button[type="submit"][value="request"]').click();
+  await expect(form.getByRole('alert')).toHaveText(c.required);
+  // soft: 팝업 안에서도 첫 빈 칸으로 포커스가 가고, 글자를 이어 칠 수 있어야 한다
+  await expect.soft(page.locator('#q-name')).toBeFocused();
+  await expect(page.getByTestId('quote-name-error')).toHaveText(c.nameRequired);
+  await expect(page.getByTestId('quote-email-required')).toHaveText(c.emailRequired);
+  await expect(page.getByTestId('quote-consent-error')).toHaveText(c.consentRequired);
+  await page.locator('#q-note').pressSequentially('e2e test only');
+  await expect.soft(page.locator('#q-note')).toHaveValue('e2e test only');
+  await page.locator('#q-note').fill('e2e test only');
+  await page.locator('#q-name').fill('상담 담당자');
+  await page.locator('#q-email').fill('request-e2e@example.com');
+  await page.locator('#q-phone').fill('010-0000-0000');
+  await form.locator('input[name="consent"]').check();
+  expect(estimates).toEqual([]);
+  await form.locator('button[type="submit"][value="request"]').click();
+  await expect.poll(() => estimates.map(entry => entry.mode)).toEqual(['token']);
+  expect(estimates[0].body).toMatchObject({ lang: 'ko', input: await savedPreview(page), recipient: { name: '상담 담당자', email: 'request-e2e@example.com', phone: '010-0000-0000' } });
+  // 문의 저장(Firestore)은 막혀 있으므로 접수되지 않고, 저장 시간(15초)이 지나면 오류를 알린다
+  await expect(form.getByRole('alert')).toHaveText(c.error, { timeout: 25_000 });
+  expect(blockedWrites.length).toBeGreaterThan(0);
+  await expect(page.getByText(c.requestDone)).toHaveCount(0);
+  const draft = JSON.stringify(await savedPreview(page));
+  for (const secret of ['request-e2e@example.com', '상담 담당자', '010-0000-0000', 'e2e test only']) expect(draft).not.toContain(secret);
 });

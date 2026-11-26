@@ -3,82 +3,45 @@
 import { useLocale } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
-import { motion } from 'motion/react';
 
-/* ─────────────────────────────────────────────────────────
-   Language Toggle
-   Pill-shaped KR / EN switcher with sliding indicator
-   ───────────────────────────────────────────────────────── */
+/* 언어 전환 — KR / EN 글자 두 개 */
 
 interface LanguageToggleProps {
   className?: string;
-  /** Translucent track and light labels for use over a dark background */
+  /** 예전 머리글과의 호환용 — 이제 늘 어두운 바탕이라 쓰지 않는다 */
   inverted?: boolean;
 }
 
-export default function LanguageToggle({ className, inverted = false }: LanguageToggleProps) {
+export default function LanguageToggle({ className }: LanguageToggleProps) {
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
 
-  function switchLocale(nextLocale: 'ko' | 'en') {
-    if (nextLocale === locale) return;
-    router.replace(pathname, { locale: nextLocale });
+  function switchLocale(next: 'ko' | 'en') {
+    if (next === locale) return;
+    router.replace(pathname, { locale: next });
   }
 
-  const isKo = locale === 'ko';
+  const item = (code: 'ko' | 'en', label: string) => (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={locale === code}
+      onClick={() => switchLocale(code)}
+      className={cn(
+        't-label !text-[0.74rem] !tracking-[0.14em] px-1 py-2 transition-colors',
+        locale === code ? 'text-paper' : 'text-paper/40 hover:text-paper/80',
+      )}
+    >
+      {label}
+    </button>
+  );
 
   return (
-    <div
-      className={cn(
-        'relative flex h-9 items-center rounded-full border p-0.5 transition-colors',
-        inverted
-          ? 'border-white/20 bg-white/10 backdrop-blur-sm'
-          : 'border-neutral-200 bg-neutral-50',
-        className,
-      )}
-      role="radiogroup"
-      aria-label="Language selection"
-    >
-      {/* Sliding indicator */}
-      <motion.div
-        className="absolute top-0.5 h-8 w-[calc(50%-2px)] rounded-full bg-white shadow-sm"
-        layout
-        animate={{ x: isKo ? 0 : '100%' }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-      />
-
-      <button
-        role="radio"
-        aria-checked={isKo}
-        onClick={() => switchLocale('ko')}
-        className={cn(
-          'relative z-10 flex h-8 w-12 items-center justify-center rounded-full text-xs font-semibold tracking-wide transition-colors',
-          isKo
-            ? 'text-teal-600'
-            : inverted
-              ? 'text-white/60 hover:text-white'
-              : 'text-neutral-400 hover:text-neutral-600',
-        )}
-      >
-        KR
-      </button>
-
-      <button
-        role="radio"
-        aria-checked={!isKo}
-        onClick={() => switchLocale('en')}
-        className={cn(
-          'relative z-10 flex h-8 w-12 items-center justify-center rounded-full text-xs font-semibold tracking-wide transition-colors',
-          !isKo
-            ? 'text-teal-600'
-            : inverted
-              ? 'text-white/60 hover:text-white'
-              : 'text-neutral-400 hover:text-neutral-600',
-        )}
-      >
-        EN
-      </button>
+    <div className={cn('flex items-center', className)} role="radiogroup" aria-label="Language selection">
+      {item('ko', 'KR')}
+      <span aria-hidden="true" className="px-0.5 text-xs text-paper/30">/</span>
+      {item('en', 'EN')}
     </div>
   );
 }

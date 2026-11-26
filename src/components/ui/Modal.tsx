@@ -29,12 +29,18 @@ export function Modal({
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  // 최신 onClose 를 ref 로 읽는다 — 부모가 다시 그려질 때마다 새 함수를 넘겨도 아래 효과가 다시 돌지 않게.
+  // (2026-11-22: 효과가 키 입력마다 다시 돌며 팝업으로 포커스를 되돌려, 입력 칸에 한 글자씩밖에 안 들어갔다)
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   // Trap focus and handle Escape key
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -61,7 +67,7 @@ export function Modal({
         }
       }
     },
-    [onClose]
+    []
   );
 
   useEffect(() => {
@@ -89,7 +95,9 @@ export function Modal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        // data-lenis-prevent: 사이트의 부드러운 스크롤(Lenis)이 휠을 가져가면 팝업 대신 뒤 페이지가 움직인다.
+        // 팝업 위의 휠은 브라우저에 맡겨 팝업 안이 스크롤되게 한다 (MobileMenu · DemoModal 과 같은 방식).
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" data-lenis-prevent>
           {/* Overlay */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -114,7 +122,7 @@ export function Modal({
             transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
             className={cn(
               'relative z-10 w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl',
-              'outline-none max-h-[85vh] overflow-y-auto',
+              'outline-none max-h-[85vh] overflow-y-auto overscroll-contain',
               className
             )}
           >

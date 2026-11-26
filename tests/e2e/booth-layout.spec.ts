@@ -5,13 +5,13 @@ import { enterExperienceStep, closePreviewOptions, showOptionPage } from './help
 test('automatic experience equipment remains visible without adding a purchased booth', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  const key = 'neander-quote-preview-flow-v1';
+  const key = 'neander-quote-v2';
   await page.addInitScript(key => localStorage.setItem(key, JSON.stringify({ items: [
     { key: 'acscent', options: { guests: 100 } },
     { key: 'photoBooth', options: { booths: 1 } },
     { key: 'rental', options: { kiosks: 1 } },
   ] })), key);
-  await page.goto('/quote-preview');
+  await page.goto('/quote');
   await enterExperienceStep(page);
   const canvas = page.getByTestId('preview-canvas');
   const originalCanvas = await canvas.boundingBox();

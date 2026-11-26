@@ -1,13 +1,11 @@
 import { expect, test, type Page } from '@playwright/test';
-import { enterExperienceStep, closePreviewOptions, nextPreviewStep, openPreviewDetails, showPhotoGalleryPage } from './helpers/quote-preview-options';
+import { enterExperienceStep, closePreviewOptions, nextPreviewStep, openPreviewDetails, showPhotoGalleryPage, sidebarOptionSummaries } from './helpers/quote-preview-options';
 import { QUOTE_COPY } from '../../src/components/quote-studio/copy';
-import { calculateQuote, defaultOptions, sanitizeInput, type QuoteInput } from '../../src/lib/quote/engine';
-import { PHOTO_BOOTH_TEMPLATES } from '../../src/lib/quote/photo-booth-templates';
-import { getExperienceBySlug } from '../../src/data/experiences';
+import { calculateQuote, sanitizeInput, type QuoteInput } from '../../src/lib/quote/engine';
+import { QUOTE_STORAGE_KEY } from '../../src/components/quote-studio/history';
+import { QUOTE_BOOTH_TEMPLATES } from '../../src/data/product-lines';
 
-const FLOW_KEY = 'neander-quote-preview-flow-v1';
-const LIVE_KEY = 'neander-quote-v2';
-const publicTemplates = PHOTO_BOOTH_TEMPLATES.filter((template) => getExperienceBySlug(template.slug));
+const publicTemplates = QUOTE_BOOTH_TEMPLATES;
 const templates = publicTemplates.slice(0, 3);
 const galleryPages = Math.max(1, Math.ceil(publicTemplates.length / 4));
 const step = (page: Page, index: number) => page.locator(`[data-quote-step="${index}"]`);
@@ -25,7 +23,7 @@ async function passConditions(page: Page) {
   await expect(step(page, 2)).toBeVisible();
 }
 
-async function saved(page: Page, key = FLOW_KEY): Promise<QuoteInput> {
+async function saved(page: Page, key = QUOTE_STORAGE_KEY): Promise<QuoteInput> {
   return page.evaluate((storageKey) => JSON.parse(localStorage.getItem(storageKey)!), key);
 }
 
@@ -40,16 +38,8 @@ async function expectPrice(page: Page, amount: number, lang: 'ko' | 'en') {
 
 for (const lang of ['ko', 'en'] as const) {
   test(`${lang}: existing templates and new custom styles have independent prices and survive the three-stage journey`, async ({ page }, testInfo) => {
-    const path = lang === 'ko' ? '/quote-preview' : '/en/quote-preview';
-    const existingLive = JSON.stringify(sanitizeInput({ days: 5, items: [defaultOptions('rental')] }));
-    await page.addInitScript(({ key, value }) => {
-      if (!sessionStorage.getItem('photo-template-test-seeded')) {
-        localStorage.setItem(key, value);
-        sessionStorage.setItem('photo-template-test-seeded', 'yes');
-      }
-    }, { key: LIVE_KEY, value: existingLive });
+    const path = lang === 'ko' ? '/quote' : '/en/quote';
     await page.goto(path, { waitUntil: 'domcontentloaded' });
-    await expect(page.getByTestId('quote-studio')).toHaveAttribute('data-mode', 'preview');
     await expect(step(page, 1)).toBeVisible();
     await passConditions(page);
     await showPhotoGalleryPage(page, 1);
@@ -89,11 +79,11 @@ for (const lang of ['ko', 'en'] as const) {
     for (const [index, template] of publicTemplates.entries()) {
       await showPhotoGalleryPage(page, Math.floor(index / 4) + 1);
       await expect(choice(page, template.slug)).toBeVisible();
-      await expect(choice(page, template.slug).locator('svg[data-template-appearance]')).toHaveAttribute('data-template-appearance', template.appearance);
+      // 썸네일은 서비스 소개와 같은 실제 프로그램 화면
+      await expect(choice(page, template.slug).locator('img').first()).toBeVisible();
     }
     await expect(picker.getByTestId('booth-templates-page')).toHaveText(`${galleryPages} / ${galleryPages}`);
     await showPhotoGalleryPage(page, 1);
-    await expect(picker.locator('img, canvas, svg image')).toHaveCount(0);
     await picker.screenshot({ path: testInfo.outputPath(`photo-templates-${lang}.png`), style: 'nextjs-portal { display: none !important; }' });
 
     // Inspect the growing result illustrations with the options closed so the
@@ -110,8 +100,9 @@ for (const lang of ['ko', 'en'] as const) {
 
     await nextPreviewStep(page);
     await expect(step(page, 3)).toBeVisible();
-    const summary = page.getByRole('complementary', { name: QUOTE_COPY[lang].sheetTitle });
-    for (const template of templates) await expect(summary).toContainText(template.name[lang]);
+    await expect(page.getByRole('complementary', { name: QUOTE_COPY[lang].sheetTitle })).toBeVisible();
+    // 요약 칸은 옵션 앞 두 개만 보이고 나머지는 title 에 — 전체 요약에서 찾는다
+    for (const template of templates) await expect.poll(async () => (await sidebarOptionSummaries(page)).join('\n')).toContain(template.name[lang]);
     await expectPrice(page, base + 770_000, lang);
     await page.getByTestId('quote-prev').click();
     await expect(step(page, 2)).toBeVisible();
@@ -142,33 +133,32 @@ for (const lang of ['ko', 'en'] as const) {
     expect(selection.templateSlugs).toEqual(templates.slice(0, 2).map((template) => template.slug));
     expect(selection.extraStyles).toBe(0);
     expect(selection.customStyles).toBe(0);
-    expect(await page.evaluate((key) => localStorage.getItem(key), LIVE_KEY)).toBe(existingLive);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
   });
 }
 
-test('legacy style quantities migrate to named templates in both the live quote and the lab', async ({ page }) => {
+test('legacy style quantities migrate to named templates in the quote', async ({ page }) => {
   const input = sanitizeInput({ items: [{ key: 'photoBooth', options: { extraStyles: 3, customStyles: 2 } }] });
-  await page.addInitScript(({ liveKey, flowKey, value }) => {
+  await page.addInitScript(({ key, value }) => {
     if (!sessionStorage.getItem('photo-legacy-test-seeded')) {
-      localStorage.setItem(liveKey, value);
-      localStorage.setItem(flowKey, value);
+      localStorage.setItem(key, value);
       sessionStorage.setItem('photo-legacy-test-seeded', 'yes');
     }
-  }, { liveKey: LIVE_KEY, flowKey: FLOW_KEY, value: JSON.stringify(input) });
-  let liveAfterEdit: string | null = null;
-  for (const [path, key] of [['/quote', LIVE_KEY], ['/quote-preview', FLOW_KEY]]) {
-    await page.goto(path, { waitUntil: 'domcontentloaded' });
-    await enterExperienceStep(page);
-    const picker = await showPhotoGalleryPage(page, 1);
-    await expect(picker).toContainText('저장된 추가 3종');
-    await expect(picker.locator('[data-testid^="booth-template-"][aria-pressed="true"]')).toHaveCount(0);
-    await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(calculateQuote(input, 'ko').total));
-    await choice(page, templates[0].slug).click();
-    await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(calculateQuote(input, 'ko').total - 660_000));
-    await expect(picker).not.toContainText('저장된 추가');
-    expect((await saved(page, key)).items.find(item => item.key === 'photoBooth')!.options).toMatchObject({ templateSlugs: [templates[0].slug], customStyles: 2 });
-    if (key === LIVE_KEY) liveAfterEdit = await page.evaluate(key => localStorage.getItem(key), LIVE_KEY);
-    else expect(await page.evaluate(key => localStorage.getItem(key), LIVE_KEY)).toBe(liveAfterEdit);
-  }
+  }, { key: QUOTE_STORAGE_KEY, value: JSON.stringify(input) });
+  await page.goto('/quote', { waitUntil: 'domcontentloaded' });
+  await enterExperienceStep(page);
+  const picker = await showPhotoGalleryPage(page, 1);
+  await expect(picker).toContainText('저장된 추가 3종');
+  await expect(picker.locator('[data-testid^="booth-template-"][aria-pressed="true"]')).toHaveCount(0);
+  await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(calculateQuote(input, 'ko').total));
+  await choice(page, templates[0].slug).click();
+  await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(calculateQuote(input, 'ko').total - 660_000));
+  await expect(picker).not.toContainText('저장된 추가');
+  const edited = await saved(page);
+  expect(edited.items.find(item => item.key === 'photoBooth')!.options).toMatchObject({ templateSlugs: [templates[0].slug], customStyles: 2 });
+  // 고친 구성은 다시 열어도 그대로다 (예전 수량으로 되돌아가지 않는다)
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await enterExperienceStep(page);
+  await expect.poll(() => saved(page)).toEqual(edited);
+  await expect(page.getByTestId('quote-total')).toHaveAttribute('data-amount', String(calculateQuote(input, 'ko').total - 660_000));
 });

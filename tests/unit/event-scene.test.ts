@@ -17,12 +17,13 @@ function inputFor(keys: readonly ServiceKey[] = physicalKeys): QuoteInput {
 function fullInput(): QuoteInput {
   const input = inputFor(SERVICE_ORDER);
   for (const item of input.items) {
-    if (item.key === 'acscent') Object.assign(item.options, { extraTeams: 2, analysisKiosks: 4, volume: '50ml', guests: 300, customBox: true, customScent: true });
+    if (item.key === 'acscent') Object.assign(item.options, { extraTeams: 2, analysisKiosks: 1, volume: '50ml', guests: 300, customBox: true, customScent: true });
     if (item.key === 'photoBooth') Object.assign(item.options, { booths: 3, wrapping: true });
     if (item.key === 'rental') Object.assign(item.options, {
       // 예전 저장값의 printer: true — 프린터는 키오스크에 내장돼 따로 그리지 않는다
-      kiosks: 4, printer: true, custom: 'brand',
-      experienceSlugs: ['ai-personal-color', 'ai-sommelier', '', 'ai-personal-color'],
+      // 키오스크는 AI 키오스크와 분석용 키오스크를 합쳐 보유 4대까지 (2026-11-22) — 3대 + 분석용 1대로 모든 기기를 보인다
+      kiosks: 3, printer: true, custom: 'brand',
+      experienceSlugs: ['ai-personal-color', 'ai-sommelier', ''],
     });
     if (item.key === 'mediaArt') Object.assign(item.options, { extraSensors: 10, grade: 'premium' });
     if (item.key === 'spatialDesign') Object.assign(item.options, { photoZone: true, lighting: true });
@@ -51,13 +52,13 @@ test('all 31 physical-service combinations share one floor and never add unselec
 test('maximum configuration shows every device and all six perfume staff at the same equipment scale', () => {
   const scene = resolveEventScene(fullInput())!;
   const expected: Record<EventSceneObjectType, number> = {
-    counter: 1, team: 3, 'analysis-kiosk': 4, 'photo-booth': 3, kiosk: 4, printer: 0,
+    counter: 1, team: 3, 'analysis-kiosk': 1, 'photo-booth': 3, kiosk: 3, printer: 0,
     'media-screen': 1, projector: 1, sensor: 11, 'media-operator': 1, 'media-guest': 1, 'photo-zone': 1,
   };
   for (const [type, count] of Object.entries(expected)) {
     assert.equal(scene.objects.filter((object) => object.type === type).length, count, type);
   }
-  assert.deepEqual(scene.counts, { teams: 3, staff: 6, analysisKiosks: 4, photoBooths: 3, kiosks: 4, printers: 0, sensors: 11, projectors: 1 });
+  assert.deepEqual(scene.counts, { teams: 3, staff: 6, analysisKiosks: 1, photoBooths: 3, kiosks: 3, printers: 0, sensors: 11, projectors: 1 });
   const equipment = scene.objects.filter((object) => !['counter', 'photo-zone'].includes(object.type));
   assert.equal(new Set(equipment.map((object) => object.scale)).size, 1);
   assert.equal(new Set(scene.objects.map((object) => object.id)).size, scene.objects.length);
@@ -120,6 +121,9 @@ test('all eleven sensors remain separate from one another, the projector and vis
 test('one kiosk keeps one assigned experience, including duplicate and undecided slots and legacy drafts', () => {
   const input = fullInput();
   const kioskItem = input.items.find((item) => item.key === 'rental')!;
+  // 4대 모두 AI 키오스크로 — 같은 체험 두 대 · 미정 칸을 함께 본다 (분석용 키오스크는 0대여야 4대를 쓸 수 있다)
+  Object.assign(kioskItem.options, { kiosks: 4, experienceSlugs: ['ai-personal-color', 'ai-sommelier', '', 'ai-personal-color'] });
+  Object.assign(input.items.find((item) => item.key === 'acscent')!.options, { analysisKiosks: 0 });
   const assignments = resolveEventScene(input)!.objects.filter((object) => object.type === 'kiosk');
   assert.deepEqual(assignments.map((object) => object.slug), ['ai-personal-color', 'ai-sommelier', '', 'ai-personal-color']);
   assert.ok(assignments.every((object) => object.branded));
@@ -234,6 +238,6 @@ test('sanitization bounds malformed saved quantities without mutating the saved 
     if (item.key === 'mediaArt') item.options.extraSensors = 999;
   }
   const saved = structuredClone(input);
-  assert.deepEqual(resolveEventScene(input)!.counts, { teams: 1000, staff: 2000, analysisKiosks: 4, photoBooths: 3, kiosks: 4, printers: 0, sensors: 11, projectors: 1 });
+  assert.deepEqual(resolveEventScene(input)!.counts, { teams: 1000, staff: 2000, analysisKiosks: 0, photoBooths: 3, kiosks: 4, printers: 0, sensors: 11, projectors: 1 });
   assert.deepEqual(input, saved);
 });

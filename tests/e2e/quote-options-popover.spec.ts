@@ -1,14 +1,14 @@
 import { expect, test, type Page } from '@playwright/test';
 import { SERVICE_TEXT } from '../../src/lib/quote/catalog';
 import { calculateQuote, type QuoteInput } from '../../src/lib/quote/engine';
-import { KIOSK_EXPERIENCES } from '../../src/lib/quote/kiosk-experiences';
+import { QUOTE_KIOSK_EXPERIENCES } from '../../src/data/product-lines';
 import { toggleKioskExperience, closePreviewOptions, nextPreviewStep, openPreviewOptions, showOptionPage } from './helpers/quote-preview-options';
 
 for (const lang of ['ko', 'en'] as const) {
   test(`${lang}: card-anchored options keep the original preview and dismiss without trapping the page`, async ({ page }, testInfo) => {
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
-    await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${lang === 'en' ? '/en' : ''}/quote`, { waitUntil: 'domcontentloaded' });
     await nextPreviewStep(page);
     await nextPreviewStep(page);
     const originalPreview = await page.getByTestId('event-preview').elementHandle();
@@ -70,7 +70,7 @@ for (const lang of ['ko', 'en'] as const) {
     await page.waitForTimeout(250);
     await page.screenshot({ path: testInfo.outputPath(`card-balloon-${lang}.png`), style: 'nextjs-portal { display: none !important; }' });
 
-    const stored = async (): Promise<QuoteInput> => page.evaluate(() => JSON.parse(localStorage.getItem('neander-quote-preview-flow-v1')!));
+    const stored = async (): Promise<QuoteInput> => page.evaluate(() => JSON.parse(localStorage.getItem('neander-quote-v2')!));
     const configured = await stored();
     await expect(page.getByTestId('options-total')).toHaveAttribute('data-amount', String(calculateQuote(configured, lang).total));
     await page.keyboard.press('Escape');
@@ -153,7 +153,7 @@ test.describe('an open balloon stays put', () => {
   for (const lang of ['ko', 'en'] as const) {
     test(`${lang}: choosing kiosk experiences and changing topics never moves the document or flips the balloon`, async ({ page }) => {
       await page.route('**/api/demo-ai/**', route => route.abort());
-      await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
+      await page.goto(`${lang === 'en' ? '/en' : ''}/quote`, { waitUntil: 'domcontentloaded' });
       await nextPreviewStep(page);
       await nextPreviewStep(page);
 
@@ -172,7 +172,7 @@ test.describe('an open balloon stays put', () => {
       const area = kiosk.getByTestId('option-page-scroll');
       const before = await area.evaluate(element => element.scrollHeight);
       // 갤러리 첫 쪽의 체험 두 개를 차례로 고른다
-      for (const slug of KIOSK_EXPERIENCES.slice(0, 2).map(experience => experience.slug)) {
+      for (const slug of QUOTE_KIOSK_EXPERIENCES.slice(0, 2).map(experience => experience.slug)) {
         await page.getByTestId(`kiosk-experience-1-${slug}`).click();
         await expect(page.getByTestId(`kiosk-experience-1-${slug}`)).toHaveAttribute('aria-checked', 'true');
         expect(await settled(page), `choosing ${slug}`).toEqual(opened);
@@ -202,7 +202,7 @@ test.describe('an open balloon stays put', () => {
     });
 
     test(`${lang}: kiosk customization cards show their whole label and price`, async ({ page }, testInfo) => {
-      await page.goto(`${lang === 'en' ? '/en' : ''}/quote-preview`, { waitUntil: 'domcontentloaded' });
+      await page.goto(`${lang === 'en' ? '/en' : ''}/quote`, { waitUntil: 'domcontentloaded' });
       await nextPreviewStep(page);
       await nextPreviewStep(page);
       await showOptionPage(page, 'rental', 'kiosk-1');
