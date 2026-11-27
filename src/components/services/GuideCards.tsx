@@ -19,7 +19,7 @@ export function GuideCards({ slugs, lang }: { slugs: string[]; lang: 'ko' | 'en'
                   {item.cover && (
                     <Image
                       src={item.cover.src}
-                      alt=""
+                      alt={item.cover.caption[lang] || item[lang].title}
                       fill
                       sizes="(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 92vw"
                       className="object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"

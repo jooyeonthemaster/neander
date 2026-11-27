@@ -246,7 +246,7 @@ export default async function InsightPage({ params }: Props) {
         <div className="absolute inset-0 -z-10" aria-hidden="true">
           {cover ? (
             <>
-              <Image src={cover.src} alt="" fill priority sizes="100vw" className="zoom-settle object-cover" />
+              <Image src={cover.src} alt={cover.caption[lang] || copy.title} fill priority sizes="100vw" className="zoom-settle object-cover" />
               <div className="absolute inset-0 bg-gradient-to-b from-ink/80 via-ink/55 to-ink" />
               <div className="absolute inset-0 bg-gradient-to-r from-ink/75 via-ink/20 to-transparent max-lg:hidden" />
             </>

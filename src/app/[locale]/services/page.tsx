@@ -69,7 +69,7 @@ export default async function ServicesPage({ params, searchParams }: Props) {
       {/* ── 첫 화면 ───────────────────────────────────── */}
       <section className="under-header relative isolate flex min-h-[min(54rem,calc(96svh-4.5rem))] lg:min-h-[min(54rem,96svh)] flex-col justify-end overflow-hidden bg-ink" aria-labelledby="services-hero-title">
         <div className="absolute inset-0 -z-10">
-          <Image src={HERO_IMAGE} alt="" fill priority sizes="100vw" className="zoom-settle object-cover object-[50%_55%]" />
+          <Image src={HERO_IMAGE} alt={ko ? '행사장에서 운영하는 AI 체험 부스' : 'AI experience booths at an event'} fill priority sizes="100vw" className="zoom-settle object-cover object-[50%_55%]" />
           <div className="absolute inset-0 bg-gradient-to-b from-ink/80 via-ink/50 to-ink" />
         </div>
         <PhotoTag className="absolute right-4 top-24 lg:right-8 lg:top-28">{t('photoConcept')}</PhotoTag>

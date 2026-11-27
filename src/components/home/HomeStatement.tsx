@@ -26,12 +26,13 @@ const COLUMNS = [0, 1, 2].map((c) => PHOTOS.filter((_, i) => i % 3 === c));
 
 function Column({ items, progress, from, to }: { items: string[]; progress: MotionValue<number>; from: string; to: string }) {
   const reduce = useReduce();
+  const alt = useLocale() === 'en' ? 'NEANDER AI experience at an event' : '네안데르 AI 체험 행사 현장';
   const y = useTransform(progress, [0, 1], [from, to]);
   return (
     <motion.div className="flex flex-col gap-4 lg:gap-5" style={reduce ? undefined : { y }}>
       {items.map((src) => (
         <div key={src} className="relative aspect-[4/3] overflow-hidden round-tile bg-ink-3">
-          <Image src={src} alt="" fill sizes="(min-width: 1024px) 18vw, 40vw" className="object-cover" />
+          <Image src={src} alt={alt} fill sizes="(min-width: 1024px) 18vw, 40vw" className="object-cover" />
         </div>
       ))}
     </motion.div>

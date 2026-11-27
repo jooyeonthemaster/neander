@@ -40,6 +40,7 @@ export default async function ExperiencePage({ params }: Props) {
         ko={t('heroTitle').replace('\n', ' ')}
         lead={t('heroDescription')}
         image="/images/portfolio/acscent-id-1.webp"
+        imageAlt={locale === 'en' ? "AC'SCENT ID store in Hongdae" : "홍대 AC'SCENT ID 매장"}
         size="h1"
       />
 

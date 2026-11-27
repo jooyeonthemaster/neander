@@ -49,6 +49,7 @@ export default async function PortfolioPage({ params }: Props) {
         ko={ko ? t('title') : undefined}
         lead={ko ? '축제와 전시, 브랜드 현장에서 직접 운영한 AI 체험과 향 프로젝트' : 'AI experiences and scent projects we ran ourselves at festivals, exhibitions and brand events'}
         image="/images/portfolio/archive/pyeongtaek-ai-festa-2026-06.webp"
+        imageAlt={ko ? '평택 AI 페스타 2026 AI 체험 부스 현장' : 'AI experience booth at Pyeongtaek AI Festa 2026'}
         caption={ko ? '운영 사례 · 평택 AI 페스타 2026' : 'Pyeongtaek AI Festa 2026'}
         align="center"
         titleClassName="[&_[data-lines]]:!text-[clamp(1.6rem,8.4vw,8.25rem)] [&_[data-lines]]:tracking-[0.02em]"

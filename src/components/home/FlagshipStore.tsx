@@ -175,7 +175,7 @@ function StoreCard({
     <article className="group relative isolate flex h-full min-h-[520px] flex-col overflow-hidden rounded-2xl bg-neutral-950 shadow-sm transition-shadow duration-500 hover:shadow-xl sm:min-h-[560px] lg:min-h-[clamp(28rem,51vh,36rem)] lg-short:min-h-[25rem] motion-reduce:transition-none">
       <Image
         src={imageSrc}
-        alt=""
+        alt={nameKo ? `${name} ${nameKo}` : name}
         fill
         loading="eager"
         sizes="(min-width: 816px) 768px, calc(100vw - 48px)"

@@ -38,7 +38,7 @@ export function ProgramCard({ slug, name, nameEn, oneLiner, tag, className }: Pr
   const image = getExperienceImage(slug);
   const preview = getProgramPreview(slug);
   const steps = useMemo(() => getProgramSteps(slug), [slug]);
-  const screens = useMemo(() => steps.map((src) => ({ src })), [steps]);
+  const screens = useMemo(() => steps.map((src, i) => ({ src, alt: `${ko ? name : nameEn ?? name} — ${ko ? `화면 ${i + 1}` : `screen ${i + 1}`}` })), [steps, ko, name, nameEn]);
   const [playing, setPlaying] = useState(false);
   const [step, setStep] = useState(0);
 

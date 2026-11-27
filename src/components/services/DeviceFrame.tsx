@@ -30,13 +30,13 @@ function Screens({ screens, active, sizes, priority, videoRef }: ScreenProps) {
         i === active ? (
           <LazyVideo key={`${i}-${s.video}`} ref={videoRef} className="os-screen-img" data-on="" src={s.video} poster={s.src} loop={s.loop ?? true} aria-label={s.alt} />
         ) : (
-          <Image key={`${i}-${s.src}`} src={s.src} alt="" fill sizes={sizes} className="os-screen-img" loading="lazy" />
+          <Image key={`${i}-${s.src}`} src={s.src} alt={s.alt ?? ''} fill sizes={sizes} className="os-screen-img" loading="lazy" />
         )
       ) : (
         <Image
           key={`${i}-${s.src}`}
           src={s.src}
-          alt={i === active ? s.alt ?? '' : ''}
+          alt={s.alt ?? ''}
           fill
           sizes={sizes}
           className="os-screen-img"
@@ -65,7 +65,7 @@ export function KioskFrame({ screens, active = 0, receipt, receiptOut = false, c
           크기 · 위치는 style 로도 박아 둔다 */}
       {receipt && receiptOut && (
         <span className="os-receipt-feed" aria-hidden="true" style={{ position: 'absolute', top: '186.2cqw', left: '18cqw', width: '19cqw', overflow: 'hidden' }}>
-          <Image src={receipt} alt="" width={320} height={900} sizes="120px" style={{ display: 'block', width: '100%', height: 'auto' }} />
+          <Image src={receipt} alt={screens.at(-1)?.alt ?? ''} width={320} height={900} sizes="120px" style={{ display: 'block', width: '100%', height: 'auto' }} />
         </span>
       )}
     </span>
@@ -83,7 +83,7 @@ export function BoothFrame({ screens, active = 0, print, printOut = false, class
         <span className="os-booth-slot" aria-hidden="true"><i /></span>
         {print && (
           <span className="os-booth-print" data-out={printOut ? '' : undefined} aria-hidden="true">
-            <Image src={print} alt="" fill sizes="140px" className="object-cover" />
+            <Image src={print} alt={screens.at(-1)?.alt ?? ''} fill sizes="140px" className="object-cover" />
           </span>
         )}
       </span>

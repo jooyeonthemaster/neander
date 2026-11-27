@@ -10,6 +10,7 @@ import { coreService, priceFrom } from '@/data/site';
 import { SITE_URL } from '@/lib/constants';
 import { fetchPublishedPortfolio } from '@/lib/firebase/rest';
 import { SERVICE_TEXT } from '@/lib/quote/catalog';
+import { startingPrice } from '@/lib/quote/engine';
 import { localePath } from '@/lib/seo';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { Parallax, Reveal, ScrollWords } from '@/components/fx';
@@ -59,7 +60,23 @@ export async function ProductPage({ kind, locale }: { kind: ProductPageKind; loc
       description: copy.metaDescription,
       url,
       provider: { '@type': 'Organization', name: ko ? '네안데르' : 'NEANDER', url: SITE_URL },
-      areaServed: 'KR',
+      areaServed: { '@type': 'Country', name: ko ? '대한민국' : 'South Korea' },
+      // 시작가 — 프로그램 상세(serviceJsonLd)와 같은 모양 (2026-11-27 서치 콘솔 점검)
+      offers: {
+        '@type': 'Offer',
+        url: `${SITE_URL}${localePath('/quote', locale)}`,
+        priceCurrency: 'KRW',
+        priceSpecification: { '@type': 'PriceSpecification', minPrice: startingPrice(kind), priceCurrency: 'KRW', valueAddedTaxIncluded: false },
+      },
+    },
+    // 이동 경로: 체험서비스 소개 › AI 포토부스 — 프로그램 상세와 같은 2단계 (포토부스 · 키오스크만 빠져 있었다)
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: t('title'), item: `${SITE_URL}${localePath('/services', locale)}` },
+        { '@type': 'ListItem', position: 2, name, item: url },
+      ],
     },
     {
       '@context': 'https://schema.org',
@@ -81,7 +98,7 @@ export async function ProductPage({ kind, locale }: { kind: ProductPageKind; loc
         nameKo={ko ? name : undefined}
         lead={SERVICE_TEXT[kind].summary[lang]}
         image={service.image}
-        imageAlt=""
+        imageAlt={`${name} — ${service.caption[lang]}`}
         caption={service.caption[lang]}
         crumbs={[{ label: 'SERVICES', href: '/services' }, { label: service.en.join(' ') }]}
         primary={{ label: t('addToQuote'), href: quoteHrefFor(kind) }}
@@ -143,7 +160,7 @@ export async function ProductPage({ kind, locale }: { kind: ProductPageKind; loc
           휴대폰에서는 사진이 위에 오고 아래로 흐려진다 */}
       <section className="relative isolate overflow-hidden border-t border-paper/10 bg-ink">
         <div aria-hidden="true" className="relative -z-10 aspect-[16/10] w-full [mask-image:linear-gradient(to_bottom,black_55%,transparent)] lg:absolute lg:inset-y-0 lg:left-0 lg:aspect-auto lg:w-[58%] lg:[mask-image:linear-gradient(to_right,black_22%,transparent_96%),linear-gradient(to_bottom,transparent,black_20%,black_78%,transparent)] lg:[mask-composite:intersect] lg:[-webkit-mask-composite:source-in]">
-          <Image src={copy.scene} alt="" fill sizes="(min-width: 1024px) 58vw, 100vw" className="object-cover opacity-75" />
+          <Image src={copy.scene} alt={ko ? `${name} 운영 현장` : `${name} on site`} fill sizes="(min-width: 1024px) 58vw, 100vw" className="object-cover opacity-75" />
           {/* 제목이 놓이는 위쪽은 조금 더 어둡게 (홈 DEVELOPMENT STUDIO 처럼 글자 쪽을 눌러 준다) */}
           <div className="absolute inset-0 hidden bg-gradient-to-b from-ink/75 via-ink/15 to-transparent lg:block" />
           {/* 실물을 참고한 생성 이미지라 표시를 붙인다 */}
@@ -242,7 +259,7 @@ export async function ProductPage({ kind, locale }: { kind: ProductPageKind; loc
                     <Reveal variant="clip" delay={i * 90}>
                       <Link href={`/portfolio/${c.slug}`} data-cursor="VIEW" className="group block focus-visible:outline-2 focus-visible:outline-offset-4">
                         <div className="relative aspect-[4/3] overflow-hidden bg-ink-2">
-                          {thumb && <Image src={thumb} alt="" fill sizes="(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 92vw" className="rd-zoom object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]" />}
+                          {thumb && <Image src={thumb} alt={title} fill sizes="(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 92vw" className="rd-zoom object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]" />}
                         </div>
                         <div className="border-b border-paper/15 pb-5 pt-4 transition-colors duration-500 group-hover:border-paper/60">
                           {period && <p className="t-label !text-[0.66rem] text-paper/45">{period}</p>}

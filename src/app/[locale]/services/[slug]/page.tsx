@@ -235,7 +235,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
         nameKo={ko ? name : isPerfume ? nameEn : undefined}
         lead={oneLiner}
         image={image?.src ?? '/images/services/services-hero-concept.webp'}
-        imageAlt=""
+        imageAlt={caption ? `${name} — ${caption}` : name}
         caption={caption}
         crumbs={[
           { label: 'SERVICES', href: '/services' },
@@ -431,7 +431,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
                     <Reveal variant="clip" delay={i * 90}>
                       <Link href={`/portfolio/${c.slug}`} data-cursor="VIEW" className="group block focus-visible:outline-2 focus-visible:outline-offset-4">
                         <div className="relative aspect-[4/3] overflow-hidden bg-ink-2">
-                          {thumb && <Image src={thumb} alt="" fill sizes="(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 92vw" className="rd-zoom object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]" />}
+                          {thumb && <Image src={thumb} alt={title} fill sizes="(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 92vw" className="rd-zoom object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]" />}
                         </div>
                         <div className="border-b border-paper/15 pb-5 pt-4 transition-colors duration-500 group-hover:border-paper/60">
                           {period && <p className="t-label !text-[0.66rem] text-paper/45">{period}</p>}

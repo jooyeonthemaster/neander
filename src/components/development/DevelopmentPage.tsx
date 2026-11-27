@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore, type MouseEvent, typ
 import Image from 'next/image';
 import { AnimatePresence, motion, useMotionValue, useScroll, useSpring, useTransform, type MotionValue } from 'motion/react';
 import { useReduce } from '@/components/fx/useReduce';
+import { useLocale } from 'next-intl';
 import { ArrowUpRight, Blocks, Box, Code2, ExternalLink, Globe2, Monitor, Play, Smartphone, Sparkles, Workflow, X } from 'lucide-react';
 import { CONTACT } from '@/lib/constants';
 import { smoothScrollIntoView } from '@/lib/smooth-scroll';
@@ -70,13 +71,14 @@ function ProjectImage({ project, locale, priority = false, sizes = '(min-width: 
 }
 
 function WallColumn({ items, progress, from, to }: { items: typeof WALL; progress: MotionValue<number>; from: string; to: string }) {
+  const lang = useLocale() === 'en' ? 'en' : 'ko';
   const reduce = useReduce();
   const y = useTransform(progress, [0, 1], [from, to]);
   return (
     <motion.div className="flex flex-col gap-4 lg:gap-5" style={reduce ? undefined : { y }}>
       {items.map((p) => (
         <div key={p.id} className="relative aspect-[16/10] overflow-hidden round-tile bg-ink-3">
-          <Image src={p.image} alt="" fill sizes="(min-width: 1024px) 20vw, 34vw" className="object-cover object-top" />
+          <Image src={p.image} alt={p.name[lang]} fill sizes="(min-width: 1024px) 20vw, 34vw" className="object-cover object-top" />
         </div>
       ))}
     </motion.div>

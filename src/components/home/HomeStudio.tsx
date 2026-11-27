@@ -16,17 +16,18 @@ import { Btn, SectionLabel } from '@/components/site/ui';
    스크롤에 따라 세로 줄마다 다른 속도로 흐른다.
    ───────────────────────────────────────────────────────── */
 
-const shots = DEVELOPMENT_PROJECTS.filter((p) => p.image).map((p) => ({ id: p.id, image: p.image }));
+const shots = DEVELOPMENT_PROJECTS.filter((p) => p.image).map((p) => ({ id: p.id, image: p.image, name: p.name }));
 const COLUMNS = [0, 1, 2, 3].map((c) => shots.filter((_, i) => i % 4 === c).slice(0, 4));
 
 function Column({ items, progress, from, to }: { items: typeof shots; progress: MotionValue<number>; from: string; to: string }) {
+  const lang = useLocale() === 'en' ? 'en' : 'ko';
   const reduce = useReduce();
   const y = useTransform(progress, [0, 1], [from, to]);
   return (
     <motion.div className="flex flex-col gap-4 lg:gap-5" style={reduce ? undefined : { y }}>
       {items.map((s) => (
         <div key={s.id} className="relative aspect-[16/10] overflow-hidden round-tile bg-ink-3">
-          <Image src={s.image} alt="" fill sizes="(min-width: 1024px) 22vw, 45vw" className="object-cover object-top" />
+          <Image src={s.image} alt={s.name[lang]} fill sizes="(min-width: 1024px) 22vw, 45vw" className="object-cover object-top" />
         </div>
       ))}
     </motion.div>

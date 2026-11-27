@@ -91,7 +91,7 @@ export function HomeHero() {
       {/* ── 배경 사진 ─────────────────────────────────── */}
       <motion.div className="absolute inset-0" style={reduce ? undefined : { scale: bgScale, y: bgY }} aria-hidden="true">
         <motion.div className="absolute -inset-6" style={{ x: px, y: py }}>
-          <Image src={STILL} alt="" fill sizes="100vw" preload className="zoom-settle object-cover" />
+          <Image src={STILL} alt={ko ? "AC'SCENT ID 매장의 AI 조향 체험" : "AI perfume experience at the AC'SCENT ID store"} fill sizes="100vw" preload className="zoom-settle object-cover" />
           {playVideo && (
             <video
               ref={videoRef}
@@ -112,7 +112,7 @@ export function HomeHero() {
               className="absolute inset-0 transition-opacity duration-700 ease-out"
               style={{ opacity: preview === i ? 1 : 0 }}
             >
-              <Image src={s.image} alt="" fill sizes="100vw" loading="lazy" className="object-cover" />
+              <Image src={s.image} alt={SERVICE_TEXT[s.key].name[lang]} fill sizes="100vw" loading="lazy" className="object-cover" />
             </div>
           ))}
         </motion.div>

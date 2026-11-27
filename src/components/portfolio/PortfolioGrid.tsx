@@ -153,7 +153,7 @@ function Featured({ item }: { item: GridItem }) {
         {item.image && (
           <Image
             src={item.image}
-            alt=""
+            alt={item.title}
             fill
             sizes="(min-width: 1024px) 88vw, 100vw"
             className="rd-zoom object-cover brightness-[0.7] transition-[transform,filter] duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04] group-hover:brightness-[0.82]"
@@ -199,7 +199,7 @@ function Card({ item, big, index }: { item: GridItem; big: boolean; index: numbe
           {item.image ? (
             <Image
               src={item.image}
-              alt=""
+              alt={item.title}
               fill
               sizes={big ? '(min-width: 640px) 46vw, 92vw' : '(min-width: 768px) 30vw, 92vw'}
               className={cn(

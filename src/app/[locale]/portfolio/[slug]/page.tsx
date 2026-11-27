@@ -11,7 +11,9 @@ import { Reveal } from '@/components/fx';
 import { Title } from '@/components/site/Title';
 import { Btn } from '@/components/site/ui';
 import { Link } from '@/i18n/navigation';
-import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
+import { DEFAULT_OG_IMAGE, localeAlternates, localePath } from '@/lib/seo';
+import { SITE_URL } from '@/lib/constants';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { SERVICE_TEXT, type ServiceKey } from '@/lib/quote/catalog';
 
 // 사례에 쓴 서비스 → 자세한 안내 페이지 (구매 의도 검색어용 랜딩·개발 의뢰).
@@ -162,12 +164,23 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
     ...(usedServices.length ? [{ label: t('detail.services'), value: usedServices.map((svc) => svc?.name).filter(Boolean).join(' · ') }] : []),
   ];
 
+  // 이동 경로: 포트폴리오 › 사례 (검색 결과에 경로로 보인다, 2026-11-27 서치 콘솔 점검)
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: t('title'), item: `${SITE_URL}${localePath('/portfolio', locale)}` },
+      { '@type': 'ListItem', position: 2, name: project.title, item: `${SITE_URL}${localePath(`/portfolio/${project.slug}`, locale)}` },
+    ],
+  };
+
   return (
     <>
+      <JsonLd data={breadcrumbJsonLd} />
       {/* ── 첫 화면: 대표 사진 + 제목 + 프로젝트 정보 ── */}
       <section className="under-header relative isolate flex min-h-[min(54rem,100svh)] flex-col justify-end overflow-hidden bg-ink" aria-labelledby="case-study-title">
         <div className="absolute inset-0 -z-10" aria-hidden="true">
-          {project.heroImage && <Image src={project.heroImage} alt="" fill priority sizes="100vw" className="zoom-settle object-cover" />}
+          {project.heroImage && <Image src={project.heroImage} alt={project.title} fill priority sizes="100vw" className="zoom-settle object-cover" />}
           <div className="absolute inset-0 bg-gradient-to-b from-ink/75 via-ink/35 to-ink" />
         </div>
 
@@ -296,7 +309,7 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
           <Link href={`/portfolio/${nextProject.slug}`} data-cursor="NEXT" className="group relative isolate block overflow-hidden">
             {nextImage && (
               <div className="absolute inset-0 -z-10" aria-hidden="true">
-                <Image src={nextImage} alt="" fill sizes="100vw" loading="lazy" className="object-cover opacity-25 transition-[opacity,transform] duration-[1400ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 group-hover:opacity-55" />
+                <Image src={nextImage} alt={nextProject.title} fill sizes="100vw" loading="lazy" className="object-cover opacity-25 transition-[opacity,transform] duration-[1400ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 group-hover:opacity-55" />
                 <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/70 to-ink/30" />
               </div>
             )}

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
 import { getPrivacyPolicy } from '@/data/privacy-policy';
-import { localeAlternates } from '@/lib/seo';
+import { DEFAULT_OG_IMAGE, localeAlternates } from '@/lib/seo';
 import { PageHero } from '@/components/site/PageHero';
 import { Toc } from '@/components/insights/Toc';
 
@@ -16,6 +16,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: localeAlternates('/privacy', locale),
     title: doc.title,
     description: doc.highlights[0],
+    // 공유 미리보기 제목도 이 문서 제목으로 (없으면 홈의 사이트 문구가 붙었다)
+    openGraph: { title: doc.title, description: doc.highlights[0], images: [DEFAULT_OG_IMAGE] },
   };
 }
 

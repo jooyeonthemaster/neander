@@ -55,7 +55,7 @@ export function HomeServices() {
             >
               <Image
                 src={s.image}
-                alt=""
+                alt={`${name} — ${s.caption[lang]}`}
                 fill
                 sizes="(min-width: 1024px) 55vw, 100vw"
                 className={cn('-z-20 object-cover transition-[transform,filter] duration-[1400ms] ease-[cubic-bezier(0.22,1,0.36,1)]', isOpen ? 'scale-100 lg:brightness-100' : 'scale-110 lg:brightness-[0.55] lg:saturate-[0.6]')}

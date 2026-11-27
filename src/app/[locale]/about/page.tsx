@@ -18,14 +18,14 @@ interface Props {
 
 /* 구역 오른쪽에 깔려 왼쪽 · 위아래로 배경에 녹는 사진 (체험 상품 페이지 ON SITE 와 같은 방식, 좌우만 반대).
    휴대폰에서는 글 위에 오고 아래로 흐려진다. 실제 현장 사진이 아니라 생성한 콘셉트 이미지라 표시를 붙인다 */
-function SceneBackdrop({ src, tag, className, tagClassName }: { src: string; tag: string; className?: string; tagClassName?: string }) {
+function SceneBackdrop({ src, tag, alt, className, tagClassName }: { src: string; tag: string; alt: string; className?: string; tagClassName?: string }) {
   return (
     <div aria-hidden="true" className={cn(
       'relative -z-10 aspect-[16/9] w-full [mask-image:linear-gradient(to_bottom,black_50%,transparent)]',
       'lg:absolute lg:inset-y-0 lg:right-0 lg:aspect-auto lg:w-[62%] lg:[mask-image:linear-gradient(to_left,black_30%,transparent_98%),linear-gradient(to_bottom,transparent,black_18%,black_75%,transparent)] lg:[mask-composite:intersect] lg:[-webkit-mask-composite:source-in]',
       className,
     )}>
-      <Image src={src} alt="" fill sizes="(min-width: 1024px) 62vw, 100vw" className="object-cover object-right opacity-70" />
+      <Image src={src} alt={`${alt} (${tag})`} fill sizes="(min-width: 1024px) 62vw, 100vw" className="object-cover object-right opacity-70" />
       <PhotoTag className={cn('absolute right-4 bottom-[45%] lg:right-6 lg:bottom-[26%]', tagClassName)}>{tag}</PhotoTag>
     </div>
   );
@@ -101,7 +101,7 @@ export default async function AboutPage({ params }: Props) {
 
       {/* ── 한 문장 ────────────────────────────────────── */}
       <section className="relative isolate overflow-hidden bg-ink">
-        <SceneBackdrop src="/images/about/about-who-studio.webp" tag={ko ? '콘셉트 이미지' : 'Concept image'} />
+        <SceneBackdrop src="/images/about/about-who-studio.webp" alt={ko ? '네안데르 팀이 AI 체험을 기획·제작하는 작업실' : 'The NEANDER team planning and building AI experiences'} tag={ko ? '콘셉트 이미지' : 'Concept image'} />
         <div className="wrap section-y max-lg:-mt-20 max-lg:pt-0">
           <Reveal><p className="t-label flex items-center gap-4 text-paper/55"><span className="text-accent">01</span>WHO WE ARE</p></Reveal>
           <ScrollWords className="mt-10 max-w-6xl text-[clamp(1.7rem,4.2vw,4rem)] font-bold leading-[1.35] tracking-[-0.04em] text-paper" text={t('statement').replace(/, /g, ',\n')} />
@@ -114,7 +114,7 @@ export default async function AboutPage({ params }: Props) {
       {/* ── 일하는 방식 ────────────────────────────────── */}
       <section aria-labelledby="process-title" className="relative isolate overflow-hidden border-t border-paper/10 bg-ink">
         {/* 사진은 제목 쪽 위에만 깔고, 아래 세 칸(불투명) 앞에서 녹아 사라진다 */}
-        <SceneBackdrop src="/images/about/about-how-onsite.webp" tag={ko ? '콘셉트 이미지' : 'Concept image'}
+        <SceneBackdrop src="/images/about/about-how-onsite.webp" alt={ko ? '행사 현장에서 AI 체험 부스를 운영하는 모습' : 'Running an AI experience booth on site at an event'} tag={ko ? '콘셉트 이미지' : 'Concept image'}
           className="lg:bottom-auto lg:h-[34rem] lg:[mask-image:linear-gradient(to_left,black_25%,transparent_72%),linear-gradient(to_bottom,transparent,black_18%,black_48%,transparent_88%)]"
           tagClassName="lg:top-24 lg:bottom-auto" />
         <div className="wrap section-y max-lg:-mt-20 max-lg:pt-0">

@@ -27,7 +27,7 @@ export function LineupGrid({ programs, device, lang }: { programs: LineProgram[]
   <Image src={s.start!} alt={`${p.name[lang]} — ${ko ? '프로그램 첫 화면' : 'program start screen'}`} fill sizes={device === 'kiosk' ? '(min-width: 1280px) 15vw, (min-width: 768px) 23vw, 45vw' : '(min-width: 1280px) 23vw, (min-width: 640px) 46vw, 92vw'} className="object-cover object-top" />
                 )}
                 {s.result && s.result !== s.start && (
-                  <Image src={s.result} alt="" fill sizes={device === 'kiosk' ? '(min-width: 1280px) 15vw, 45vw' : '(min-width: 1280px) 23vw, 92vw'} loading="lazy" className="object-cover object-top opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-focus-visible:opacity-100" />
+                  <Image src={s.result} alt={`${p.name[lang]} — ${ko ? '결과 화면' : 'result screen'}`} fill sizes={device === 'kiosk' ? '(min-width: 1280px) 15vw, 45vw' : '(min-width: 1280px) 23vw, 92vw'} loading="lazy" className="object-cover object-top opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-focus-visible:opacity-100" />
                 )}
               </span>
               <span className="mt-3 flex items-baseline gap-2">
