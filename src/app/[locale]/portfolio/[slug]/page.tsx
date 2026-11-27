@@ -15,6 +15,7 @@ import { DEFAULT_OG_IMAGE, localeAlternates, localePath } from '@/lib/seo';
 import { SITE_URL } from '@/lib/constants';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { SERVICE_TEXT, type ServiceKey } from '@/lib/quote/catalog';
+import { priceFrom, type CoreServiceKey } from '@/data/site';
 
 // 사례에 쓴 서비스 → 자세한 안내 페이지 (구매 의도 검색어용 랜딩·개발 의뢰).
 // 포트폴리오 상세로 바로 들어온 방문 96회 중 서비스·견적·문의로 넘어간 경우가 5회뿐이라 (2026-11 방문 분석)
@@ -25,6 +26,15 @@ const SERVICE_GUIDE: Partial<Record<ServiceKey, { href: string; ko: string; en: 
   custom: { href: '/development', ko: '맞춤 AI 콘텐츠 개발 의뢰 안내', en: 'Custom AI content development' },
 };
 const isServiceKey = (k: string): k is ServiceKey => k in SERVICE_TEXT;
+
+/* 「한눈에 보기」의 같은 구성 시작가 — 온라인 견적 시작가(startingPrice)와 같은 값.
+   ChatGPT 가 답하며 사례 상세를 자주 연다(2026-11 접속 기록: 엔플라잉 · 하현상 · 평택) — 「이런 행사는 얼마쯤」에 쓸 숫자를 사례 안에 둔다. */
+const PRICED: Record<CoreServiceKey, { ko: string; en: string }> = {
+  acscent: { ko: '10ml 32명까지 · 조향 팀 출장 포함', en: 'up to 32 guests with 10ml, perfumer team included' },
+  photoBooth: { ko: '1대 1일 · 운영 인력 별도', en: 'per booth per day, staff extra' },
+  rental: { ko: '1대 1일 · 운영 인력 별도', en: 'per kiosk per day, staff extra' },
+};
+const isPriced = (k: string): k is CoreServiceKey => k in PRICED;
 
 // 관리자 페이지에서 수정한 내용이 5분 안에 반영되도록 ISR 적용
 export const revalidate = 300;
@@ -164,6 +174,17 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
     ...(usedServices.length ? [{ label: t('detail.services'), value: usedServices.map((svc) => svc?.name).filter(Boolean).join(' · ') }] : []),
   ];
 
+  const priced = project.services.filter(isPriced);
+  const glance = [
+    ...(story && project.result ? [{ label: lang === 'ko' ? '결과 · 규모' : 'Outcome', value: project.result }] : []),
+    ...(priced.length && project.category === 'offline'
+      ? [{
+          label: lang === 'ko' ? '같은 구성 비용' : 'Same setup from',
+          value: `${priced.map((k) => `${SERVICE_TEXT[k].name[lang]} ${priceFrom(k, lang)} (${PRICED[k][lang]})`).join(' · ')}${lang === 'ko' ? ' — VAT 별도, 서울 기준. 일수·대수·인원에 맞춘 금액은 온라인 견적에서 바로 계산됩니다.' : ' — excl. VAT, Seoul. The online estimate prices your days, units and guests instantly.'}`,
+        }]
+      : []),
+  ];
+
   // 이동 경로: 포트폴리오 › 사례 (검색 결과에 경로로 보인다, 2026-11-27 서치 콘솔 점검)
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
@@ -220,6 +241,20 @@ export default async function PortfolioCaseStudyPage({ params }: Props) {
               {project.description}
             </p>
           </Reveal>
+
+          {/* 한눈에 보기 — 결과·규모는 사례 서술이 있으면 아래 결과 상자가 숨어 보이지 않던 값이다 */}
+          {(glance.length > 0) && (
+            <Reveal delay={60}>
+              <dl className="mt-10 max-w-5xl border-y border-paper/15 py-5 text-[0.98rem] leading-relaxed" data-testid="case-glance">
+                {glance.map((g) => (
+                  <div key={g.label} className="grid gap-x-6 gap-y-1 py-1.5 sm:grid-cols-[9rem_1fr]">
+                    <dt className="t-label !text-[0.64rem] pt-1 text-paper/50">{g.label}</dt>
+                    <dd className="text-paper/85">{g.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Reveal>
+          )}
 
           {story ? (
             <ol className="mt-14 grid gap-px border border-paper/15 bg-paper/15 md:grid-cols-3 lg:mt-20">

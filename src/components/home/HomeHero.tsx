@@ -152,10 +152,18 @@ export function HomeHero() {
             <span className="sr-only"> — {t('tagline')} {t('companyName')}</span>
           </span>
         </h1>
-        <div className="rise mt-9 flex flex-wrap items-center justify-center gap-3" style={{ '--i': 6 } as CSSProperties}>
-          <Btn href="/services" variant="fill" arrow>{t('ctaServices')}</Btn>
-          <Btn href="/portfolio">{t('ctaSecondary')}</Btn>
+        {/* 첫 화면 버튼 (2026-11-27): ChatGPT 로 오는 방문(주간 21~28%)의 57%가 홈으로 들어오고 대부분 평일 업무 시간 PC다 —
+            금액과 결재용 자료를 찾는 행사 담당자라 견적을 맨 앞에, 회사소개서·포트폴리오 PDF 를 바로 아래에 둔다.
+            비교 기준: docs/behavior-baseline-2026-11-27.md (click_cta home_hero:quote 는 이때부터 기록) */}
+        <div className="rise mt-9 flex flex-wrap items-center justify-center gap-3" data-cta-area="home_hero" style={{ '--i': 6 } as CSSProperties}>
+          <Btn href="/quote" variant="fill" arrow>{t('ctaQuote')}</Btn>
+          <Btn href="/services">{t('ctaServices')}</Btn>
         </div>
+        <p className="rise mt-5 text-sm text-paper/65" style={{ '--i': 7 } as CSSProperties}>
+          <Link href="/portfolio#download" className="underline decoration-paper/30 underline-offset-4 transition-colors hover:text-paper hover:decoration-paper">
+            {t('ctaDocs')}
+          </Link>
+        </p>
       </motion.div>
 
       {/* ── 아래: 주력 3종 바로 가기 ───────────────────── */}

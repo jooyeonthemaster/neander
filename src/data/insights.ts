@@ -6,6 +6,7 @@
    ───────────────────────────────────────────────────────── */
 
 import { LANDINGS } from './insights-landings';
+import { QUESTION_GUIDES } from './insights-questions';
 
 /** 본문 사진 한 장. staged = AI로 만든 연출 이미지(관리용 표시, 화면에는 따로 표시하지 않음 — 2026-11-21 사용자 결정) */
 export interface InsightImage {
@@ -109,13 +110,17 @@ export const INSIGHTS: Insight[] = [
           items: [
             'AI 조향사 1인 단가: 10ml 2만 / 1.8만 / 1.5만원, 50ml 4.5만 / 4만 / 3.5만원 (20~49명 / 50~99명 / 100명 이상)',
             'AI 조향사 조향 1팀(2인) 출장비: 서울 35만 · 경기·인천 40만 · 충청·강원 영서 45만 · 전라·강원 영동 55만 · 경상 60만원, 팀 추가 시 1팀당 동일. 최소 금액 99만원(서울)',
-            'AI 포토부스: 부스 추가 1대당 +110만원(최대 3대), 추가 운영일 대당 +60만원, AI 스타일 추가 1종당 +20만원, 인화 1롤(700장) 추가 +20만원',
+            'AI 포토부스: 부스 추가 1대당 +110만원(최대 3대), 추가 운영일 대당 +60만원, AI 스타일 추가 1종당 +20만원, 인화 1롤(700장) 추가 +20만원, 상시 운영 대당 월 400만원(인화 월 1롤 포함)',
             'AI 키오스크: 키오스크 추가 1대당 +30만원(최대 4대), 추가 운영일 대당 +20만원, 영수증형 즉석 프린터 기본 내장, 상시 운영 대당 월 300만원',
             '포토부스·키오스크 커스텀 개발(1회): 키오스크 브랜드 적용 20만 · 콘텐츠 커스텀 150만 · 전용 체험 500만원부터, 포토부스 전용 AI 스타일 1종 50만 · 촬영 흐름·화면 150만 · 전용 AI 기능 500만원부터. 준비 기간보다 촉박하면 긴급 제작 +30%',
             '현장 운영 인력 1인 1일 30만원, 전날 사전 설치 +30만원(2인), 기본 6시간 초과 시간당 5만원, 지역 운송비 경기·인천 +5만 · 충청·강원 영서 +10만 · 전라·강원 영동 +30만 · 경상 +35만원, AI 키오스크만이면 +5만 / +10만 / +20만 / +25만원 (제주 및 도서 지역은 운영하지 않음)',
           ],
         },
         { type: 'p', text: '온라인 견적에서 인원·기간·지역을 넣으면 연락처 없이 바로 금액을 볼 수 있고, 이름과 이메일만 남기면 내부 결재용 가견적서 PDF도 받을 수 있습니다.' },
+        { type: 'links', items: [
+          { text: '행사 AI 체험, 예산별로 고르기 — 100만·200만·300만·500만원 구성', href: '/insights/event-ai-experience-by-budget' },
+          { text: 'AI 포토부스와 AI 키오스크, 무엇이 다른가', href: '/insights/ai-photo-booth-vs-kiosk' },
+        ] },
         { type: 'cta', text: '온라인 견적 바로 받기', href: '/quote' },
       ],
     },
@@ -156,7 +161,7 @@ export const INSIGHTS: Insight[] = [
           items: [
             'AI Perfume per guest: 10ml KRW 20,000 / 18,000 / 15,000; 50ml KRW 45,000 / 40,000 / 35,000 (20–49 / 50–99 / 100+ guests)',
             'AI Perfume team travel (perfumer + assistant): Seoul KRW 350,000, Gyeonggi/Incheon 400,000, Chungcheong/West Gangwon 450,000, Jeolla/East Gangwon 550,000, Gyeongsang 600,000 per team. Minimum charge KRW 990,000 (Seoul)',
-            'AI Photo Booth: +KRW 1,100,000 per extra booth (up to 3), +KRW 600,000 per booth per extra day, +KRW 200,000 per extra AI style, +KRW 200,000 per extra 700-print roll',
+            'AI Photo Booth: +KRW 1,100,000 per extra booth (up to 3), +KRW 600,000 per booth per extra day, +KRW 200,000 per extra AI style, +KRW 200,000 per extra 700-print roll, ongoing operation KRW 4,000,000 per booth per month (one roll a month included)',
             'AI Kiosk: +KRW 300,000 per extra kiosk (up to 4), +KRW 200,000 per kiosk per extra day, built-in receipt printer included, ongoing operation KRW 3,000,000 per kiosk per month',
             'Photo booth and kiosk custom development (one-time): kiosk branding KRW 200K, content customization KRW 1.5M, dedicated experience from KRW 5M; photo booth dedicated AI style KRW 500K each, flow and screens KRW 1.5M, dedicated AI feature from KRW 5M. Rush production +30% when the lead time is short',
             'On-site staff KRW 300,000 per person per day; setup the day before +KRW 300,000 (2 people); KRW 50,000 per hour beyond 6 hours; regional transport +KRW 50,000 (Gyeonggi/Incheon), +100,000 (Chungcheong/West Gangwon), +300,000 (Jeolla/East Gangwon) or +350,000 (Gyeongsang), kiosk only +KRW 50,000 / 100,000 / 200,000 / 250,000; no service on Jeju or other islands',
@@ -403,6 +408,8 @@ export const INSIGHTS: Insight[] = [
 
 // 구매 의도 검색어용 랜딩 (포토부스 대여·사주 키오스크·향수 체험·송년회) — src/data/insights-landings.ts
 INSIGHTS.push(...LANDINGS);
+// 질문형 안내 (예산별 · 포토부스 대 키오스크, 2026-11-27) — src/data/insights-questions.ts
+INSIGHTS.push(...QUESTION_GUIDES);
 
 export function getInsight(slug: string): Insight | undefined {
   return INSIGHTS.find((i) => i.slug === slug);

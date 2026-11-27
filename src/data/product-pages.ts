@@ -99,7 +99,7 @@ export function productPageCopy(kind: ProductPageKind, lang: Lang): ProductPageC
           ],
       lineupSub: ko ? '같은 부스에 행사에 맞는 테마를 담습니다.' : 'One booth, themed for your event.',
       caseSlugs: ['pyeongtaek-ai-festa-2026', 'ansan-science-festival-2026', 'kwave-dance-festival-2026', 'sowon-festa-saju-photobooth-2026'],
-      guideSlugs: ['ai-photo-booth-rental', 'festival-experience-booth', 'corporate-year-end-event-ai-booth'],
+      guideSlugs: ['ai-photo-booth-rental', 'ai-photo-booth-vs-kiosk', 'festival-experience-booth'],
       faq: ko
         ? [
             { q: '한 번에 몇 대까지 운영할 수 있나요?', a: `최대 ${PHOTO_BOOTH.maxBooths}대까지 함께 운영합니다. 첫 부스는 1일 ${p(PHOTO_BOOTH.firstBooth)}, 2 · 3번째 부스는 대당 ${p(PHOTO_BOOTH.extraBooth)}입니다.` },
@@ -166,7 +166,7 @@ export function productPageCopy(kind: ProductPageKind, lang: Lang): ProductPageC
         ],
     lineupSub: ko ? '준비된 체험을 그대로 운영합니다. 대마다 다른 체험을 넣을 수 있습니다.' : 'Run a ready-made experience as-is — a different one on each kiosk.',
     caseSlugs: ['eunpyeong-ai-festival-2026', 'pyeongtaek-ai-festa-2026', 'jimff-2026-ost-fair'],
-    guideSlugs: ['ai-fortune-kiosk-rental', 'ai-personal-color-booth', 'school-library-ai-experience'],
+    guideSlugs: ['ai-fortune-kiosk-rental', 'ai-photo-booth-vs-kiosk', 'ai-personal-color-booth'],
     faq: ko
       ? [
           { q: '한 대에 여러 체험을 넣을 수 있나요?', a: `키오스크 한 대에는 체험 하나를 운영합니다. 여러 체험을 하려면 대수를 늘려 대마다 다른 체험을 넣습니다. 최대 ${KIOSK.maxKiosks}대까지 함께 운영할 수 있고, 2대째부터는 대당 ${p(KIOSK.extraKiosk)}입니다.` },

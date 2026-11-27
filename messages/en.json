@@ -30,6 +30,8 @@
     "description": "Fragrance, imagery, light, sound — we engineer sensory experiences\nwith AI and bring unforgettable moments to offline spaces.",
     "cta": "Start Your Project",
     "ctaServices": "Explore Our Services",
+    "ctaQuote": "Get a price in 3 minutes",
+    "ctaDocs": "Download our company profile & portfolio (PDF) →",
     "ctaSecondary": "View Portfolio",
     "scrollIndicator": "Scroll to explore",
     "badge": "190+ Events Delivered"
@@ -1610,10 +1612,10 @@
       "submitting": "Submitting...",
       "privacyConsentDetail": "Collected: name, email, phone, company, message · Purpose: responding to your quote request"
     },
-    "disclaimer": "Quotes may vary based on event scale, duration, and location. Exact pricing will be provided after consultation. A team member will contact you within 1–2 business days of your request.",
+    "disclaimer": "Quotes may vary based on event scale, duration, and location. Exact pricing will be provided after consultation. A team member will contact you within one business day of your request.",
     "success": {
       "title": "Your Quote Request Has Been Submitted",
-      "description": "A team member will reach out within 1–2 business days. Thank you for your interest.",
+      "description": "A team member will reach out within one business day. Thank you for your interest.",
       "backToHome": "Back to Home"
     },
     "error": {
@@ -1793,7 +1795,7 @@
   "contact": {
     "title": "Contact Us",
     "subtitle": "Let's Talk About Your Project",
-    "description": "Leave a quick message, or pick your event details and services to get an instant estimate.",
+    "description": "Leave a quick message, or pick your event details and services to get an instant estimate. We reply within one business day.",
     "tabs": {
       "label": "How would you like to reach us?",
       "inquiry": "Quick Inquiry",
@@ -1850,7 +1852,7 @@
     },
     "success": {
       "title": "Your Message Has Been Sent",
-      "description": "We will get back to you as soon as possible. Thank you.",
+      "description": "We will reply within one business day. Thank you.",
       "sendAnother": "Send another message"
     },
     "error": {
@@ -2204,7 +2206,7 @@
       },
       "q2": {
         "question": "How is pricing determined?",
-        "answer": "Pricing considers event type, duration, location, selected services, and expected attendance. Submit a quote request with basic details and we will send you a detailed proposal within 1–2 business days."
+        "answer": "Pricing considers event type, duration, location, selected services, and expected attendance. Submit a quote request with basic details and we will send you a detailed proposal within one business day."
       },
       "q3": {
         "question": "How far in advance should I plan?",

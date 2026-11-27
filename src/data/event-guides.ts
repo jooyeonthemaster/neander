@@ -28,6 +28,12 @@ export const GUIDE_GROUPS: GuideGroup[] = [
     title: { ko: '행사 종류별', en: 'By event type' },
     slugs: ['corporate-year-end-event-ai-booth', 'festival-experience-booth', 'school-library-ai-experience'],
   },
+  {
+    // 질문형 안내 (2026-11-27) — 예산에서 출발하거나 두 상품을 견주는 방문자용
+    id: 'choose',
+    title: { ko: '예산 · 고르기', en: 'Budget & choosing' },
+    slugs: ['event-ai-experience-by-budget', 'ai-photo-booth-vs-kiosk'],
+  },
 ];
 
 /** 서비스 상세 아래에 붙일 안내 3개 — 체험이 속한 견적 서비스와 묶음으로 고른다 */
