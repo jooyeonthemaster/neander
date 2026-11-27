@@ -12,6 +12,7 @@ import {
   getPillarById,
   getIndustryById,
   RETIRED_PROGRAMS,
+  formerProgramPillar,
 } from '@/data/experiences';
 import { DEFAULT_OG_IMAGE, localeAlternates, localePath } from '@/lib/seo';
 import { getExperienceSpec } from '@/data/experience-specs';
@@ -20,6 +21,7 @@ import { getOnsiteFlow } from '@/data/onsite-flows';
 import { VIDEO_FLOWS } from '@/data/program-previews';
 import { AcscentTrust } from '@/components/services/AcscentTrust';
 import { serviceForExperience, startingPrice as quoteStartingPrice } from '@/lib/quote/engine';
+import { getPhotoBoothTemplates } from '@/lib/quote/photo-booth-templates';
 import { formatPrice } from '@/lib/quote/format';
 import { serviceJsonLd, serviceLanding, serviceSearchDescription, serviceSearchTitle } from '@/lib/seo-service';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -103,7 +105,14 @@ export default async function ExperienceDetailPage({ params }: Props) {
   const exp = getExperienceBySlug(slug);
   // 2026-11-26 뺀 프로그램의 예전 주소 → 상품 화면
   if (!exp && RETIRED_PROGRAMS[slug]) permanentRedirect(localePath(RETIRED_PROGRAMS[slug], locale));
-  if (!exp) notFound();
+  // 상세 페이지를 내린 프로그램의 예전 주소 (검색엔진에 남아 있다) → 가장 가까운 상품 화면 (2026-11-27)
+  //  포토부스에서 도는 프로그램 → 포토부스, 미디어아트형 → 체험서비스 목록, 나머지(키오스크 체험) → 키오스크
+  if (!exp) {
+    const pillar = formerProgramPillar(slug);
+    if (pillar) permanentRedirect(localePath(getPhotoBoothTemplates([slug]).length || pillar === 'ai-photo'
+      ? '/services/ai-photo-booth' : pillar === 'ai-immersive' ? '/services' : '/services/ai-kiosk', locale));
+    notFound();
+  }
 
   const ko = locale !== 'en';
   const lang = ko ? 'ko' : 'en';

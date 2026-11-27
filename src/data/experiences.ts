@@ -267,6 +267,11 @@ export const industries: Industry[] = industryCatalog
 
 /* ── Helper functions ─────────────────────────────────── */
 
+/** 개편 전에는 모든 프로그램에 상세 주소(/services/<slug>)가 있었다 — 지금 공개하지 않는 프로그램의 예전 분류 (2026-11-27: 22곳이 404였다) */
+export function formerProgramPillar(slug: string): PillarId | null {
+  return experienceCatalog.find((e) => e.slug === slug)?.pillar ?? null;
+}
+
 export function getExperienceBySlug(slug: string): Experience | undefined {
   return experiences.find((e) => e.slug === slug);
 }
